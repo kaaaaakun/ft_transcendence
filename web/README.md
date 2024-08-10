@@ -1,5 +1,23 @@
 # web
 
+## セットアップ
+```sh
+pnpm install
+```
+
+## よく使いそうなコマンド
+```sh
+pnpm dev # 開発サーバーを起動
+
+pnpm build # ビルド
+
+pnpm lint # Biome でコードをチェック
+
+pnpm format # Biome でコードをフォーマット
+
+pnpm fix # Biome でlintエラーを修正し、コードをフォーマット
+```
+
 ## ライブラリ
 
 - Bootstrap
