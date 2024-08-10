@@ -31,7 +31,7 @@ function createDom(fiber) {
 }
 
 const isEvent = (key) => key.startsWith("on");
-const isProperty = (key) => key !== "children" && !isEvent(key);
+const isProperty = (key) => key !== "children" && key !== "className" && !isEvent(key);
 const isNew = (prev, next) => (key) => prev[key] !== next[key];
 const isGone = (_, next) => (key) => !(key in next);
 function updateDom(dom, prevProps, nextProps) {
@@ -65,6 +65,11 @@ function updateDom(dom, prevProps, nextProps) {
   const changedPropKeys = nextPropKeys.filter(isNew(prevProps, nextProps));
   for (const key of changedPropKeys) {
     dom[key] = nextProps[key];
+  }
+
+  // handle className specifically
+  if (prevProps.className !== nextProps.className) {
+    dom.className = nextProps.className || "";
   }
 }
 
