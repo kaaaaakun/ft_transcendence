@@ -6,12 +6,16 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "biome lint --write --verbose",
+    "format": "biome format --write --verbose",
+    "fix": "biome check --write --verbose"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.8.3",
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.3",
-    "sass": "^1.77.8",
+    "sass": "1.77.6",
     "vite": "^5.4.0"
   }
 }
