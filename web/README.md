@@ -1,8 +1,9 @@
 # web
 
 ## セットアップ
+下のコマンドを実行したのち、 http://localhost:5173 でアクセス可能
 ```sh
-pnpm install
+docker compose up
 ```
 
 ## よく使いそうなコマンド
