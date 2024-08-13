@@ -1,0 +1,13 @@
+# TODO これは一時的なcomposeファイルなので全体のcomposeファイルができたら消す。
+
+services:
+  web:
+    container_name: web
+    build:
+      context: ./
+      target: development
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./:/usr/src/vite
+    entrypoint: ["sh", "-c", "pnpm config set store-dir /tmp/pnpm/store && pnpm install --frozen-lockfile && pnpm dev"]
