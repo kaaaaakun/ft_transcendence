@@ -1,0 +1,10 @@
+# Djangoの開発用。グローバルdocker-compose.ymlができたら削除する
+services:
+  # バックエンドのサービス
+  backend:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: development_djangoserver # 開発用のDockerfileのターゲット
+    ports:
+      - "8000:8000"
