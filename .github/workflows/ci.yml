@@ -16,7 +16,7 @@ jobs:
           node-version: '22.x'
       - uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 9
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Run lint check
@@ -34,7 +34,7 @@ jobs:
           node-version: '22.x'
       - uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 9
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Run build test
