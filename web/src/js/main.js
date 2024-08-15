@@ -9,7 +9,7 @@ function App() {
   return BaseLayout(
     Teact.createElement(
       'div',
-      { className: 'container, pt-5 vh-100' },
+      { className: 'container pt-5 vh-100' },
       Teact.createElement(
         'div',
         { className: 'd-flex justify-content-center' },

@@ -3,7 +3,7 @@ import { Teact } from '@/js/teact'
 export const Header = () => {
   return Teact.createElement(
     'header',
-    { className: 'bg-dark text-white p-3' },
+    { className: 'bg-darkbule text-white p-3' },
     Teact.createElement(
       'div',
       {
@@ -13,7 +13,12 @@ export const Header = () => {
       Teact.createElement(
         'a',
         { href: '/', className: 'text-white' },
-        Teact.createElement('h1', { className: 'm-0' }, 'My Website'),
+        Teact.createElement('img', {
+          src: '/src/assets/images/icon.png',
+          alt: 'Logo',
+          width: '30',
+          height: '30',
+        }),
       ),
       Teact.createElement(
         'nav',
