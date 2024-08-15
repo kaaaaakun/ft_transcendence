@@ -7,7 +7,7 @@ export const Title = () => {
     },
       Teact.createElement(
       'img', {
-        src: '/src/assets/images/title2.png',
+        src: '/src/assets/images/title.png',
         alt: 'Title',
         height: '200',
       },
