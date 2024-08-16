@@ -14,7 +14,8 @@ RUN apt-get -y install \
 ## install for Debug
 RUN apt-get -y install \
     vim \
-    curl
+    curl \
+    lsof
 ## clean up to reduce the size of the image
 RUN rm -rf /var/lib/apt/lists/*
 
@@ -33,7 +34,9 @@ FROM base AS development_djangoserver
 ## プロジェクトディレクトリの作成が、rootディレクトリでいいのかは要検討
 RUN django-admin startproject ft_transcendence
 WORKDIR /ft_transcendence
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+CMD ["sleep", "infinity"]
+# CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
 
 ##########################
