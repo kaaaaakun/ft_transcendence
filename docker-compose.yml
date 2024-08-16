@@ -12,8 +12,6 @@ services:
     build:
       context: web/
     container_name: "web"
-    networks:
-      - pong
     # volumes:
     #   - web_data:/var/www/html
 
