@@ -8,3 +8,23 @@ services:
       target: development_djangoserver # 開発用のDockerfileのターゲット
     ports:
       - "8000:8000"
+    networks:
+      - pong_network
+
+  db:
+    image: postgres:latest
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: pong_db
+      POSTGRES_USER: pong_user
+      POSTGRES_PASSWORD: pass
+    networks:
+      - pong_network
+
+volumes:
+  postgres_data:
+
+networks:
+  pong_network:
+    driver: bridge
