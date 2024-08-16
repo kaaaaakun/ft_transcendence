@@ -1,0 +1,48 @@
+services:
+  postgres:
+    build:
+      context: postgres/
+    container_name: "postgres"
+    networks:
+      - pong
+    # volumes:
+    #   - postgres_data:/var/lib/postgresql/data
+
+  web:
+    build:
+      context: web/
+    container_name: "web"
+    # volumes:
+    #   - web_data:/var/www/html
+
+  nginx:
+    build:
+      context: nginx/
+    container_name: "nginx"
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - pong
+    # volumes:
+    #   - nginx.conf:/etc/nginx/nginx.conf
+    #   - certs:/etc/nginx/certs
+
+  api:
+    build:
+      context: api/
+    container_name: "api"
+    networks:
+      - pong
+
+
+networks:
+  pong:
+    name: "pong"
+
+# volumes:
+#   postgres_data:
+#   web_data:
+#   nginx.conf:
+#   certs:
+
