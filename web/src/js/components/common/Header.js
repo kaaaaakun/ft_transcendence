@@ -8,7 +8,7 @@ export const Header = () => {
       'div',
       {
         className:
-          'container d-flex justify-content-between align-items-center',
+          'container-fluid d-flex justify-content-between align-items-center',
       },
       Teact.createElement(
         'a',
