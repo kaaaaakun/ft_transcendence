@@ -19,12 +19,7 @@ function handleSubmit(event) {
 
 
 function App() {
-  const [state, setState] = Teact.useState(8); //TODO: ボタンが押された時に変更できるように
-
-  const handleGenerateInputs = (num) => {
-    setState(num);
-    console.log('State updated to:', num);
-  };
+  const [state, setState] = Teact.useState(2)
 
   return BaseLayout(
     Teact.createElement(
@@ -37,7 +32,7 @@ function App() {
           'button',
           {
             className: 'btn btn-primary btn-lg bg-darkblue',
-            onClick: () => handleGenerateInputs(2),
+            onClick: () => setState(c => 2),
           },
           '2 Players'
         ),
@@ -45,7 +40,7 @@ function App() {
           'button',
           {
             className: 'btn btn-primary btn-lg bg-darkblue',
-            onClick: () => handleGenerateInputs(4),
+            onClick: () => setState(c => 4),
           },
           '4 Players'
         ),
@@ -53,7 +48,7 @@ function App() {
           'button',
           {
             className: 'btn btn-primary btn-lg bg-darkblue',
-            onClick: () => handleGenerateInputs(8),
+            onClick: () => setState(c => 8),
           },
           '8 Players'
         )
