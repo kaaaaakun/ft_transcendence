@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:16-alpine
     container_name: "postgres"
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -40,11 +40,9 @@ services:
     networks:
       - pong
 
-
 networks:
   pong:
     name: "pong"
-
 # volumes:
 #   postgres_data:
 #   web_data:
