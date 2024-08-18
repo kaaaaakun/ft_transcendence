@@ -1,8 +1,13 @@
 services:
   postgres:
-    build:
-      context: postgres/
+    image: postgres:16-alpine
     container_name: "postgres"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
     networks:
       - pong
     # volumes:
@@ -35,11 +40,9 @@ services:
     networks:
       - pong
 
-
 networks:
   pong:
     name: "pong"
-
 # volumes:
 #   postgres_data:
 #   web_data:
