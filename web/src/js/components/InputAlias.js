@@ -59,7 +59,10 @@ function App() {
           onSubmit: handleSubmit, // フォームの送信時に呼ばれるハンドラ
           className: 'text-center mt-3 d-grid gap-2 col-3 mx-auto',
         },
-        ...Array.from({ length: Math.ceil(state / 2) }, (_, i) => {
+        ...Array.from({ length: 4 }, (_, i) => {
+          const className = i >= state / 2 ?
+            'form-control mt-2 bg-secondary' :
+            'form-control mt-2';
           return Teact.createElement(
             'div',
             { className: 'row form-group', key: i },
@@ -70,22 +73,24 @@ function App() {
                 'input',
                 {
                   type: 'text',
-                  className: 'form-control mt-2',
+                  className: className,
                   placeholder: `Player ${i * 2 + 1}`,
                   name: `player${i * 2}`,  // 1つ目の入力フィールド
+                  disabled: i >= state / 2,
                 }
               )
             ),
-            (i * 2 + 1 < state) && Teact.createElement(  // 2つ目の入力フィールドがある場合のみ
+            Teact.createElement(  // 2つ目の入力フィールドがある場合のみ
               'div',
               { className: 'col-6' },
               Teact.createElement(
                 'input',
                 {
                   type: 'text',
-                  className: 'form-control mt-2',
+                  className: className,
                   placeholder: `Player ${i * 2 + 2}`,
                   name: `player${i * 2 + 1}`,  // 2つ目の入力フィールド
+                  disabled: i >= state / 2,
                 }
               )
             )
