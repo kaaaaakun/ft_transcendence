@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: "postgres"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    networks:
+      - net_pong
+
+  web:
+    build:
+      context: web/
+    container_name: "web"
+    ports:
+      - "5173:5173"
+
+  nginx:
+    build:
+      context: nginx/
+    container_name: "nginx"
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - net_pong
+
+  api:
+    build:
+      context: api/
+    container_name: "api"
+    networks:
+      - net_pong
+    ports:
+      - "8000:8000"
+
+
+networks:
+  net_pong:
+    name: "net_pong"
+
+# volumes:
+# localは命名任せます
+
+
