@@ -84,13 +84,11 @@ function updateDom(dom, prevProps = {}, nextProps = {}) {
       }
     })
 
-  // Handle className specifically
+  // handle className specifically
   if (!isSvg && prevProps.className !== nextProps.className) {
     dom.className = nextProps.className || ''
   }
 }
-
-
 
 function commitRoot() {
   deletions.forEach(commitWork)
@@ -249,7 +247,7 @@ function reconcileChildren(wipFiber, elements) {
     let newFiber = null
 
     const sameType = oldFiber && element && element.type === oldFiber.type
-
+  // oldFiber and element are the same type. update the node
     if (sameType) {
       newFiber = {
         type: oldFiber.type,
@@ -261,7 +259,7 @@ function reconcileChildren(wipFiber, elements) {
         isSvg,
       }
     }
-
+  // oldFiber and element are different types. add the new node
     if (element && !sameType) {
       newFiber = {
         type: element.type,
@@ -273,7 +271,7 @@ function reconcileChildren(wipFiber, elements) {
         isSvg,
       }
     }
-
+  // oldFiber exists but element does not. delete the old node
     if (oldFiber && !sameType) {
       oldFiber.effectTag = 'DELETION'
       deletions.push(oldFiber)
@@ -291,7 +289,6 @@ function reconcileChildren(wipFiber, elements) {
     index++
   }
 }
-
 
 export const Teact = {
   createElement,
