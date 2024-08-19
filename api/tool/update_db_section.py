@@ -4,7 +4,7 @@ import os #環境変数でパスワードをなどを取得するときのため
 import re
 
 # settings.pyのパスを指定
-settings_file = 'ft_transcendence/settings.py'
+settings_file = 'trans/settings.py'
 
 # setting.pyのDATABASESセクションを以下に置き換える
 database_config = """
