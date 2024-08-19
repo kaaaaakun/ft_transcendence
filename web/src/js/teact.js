@@ -247,7 +247,7 @@ function reconcileChildren(wipFiber, elements) {
     let newFiber = null
 
     const sameType = oldFiber && element && element.type === oldFiber.type
-  // oldFiber and element are the same type. update the node
+    // oldFiber and element are the same type. update the node
     if (sameType) {
       newFiber = {
         type: oldFiber.type,
@@ -259,7 +259,7 @@ function reconcileChildren(wipFiber, elements) {
         isSvg,
       }
     }
-  // oldFiber and element are different types. add the new node
+    // oldFiber and element are different types. add the new node
     if (element && !sameType) {
       newFiber = {
         type: element.type,
@@ -271,7 +271,7 @@ function reconcileChildren(wipFiber, elements) {
         isSvg,
       }
     }
-  // oldFiber exists but element does not. delete the old node
+    // oldFiber exists but element does not. delete the old node
     if (oldFiber && !sameType) {
       oldFiber.effectTag = 'DELETION'
       deletions.push(oldFiber)
