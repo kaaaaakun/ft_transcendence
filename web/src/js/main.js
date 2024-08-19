@@ -4,8 +4,23 @@ import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/teact'
 import viteLogo from '/vite.svg'
 
+function sumVictoryCount(start, end) {
+  let sum = 0
+  for (let i = start; i <= end; i++) {
+    sum += players[i].victoryCount
+  }
+  return sum
+}
+
 // SVG要素を仮想DOM形式で作成する関数
 function App({ players }) {
+  function sumVictoryCount(start, end) {
+    let sum = 0
+    for (let i = start; i <= end; i++) {
+      sum += players[i].victoryCount
+    }
+    return sum
+  }
   const xAdjustment = 5;
   const yAdjustment = 12;
   const textWidth = 110; // 四角形の幅
@@ -29,9 +44,8 @@ function App({ players }) {
         },
         Teact.createElement('path', {
           d: 'M133,30 L165,30z',
-          stroke: 'black',
+          stroke: players[1].victoryCount >= 0 ? 'yellow' : 'black',
           'stroke-width': '2',
-          class: 'win-1-0 win-1-1 win-1-2 win-1-3',
         }),
         Teact.createElement('rect', {
           x: 2 - xAdjustment,
@@ -56,13 +70,13 @@ function App({ players }) {
       ),
         Teact.createElement('path', {
           d: 'M164,30 L164,45z',
-          stroke: 'black',
+          stroke: players[1].victoryCount >= 1 ? 'yellow' : 'black',
           'stroke-width': '2',
           class: 'win-1-1 win-1-2 win-1-3',
         }),
         Teact.createElement('path', {
           d: 'M133,60 L165,60z',
-          stroke: 'black',
+          stroke: players[2].victoryCount >= 0 ? 'yellow' : 'black',
           'stroke-width': '2',
           class: 'win-2-0 win-2-1 win-2-2 win-2-3',
         }),
@@ -89,13 +103,13 @@ function App({ players }) {
       ),
         Teact.createElement('path', {
           d: 'M164,60 L164,45z',
-          stroke: 'black',
+          stroke: players[2].victoryCount >= 1 ? 'yellow' : 'black',
           'stroke-width': '2',
           class: 'win-2-1 win-2-2 win-2-3',
         }),
         Teact.createElement('path', {
           d: 'M133,90 L165,90z',
-          stroke: 'black',
+          stroke: players[3].victoryCount >= 0 ? 'yellow' : 'black',
           'stroke-width': '2',
           class: 'win-3-0 win-3-1 win-3-2 win-3-3',
         }),
@@ -122,15 +136,13 @@ function App({ players }) {
       ),
         Teact.createElement('path', {
           d: 'M164,90 L164,105z',
-          stroke: 'black',
+          stroke: players[3].victoryCount >= 1 ? 'yellow' : 'black',
           'stroke-width': '2',
-          class: 'win-3-1 win-3-2 win-3-3',
         }),
         Teact.createElement('path', {
           d: 'M133,120 L165,120z',
-          stroke: 'black',
+          stroke: players[4].victoryCount >= 0 ? 'yellow' : 'black',
           'stroke-width': '2',
-          class: 'win-4-0 win-4-1 win-4-2 win-4-3',
         }),
         Teact.createElement('rect', {
           x: 2 - xAdjustment,
@@ -155,15 +167,14 @@ function App({ players }) {
       ),
         Teact.createElement('path', {
           d: 'M164,120 L164,105z',
-          stroke: 'black',
+          stroke: players[4].victoryCount >= 1 ? 'yellow' : 'black',
           'stroke-width': '2',
           class: 'win-4-1 win-4-2 win-4-3',
         }),
         Teact.createElement('path', {
           d: 'M315,30 L283,30z',
-          stroke: 'black',
+          stroke: players[5].victoryCount >= 0 ? 'yellow' : 'black',
           'stroke-width': '2',
-          class: 'win-5-0 win-5-1 win-5-2 win-5-3',
         }),
         Teact.createElement('rect', {
           x: 329 - xAdjustment,
@@ -188,13 +199,12 @@ function App({ players }) {
       ),
         Teact.createElement('path', {
           d: 'M284,30 L284,45z',
-          stroke: 'black',
+          stroke: players[5].victoryCount >= 1 ? 'yellow' : 'black',
           'stroke-width': '2',
-          class: 'win-5-1 win-5-2 win-5-3',
         }),
         Teact.createElement('path', {
           d: 'M315,60 L283,60z',
-          stroke: 'black',
+          stroke: players[6].victoryCount >= 0 ? 'yellow' : 'black',
           'stroke-width': '2',
           class: 'win-6-0 win-6-1 win-6-2 win-6-3',
         }),
@@ -221,15 +231,13 @@ function App({ players }) {
       ),
         Teact.createElement('path', {
           d: 'M284,60 L284,45z',
-          stroke: 'black',
+          stroke: players[6].victoryCount >= 1 ? 'yellow' : 'black',
           'stroke-width': '2',
-          class: 'win-6-1 win-6-2 win-6-3',
         }),
         Teact.createElement('path', {
           d: 'M315,90 L283,90z',
-          stroke: 'black',
+          stroke: players[7].victoryCount >= 0 ? 'yellow' : 'black',
           'stroke-width': '2',
-          class: 'win-7-0 win-7-1 win-7-2 win-7-3',
         }),
         Teact.createElement('rect', {
           x: 329 - xAdjustment,
@@ -254,15 +262,13 @@ function App({ players }) {
       ),
         Teact.createElement('path', {
           d: 'M284,90 L284,105z',
-          stroke: 'black',
+          stroke: players[7].victoryCount >= 1 ? 'yellow' : 'black',
           'stroke-width': '2',
-          class: 'win-7-1 win-7-2 win-7-3',
         }),
         Teact.createElement('path', {
           d: 'M315,120 L283,120z',
-          stroke: 'black',
+          stroke: players[8].victoryCount >= 0 ? 'yellow' : 'black',
           'stroke-width': '2',
-          class: 'win-8-0 win-8-1 win-8-2 win-8-3',
         }),
         Teact.createElement('rect', {
           x: 329 - xAdjustment,
@@ -287,75 +293,64 @@ function App({ players }) {
       ),
         Teact.createElement('path', {
           d: 'M284,120 L284,105z',
-          stroke: 'black',
+          stroke: players[8].victoryCount >= 1 ? 'yellow' : 'black',
           'stroke-width': '2',
-          class: 'win-8-1 win-8-2 win-8-3',
         }),
         Teact.createElement('path', {
           d: 'M163,45 L195,45z',
-          stroke: 'black',
+          stroke: (sumVictoryCount(1, 2) >= 1) ? 'yellow' : 'black',
           'stroke-width': '2',
-          class: 'win-1-1 win-1-2 win-1-3 win-2-1 win-2-2 win-2-3',
         }),
         Teact.createElement('path', {
           d: 'M194,45 L194,75z',
-          stroke: 'black',
+          stroke: (sumVictoryCount(1, 2) >= 2) ? 'yellow' : 'black',
           'stroke-width': '2',
-          class: 'win-1-2 win-1-3 win-2-2 win-2-3',
         }),
         Teact.createElement('path', {
           d: 'M163,105 L195,105z',
-          stroke: 'black',
+          stroke: (sumVictoryCount(3, 4) >= 1) ? 'yellow' : 'black',
           'stroke-width': '2',
-          class: 'win-3-1 win-3-2 win-3-3 win-4-1 win-4-2 win-4-3',
         }),
         Teact.createElement('path', {
           d: 'M194,105 L194,75z',
-          stroke: 'black',
+          stroke: (sumVictoryCount(3, 4) >= 2) ? 'yellow' : 'black',
           'stroke-width': '2',
-          class: 'win-3-2 win-3-3 win-4-2 win-4-3',
         }),
         Teact.createElement('path', {
           d: 'M285,45 L253,45z',
-          stroke: 'black',
+          stroke: (sumVictoryCount(5, 6) >= 1) ? 'yellow' : 'black',
           'stroke-width': '2',
-          class: 'win-5-1 win-5-2 win-5-3 win-6-1 win-6-2 win-6-3',
         }),
         Teact.createElement('path', {
           d: 'M254,45 L254,75z',
-          stroke: 'black',
+          stroke: (sumVictoryCount(5, 6) >= 2) ? 'yellow' : 'black',
           'stroke-width': '2',
-          class: 'win-5-2 win-5-3 win-6-2 win-6-3',
         }),
         Teact.createElement('path', {
           d: 'M285,105 L253,105z',
-          stroke: 'black',
+          stroke: (sumVictoryCount(7, 8) >= 1) ? 'yellow' : 'black',
           'stroke-width': '2',
-          class: 'win-7-1 win-7-2 win-7-3 win-8-1 win-8-2 win-8-3',
         }),
         Teact.createElement('path', {
           d: 'M254,105 L254,75z',
-          stroke: 'black',
+          stroke: (sumVictoryCount(7, 8) >= 2) ? 'yellow' : 'black',
           'stroke-width': '2',
-          class: 'win-7-2 win-7-3 win-8-2 win-8-3',
         }),
         Teact.createElement('path', {
           d: 'M193,75 L225,75z',
-          stroke: 'black',
+          stroke: (sumVictoryCount(1, 4) >= 4) ? 'yellow' : 'black',
           'stroke-width': '2',
           class: 'win-1-3 win-2-3 win-3-3 win-4-3',
         }),
         Teact.createElement('path', {
           d: 'M224,75 L224,55z',
-          stroke: 'black',
+          stroke: (sumVictoryCount(1, 8) >= 7) ? 'yellow' : 'black',
           'stroke-width': '2',
-          class: 'win-1-3 win-2-3 win-3-3 win-4-3 win-5-3 win-6-3 win-7-3 win-8-3',
         }),
         Teact.createElement('path', {
           d: 'M255,75 L223,75z',
-          stroke: 'black',
+          stroke: (sumVictoryCount(5, 8) >= 4) ? 'yellow' : 'black',
           'stroke-width': '2',
-          class: 'win-5-3 win-6-3 win-7-3 win-8-3',
         })
       )
     )
