@@ -5,7 +5,13 @@ import { Teact } from '@/js/teact'
 import viteLogo from '/vite.svg'
 
 // SVG要素を仮想DOM形式で作成する関数
-function App() {
+function App({ players }) {
+  const xAdjustment = 5;
+  const yAdjustment = 12;
+  const textWidth = 110; // 四角形の幅
+  const textHeight = 20; // 四角形の高さ
+  const fighterColor = '#FCAA30'
+  const otherColor = '#182F44'
   return BaseLayout(
     Teact.createElement(
       'div',
@@ -27,6 +33,15 @@ function App() {
           'stroke-width': '2',
           class: 'win-1-0 win-1-1 win-1-2 win-1-3',
         }),
+        Teact.createElement('rect', {
+          x: 2 - xAdjustment,
+          y: 30 - yAdjustment,
+          width: textWidth,
+          height: textHeight,
+          fill: players[1].nextPlayer ? fighterColor : otherColor,
+          stroke: 'white',
+          'stroke-width': 0.5
+        }),
         Teact.createElement('text', {
           x: '2',
           y: '30',
@@ -34,9 +49,11 @@ function App() {
           class: 'playername',
           id: '1-playername',
           'font-size': '12',
-          fill: '',
+          fill: 'white',
           textLength: '100',
-        }),
+        },
+        players[1].name
+      ),
         Teact.createElement('path', {
           d: 'M164,30 L164,45z',
           stroke: 'black',
@@ -49,6 +66,15 @@ function App() {
           'stroke-width': '2',
           class: 'win-2-0 win-2-1 win-2-2 win-2-3',
         }),
+        Teact.createElement('rect', {
+          x: 2 - xAdjustment,
+          y: 60 - yAdjustment,
+          width: textWidth,
+          height: textHeight,
+          fill: players[2].nextPlayer ? fighterColor : otherColor,
+          stroke: 'white',
+          'stroke-width': 0.5
+        }),
         Teact.createElement('text', {
           x: '2',
           y: '60',
@@ -56,9 +82,11 @@ function App() {
           class: 'playername',
           id: '2-playername',
           'font-size': '12',
-          fill: '',
+          fill: 'white',
           textLength: '100',
-        }),
+        },
+        players[2].name
+      ),
         Teact.createElement('path', {
           d: 'M164,60 L164,45z',
           stroke: 'black',
@@ -71,6 +99,15 @@ function App() {
           'stroke-width': '2',
           class: 'win-3-0 win-3-1 win-3-2 win-3-3',
         }),
+        Teact.createElement('rect', {
+          x: 2 - xAdjustment,
+          y: 90 - yAdjustment,
+          width: textWidth,
+          height: textHeight,
+          fill: players[3].nextPlayer ? fighterColor : otherColor,
+          stroke: 'white',
+          'stroke-width': 0.5
+        }),
         Teact.createElement('text', {
           x: '2',
           y: '90',
@@ -78,9 +115,11 @@ function App() {
           class: 'playername',
           id: '3-playername',
           'font-size': '12',
-          fill: '',
+          fill: 'white',
           textLength: '100',
-        }),
+        },
+        players[3].name
+      ),
         Teact.createElement('path', {
           d: 'M164,90 L164,105z',
           stroke: 'black',
@@ -93,6 +132,15 @@ function App() {
           'stroke-width': '2',
           class: 'win-4-0 win-4-1 win-4-2 win-4-3',
         }),
+        Teact.createElement('rect', {
+          x: 2 - xAdjustment,
+          y: 120 - yAdjustment,
+          width: textWidth,
+          height: textHeight,
+          fill: players[4].nextPlayer ? fighterColor : otherColor,
+          stroke: 'white',
+          'stroke-width': 0.5
+        }),
         Teact.createElement('text', {
           x: '2',
           y: '120',
@@ -100,9 +148,11 @@ function App() {
           class: 'playername',
           id: '4-playername',
           'font-size': '12',
-          fill: '',
+          fill: 'white',
           textLength: '100',
-        }),
+        },
+        players[4].name
+      ),
         Teact.createElement('path', {
           d: 'M164,120 L164,105z',
           stroke: 'black',
@@ -115,6 +165,15 @@ function App() {
           'stroke-width': '2',
           class: 'win-5-0 win-5-1 win-5-2 win-5-3',
         }),
+        Teact.createElement('rect', {
+          x: 329 - xAdjustment,
+          y: 30 - yAdjustment,
+          width: textWidth,
+          height: textHeight,
+          fill: players[5].nextPlayer ? fighterColor : otherColor,
+          stroke: 'white',
+          'stroke-width': 0.5
+        }),
         Teact.createElement('text', {
           x: '329',
           y: '30',
@@ -122,9 +181,11 @@ function App() {
           class: 'playername',
           id: '5-playername',
           'font-size': '12',
-          fill: '',
+          fill: 'white',
           textLength: '100',
-        }),
+        },
+        players[5].name
+      ),
         Teact.createElement('path', {
           d: 'M284,30 L284,45z',
           stroke: 'black',
@@ -137,6 +198,15 @@ function App() {
           'stroke-width': '2',
           class: 'win-6-0 win-6-1 win-6-2 win-6-3',
         }),
+        Teact.createElement('rect', {
+          x: 329 - xAdjustment,
+          y: 60 - yAdjustment,
+          width: textWidth,
+          height: textHeight,
+          fill: players[6].nextPlayer ? fighterColor : otherColor,
+          stroke: 'white',
+          'stroke-width': 0.5
+        }),
         Teact.createElement('text', {
           x: '329',
           y: '60',
@@ -144,9 +214,11 @@ function App() {
           class: 'playername',
           id: '6-playername',
           'font-size': '12',
-          fill: '',
+          fill: 'white',
           textLength: '100',
-        }),
+        },
+      players[6].name
+      ),
         Teact.createElement('path', {
           d: 'M284,60 L284,45z',
           stroke: 'black',
@@ -159,6 +231,15 @@ function App() {
           'stroke-width': '2',
           class: 'win-7-0 win-7-1 win-7-2 win-7-3',
         }),
+        Teact.createElement('rect', {
+          x: 329 - xAdjustment,
+          y: 90 - yAdjustment,
+          width: textWidth,
+          height: textHeight,
+          fill: players[7].nextPlayer ? fighterColor : otherColor,
+          stroke: 'white',
+          'stroke-width': 0.5
+        }),
         Teact.createElement('text', {
           x: '329',
           y: '90',
@@ -166,9 +247,11 @@ function App() {
           class: 'playername',
           id: '7-playername',
           'font-size': '12',
-          fill: '',
+          fill: 'white',
           textLength: '100',
-        }),
+        },
+        players[7].name
+      ),
         Teact.createElement('path', {
           d: 'M284,90 L284,105z',
           stroke: 'black',
@@ -181,6 +264,15 @@ function App() {
           'stroke-width': '2',
           class: 'win-8-0 win-8-1 win-8-2 win-8-3',
         }),
+        Teact.createElement('rect', {
+          x: 329 - xAdjustment,
+          y: 120 - yAdjustment,
+          width: textWidth,
+          height: textHeight,
+          fill: players[8].nextPlayer ? fighterColor : otherColor,
+          stroke: 'white',
+          'stroke-width': 0.5
+        }),
         Teact.createElement('text', {
           x: '329',
           y: '120',
@@ -188,9 +280,11 @@ function App() {
           class: 'playername',
           id: '8-playername',
           'font-size': '12',
-          fill: '',
+          fill: 'white',
           textLength: '100',
-        }),
+        },
+        players[3].name
+      ),
         Teact.createElement('path', {
           d: 'M284,120 L284,105z',
           stroke: 'black',
@@ -268,6 +362,17 @@ function App() {
   );
 }
 
+const players = {
+  1: { name: "Alice", victoryCount: 1, nextPlayer: false },
+  2: { name: "Bob", victoryCount: 0, nextPlayer: false },
+  3: { name: "Charlie", victoryCount: 2, nextPlayer: true },
+  4: { name: "David", victoryCount: 0, nextPlayer: false },
+  5: { name: "Eve", victoryCount: 1, nextPlayer: false },
+  6: { name: "Frank", victoryCount: 0, nextPlayer: false },
+  7: { name: "Grace", victoryCount: 2, nextPlayer: true },
+  8: { name: "Hank", victoryCount: 0, nextPlayer: false }
+};
+
 // アプリケーションをレンダリング
 const container = document.getElementById('app');
-Teact.render(Teact.createElement(App), container);
+Teact.render(Teact.createElement(App, { players }), container);

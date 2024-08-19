@@ -21,7 +21,7 @@ function createTextElement(text) {
 }
 
 function createDom(fiber) {
-  const isSvg = fiber.type === 'svg' || fiber.type === 'path' || fiber.type === 'text'
+  const isSvg = fiber.type === 'svg' || fiber.type === 'path' || fiber.type === 'text' || fiber.type === 'rect'
   const dom =
     fiber.type === 'TEXT_ELEMENT'
       ? document.createTextNode(fiber.props.nodeValue || '')
