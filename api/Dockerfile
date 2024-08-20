@@ -9,7 +9,7 @@ FROM python:3.9-slim AS base
 ARG PSYCOPG_VERSION=3.1.8
 ARG DJANGO_VERSION=4.2
 ## misc
-ARG SETTINGSPY_NAME=update_settingspy.py
+
 
 # コンテナ起動後にも利用する環境変数
 ## Djangoのsuperuser作成時のデフォルト値(https://kamatimaru.hatenablog.com/entry/2021/02/28/030646)
@@ -63,11 +63,11 @@ COPY conf/app_tmt/* ${DJANGO_PROJECT_DIR}tmt/
 COPY conf/app_mtch/* ${DJANGO_PROJECT_DIR}mtch/
 
 # appsで定めたモデルをDBに反映する準備
-RUN python manage.py makemigrations
+RUN python ${DJANGO_PROJECT_DIR}manage.py makemigrations
 
 # コンテナ起動後に利用するファイルをコピー
-COPY tool/entrypoint.sh .
-RUN chmod +x entrypoint.sh
+COPY tool/entrypoint.sh ${DJANGO_PROJECT_DIR}
+RUN chmod +x ${DJANGO_PROJECT_DIR}entrypoint.sh
 
 
 ##################################
