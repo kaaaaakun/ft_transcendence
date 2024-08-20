@@ -15,9 +15,6 @@ ARG DJANGO_VERSION=4.2
 ## Djangoのsuperuser作成時のデフォルト値(https://kamatimaru.hatenablog.com/entry/2021/02/28/030646)
 ENV DJANGO_PROJECT_NAME trans
 ENV DJANGO_PROJECT_DIR /${DJANGO_PROJECT_NAME}/
-ENV DJANGO_SUPERUSER_USERNAME admin
-ENV DJANGO_SUPERUSER_EMAIL admin@example.com
-ENV DJANGO_SUPERUSER_PASSWORD pass
 RUN export SECRET_KEY=$(python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())') && \
     echo "SECRET_KEY=${SECRET_KEY}" >> /etc/environment
 ENV SECRET_KEY=$SECRET_KEY

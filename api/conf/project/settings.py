@@ -86,9 +86,9 @@ WSGI_APPLICATION = 'trans.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'pong_db',
-        'USER': 'pong_user',
-        'PASSWORD': 'pass',
+        'NAME': os.getenv('POSTGRES_DB', 'pong_db'),
+        'USER': os.getenv('POSTGRES_USER', 'pong_user'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'pass'),
         'HOST': 'db',
         'PORT': '5432',
     }

@@ -5,10 +5,10 @@ DOCKER_COMPOSE_DIR = .
 DOCKER_COMPOSE_FILE = $(DOCKER_COMPOSE_DIR)/docker-compose.yml
 
 up: build
-	docker compose -f $(DOCKER_COMPOSE_FILE) up -d
+	docker compose --env-file .env.sample -f $(DOCKER_COMPOSE_FILE) up -d
 
 down:
-	docker compose -f $(DOCKER_COMPOSE_FILE) down -v
+	docker compose --env-file .env.sample -f $(DOCKER_COMPOSE_FILE) down -v
 
 # 古いイメージを削除
 image-prune:
@@ -16,6 +16,6 @@ image-prune:
 
 # cacheを使わずにビルド
 build:
-	docker compose -f $(DOCKER_COMPOSE_FILE) build --no-cache
+	docker compose --env-file .env.sample -f $(DOCKER_COMPOSE_FILE) build --no-cache
 
 re:	down image-prune up
