@@ -4,18 +4,26 @@
 # 軽そうなbaseイメージを選択(https://hub.docker.com/_/python)
 FROM python:3.9-slim AS base
 
-# インストールするソフトのバージョン指定
-ENV PSYCOPG_VERSION 3.1.8
-ENV DJANGO_VERSION 4.2
+# ビルド時のみ利用する変数
+## version of installed packages
+ARG PSYCOPG_VERSION=3.1.8
+ARG DJANGO_VERSION=4.2
+## misc
+ARG SETTINGSPY_NAME=update_settingspy.py
 
-# 環境変数の設定
+# コンテナ起動後にも利用する環境変数
 ## Djangoのsuperuser作成時のデフォルト値(https://kamatimaru.hatenablog.com/entry/2021/02/28/030646)
+ENV DJANGO_PROJECT_NAME trans
+ENV DJANGO_PROJECT_DIR /${DJANGO_PROJECT_NAME}/
 ENV DJANGO_SUPERUSER_USERNAME admin
 ENV DJANGO_SUPERUSER_EMAIL admin@example.com
 ENV DJANGO_SUPERUSER_PASSWORD pass
+RUN export SECRET_KEY=$(python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())') && \
+    echo "SECRET_KEY=${SECRET_KEY}" >> /etc/environment
+ENV SECRET_KEY=$SECRET_KEY
 
-RUN apt-get update
 # 必要なソフト(bainary)をインストール
+RUN apt-get update
 ## gcc: psycopgのインストールに必要
 ## libpq-dev: psycopgの動作に必要
 RUN apt-get -y install \
@@ -39,28 +47,20 @@ RUN pip install --no-cache-dir psycopg==${PSYCOPG_VERSION}
 RUN pip install --no-cache-dir Django==${DJANGO_VERSION}
 RUN pip install --no-cache-dir djangorestframework
 
-
-##################################
-# development_djangoserver stage #
-##################################
-FROM base AS development_djangoserver
 # Create a Django project
-RUN django-admin startproject trans
-WORKDIR /trans
+RUN django-admin startproject ${DJANGO_PROJECT_NAME}
 
 # Create Django apps
-RUN python manage.py startapp usr
+WORKDIR ${DJANGO_PROJECT_DIR}
+RUN python manage.py startapp plyr
 RUN python manage.py startapp tmt
 RUN python manage.py startapp mtch
-RUN python manage.py startapp gply
 
-# manage.pyのDATABASES設定を変更
-COPY tool/update_db_section.py .
-RUN chmod +x update_db_section.py
-RUN python update_db_section.py
-RUN rm update_db_section.py
-
-# appsのファイルをコピー
+# project, appsのファイルをコピー
+COPY conf/project/* ${DJANGO_PROJECT_DIR}${DJANGO_PROJECT_NAME}/
+COPY conf/app_plyr/* ${DJANGO_PROJECT_DIR}plyr/
+COPY conf/app_tmt/* ${DJANGO_PROJECT_DIR}tmt/
+COPY conf/app_mtch/* ${DJANGO_PROJECT_DIR}mtch/
 
 # appsで定めたモデルをDBに反映する準備
 RUN python manage.py makemigrations
@@ -68,6 +68,15 @@ RUN python manage.py makemigrations
 # コンテナ起動後に利用するファイルをコピー
 COPY tool/entrypoint.sh .
 RUN chmod +x entrypoint.sh
+
+
+##################################
+# development_djangoserver stage #
+##################################
+FROM base AS development_djangoserver
+
+# コンテナ内で"run"コマンドを実行すると、Djangoの開発サーバーが起動するようにaliasを設定
+RUN echo "alias run='python manage.py runserver 0.0.0.0:8000'" >> ~/.bashrc
 
 ENTRYPOINT [ "/trans/entrypoint.sh" ]
 CMD ["sleep", "infinity"]
