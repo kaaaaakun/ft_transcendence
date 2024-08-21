@@ -4,16 +4,8 @@ import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/teact'
 import viteLogo from '/vite.svg'
 
-function sumVictoryCount(start, end) {
-  let sum = 0
-  for (let i = start; i <= end; i++) {
-    sum += players[i].victoryCount
-  }
-  return sum
-}
-
 // SVG要素を仮想DOM形式で作成する関数
-function SvgTest({ players }) {
+function svgTest({ players }) {
   function sumVictoryCount(start, end) {
     let sum = 0
     for (let i = start; i <= end; i++) {
@@ -371,4 +363,4 @@ const players = {
 };
 
 const container = document.getElementById('app');
-Teact.render(Teact.createElement(SvgTest, { players }), container);
+Teact.render(Teact.createElement(svgTest, { players }), container);

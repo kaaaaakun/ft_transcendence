@@ -45,13 +45,13 @@ function updateDom(dom, prevProps = {}, nextProps = {}) {
   const isSvg = dom instanceof SVGElement
 
   // Remove old or changed event listeners
-  Object.keys(prevProps)
-    .filter(isEvent)
-    .filter(key => !(key in nextProps) || isNew(prevProps, nextProps)(key))
-    .forEach(name => {
-      const eventType = name.toLowerCase().substring(2)
-      dom.removeEventListener(eventType, prevProps[name])
-    })
+  for (const name of Object.keys(prevProps)) {
+    if (isEvent(name)) {
+      const eventType = name.toLowerCase().substring(2);
+      dom.removeEventListener(eventType, prevProps[name]);
+    }
+  }
+  
 
   // Add new event listeners
   Object.keys(nextProps)
@@ -63,28 +63,25 @@ function updateDom(dom, prevProps = {}, nextProps = {}) {
     })
 
   // Remove old properties
-  Object.keys(prevProps)
-    .filter(isProperty)
-    .filter(isGone(prevProps, nextProps))
-    .forEach(name => {
-      if (isSvg) {
-        dom.removeAttribute(name)
-      } else {
-        dom[name] = ''
-      }
-    })
+  for (const name of Object.keys(nextProps)) {
+    if (isEvent(name)) {
+      const eventType = name.toLowerCase().substring(2);
+      dom.addEventListener(eventType, nextProps[name]);
+    }
+  }
+  
 
   // Set new or changed properties
-  Object.keys(nextProps)
-    .filter(isProperty)
-    .filter(isNew(prevProps, nextProps))
-    .forEach(name => {
+  for (const name of Object.keys(nextProps)) {
+    if (isProperty(name) && isNew(prevProps, nextProps)(name)) {
       if (isSvg) {
-        dom.setAttribute(name, nextProps[name])
+        dom.setAttribute(name, nextProps[name]);
       } else {
-        dom[name] = nextProps[name]
+        dom[name] = nextProps[name];
       }
-    })
+    }
+  }
+  
 
   // handle className specifically
   if (!isSvg && prevProps.className !== nextProps.className) {

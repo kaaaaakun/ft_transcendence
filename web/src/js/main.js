@@ -5,7 +5,6 @@ import { Teact } from '@/js/teact'
 import viteLogo from '/vite.svg'
 
 function App() {
-  const [state, setState] = Teact.useState(1)
   return BaseLayout(
     Teact.createElement(
       'div',
