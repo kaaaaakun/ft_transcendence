@@ -43,6 +43,7 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache-dir psycopg==${PSYCOPG_VERSION}
 RUN pip install --no-cache-dir Django==${DJANGO_VERSION}
 RUN pip install --no-cache-dir djangorestframework
+RUN pip install --no-cache-dir gunicorn
 
 # Create a Django project
 RUN django-admin startproject ${DJANGO_PROJECT_NAME}
@@ -74,6 +75,17 @@ FROM base AS development_djangoserver
 
 # コンテナ内で"run"コマンドを実行すると、Djangoの開発サーバーが起動するようにaliasを設定
 RUN echo "alias run='python manage.py runserver 0.0.0.0:8000'" >> ~/.bashrc
+
+ENTRYPOINT [ "/trans/entrypoint.sh" ]
+CMD ["sleep", "infinity"]
+
+##########################
+# development_wsgi stage #
+##########################
+FROM base AS development_wsgi
+
+# コンテナ内で"run"コマンドを実行すると、Gunicornが起動するようにaliasを設定
+RUN echo "alias run='gunicorn ${DJANGO_PROJECT_NAME}.wsgi:application --bind 0.0.0.0:8000'" >> ~/.bashrc
 
 ENTRYPOINT [ "/trans/entrypoint.sh" ]
 CMD ["sleep", "infinity"]
