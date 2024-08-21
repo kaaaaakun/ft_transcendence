@@ -40,7 +40,6 @@ const isEvent = key => key.startsWith('on')
 const isProperty = key =>
   key !== 'children' && key !== 'className' && !isEvent(key)
 const isNew = (prev, next) => key => prev[key] !== next[key]
-const isGone = (_, next) => key => !(key in next)
 function updateDom(dom, prevProps = {}, nextProps = {}) {
   const isSvg = dom instanceof SVGElement
 
@@ -54,14 +53,13 @@ function updateDom(dom, prevProps = {}, nextProps = {}) {
   
 
   // Add new event listeners
-  Object.keys(nextProps)
-    .filter(isEvent)
-    .filter(isNew(prevProps, nextProps))
-    .forEach(name => {
-      const eventType = name.toLowerCase().substring(2)
-      dom.addEventListener(eventType, nextProps[name])
-    })
-
+  for (const name of Object.keys(nextProps)) {
+    if (isEvent(name) && isNew(prevProps, nextProps)(name)) {
+      const eventType = name.toLowerCase().substring(2);
+      dom.addEventListener(eventType, nextProps[name]);
+    }
+  }
+  
   // Remove old properties
   for (const name of Object.keys(nextProps)) {
     if (isEvent(name)) {
@@ -70,7 +68,6 @@ function updateDom(dom, prevProps = {}, nextProps = {}) {
     }
   }
   
-
   // Set new or changed properties
   for (const name of Object.keys(nextProps)) {
     if (isProperty(name) && isNew(prevProps, nextProps)(name)) {
@@ -82,7 +79,6 @@ function updateDom(dom, prevProps = {}, nextProps = {}) {
     }
   }
   
-
   // handle className specifically
   if (!isSvg && prevProps.className !== nextProps.className) {
     dom.className = nextProps.className || ''

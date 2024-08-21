@@ -6,13 +6,6 @@ import viteLogo from '/vite.svg'
 
 // SVG要素を仮想DOM形式で作成する関数
 function svgTest({ players }) {
-  function sumVictoryCount(start, end) {
-    let sum = 0
-    for (let i = start; i <= end; i++) {
-      sum += players[i].victoryCount
-    }
-    return sum
-  }
   const xAdjustment = 5;
   const yAdjustment = 12;
   const textWidth = 110; // 四角形の幅
