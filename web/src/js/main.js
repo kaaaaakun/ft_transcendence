@@ -1,13 +1,12 @@
-import '@/scss/styles.scss'
-import { BaseLayout } from '@/js/layouts/BaseLayout'
-import { Teact } from '@/js/teact'
+import '@/scss/styles.scss';
+import { BaseLayout } from '@/js/layouts/BaseLayout';
+import { Teact } from '@/js/teact';
 
 function App() {
   const [state, setState] = Teact.useState(0);
   const [score, setScore] = Teact.useState({ player1: 0, player2: 0 });
 
   const startGame = () => {
-    // HTML要素を動的に作成
     const gameContainer = document.createElement('div');
     gameContainer.id = 'gameContainer';
     gameContainer.style.display = 'flex';
@@ -21,7 +20,7 @@ function App() {
     leftPlayer.style.fontSize = '32px';
     leftPlayer.style.color = 'white';
     leftPlayer.style.marginRight = '30px';
-    leftPlayer.textContent = 'A'; // 左プレイヤー名
+    leftPlayer.textContent = 'A';
 
     const rightPlayer = document.createElement('div');
     rightPlayer.id = 'rightPlayer';
@@ -30,21 +29,25 @@ function App() {
     rightPlayer.style.fontSize = '32px';
     rightPlayer.style.color = 'white';
     rightPlayer.style.marginLeft = '30px';
-    rightPlayer.textContent = 'D'; // 右プレイヤー名
+    rightPlayer.textContent = 'D';
 
     const scoreBoard = document.createElement('div');
-    scoreBoard.id = 'scoreBoard';
-    scoreBoard.className = 'pt-0';
+    scoreBoard.className = 'score-board'; // クラス名を設定
     scoreBoard.style.textAlign = 'center';
     scoreBoard.style.color = 'white';
     scoreBoard.style.fontSize = '72px';
+    scoreBoard.style.position = 'absolute';
+    scoreBoard.style.top = '250px';
+    scoreBoard.style.left = '50%';
+    scoreBoard.style.zIndex = '1';
+    scoreBoard.style.transform = 'translateX(-50%)';
     scoreBoard.textContent = `${score.player1} : ${score.player2}`;
 
     const canvasContainer = document.createElement('div');
     canvasContainer.style.position = 'relative';
     canvasContainer.style.width = '600px';
     canvasContainer.style.height = '400px';
-    canvasContainer.style.backgroundColor = '#1E1E2C'; // キャンバスの背景色を設定
+    canvasContainer.style.backgroundColor = '#1E1E2C';
 
     const canvas = document.createElement('canvas');
     canvas.id = 'pongCanvas';
@@ -55,12 +58,11 @@ function App() {
     gameContainer.appendChild(leftPlayer);
     gameContainer.appendChild(canvasContainer);
     gameContainer.appendChild(rightPlayer);
-    document.getElementById('pong').appendChild(scoreBoard); // スコアボードを配置
+    document.getElementById('pong').appendChild(scoreBoard);
     document.getElementById('pong').appendChild(gameContainer);
 
     const context = canvas.getContext('2d');
 
-    // パドルとボールの設定
     const paddleWidth = 10, paddleHeight = 100, ballSize = 10;
     let paddle1Y = (canvas.height - paddleHeight) / 2;
     let paddle2Y = (canvas.height - paddleHeight) / 2;
@@ -98,14 +100,12 @@ function App() {
         ballSpeedY = -ballSpeedY;
       }
 
-      // パドルとの衝突判定
       if (ballX - ballSize < paddleWidth && ballY > paddle1Y && ballY < paddle1Y + paddleHeight) {
         ballSpeedX = -ballSpeedX;
       } else if (ballX + ballSize > canvas.width - paddleWidth && ballY > paddle2Y && ballY < paddle2Y + paddleHeight) {
         ballSpeedX = -ballSpeedX;
       }
 
-      // スコアリング
       if (ballX - ballSize < 0) {
         setScore(score => ({ ...score, player2: score.player2 + 1 }));
         scoreBoard.textContent = `${score.player1} : ${score.player2}`;
@@ -124,17 +124,17 @@ function App() {
     }
 
     function draw() {
-      drawRect(0, 0, canvas.width, canvas.height, '#1E1E2C'); // キャンバス内の背景色を設定
+      drawRect(0, 0, canvas.width, canvas.height, '#1E1E2C');
       drawRect(0, paddle1Y, paddleWidth, paddleHeight, 'white');
       drawRect(canvas.width - paddleWidth, paddle2Y, paddleWidth, paddleHeight, 'white');
-      drawBall(ballX, ballY, ballSize, '#FFD700'); // ボールの色を設定
+      drawBall(ballX, ballY, ballSize, '#FFD700');
     }
 
     function update() {
       movePaddle();
       moveBall();
       draw();
-      setState(state => state + 1); // 再レンダリングをトリガー
+      setState(state => state + 1);
     }
 
     function keyDownHandler(e) {
@@ -160,11 +160,10 @@ function App() {
       clearInterval(intervalId);
       document.removeEventListener('keydown', keyDownHandler);
       document.removeEventListener('keyup', keyUpHandler);
-      gameContainer.remove(); // ゲームが終了した際にキャンバスを削除
+      gameContainer.remove();
     };
   };
 
-  // 初回レンダリング時に一度だけゲームを開始する
   if (state === 0) {
     startGame();
   }
