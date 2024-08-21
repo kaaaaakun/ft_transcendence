@@ -4,13 +4,13 @@ import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/teact'
 import viteLogo from '/vite.svg'
 
-function sumVictoryCount(start, end) {
-  let sum = 0
-  for (let i = start; i <= end; i++) {
-    sum += players[i].victoryCount
-  }
-  return sum
-}
+// function sumVictoryCount(start, end) {
+//   let sum = 0
+//   for (let i = start; i <= end; i++) {
+//     sum += players[i].victoryCount
+//   }
+//   return sum
+// }
 
 // SVG要素を仮想DOM形式で作成する関数
 function App({ players }) {
@@ -368,6 +368,33 @@ const players = {
   8: { name: "Hank", victoryCount: 0, nextPlayer: false }
 };
 
+fetch('http://127.0.0.1:8000/api/plyr/data/')
+  .then(response => {
+    // レスポンスが成功かどうかを確認
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    // レスポンスをJSON形式に変換
+    return response.json();
+  })
+  .then(data => {
+    // 取得したJSONデータを利用
+    console.log(data);
+    const players = data.reduce((acc, item) => {
+      const key = Object.keys(item)[0];  // キーを取得
+      acc[key] = item[key];  // オブジェクトにキーと値を追加
+      return acc;
+    }, {});
+    const container = document.getElementById('app');
+    Teact.render(Teact.createElement(App, { players }), container);
+    // ここでデータの処理を行う（例: DOMに表示するなど）
+  })
+  .catch(error => {
+    // エラー処理
+    console.error('There was a problem with the fetch operation:', error);
+});
+
+
 // アプリケーションをレンダリング
-const container = document.getElementById('app');
-Teact.render(Teact.createElement(App, { players }), container);
+// const container = document.getElementById('app');
+// Teact.render(Teact.createElement(App, { players }), container);
