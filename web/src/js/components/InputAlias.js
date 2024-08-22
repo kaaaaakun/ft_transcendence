@@ -20,7 +20,7 @@ function handleSubmit(event) {
 
 
 function App() {
-  const [state, setState] = Teact.useState(2)
+  const [numberOfPlayers, setNumberOfPlayers] = Teact.useState(2)
 
   return BaseLayout(
     Teact.createElement(
@@ -29,9 +29,9 @@ function App() {
       Teact.createElement(
         'div',
         { className: 'd-flex justify-content-center' },
-        DefaultButton({ text: '2 Players', onClick: () => setState(c => 2) }),
-        DefaultButton({ text: '4 Players', onClick: () => setState(c => 4) }),
-        DefaultButton({ text: '8 Players', onClick: () => setState(c => 8) }),
+        DefaultButton({ text: '2 Players', onClick: () => setNumberOfPlayers(c => 2) }),
+        DefaultButton({ text: '4 Players', onClick: () => setNumberOfPlayers(c => 4) }),
+        DefaultButton({ text: '8 Players', onClick: () => setNumberOfPlayers(c => 8) }),
       ),
       Teact.createElement(
         'form',
@@ -40,7 +40,7 @@ function App() {
           className: 'text-center mt-3 d-grid gap-2 col-3 mx-auto',
         },
         ...Array.from({ length: 4 }, (_, i) => {
-          const className = i >= state / 2 ?
+          const className = i >= numberOfPlayers / 2 ?
             'form-control mt-2 bg-secondary' :
             'form-control mt-2';
           return Teact.createElement(
@@ -55,12 +55,12 @@ function App() {
                   type: 'text',
                   className: className,
                   placeholder: `Player ${i * 2 + 1}`,
-                  name: `player${i * 2}`,  // 1つ目の入力フィールド
-                  disabled: i >= state / 2,
+                  name: `player${i * 2}`,
+                  disabled: i >= numberOfPlayers / 2,
                 }
               )
             ),
-            Teact.createElement(  // 2つ目の入力フィールドがある場合のみ
+            Teact.createElement(
               'div',
               { className: 'col-6' },
               Teact.createElement(
@@ -70,7 +70,7 @@ function App() {
                   className: className,
                   placeholder: `Player ${i * 2 + 2}`,
                   name: `player${i * 2 + 1}`,  // 2つ目の入力フィールド
-                  disabled: i >= state / 2,
+                  disabled: i >= numberOfPlayers / 2,
                 }
               )
             )
