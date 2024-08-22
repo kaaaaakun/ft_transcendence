@@ -1,7 +1,7 @@
 services:
-  postgres:
+  rdbms:
     image: postgres:16-alpine
-    container_name: "postgres"
+    container_name: "rdbms"
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -9,43 +9,37 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - pong
-    # volumes:
-    #   - postgres_data:/var/lib/postgresql/data
+      - net_pong
 
-  web:
+  static-builder:
     build:
-      context: web/
-    container_name: "web"
-    # volumes:
-    #   - web_data:/var/www/html
+      context: static-builder/
+    container_name: "static-builder"
 
-  nginx:
+  reverseproxy:
     build:
-      context: nginx/
-    container_name: "nginx"
+      context: reverseproxy/
+    container_name: "reverseproxy"
     ports:
       - "80:80"
       - "443:443"
     networks:
-      - pong
-    # volumes:
-    #   - nginx.conf:/etc/nginx/nginx.conf
-    #   - certs:/etc/nginx/certs
+      - net_pong
 
   api:
     build:
       context: api/
     container_name: "api"
     networks:
-      - pong
+      - net_pong
 
 networks:
-  pong:
-    name: "pong"
-# volumes:
-#   postgres_data:
-#   web_data:
-#   nginx.conf:
-#   certs:
+  net_pong:
+    name: "net_pong"
+
+volumes:
+  vol_reverseproxy:
+    name: "vol_reverseproxy"
+  vol_rdbms:
+    name: "vol_rdbms"
 
