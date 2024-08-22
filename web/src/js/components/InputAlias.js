@@ -6,16 +6,14 @@ import DefaultButton from '@/js/components/ui/button';
 function handleSubmit(event) {
   event.preventDefault(); // フォームのデフォルトの送信を防ぐ（ページリロード防止）
 
-  const formData = new FormData(event.target); // フォームのデータを取得
+  const formData = new FormData(event.target);
 
-  // フォームのデータをオブジェクトとして取得する例
   const data = {};
   formData.forEach((value, key) => {
     data[key] = value;
   });
 
   console.log('Form Data:', data);
-  // ここで送信処理やバリデーションを行う
 }
 
 
@@ -36,7 +34,7 @@ function App() {
       Teact.createElement(
         'form',
         {
-          onSubmit: handleSubmit, // フォームの送信時に呼ばれるハンドラ
+          onSubmit: handleSubmit,
           className: 'text-center mt-3 d-grid gap-2 col-3 mx-auto',
         },
         ...Array.from({ length: 4 }, (_, i) => {
@@ -69,7 +67,7 @@ function App() {
                   type: 'text',
                   className: className,
                   placeholder: `Player ${i * 2 + 2}`,
-                  name: `player${i * 2 + 1}`,  // 2つ目の入力フィールド
+                  name: `player${i * 2 + 1}`,
                   disabled: i >= numberOfPlayers / 2,
                 }
               )
