@@ -18,10 +18,10 @@ services:
     ports:
       - "5173:5173"
 
-  nginx:
+  reverseproxy:
     build:
-      context: nginx/
-    container_name: "nginx"
+      context: reverseproxy/
+    container_name: "reverseproxy"
     ports:
       - "80:80"
       - "443:443"
