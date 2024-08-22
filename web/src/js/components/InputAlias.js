@@ -1,6 +1,7 @@
 import '@/scss/styles.scss';
 import { BaseLayout } from '@/js/layouts/BaseLayout';
 import { Teact } from '@/js/teact';
+import DefaultButton from '@/js/components/ui/button';
 
 function handleSubmit(event) {
   event.preventDefault(); // フォームのデフォルトの送信を防ぐ（ページリロード防止）
@@ -28,30 +29,9 @@ function App() {
       Teact.createElement(
         'div',
         { className: 'd-flex justify-content-center' },
-        Teact.createElement(
-          'button',
-          {
-            className: 'btn btn-primary btn-lg bg-darkblue',
-            onClick: () => setState(c => 2),
-          },
-          '2 Players'
-        ),
-        Teact.createElement(
-          'button',
-          {
-            className: 'btn btn-primary btn-lg bg-darkblue',
-            onClick: () => setState(c => 4),
-          },
-          '4 Players'
-        ),
-        Teact.createElement(
-          'button',
-          {
-            className: 'btn btn-primary btn-lg bg-darkblue',
-            onClick: () => setState(c => 8),
-          },
-          '8 Players'
-        )
+        DefaultButton({ text: '2 Players', onClick: () => setState(c => 2) }),
+        DefaultButton({ text: '4 Players', onClick: () => setState(c => 4) }),
+        DefaultButton({ text: '8 Players', onClick: () => setState(c => 8) }),
       ),
       Teact.createElement(
         'form',
@@ -96,14 +76,7 @@ function App() {
             )
           );
         }),
-        Teact.createElement(
-          'button',
-          {
-            type: 'submit',
-            className: 'btn btn-primary btn-lg bg-darkblue mt-3',
-          },
-          'Submit'
-        )
+        DefaultButton({ type: 'submit', text: 'submit'}),
       )
     )
   );
