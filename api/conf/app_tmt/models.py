@@ -3,7 +3,7 @@ from plyr.models import Player
 
 class Tournament(models.Model):
     num_of_player = models.IntegerField()
-    tournament_status = models.CharField(max_length=10)
+    status = models.CharField(max_length=10)
 
 # 外部キーを利用する。
 # Ref: https://blog.css-net.co.jp/entry/2023/05/24/105218 (基本, 引数の意味)
