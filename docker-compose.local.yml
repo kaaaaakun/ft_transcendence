@@ -1,7 +1,7 @@
 services:
-  postgres:
+  rdbms:
     image: postgres:16-alpine
-    container_name: "postgres"
+    container_name: "rdbms"
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -11,10 +11,10 @@ services:
     networks:
       - net_pong
 
-  web:
+  static-builder:
     build:
-      context: web/
-    container_name: "web"
+      context: static-builder/
+    container_name: "static-builder"
     ports:
       - "5173:5173"
 
@@ -42,7 +42,11 @@ networks:
   net_pong:
     name: "net_pong"
 
-# volumes:
-# localは命名任せます
+volumes:
+  vol_reverseproxy:
+    name: "vol_reverseproxy"
+  vol_rdbms:
+    name: "vol_rdbms"
+
 
 
