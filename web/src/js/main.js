@@ -9,56 +9,25 @@ function App() {
   return BaseLayout(
     Teact.createElement(
       'div',
-      { className: 'container, pt-5 vh-100' },
+      { className: 'container vh-100' },
       Teact.createElement(
-        'div',
-        { className: 'd-flex justify-content-center' },
-        Teact.createElement(
-          'a',
-          { className: 'mx-4', href: 'https://vitejs.dev', target: '_blank' },
-          Teact.createElement('img', {
-            src: viteLogo,
-            className: 'img-fluid',
-            alt: 'Vite logo',
-          }),
-        ),
-        Teact.createElement(
-          'a',
-          {
-            className: 'mx-4',
-            href: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript',
-            target: '_blank',
-          },
-          Teact.createElement('img', {
-            src: javascriptLogo,
-            className: 'img-fluid',
-            alt: 'JavaScript logo',
-          }),
-        ),
-      ),
-      Teact.createElement(
-        'h1',
-        { className: 'text-center pt-5' },
-        'Hello Vite!',
+        'h3',
+        { className: 'mb-5 text-center text-light' },
+        '遊ぶモードを選んでください'
       ),
       Teact.createElement(
         'div',
-        { className: 'd-flex justify-content-center' },
+        { className: 'd-grid gap-2 col-3 mx-auto' },
         Teact.createElement(
           'button',
-          {
-            className: 'btn btn-primary',
-            id: 'counter',
-            type: 'button',
-            onClick: () => setState(c => c + 1),
-          },
-          `Count: ${state}`,
+          { className: 'btn btn-primary btn-lg bg-darkblue', type: 'submit' },
+          '２人対戦'
         ),
-      ),
-      Teact.createElement(
-        'p',
-        { className: 'text-muted text-center pt-3' },
-        'Click on the Vite logo to learn more',
+        Teact.createElement(
+          'button',
+          { className: 'btn btn-primary btn-lg bg-darkblue', type: 'submit' },
+          'トーナメント'
+        )
       ),
     ),
   )
