@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from plyr.utils import validate_players, register_players
 from .utils import validate_tournament, register_tournament
+from plyr.serializers import PlayerSerializer
 
 # start: ユースケースでは本来必要ないが、データの確認のために追加
 class TournamentViewSet(viewsets.ModelViewSet):
@@ -39,4 +40,13 @@ class LocalTournamentCreateView(APIView):
         # TournamentPlayerをDBに登録
         # to be implemented
 
-        return Response("Tournament created successfully.", status = status.HTTP_201_CREATED)
+
+        # code example. return JSON response
+        response = {
+            'Tournament_id': tournament.id,
+            'Tournament_all': TournamentSerializer(tournament).data,
+            'Players_id': [player.id for player in players],
+            'Players_all': PlayerSerializer(players, many=True).data
+        }
+
+        return Response(response, status = status.HTTP_201_CREATED)
