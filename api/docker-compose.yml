@@ -1,0 +1,45 @@
+# Djangoの開発用。グローバルdocker-compose.ymlができたら削除する
+services:
+  # バックエンドのサービス
+  backend:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: development_djangoserver # 開発用のDockerfileのターゲット
+    ports:
+      - "8000:8000"
+    networks:
+      - pong_network
+    environment:
+      DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME}
+      DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL}
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+
+
+  db:
+    image: postgres:latest
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - pong_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pong_user"]
+      interval: 15s
+      retries: 5
+
+volumes:
+  postgres_data:
+
+networks:
+  pong_network:
+    driver: bridge
