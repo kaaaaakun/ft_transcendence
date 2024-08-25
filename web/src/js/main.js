@@ -6,7 +6,6 @@ import viteLogo from '/vite.svg'
 import DefaultButton from '@/js/components/ui/button';
 
 function App() {
-  const [state, setState] = Teact.useState(1)
   return BaseLayout(
     Teact.createElement(
       'div',
