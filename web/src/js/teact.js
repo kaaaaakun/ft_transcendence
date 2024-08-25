@@ -20,13 +20,18 @@ function createTextElement(text) {
   }
 }
 
+const svgTag = ['svg', 'path', 'text', 'rect']
+
 function createDom(fiber) {
+  const isSvg = svgTag.includes(fiber.type);
   const dom =
     fiber.type === 'TEXT_ELEMENT'
-      ? document.createTextNode('')
+      ? document.createTextNode(fiber.props.nodeValue || '')
+      : isSvg
+      ? document.createElementNS('http://www.w3.org/2000/svg', fiber.type)
       : document.createElement(fiber.type)
 
-  updateDom(dom, {}, fiber.props)
+  updateDom(dom, {}, fiber.props, isSvg)
 
   return dom
 }
@@ -35,42 +40,47 @@ const isEvent = key => key.startsWith('on')
 const isProperty = key =>
   key !== 'children' && key !== 'className' && !isEvent(key)
 const isNew = (prev, next) => key => prev[key] !== next[key]
-const isGone = (_, next) => key => !(key in next)
-function updateDom(dom, prevProps, nextProps) {
-  // remove old or changed event listeners
-  const prevEventKeys = Object.keys(prevProps).filter(isEvent)
-  const removedEventKeys = prevEventKeys.filter(
-    key => !(key in nextProps) || isNew(prevProps, nextProps)(key),
-  )
-  for (const key of removedEventKeys) {
-    const eventType = key.toLowerCase().substring(2)
-    dom.removeEventListener(eventType, prevProps[key])
-  }
+function updateDom(dom, prevProps = {}, nextProps = {}) {
+  const isSvg = dom instanceof SVGElement
 
-  // add new event listeners
-  const nextEventKeys = nextProps && Object.keys(nextProps).filter(isEvent)
-  const addedEventKeys = nextEventKeys?.filter(isNew(prevProps, nextProps))
-  for (const key of addedEventKeys) {
-    const eventType = key.toLowerCase().substring(2)
-    dom.addEventListener(eventType, nextProps[key])
+  // Remove old or changed event listeners
+  for (const name of Object.keys(prevProps)) {
+    if (isEvent(name)) {
+      const eventType = name.toLowerCase().substring(2);
+      dom.removeEventListener(eventType, prevProps[name]);
+    }
   }
+  
 
-  // remove old properties
-  const prevPropKeys = Object.keys(prevProps).filter(isProperty)
-  const removedPropKeys = prevPropKeys.filter(isGone(prevProps, nextProps))
-  for (const key of removedPropKeys) {
-    dom[key] = ''
+  // Add new event listeners
+  for (const name of Object.keys(nextProps)) {
+    if (isEvent(name) && isNew(prevProps, nextProps)(name)) {
+      const eventType = name.toLowerCase().substring(2);
+      dom.addEventListener(eventType, nextProps[name]);
+    }
   }
-
-  // set new or changed properties
-  const nextPropKeys = Object.keys(nextProps).filter(isProperty)
-  const changedPropKeys = nextPropKeys.filter(isNew(prevProps, nextProps))
-  for (const key of changedPropKeys) {
-    dom[key] = nextProps[key]
+  
+  // Remove old properties
+  for (const name of Object.keys(nextProps)) {
+    if (isEvent(name)) {
+      const eventType = name.toLowerCase().substring(2);
+      dom.addEventListener(eventType, nextProps[name]);
+    }
   }
-
+  
+  // Set new or changed properties
+  for (const name of Object.keys(nextProps)) {
+    if (isProperty(name) && isNew(prevProps, nextProps)(name)) {
+      if (isSvg) {
+        dom.setAttribute(name, nextProps[name]);
+      } else {
+        dom[name] = nextProps[name];
+      }
+    }
+  }
+  
   // handle className specifically
-  if (prevProps.className !== nextProps.className) {
+  if (!isSvg && prevProps.className !== nextProps.className) {
     dom.className = nextProps.className || ''
   }
 }
@@ -214,13 +224,18 @@ function updateHostComponent(fiber) {
     fiber.dom = createDom(fiber)
   }
 
-  reconcileChildren(fiber, fiber.props.children)
+  // fiber.propsが存在し、childrenが存在するかを確認
+  const elements = fiber.props?.children || []
+  reconcileChildren(fiber, elements)
 }
+
 
 function reconcileChildren(wipFiber, elements) {
   let index = 0
   let oldFiber = wipFiber.alternate?.child
   let prevSibling = null
+
+  const isSvg = wipFiber.isSvg
 
   while (index < elements.length || oldFiber != null) {
     const element = elements[index]
@@ -236,6 +251,7 @@ function reconcileChildren(wipFiber, elements) {
         parent: wipFiber,
         alternate: oldFiber,
         effectTag: 'UPDATE',
+        isSvg,
       }
     }
     // oldFiber and element are different types. add the new node
@@ -247,6 +263,7 @@ function reconcileChildren(wipFiber, elements) {
         parent: wipFiber,
         alternate: null,
         effectTag: 'PLACEMENT',
+        isSvg,
       }
     }
     // oldFiber exists but element does not. delete the old node
