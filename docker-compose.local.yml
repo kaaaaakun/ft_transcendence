@@ -1,0 +1,52 @@
+services:
+  rdbms:
+    image: postgres:16-alpine
+    container_name: "rdbms"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    networks:
+      - net_pong
+
+  static-builder:
+    build:
+      context: static-builder/
+    container_name: "static-builder"
+    ports:
+      - "5173:5173"
+
+  reverseproxy:
+    build:
+      context: reverseproxy/
+    container_name: "reverseproxy"
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - net_pong
+
+  api:
+    build:
+      context: api/
+    container_name: "api"
+    networks:
+      - net_pong
+    ports:
+      - "8000:8000"
+
+
+networks:
+  net_pong:
+    name: "net_pong"
+
+volumes:
+  vol_reverseproxy:
+    name: "vol_reverseproxy"
+  vol_rdbms:
+    name: "vol_rdbms"
+
+
+
