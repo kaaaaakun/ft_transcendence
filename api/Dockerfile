@@ -8,6 +8,9 @@ FROM python:3.9-slim AS base
 ## version of installed packages
 ARG PSYCOPG_VERSION=3.1.8
 ARG DJANGO_VERSION=4.2
+ARG DJANGO_REST_VERSION=3.15.2
+ARG GUNICORN_VERSION=23.0.0
+
 ## misc
 
 
@@ -33,7 +36,8 @@ RUN apt-get -y install \
     curl \
     lsof \
     tree
-## clean up to reduce the size of the image
+
+# clean up to reduce the size of the image
 RUN rm -rf /var/lib/apt/lists/*
 
 # Djangoとpsycopg(postgreSQL操作に必要)のインストール
@@ -42,8 +46,8 @@ RUN rm -rf /var/lib/apt/lists/*
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir psycopg==${PSYCOPG_VERSION}
 RUN pip install --no-cache-dir Django==${DJANGO_VERSION}
-RUN pip install --no-cache-dir djangorestframework
-RUN pip install --no-cache-dir gunicorn
+RUN pip install --no-cache-dir djangorestframework==${DJANGO_REST_VERSION}
+RUN pip install --no-cache-dir gunicorn==${GUNICORN_VERSION}
 
 # Create a Django project
 RUN django-admin startproject ${DJANGO_PROJECT_NAME}
@@ -75,6 +79,9 @@ FROM base AS development_djangoserver
 
 # コンテナ内で"run"コマンドを実行すると、Djangoの開発サーバーが起動するようにaliasを設定
 RUN echo "alias run='python manage.py runserver 0.0.0.0:8000'" >> ~/.bashrc
+
+# コンテナ内で"test"コマンドを実行すると、Djangoのtestが実行できるようにaliasを設定
+RUN echo "alias test='python manage.py test'" >> ~/.bashrc
 
 ENTRYPOINT [ "/trans/entrypoint.sh" ]
 CMD ["sleep", "infinity"]
