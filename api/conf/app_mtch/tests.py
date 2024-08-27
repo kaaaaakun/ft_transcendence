@@ -63,13 +63,13 @@ class MatchSerializerTests(BaseTestSetup):
         serializer = MatchSerializer(data={'tournament': 'invalid', 'status': 'start'})
         self.assertFalse(serializer.is_valid(), msg = serializer.errors)
     
-    # def test_ended_tournament(self):
-    #     serializer = MatchSerializer(data={'tournament_id': self.tournament2.id, 'status': 'start'})
-    #     self.assertFalse(serializer.is_valid(), msg = serializer.errors)
+    def test_ended_tournament(self):
+        serializer = MatchSerializer(data={'tournament_id': self.tournament2.id, 'status': 'start'})
+        self.assertFalse(serializer.is_valid(), msg = serializer.errors)
 
-    # def test_invalid_status(self):
-    #     serializer = MatchSerializer(data={'tournament': self.tournament1.id, 'status': 'invalid'})
-    #     self.assertFalse(serializer.is_valid())
+    def test_invalid_status(self):
+        serializer = MatchSerializer(data={'tournament': self.tournament1.id, 'status': 'invalid'})
+        self.assertFalse(serializer.is_valid())
 
     def test_overlength_status(self):
         serializer = MatchSerializer(data={'tournament_id': self.tournament1.id, 'status': '12345678901'})
@@ -81,6 +81,35 @@ class MatchSerializerTests(BaseTestSetup):
 
 class MatchDetailSerializerTests(BaseTestSetup):
     def test_valid_data(self):
-        serializer = MatchDetailSerializer(data={'match_id': self.matches[1].id, 'player_id': self.players[1].id, 'score': 0, 'result': 'await'})
+        serializer = MatchDetailSerializer(data={'match_id': self.matches[2].id, 'player_id': self.players[1].id, 'score': 0, 'result': 'await'})
         self.assertTrue(serializer.is_valid(), msg = serializer.errors)
 
+    def test_minus_score(self):
+        serializer = MatchDetailSerializer(data={'match_id': self.matches[2].id, 'player_id': self.players[2].id, 'score': -1, 'result': 'await'})
+        is_valid = serializer.is_valid()
+        print(serializer.errors) # もしエラーメッセージを出力したいときはこうする。なお、関数名のアルファベット順に出力される（defの定義順ではない）。
+        self.assertFalse(is_valid, msg = serializer.errors)
+
+    def test_invalid_result(self):
+        serializer = MatchDetailSerializer(data={'match_id': self.matches[2].id, 'player_id': self.players[2].id, 'score': 0, 'result': 'invalid'})
+        is_valid = serializer.is_valid()
+        print(serializer.errors)
+        self.assertFalse(is_valid, msg = serializer.errors)
+    
+    def test_ended_match(self):
+        serializer = MatchDetailSerializer(data={'match_id': self.matches[3].id, 'player_id': self.players[1].id, 'score': 0, 'result': 'await'})
+        is_valid = serializer.is_valid()
+        print(serializer.errors)
+        self.assertFalse(is_valid, msg = serializer.errors)
+    
+    def test_nonexistent_tournamentplayer(self):
+        serializer = MatchDetailSerializer(data={'match_id': self.matches[2].id, 'player_id': 9999, 'score': 0, 'result': 'await'})
+        is_valid = serializer.is_valid()
+        print(serializer.errors)
+        self.assertFalse(is_valid, msg = serializer.errors)
+
+    def test_existed_matchdetail(self):
+        serializer = MatchDetailSerializer(data={'match_id': self.matches[1].id, 'player_id': self.players[1].id, 'score': 0, 'result': 'await'})
+        is_valid = serializer.is_valid()
+        print(serializer.errors)
+        self.assertFalse(is_valid, msg = serializer.errors)
