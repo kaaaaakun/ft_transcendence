@@ -5,9 +5,9 @@ from plyr.models import Player
 from .models import Match, MatchDetail
 from .serializers import MatchSerializer, MatchDetailSerializer
 
-from django.urls import reverse
-from rest_framework import status
-from rest_framework import APITestCase
+# from django.urls import reverse
+# from rest_framework import status
+# from rest_framework import APITestCase
 
 class BaseTestSetup(TestCase):
     @classmethod
@@ -36,6 +36,7 @@ class BaseTestSetup(TestCase):
         cls.matches[1] = Match.objects.create(tournament_id = cls.tournament1, status = 'start')
         cls.matches[2] = Match.objects.create(tournament_id = cls.tournament3, status = 'start')
         cls.matches[3] = Match.objects.create(tournament_id = cls.tournament1, status = 'end')
+        cls.matches[4] = Match.objects.create(tournament_id = cls.tournament2, status = 'start')
 
         # Create matchdetails
         cls.matchdetails = {}
@@ -107,7 +108,7 @@ class MatchDetailSerializerTests(BaseTestSetup):
         self.assertFalse(is_valid, msg = serializer.errors)
     
     def test_nonexistent_tournamentplayer(self):
-        serializer = MatchDetailSerializer(data={'match_id': self.matches[2].id, 'player_id': 9999, 'score': 0, 'result': 'await'})
+        serializer = MatchDetailSerializer(data={'match_id': self.matches[4].id, 'player_id': 1, 'score': 0, 'result': 'await'})
         is_valid = serializer.is_valid()
         print(serializer.errors)
         self.assertFalse(is_valid, msg = serializer.errors)
