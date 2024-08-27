@@ -8,6 +8,9 @@ up: build
 	docker compose --env-file .env.sample -f $(DOCKER_COMPOSE_FILE) up -d
 
 down:
+	docker compose --env-file .env.sample -f $(DOCKER_COMPOSE_FILE) down
+
+vdown:
 	docker compose --env-file .env.sample -f $(DOCKER_COMPOSE_FILE) down -v
 
 # 古いイメージを削除
@@ -18,4 +21,8 @@ image-prune:
 build:
 	docker compose --env-file .env.sample -f $(DOCKER_COMPOSE_FILE) build --no-cache
 
+# ボリュームを削除しないので、DBのデータが残る
 re:	down image-prune up
+
+# DBごと削除する
+cre: vdown image-prune up
