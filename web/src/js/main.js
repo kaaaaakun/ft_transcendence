@@ -4,7 +4,8 @@ import { Teact } from '@/js/teact';
 
 function App() {
   const [state, setState] = Teact.useState(0);
-  const [score, setScore] = Teact.useState({ player1: 0, player2: 0 });
+  let score1 = 0;
+  let score2 = 0;
 
   const startGame = () => {
     const gameContainer = document.createElement('div');
@@ -31,18 +32,6 @@ function App() {
     rightPlayer.style.marginLeft = '30px';
     rightPlayer.textContent = 'D';
 
-    const scoreBoard = document.createElement('div');
-    scoreBoard.className = 'score-board'; // クラス名を設定
-    scoreBoard.style.textAlign = 'center';
-    scoreBoard.style.color = 'white';
-    scoreBoard.style.fontSize = '72px';
-    scoreBoard.style.position = 'absolute';
-    scoreBoard.style.top = '250px';
-    scoreBoard.style.left = '50%';
-    scoreBoard.style.zIndex = '1';
-    scoreBoard.style.transform = 'translateX(-50%)';
-    scoreBoard.textContent = `${score.player1} : ${score.player2}`;
-
     const canvasContainer = document.createElement('div');
     canvasContainer.style.position = 'relative';
     canvasContainer.style.width = '600px';
@@ -58,7 +47,6 @@ function App() {
     gameContainer.appendChild(leftPlayer);
     gameContainer.appendChild(canvasContainer);
     gameContainer.appendChild(rightPlayer);
-    document.getElementById('pong').appendChild(scoreBoard);
     document.getElementById('pong').appendChild(gameContainer);
 
     const context = canvas.getContext('2d');
@@ -83,12 +71,19 @@ function App() {
       context.fill();
     }
 
+    function drawText(text, x, y, font = '48px sans-serif', color = 'white') {
+      context.font = font;
+      context.fillStyle = color;
+      context.textAlign = 'center';
+      context.fillText(text, x, y);
+    }
+
     function movePaddle() {
       if (paddle1Y + paddle1Speed > 0 && paddle1Y + paddleHeight + paddle1Speed < canvas.height) {
         paddle1Y += paddle1Speed;
       }
       if (paddle2Y + ballSpeedY > 0 && paddle2Y + paddleHeight + ballSpeedY < canvas.height) {
-        paddle2Y += ballSpeedY;
+        paddle2Y += ballSpeedY * 0.3;
       }
     }
 
@@ -102,17 +97,17 @@ function App() {
 
       if (ballX - ballSize < paddleWidth && ballY > paddle1Y && ballY < paddle1Y + paddleHeight) {
         ballSpeedX = -ballSpeedX;
-      } else if (ballX + ballSize > canvas.width - paddleWidth && ballY > paddle2Y && ballY < paddle2Y + paddleHeight) {
-        ballSpeedX = -ballSpeedX;
       }
-
+      if (ballX + ballSize > canvas.width - paddleWidth && ballY >= paddle2Y && ballY <= paddle2Y + paddleHeight) {
+        ballSpeedX = -ballSpeedX;
+        console.log('hit');
+      }
+      
       if (ballX - ballSize < 0) {
-        setScore(score => ({ ...score, player2: score.player2 + 1 }));
-        scoreBoard.textContent = `${score.player1} : ${score.player2}`;
+        score2++;
         resetBall();
       } else if (ballX + ballSize > canvas.width) {
-        setScore(score => ({ ...score, player1: score.player1 + 1 }));
-        scoreBoard.textContent = `${score.player1} : ${score.player2}`;
+        score1++;
         resetBall();
       }
     }
@@ -127,13 +122,22 @@ function App() {
       drawRect(0, 0, canvas.width, canvas.height, '#1E1E2C');
       drawRect(0, paddle1Y, paddleWidth, paddleHeight, 'white');
       drawRect(canvas.width - paddleWidth, paddle2Y, paddleWidth, paddleHeight, 'white');
-      drawBall(ballX, ballY, ballSize, '#FFD700');
+      if (score1 === 10 || score2 === 10) {}else {
+        drawBall(ballX, ballY, ballSize, '#FFD700');
+      }
+      // スコアを描画
+      drawText(`${score1}`, canvas.width / 4, 50, '48px sans-serif', score1 === 10 ? 'yellow' : 'white');
+      drawText(`${score2}`, (canvas.width / 4) * 3, 50, '48px sans-serif', score2 === 10 ? 'yellow' : 'white');
     }
 
     function update() {
       movePaddle();
       moveBall();
       draw();
+      if (score1 === 10 || score2 === 10) {
+        clearInterval(intervalId);
+        drawText(`${score1 > score2 ? 'Player 1' : 'Player 2'} wins!`, canvas.width / 2, canvas.height / 2);
+      }
       setState(state => state + 1);
     }
 
