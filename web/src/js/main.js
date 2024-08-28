@@ -3,6 +3,7 @@ import javascriptLogo from '@/assets/images/javascript.svg'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/teact'
 import viteLogo from '/vite.svg'
+import DefaultButton from '@/js/components/ui/button';
 
 // function sumVictoryCount(start, end) {
 //   let sum = 0

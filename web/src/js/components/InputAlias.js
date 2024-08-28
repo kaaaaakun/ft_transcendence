@@ -1,25 +1,24 @@
 import '@/scss/styles.scss';
 import { BaseLayout } from '@/js/layouts/BaseLayout';
 import { Teact } from '@/js/teact';
+import DefaultButton from '@/js/components/ui/button';
 
 function handleSubmit(event) {
   event.preventDefault(); // フォームのデフォルトの送信を防ぐ（ページリロード防止）
 
-  const formData = new FormData(event.target); // フォームのデータを取得
+  const formData = new FormData(event.target);
 
-  // フォームのデータをオブジェクトとして取得する例
   const data = {};
   formData.forEach((value, key) => {
     data[key] = value;
   });
 
   console.log('Form Data:', data);
-  // ここで送信処理やバリデーションを行う
 }
 
 
 function App() {
-  const [state, setState] = Teact.useState(2)
+  const [numberOfPlayers, setNumberOfPlayers] = Teact.useState(2)
 
   return BaseLayout(
     Teact.createElement(
@@ -28,38 +27,20 @@ function App() {
       Teact.createElement(
         'div',
         { className: 'd-flex justify-content-center' },
-        Teact.createElement(
-          'button',
-          {
-            className: 'btn btn-primary btn-lg bg-darkblue',
-            onClick: () => setState(c => 2),
-          },
-          '2 Players'
-        ),
-        Teact.createElement(
-          'button',
-          {
-            className: 'btn btn-primary btn-lg bg-darkblue',
-            onClick: () => setState(c => 4),
-          },
-          '4 Players'
-        ),
-        Teact.createElement(
-          'button',
-          {
-            className: 'btn btn-primary btn-lg bg-darkblue',
-            onClick: () => setState(c => 8),
-          },
-          '8 Players'
-        )
+        DefaultButton({ text: '2 Players', onClick: () => setNumberOfPlayers(c => 2) }),
+        DefaultButton({ text: '4 Players', onClick: () => setNumberOfPlayers(c => 4) }),
+        DefaultButton({ text: '8 Players', onClick: () => setNumberOfPlayers(c => 8) }),
       ),
       Teact.createElement(
         'form',
         {
-          onSubmit: handleSubmit, // フォームの送信時に呼ばれるハンドラ
+          onSubmit: handleSubmit,
           className: 'text-center mt-3 d-grid gap-2 col-3 mx-auto',
         },
-        ...Array.from({ length: Math.ceil(state / 2) }, (_, i) => {
+        ...Array.from({ length: 4 }, (_, i) => {
+          const className = i >= numberOfPlayers / 2 ?
+            'form-control mt-2 bg-secondary' :
+            'form-control mt-2';
           return Teact.createElement(
             'div',
             { className: 'row form-group', key: i },
@@ -70,35 +51,30 @@ function App() {
                 'input',
                 {
                   type: 'text',
-                  className: 'form-control mt-2',
+                  className: className,
                   placeholder: `Player ${i * 2 + 1}`,
-                  name: `player${i * 2}`,  // 1つ目の入力フィールド
+                  name: `player${i * 2}`,
+                  disabled: i >= numberOfPlayers / 2,
                 }
               )
             ),
-            (i * 2 + 1 < state) && Teact.createElement(  // 2つ目の入力フィールドがある場合のみ
+            Teact.createElement(
               'div',
               { className: 'col-6' },
               Teact.createElement(
                 'input',
                 {
                   type: 'text',
-                  className: 'form-control mt-2',
+                  className: className,
                   placeholder: `Player ${i * 2 + 2}`,
-                  name: `player${i * 2 + 1}`,  // 2つ目の入力フィールド
+                  name: `player${i * 2 + 1}`,
+                  disabled: i >= numberOfPlayers / 2,
                 }
               )
             )
           );
         }),
-        Teact.createElement(
-          'button',
-          {
-            type: 'submit',
-            className: 'btn btn-primary btn-lg bg-darkblue mt-3',
-          },
-          'Submit'
-        )
+        DefaultButton({ type: 'submit', text: 'submit'}),
       )
     )
   );

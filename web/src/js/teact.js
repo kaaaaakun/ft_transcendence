@@ -20,8 +20,10 @@ function createTextElement(text) {
   }
 }
 
+const svgTag = ['svg', 'path', 'text', 'rect']
+
 function createDom(fiber) {
-  const isSvg = fiber.type === 'svg' || fiber.type === 'path' || fiber.type === 'text' || fiber.type === 'rect'
+  const isSvg = svgTag.includes(fiber.type);
   const dom =
     fiber.type === 'TEXT_ELEMENT'
       ? document.createTextNode(fiber.props.nodeValue || '')
@@ -38,52 +40,45 @@ const isEvent = key => key.startsWith('on')
 const isProperty = key =>
   key !== 'children' && key !== 'className' && !isEvent(key)
 const isNew = (prev, next) => key => prev[key] !== next[key]
-const isGone = (_, next) => key => !(key in next)
 function updateDom(dom, prevProps = {}, nextProps = {}) {
   const isSvg = dom instanceof SVGElement
 
   // Remove old or changed event listeners
-  Object.keys(prevProps)
-    .filter(isEvent)
-    .filter(key => !(key in nextProps) || isNew(prevProps, nextProps)(key))
-    .forEach(name => {
-      const eventType = name.toLowerCase().substring(2)
-      dom.removeEventListener(eventType, prevProps[name])
-    })
+  for (const name of Object.keys(prevProps)) {
+    if (isEvent(name)) {
+      const eventType = name.toLowerCase().substring(2);
+      dom.removeEventListener(eventType, prevProps[name]);
+    }
+  }
+  
 
   // Add new event listeners
-  Object.keys(nextProps)
-    .filter(isEvent)
-    .filter(isNew(prevProps, nextProps))
-    .forEach(name => {
-      const eventType = name.toLowerCase().substring(2)
-      dom.addEventListener(eventType, nextProps[name])
-    })
-
+  for (const name of Object.keys(nextProps)) {
+    if (isEvent(name) && isNew(prevProps, nextProps)(name)) {
+      const eventType = name.toLowerCase().substring(2);
+      dom.addEventListener(eventType, nextProps[name]);
+    }
+  }
+  
   // Remove old properties
-  Object.keys(prevProps)
-    .filter(isProperty)
-    .filter(isGone(prevProps, nextProps))
-    .forEach(name => {
-      if (isSvg) {
-        dom.removeAttribute(name)
-      } else {
-        dom[name] = ''
-      }
-    })
-
+  for (const name of Object.keys(nextProps)) {
+    if (isEvent(name)) {
+      const eventType = name.toLowerCase().substring(2);
+      dom.addEventListener(eventType, nextProps[name]);
+    }
+  }
+  
   // Set new or changed properties
-  Object.keys(nextProps)
-    .filter(isProperty)
-    .filter(isNew(prevProps, nextProps))
-    .forEach(name => {
+  for (const name of Object.keys(nextProps)) {
+    if (isProperty(name) && isNew(prevProps, nextProps)(name)) {
       if (isSvg) {
-        dom.setAttribute(name, nextProps[name])
+        dom.setAttribute(name, nextProps[name]);
       } else {
-        dom[name] = nextProps[name]
+        dom[name] = nextProps[name];
       }
-    })
-
+    }
+  }
+  
   // handle className specifically
   if (!isSvg && prevProps.className !== nextProps.className) {
     dom.className = nextProps.className || ''
