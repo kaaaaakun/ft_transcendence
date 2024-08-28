@@ -61,7 +61,7 @@ class MatchDetailSerializer(serializers.ModelSerializer):
         if not TournamentPlayer.objects.filter(tournament_id = tournament, player_id = player).exists():
             raise serializers.ValidationError("This player is not part of Tournament player.")
 
-        if MatchDetail.objects.filter(match_id=match, player_id=player).exists():
+        if not self.instance and MatchDetail.objects.filter(match_id=match, player_id=player).exists():
             raise serializers.ValidationError("Matchdetail is already exist.")
         
         return data
