@@ -43,4 +43,7 @@ generate:
 clean:
 	rm -rf $(OUTPUT_DIR)
 
+mock:
+	prism mock openapi.yaml
+
 PHONY:generate
