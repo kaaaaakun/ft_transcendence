@@ -5,9 +5,9 @@ from plyr.models import Player
 from .models import Match, MatchDetail
 from .serializers import MatchSerializer, MatchDetailSerializer
 
-# from django.urls import reverse
-# from rest_framework import status
-# from rest_framework import APITestCase
+from django.urls import reverse
+from rest_framework import status
+from rest_framework.test import APITestCase
 
 class BaseTestSetup(TestCase):
     @classmethod
@@ -21,7 +21,7 @@ class BaseTestSetup(TestCase):
         cls.players = {}
         for i in range(1, 9):
             cls.players[i] = Player.objects.create(id = i, name = f'P{i}')
-        
+
         # Create tournamentplayers
         cls.tournamentplayers = {}
         for i in range(1, 3):
@@ -37,6 +37,7 @@ class BaseTestSetup(TestCase):
         cls.matches[2] = Match.objects.create(tournament_id = cls.tournament3, status = 'start')
         cls.matches[3] = Match.objects.create(tournament_id = cls.tournament1, status = 'end')
         cls.matches[4] = Match.objects.create(tournament_id = cls.tournament2, status = 'start')
+        cls.matches[5] = Match.objects.create(tournament_id = cls.tournament3, status = 'start')
 
         # Create matchdetails
         cls.matchdetails = {}
@@ -118,3 +119,32 @@ class MatchDetailSerializerTests(BaseTestSetup):
         is_valid = serializer.is_valid()
         print(serializer.errors)
         self.assertFalse(is_valid, msg = serializer.errors)
+
+class IncrementScoreViewTests(APITestCase, BaseTestSetup):
+    def test_increment_score(self):
+        url = reverse('increment_score')
+        data = {'matchdetail': {'match_id': self.matches[1].id, 'player_id': self.players[1].id}}
+        response = self.client.put(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, {1: {'player': {'name': 'P1'}, 'matchdetail': {'player_id': 1, 'match_id': 1, 'score': 1}}, 2: {'player': {'name': 'P2'}, 'matchdetail': {'player_id': 2, 'match_id': 1, 'score': 0}}})
+    
+    def test_increment_score_to_the_end(self):
+        url = reverse('increment_score')
+        data = {'matchdetail': {'match_id': self.matches[1].id, 'player_id': self.players[2].id}}
+        for i in range(10):
+            response = self.client.put(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.matchdetails[1].refresh_from_db() # 以前利用したクエリのキャッシュを無効化するために、refresh_from_db()を使う。使わないと、以前の値が返される。
+        self.assertEqual(self.matchdetails[1].result, 'lose')
+        self.matchdetails[2].refresh_from_db()
+        self.assertEqual(self.matchdetails[2].result, 'win')
+        self.matches[1].refresh_from_db()
+        self.assertEqual(self.matches[1].status, 'end')
+        self.tournamentplayers[1].refresh_from_db() # リフレッシュの機能不全のため, tmtplyrはget()で取得する。
+        self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament1.id, player_id = self.players[1].id).victory_count, 0)
+        self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament1.id, player_id = self.players[1].id).status, 'lose')
+        self.tournamentplayers[2].refresh_from_db()
+        self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament1.id, player_id = self.players[2].id).victory_count, 1)
+        self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament1.id, player_id = self.players[2].id).status, 'win')
+        self.tournament1.refresh_from_db()
+        self.assertEqual(self.tournament1.status, 'end')
