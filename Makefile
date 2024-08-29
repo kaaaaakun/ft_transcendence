@@ -43,6 +43,7 @@ generate:
 clean:
 	rm -rf $(OUTPUT_DIR)
 
+# -- mockサーバーを立てる
 mock:
 	prism mock openapi.yaml
 
