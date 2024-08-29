@@ -63,6 +63,13 @@ def create_ponggame_dataset(matchdetails_with_related):
     ponggame_dataset = {}
     for index, matchdetail in enumerate(matchdetails_with_related, start=1):
         ponggame_dataset[index] = create_ponggame_data(matchdetail)
+
+    # add key match_end
+    if (matchdetails_with_related[0].match_id.status == 'end'):
+        ponggame_dataset['match_end'] = True
+    else:
+        ponggame_dataset['match_end'] = False
+
     return ponggame_dataset
 
 # 対戦画面に必要なplayerごとのデータを作成する

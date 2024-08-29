@@ -126,7 +126,18 @@ class IncrementScoreViewTests(APITestCase, BaseTestSetup):
         data = {'matchdetail': {'match_id': self.matches[1].id, 'player_id': self.players[1].id}}
         response = self.client.put(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, {1: {'player': {'name': 'P1'}, 'matchdetail': {'player_id': 1, 'match_id': 1, 'score': 1}}, 2: {'player': {'name': 'P2'}, 'matchdetail': {'player_id': 2, 'match_id': 1, 'score': 0}}})
+        expected_data = {
+            1: {
+                'player': {'name': 'P1'},
+                'matchdetail': {'player_id': 1, 'match_id': 1, 'score': 1}
+            },
+            2: {
+                'player': {'name': 'P2'},
+                'matchdetail': {'player_id': 2, 'match_id': 1, 'score': 0}
+            },
+            'match_end': False
+        }
+        self.assertEqual(response.data, expected_data)
     
     def test_increment_score_to_the_end(self):
         url = reverse('increment_score')
@@ -148,3 +159,4 @@ class IncrementScoreViewTests(APITestCase, BaseTestSetup):
         self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament1.id, player_id = self.players[2].id).status, 'win')
         self.tournament1.refresh_from_db()
         self.assertEqual(self.tournament1.status, 'end')
+        self.assertEqual(response.data['match_end'], True)
