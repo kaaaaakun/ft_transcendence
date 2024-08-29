@@ -46,4 +46,4 @@ clean:
 mock:
 	prism mock openapi.yaml
 
-PHONY:generate
+PHONY:generate clean mock
