@@ -12,13 +12,13 @@ function Tournament({ players }) {
     }
     return sum
   }
-  const xAdjustment = 5;
-  const yAdjustment = 12;
-  const textWidth = 110; // 四角形の幅
-  const textHeight = 20; // 四角形の高さ
-  const fighterColor = '#FCAA30'
-  const otherColor = '#182F44'
   function createPlayerBoard(player, x, y) {
+    const xAdjustment = 5;
+    const yAdjustment = 12;
+    const textWidth = 110;
+    const textHeight = 20;
+    const fighterColor = '#FCAA30'
+    const otherColor = '#182F44'
     return [
       Teact.createElement('rect', {
         x: x - xAdjustment,
