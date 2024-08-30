@@ -1,5 +1,4 @@
 import '@/scss/styles.scss'
-import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/teact'
 
 

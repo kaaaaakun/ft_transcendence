@@ -1,7 +1,7 @@
 import '@/scss/styles.scss'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/teact'
-import { Tournament } from './features/tournament/Tournament'
+import { Tournament } from '@/js/features/tournament/Tournament'
 
 function App({ players }) {
   return BaseLayout(
