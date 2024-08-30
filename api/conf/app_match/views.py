@@ -23,7 +23,7 @@ class MatchDetailViewSet(viewsets.ModelViewSet):
     serializer_class = MatchDetailSerializer
 # end
 
-class IncrementScoreView(APIView):
+class LocalScoreView(APIView):
     def patch(self, request):
         match_id = request.data.get('matchdetail', {}).get('match_id')
         player_id = request.data.get('matchdetail', {}).get('player_id')

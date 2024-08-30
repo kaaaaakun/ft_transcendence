@@ -120,9 +120,9 @@ class MatchDetailSerializerTests(BaseTestSetup):
         print(serializer.errors)
         self.assertFalse(is_valid, msg = serializer.errors)
 
-class IncrementScoreViewTests(APITestCase, BaseTestSetup):
+class LocalScoreViewTests(APITestCase, BaseTestSetup):
     def test_increment_score(self):
-        url = reverse('increment_score')
+        url = reverse('local_score')
         data = {'matchdetail': {'match_id': self.matches[1].id, 'player_id': self.players[1].id}}
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -140,7 +140,7 @@ class IncrementScoreViewTests(APITestCase, BaseTestSetup):
         self.assertEqual(response.data, expected_data)
     
     def test_increment_score_to_the_end(self):
-        url = reverse('increment_score')
+        url = reverse('local_score')
         data = {'matchdetail': {'match_id': self.matches[1].id, 'player_id': self.players[2].id}}
         for i in range(10):
             response = self.client.patch(url, data, format='json')

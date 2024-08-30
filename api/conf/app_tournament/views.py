@@ -19,7 +19,7 @@ class TournamentPlayerViewSet(viewsets.ModelViewSet):
     serializer_class = TournamentPlayerSerializer
 # :end
 
-class LocalTournamentCreateView(APIView):
+class LocalTournamentView(APIView):
     def post(self, request):
         player_names = request.data.get('players', [])
         if not player_names:
