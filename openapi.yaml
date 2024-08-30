@@ -8,7 +8,7 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 
 paths:
-  /tournaments:
+  /api/tournaments/local:
     post:
       summary: トーナメントの作成
       description: プレイヤーのリストを使用して新しいトーナメントを作成します。プレイヤーの数は2の累乗（例：2、4、8、16）でなければなりません。
@@ -48,7 +48,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /matches:
+  /api/matches/local:
     get:
       summary: 試合の開始
       description: 次の試合の詳細を取得します。
@@ -66,8 +66,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /scores:
-    put:
+  /api/matches/local/score:
+    patch:
       summary: スコアの更新
       description: 試合中のプレイヤーのスコアを増加させます。
       requestBody:
