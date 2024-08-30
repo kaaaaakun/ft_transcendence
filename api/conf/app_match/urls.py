@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import MatchViewSet, MatchDetailViewSet, IncrementScoreView
 
 router = DefaultRouter()
-router.register(r'mtch', MatchViewSet)
+router.register(r'match', MatchViewSet)
 router.register(r'dtl', MatchDetailViewSet)
 
 urlpatterns = [

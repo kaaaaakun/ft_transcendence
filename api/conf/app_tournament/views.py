@@ -5,9 +5,9 @@ from .serializers import TournamentSerializer, TournamentPlayerSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from plyr.utils import validate_players, register_players
+from player.utils import validate_players, register_players
 from .utils import validate_tournament, register_tournament
-from plyr.serializers import PlayerSerializer
+from player.serializers import PlayerSerializer
 
 # start: ユースケースでは本来必要ないが、データの確認のために追加
 class TournamentViewSet(viewsets.ModelViewSet):

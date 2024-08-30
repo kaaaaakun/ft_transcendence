@@ -8,7 +8,7 @@ from rest_framework import status
 from .utils import ( increment_score, validate_and_update_matchdetail,
     get_matchdetail_with_related_data, update_when_match_end, create_ponggame_dataset )
 from rest_framework.exceptions import ValidationError
-from tmt.utils import ( update_tournamentplayer_status, increment_tournamentplayer_vcount, 
+from tournament.utils import ( update_tournamentplayer_status, increment_tournamentplayer_vcount, 
     is_round_end, update_tournamentplayer_win_to_await, is_tournament_end, update_tournament_status )
 
 END_OF_GAME_SCORE = 10
@@ -24,7 +24,7 @@ class MatchDetailViewSet(viewsets.ModelViewSet):
 # end
 
 class IncrementScoreView(APIView):
-    def put(self, request):
+    def patch(self, request):
         match_id = request.data.get('matchdetail', {}).get('match_id')
         player_id = request.data.get('matchdetail', {}).get('player_id')
 

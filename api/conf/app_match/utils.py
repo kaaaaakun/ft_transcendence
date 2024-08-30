@@ -2,7 +2,7 @@ from .models import Match, MatchDetail
 from .serializers import MatchDetailSerializer
 from rest_framework.exceptions import ValidationError
 from django.forms.models import model_to_dict
-from tmt.utils import ( update_tournamentplayer_status, increment_tournamentplayer_vcount )
+from tournament.utils import ( update_tournamentplayer_status, increment_tournamentplayer_vcount )
 # ついでに作ってみたけど検証してない機能
 #
 # # Validate MatchDetail

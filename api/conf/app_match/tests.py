@@ -1,7 +1,7 @@
 from django.test import TestCase
 
-from tmt.models import Tournament, TournamentPlayer
-from plyr.models import Player
+from tournament.models import Tournament, TournamentPlayer
+from player.models import Player
 from .models import Match, MatchDetail
 from .serializers import MatchSerializer, MatchDetailSerializer
 
@@ -124,7 +124,7 @@ class IncrementScoreViewTests(APITestCase, BaseTestSetup):
     def test_increment_score(self):
         url = reverse('increment_score')
         data = {'matchdetail': {'match_id': self.matches[1].id, 'player_id': self.players[1].id}}
-        response = self.client.put(url, data, format='json')
+        response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         expected_data = {
             1: {
@@ -143,7 +143,7 @@ class IncrementScoreViewTests(APITestCase, BaseTestSetup):
         url = reverse('increment_score')
         data = {'matchdetail': {'match_id': self.matches[1].id, 'player_id': self.players[2].id}}
         for i in range(10):
-            response = self.client.put(url, data, format='json')
+            response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.matchdetails[1].refresh_from_db() # 以前利用したクエリのキャッシュを無効化するために、refresh_from_db()を使う。使わないと、以前の値が返される。
         self.assertEqual(self.matchdetails[1].result, 'lose')
@@ -151,7 +151,7 @@ class IncrementScoreViewTests(APITestCase, BaseTestSetup):
         self.assertEqual(self.matchdetails[2].result, 'win')
         self.matches[1].refresh_from_db()
         self.assertEqual(self.matches[1].status, 'end')
-        self.tournamentplayers[1].refresh_from_db() # リフレッシュの機能不全のため, tmtplyrはget()で取得する。
+        self.tournamentplayers[1].refresh_from_db() # リフレッシュの機能不全のため, tournamentplayerはget()で取得する。
         self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament1.id, player_id = self.players[1].id).victory_count, 0)
         self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament1.id, player_id = self.players[1].id).status, 'lose')
         self.tournamentplayers[2].refresh_from_db()

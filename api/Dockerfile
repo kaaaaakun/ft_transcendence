@@ -54,15 +54,15 @@ RUN django-admin startproject ${DJANGO_PROJECT_NAME}
 
 # Create Django apps
 WORKDIR ${DJANGO_PROJECT_DIR}
-RUN python manage.py startapp plyr
-RUN python manage.py startapp tmt
-RUN python manage.py startapp mtch
+RUN python manage.py startapp player
+RUN python manage.py startapp tournament
+RUN python manage.py startapp match
 
 # project, appsのファイルをコピー
 COPY conf/project/* ${DJANGO_PROJECT_DIR}${DJANGO_PROJECT_NAME}/
-COPY conf/app_plyr/* ${DJANGO_PROJECT_DIR}plyr/
-COPY conf/app_tmt/* ${DJANGO_PROJECT_DIR}tmt/
-COPY conf/app_mtch/* ${DJANGO_PROJECT_DIR}mtch/
+COPY conf/app_player/* ${DJANGO_PROJECT_DIR}player/
+COPY conf/app_tournament/* ${DJANGO_PROJECT_DIR}tournament/
+COPY conf/app_match/* ${DJANGO_PROJECT_DIR}match/
 
 # appsで定めたモデルをDBに反映する準備
 RUN python ${DJANGO_PROJECT_DIR}manage.py makemigrations

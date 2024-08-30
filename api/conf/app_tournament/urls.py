@@ -3,8 +3,8 @@ from rest_framework.routers import DefaultRouter
 from .views import TournamentViewSet, TournamentPlayerViewSet, LocalTournamentCreateView
 
 router = DefaultRouter()
-router.register(r'tmt', TournamentViewSet)
-router.register(r'plyr', TournamentPlayerViewSet)
+router.register(r'tournament', TournamentViewSet)
+router.register(r'player', TournamentPlayerViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
