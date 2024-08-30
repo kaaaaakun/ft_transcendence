@@ -33,8 +33,6 @@ function Tournament({ players }) {
         x: x,
         y: y,
         'dominant-baseline': 'middle',
-        class: 'playername',
-        id: '2-playername',
         'font-size': '12',
         fill: 'white',
         textLength: '100',
