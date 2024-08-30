@@ -45,7 +45,7 @@ function Tournament({ players }) {
   }
   return Teact.createElement(
       'div',
-      { className: 'position-relative　shift-up-200'},
+      { className: 'position-relative shift-up-200'},
       Teact.createElement(
         'svg',
         {
