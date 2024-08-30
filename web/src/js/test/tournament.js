@@ -20,7 +20,5 @@ const players = {
   8: { name: "Hank", victoryCount: 0, nextPlayer: false }
 };
 
-
-// アプリケーションをレンダリング
 const container = document.getElementById('app');
 Teact.render(Teact.createElement(App, { players }), container);
