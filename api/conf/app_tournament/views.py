@@ -32,10 +32,6 @@ class LocalTournamentView(APIView):
         player_names = request.data.get('players', [])
         if not player_names:
             return Response("player names are required.", status=status.HTTP_400_BAD_REQUEST)
-        # プレイヤー数のバリデーション
-        valid_player_num = [2, 4, 8]
-        if (len(player_names) not in valid_player_num):
-            return Response("The number of players must be 2, 4, or 8.", status=status.HTTP_400_BAD_REQUEST)
         # プレイヤー名をシャッフル
         random.shuffle(player_names)
         # PlayerをDBに登録
