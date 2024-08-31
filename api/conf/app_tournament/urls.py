@@ -8,5 +8,5 @@ router.register(r'player', TournamentPlayerViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('local/', LocalTournamentView.as_view(), name='local_tournament'),
+    path('local/', LocalTournamentView, name='local_tournament'),
 ]

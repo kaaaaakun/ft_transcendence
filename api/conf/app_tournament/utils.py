@@ -1,7 +1,21 @@
 from .models import Tournament, TournamentPlayer
-from .serializers import TournamentSerializer
+from .serializers import TournamentSerializer , TournamentPlayerSerializer
 from rest_framework.exceptions import ValidationError
 from django.db.models import F
+
+def create_tournament(players):
+    try:
+        tournament = register_tournament(validate_tournament(len(players), 'start'))
+    except ValueError as e:
+        raise ValidationError(e.detail)
+    
+    try:
+        valid_tournament_players = validate_tournament_players(tournament.id, players)
+    except ValidationError as e:
+        raise ValidationError(e.detail)
+    
+    tournament_players = register_tournament_players(valid_tournament_players)
+    return tournament, tournament_players
 
 # Validate Tournament
 # args: トーナメントの参加人数, トーナメントのステータス
@@ -15,13 +29,45 @@ def validate_tournament(num_of_player, status):
     if tournament_serializer.is_valid(raise_exception = True):
         return tournament_serializer.validated_data
     else:
-        raise ValidationError(tournament_serializer.errors)
+        return None
 
 # トーナメントをDBに登録する
 # args: Tournament(validated)のインスタンス
 # return: Tournamentのオブジェクト
 def register_tournament(valid_tournament):
     return Tournament.objects.create(**valid_tournament)
+
+def validate_tournament_player(tournament_id, player_id, status, victory_count):
+    tournament_player_data = {
+        'tournament_id': tournament_id,
+        'player_id': player_id,
+        'status': status,
+        'victory_count': victory_count
+    }
+    tournament_player_serializer = TournamentPlayerSerializer(data = tournament_player_data)
+    if tournament_player_serializer.is_valid(raise_exception = True):
+        return tournament_player_serializer.validated_data
+    else:
+        raise ValidationError(tournament_player_serializer.errors)
+    
+def validate_tournament_players(tournament_id, players, status = 'await', victory_count = 0):
+    valid_tournament_players = []
+    try:
+        for player in players:
+            valid_tournament_players.append(validate_tournament_player(tournament_id, player.id, status, victory_count))
+    except ValidationError as e:
+        raise ValidationError(e.detail)
+    return valid_tournament_players
+
+# トーナメントプレイヤーをDBに登録する
+# args: TournamentPlayer(validated)のインスタンス
+# return: TournamentPlayerのオブジェクト
+def register_tournament_players(valid_tournament_players_data):
+	players = []
+	for player_data in valid_tournament_players_data:
+			player = TournamentPlayer.objects.create(**player_data)
+			players.append(player)
+	return players
 
 # TournamentPlayerのステータスを更新する
 def update_tournamentplayer_status(tournament_id, player_id, status):

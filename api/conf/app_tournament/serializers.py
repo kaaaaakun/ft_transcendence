@@ -37,10 +37,10 @@ class TournamentPlayerSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("key 'status' is required.")
         if 'victory_count' not in data:
             raise serializers.ValidationError("key 'victory_count' is required.")
-        if data['victory_count'] != 0:
-            raise serializers.ValidationError("TournamentPlayer 'victory_count' must be 0.")
         if data['status'] != 'await':
             raise serializers.ValidationError("TournamentPlayer 'status' must be 'await'.")
+        if data['victory_count'] != 0:
+            raise serializers.ValidationError("TournamentPlayer 'victory_count' must be 0.")
         
         tournament = Tournament.objects.get(id = data['tournament_id'])
         if tournament.status == 'end':
