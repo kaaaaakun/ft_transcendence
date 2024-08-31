@@ -4,6 +4,7 @@ from tournament.models import Tournament, TournamentPlayer
 from player.models import Player
 from .models import Match, MatchDetail
 from .serializers import MatchSerializer, MatchDetailSerializer
+from django.contrib.auth.models import User
 
 from django.urls import reverse
 from rest_framework import status
@@ -43,6 +44,9 @@ class BaseTestSetup(TestCase):
         cls.matchdetails = {}
         cls.matchdetails[1] = MatchDetail.objects.create(match_id = cls.matches[1], player_id = cls.players[1], score = 0, result = 'await')
         cls.matchdetails[2] = MatchDetail.objects.create(match_id = cls.matches[1], player_id = cls.players[2], score = 0, result = 'await')
+
+        # Create admin user
+        cls.admin = User.objects.create_user(username = 'admin', password = 'pass', is_staff = True)
 
 class MatchSerializerTests(BaseTestSetup):
     def test_valid_data(self):
@@ -128,12 +132,12 @@ class LocalScoreViewTests(APITestCase, BaseTestSetup):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         expected_data = {
             1: {
-                'player': {'name': 'P1'},
-                'matchdetail': {'player_id': 1, 'match_id': 1, 'score': 1}
+                'player': {'name': self.players[1].name},
+                'matchdetail': {'player_id': self.players[1].id, 'match_id': self.matches[1].id, 'score': 1}
             },
             2: {
-                'player': {'name': 'P2'},
-                'matchdetail': {'player_id': 2, 'match_id': 1, 'score': 0}
+                'player': {'name': self.players[2].name},
+                'matchdetail': {'player_id': self.players[2].id, 'match_id': self.matches[1].id, 'score': 0}
             },
             'match_end': False
         }
@@ -160,3 +164,14 @@ class LocalScoreViewTests(APITestCase, BaseTestSetup):
         self.tournament1.refresh_from_db()
         self.assertEqual(self.tournament1.status, 'end')
         self.assertEqual(response.data['match_end'], True)
+
+class AdminOnlyTests(APITestCase, BaseTestSetup):
+    def test_match_viewset_with_nonadmin(self):
+        response = self.client.get(reverse('match-list'))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_match_viewset_with_admin(self):
+        # ログイン
+        self.client.login(username = 'admin', password = 'pass')
+        response = self.client.get(reverse('match-list'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
