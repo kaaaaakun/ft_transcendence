@@ -14,7 +14,10 @@ services:
   static-builder:
     build:
       context: static-builder/
+      target: build
     container_name: "static-builder"
+    volumes:
+      - vol_static_builder:/usr/src/vite
 
   reverseproxy:
     build:
@@ -25,7 +28,8 @@ services:
       - "443:443"
     networks:
       - net_pong
-
+    volumes:
+      - vol_static_builder:/var/www/html
   api:
     build:
       context: api/
@@ -44,4 +48,5 @@ volumes:
     name: "vol_reverseproxy"
   vol_rdbms:
     name: "vol_rdbms"
-
+  vol_static_builder:
+    name: "vol_static_builder"
