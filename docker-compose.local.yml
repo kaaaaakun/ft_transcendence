@@ -22,9 +22,11 @@ services:
     build:
       context: reverseproxy/
     container_name: "reverseproxy"
+    image: nginx:1.26.1-alpine
     ports:
       - "80:80"
-      - "443:443"
+    volumes:
+      - ./nginx/nginx.local.conf:/etc/nginx/nginx.conf
     networks:
       - net_pong
 
@@ -37,7 +39,6 @@ services:
     ports:
       - "8000:8000"
 
-
 networks:
   net_pong:
     name: "net_pong"
@@ -47,6 +48,3 @@ volumes:
     name: "vol_reverseproxy"
   vol_rdbms:
     name: "vol_rdbms"
-
-
-
