@@ -1,6 +1,6 @@
 from django.db import models
-from tmt.models import Tournament
-from plyr.models import Player
+from tournament.models import Tournament
+from player.models import Player
 
 class Match(models.Model):
     tournament_id = models.ForeignKey(Tournament, on_delete=models.CASCADE)

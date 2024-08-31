@@ -1,5 +1,5 @@
 from django.db import models
-from plyr.models import Player
+from player.models import Player
 
 class Tournament(models.Model):
     num_of_player = models.IntegerField()
