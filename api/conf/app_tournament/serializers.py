@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Tournament, TournamentPlayer
 
-STATUS_CHOICES = ['start', 'end']
+STATUS_CHOICES = ['win', 'lose', 'await']
 MIN_PLAYERS = 1
 MAX_PLAYERS = 8
 
@@ -37,17 +37,13 @@ class TournamentPlayerSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("key 'status' is required.")
         if 'victory_count' not in data:
             raise serializers.ValidationError("key 'victory_count' is required.")
-        if data['status'] != 'await':
+        if data['status'] not in STATUS_CHOICES:
             raise serializers.ValidationError("TournamentPlayer 'status' must be 'await'.")
-        if data['victory_count'] != 0:
-            raise serializers.ValidationError("TournamentPlayer 'victory_count' must be 0.")
+        if data['victory_count'] < 0:
+            raise serializers.ValidationError("TournamentPlayer 'victory_count' must be a non-negative integer.")
         
         tournament = Tournament.objects.get(id = data['tournament_id'])
         if tournament.status == 'end':
             raise serializers.ValidationError("Cannot create a tournamentplayer for a tournament that has already ended.")
-        
-        players = TournamentPlayer.objects.filter(tournament_id = data['tournament_id'])
-        if tournament.num_of_player <= players.count():
-            raise serializers.ValidationError("Cannot create a tournamentplayer for a tournament that has already full.")
         
         return data
