@@ -10,12 +10,10 @@ ARG PSYCOPG_VERSION=3.1.8
 ARG DJANGO_VERSION=4.2
 ARG DJANGO_REST_VERSION=3.15.2
 ARG GUNICORN_VERSION=23.0.0
-
 ## misc
 
 
-# コンテナ起動後にも利用する環境変数
-## Djangoのsuperuser作成時のデフォルト値(https://kamatimaru.hatenablog.com/entry/2021/02/28/030646)
+# コンテナ起動後にも利用する環境変数(secretは.envへ)
 ENV DJANGO_PROJECT_NAME trans
 ENV DJANGO_PROJECT_DIR /${DJANGO_PROJECT_NAME}/
 RUN export SECRET_KEY=$(python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())') && \
@@ -24,7 +22,7 @@ ENV SECRET_KEY=$SECRET_KEY
 ENV BIND_ADDRESS 0.0.0.0
 ENV BIND_PORT 8000
 
-# 必要なソフト(bainary)をインストール
+# install for deploy
 RUN apt-get update
 ## gcc: psycopgのインストールに必要
 ## libpq-dev: psycopgの動作に必要
@@ -117,10 +115,16 @@ CMD ["sleep", "infinity"]
 FROM development_common AS development_asgi
 
 
-################
-# deploy stage #
-################
-FROM base AS deploy
+#########################
+# deploy_wsgi stage #
+#########################
+FROM base AS deploy_wsgi
 
 ENTRYPOINT [ "trans/entrypoint.sh" ]
 CMD [ "sh", "-c", "gunicorn ${DJANGO_PROJECT_NAME}.wsgi:application --bind ${BIND_ADDRESS}:${BIND_PORT}" ]
+
+
+#########################
+# deploy_asgi stage #
+#########################
+FROM base AS deploy_asgi
