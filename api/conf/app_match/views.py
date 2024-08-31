@@ -11,13 +11,18 @@ from rest_framework.exceptions import ValidationError
 from tournament.utils import ( update_tournamentplayer_status, increment_tournamentplayer_vcount, 
     is_round_end, update_tournamentplayer_win_to_await, is_tournament_end, update_tournament_status )
 
+from django.utils.decorators import method_decorator
+from utils.decorators import admin_only
+
 END_OF_GAME_SCORE = 10
 
 # start: ユースケースでは本来必要ないが、データの確認のために追加
+@method_decorator(admin_only, name = 'dispatch')
 class MatchViewSet(viewsets.ModelViewSet):
     queryset = Match.objects.all()
     serializer_class = MatchSerializer
 
+@method_decorator(admin_only, name = 'dispatch')
 class MatchDetailViewSet(viewsets.ModelViewSet):
     queryset = MatchDetail.objects.all()
     serializer_class = MatchDetailSerializer
