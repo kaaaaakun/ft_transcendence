@@ -9,11 +9,16 @@ from player.utils import validate_players, register_players
 from .utils import validate_tournament, register_tournament
 from player.serializers import PlayerSerializer
 
+from django.utils.decorators import method_decorator
+from utils.decorators import admin_only
+
 # start: ユースケースでは本来必要ないが、データの確認のために追加
+@method_decorator(admin_only, name = 'dispatch')
 class TournamentViewSet(viewsets.ModelViewSet):
     queryset = Tournament.objects.all()
     serializer_class = TournamentSerializer
 
+@method_decorator(admin_only, name = 'dispatch')
 class TournamentPlayerViewSet(viewsets.ModelViewSet):
     queryset = TournamentPlayer.objects.all()
     serializer_class = TournamentPlayerSerializer

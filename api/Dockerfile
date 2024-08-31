@@ -64,6 +64,10 @@ COPY conf/app_player/* ${DJANGO_PROJECT_DIR}player/
 COPY conf/app_tournament/* ${DJANGO_PROJECT_DIR}tournament/
 COPY conf/app_match/* ${DJANGO_PROJECT_DIR}match/
 
+# Create utils Directory and Copy files
+RUN mkdir -p ${DJANGO_PROJECT_DIR}utils
+COPY conf/utils/* ${DJANGO_PROJECT_DIR}utils/
+
 # appsで定めたモデルをDBに反映する準備
 RUN python ${DJANGO_PROJECT_DIR}manage.py makemigrations
 
