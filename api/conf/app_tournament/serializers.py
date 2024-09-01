@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from .models import Tournament, TournamentPlayer
 
-STATUS_CHOICES = ['win', 'lose', 'await']
+TOURNAMENT_STATUS_CHOICES = ['start', 'end']
+TOURNAMENT_PLAYER_STATUS_CHOICES = ['start', 'end', 'await']
 NUM_OF_PLAYER_CHOICES = [2, 4, 8]
 
 class TournamentSerializer(serializers.ModelSerializer):
@@ -14,7 +15,7 @@ class TournamentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("key 'status' is required.")
         if 'num_of_player' not in data:
             raise serializers.ValidationError("key 'num_of_player' is required.")
-        if data['status'] not in STATUS_CHOICES:
+        if data['status'] not in TOURNAMENT_STATUS_CHOICES:
             raise serializers.ValidationError("Tournament 'status' is invalid value.")
         if data['num_of_player'] not in NUM_OF_PLAYER_CHOICES:
             raise serializers.ValidationError(f"Tournament 'num_of_player':{data['num_of_player']} is invalid.")
@@ -34,12 +35,12 @@ class TournamentPlayerSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("key 'status' is required.")
         if 'victory_count' not in data:
             raise serializers.ValidationError("key 'victory_count' is required.")
-        if data['status'] not in STATUS_CHOICES:
-            raise serializers.ValidationError("TournamentPlayer 'status' must be 'await'.")
+        if data['status'] not in TOURNAMENT_PLAYER_STATUS_CHOICES:
+            raise serializers.ValidationError("TournamentPlayer 'status' is invalid value.")
         if data['victory_count'] < 0:
             raise serializers.ValidationError("TournamentPlayer 'victory_count' must be a non-negative integer.")
         
-        tournament = Tournament.objects.get(id = data['tournament_id'])
+        tournament = Tournament.objects.get(id = data['tournament_id'].id)
         if tournament.status == 'end':
             raise serializers.ValidationError("Cannot create a tournamentplayer for a tournament that has already ended.")
         

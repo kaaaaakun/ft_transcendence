@@ -1,15 +1,14 @@
 from .models import Match, MatchDetail
-from .serializers import MatchDetailSerializer
+from .serializers import MatchSerializer, MatchDetailSerializer
 from rest_framework.exceptions import ValidationError
 from django.forms.models import model_to_dict
-from tournament.utils import ( update_tournamentplayer_status, increment_tournamentplayer_vcount )
 
 def create_match(tournament_id, player1, player2):
     match_data = {
         'tournament_id': tournament_id,
         'status': 'start'
     }
-    match_serializer = MatchDetailSerializer(data = match_data)
+    match_serializer = MatchSerializer(data = match_data)
     if match_serializer.is_valid(raise_exception = True):
         match = match_serializer.save()
     else:
@@ -105,6 +104,7 @@ def create_ponggame_data(matchdetail):
     }
 
 def update_when_match_end(match_id, player_id, tournament_id):
+    from tournament.utils import ( update_tournamentplayer_status, increment_tournamentplayer_vcount )
     opponent_player_id = get_opponent_player_id(match_id, player_id)
     # Update MatchDetail result
     update_matchdetail_result(match_id, player_id, 'win')

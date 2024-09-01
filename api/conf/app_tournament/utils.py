@@ -2,20 +2,29 @@ from .models import Tournament, TournamentPlayer
 from .serializers import TournamentSerializer , TournamentPlayerSerializer
 from rest_framework.exceptions import ValidationError
 from django.db.models import F
-from app_match.utils import create_match
 
+# トーナメントの参加者を取得する
+# args: tournament_id
+# return: TournamentPlayerのインスタンスのリスト
 def get_tournamentplayer_with_related_data(tournament_id):
     return TournamentPlayer.objects.filter(tournament_id=tournament_id).select_related('tournament_id', 'player_id')
 
+# トーナメントのデータセットを作成する
+# args: TournamentPlayerのインスタンスのリスト, MatchDetailのインスタンス2つ
+# return: トーナメントデータセット
 def create_tournament_dataset(tournamentplayer_with_related, matchdetail1, matchdetail2):
     tournament_dataset = {}
     participants = []
     for tournamentplayer in tournamentplayer_with_related:
         participants.append(create_tournament_data(tournamentplayer,
-                                                    (matchdetail1.player_id.player_id == tournamentplayer.player_id.id
-                                                        or matchdetail2.player_id.player_id == tournamentplayer.player_id.id)))
+                                                    (matchdetail1.player_id.id == tournamentplayer.player_id.id
+                                                        or matchdetail2.player_id.id == tournamentplayer.player_id.id)))
     tournament_dataset['participants'] = participants
+    return tournament_dataset
 
+# トーナメントデータを作成する
+# args: TournamentPlayerのインスタンス, 次のプレイヤーかどうか
+# return: トーナメントデータ
 def create_tournament_data(tournamentplayer, is_next_player):
     return {
         "player": {
@@ -44,7 +53,11 @@ def create_tournament(players):
     tournament_players = register_tournament_players(valid_tournament_players)
     return tournament, tournament_players
 
+# 次のトーナメントマッチを作成する
+# args: tournament_id
+# return: Matchのインスタンス, MatchDetailのインスタンス2つ
 def create_next_tournament_match(tournament_id):
+    from match.utils import create_match
     tournamentplayers = TournamentPlayer.objects.filter(tournament_id = tournament_id, status = 'await')
     if (tournamentplayers.count() < 2):
         raise ValidationError("Not enough players with status 'await' to create a match.")
