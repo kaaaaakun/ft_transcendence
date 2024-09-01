@@ -50,7 +50,7 @@ function updateDom(dom, prevProps = {}, nextProps = {}) {
       dom.removeEventListener(eventType, prevProps[name]);
     }
   }
-  
+
 
   // Add new event listeners
   for (const name of Object.keys(nextProps)) {
@@ -59,7 +59,7 @@ function updateDom(dom, prevProps = {}, nextProps = {}) {
       dom.addEventListener(eventType, nextProps[name]);
     }
   }
-  
+
   // Remove old properties
   for (const name of Object.keys(nextProps)) {
     if (isEvent(name)) {
@@ -67,7 +67,7 @@ function updateDom(dom, prevProps = {}, nextProps = {}) {
       dom.addEventListener(eventType, nextProps[name]);
     }
   }
-  
+
   // Set new or changed properties
   for (const name of Object.keys(nextProps)) {
     if (isProperty(name) && isNew(prevProps, nextProps)(name)) {
@@ -78,7 +78,7 @@ function updateDom(dom, prevProps = {}, nextProps = {}) {
       }
     }
   }
-  
+
   // handle className specifically
   if (!isSvg && prevProps.className !== nextProps.className) {
     dom.className = nextProps.className || ''
@@ -219,6 +219,16 @@ function useState(initial) {
   return [hook.state, setState]
 }
 
+function useEffect(callback, deps) {
+  const oldDeps = wipFiber.alternate?.hooks?.[hookIndex]?.deps
+  const hasChanged = !oldDeps || oldDeps.some((dep, index) => dep !== deps[index])
+  if (hasChanged) {
+    callback()
+  }
+  wipFiber.hooks.push({ deps })
+  hookIndex++
+}
+
 function updateHostComponent(fiber) {
   if (!fiber.dom) {
     fiber.dom = createDom(fiber)
@@ -289,4 +299,5 @@ export const Teact = {
   createElement,
   render,
   useState,
+  useEffect,
 }
