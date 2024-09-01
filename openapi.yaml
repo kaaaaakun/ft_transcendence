@@ -17,20 +17,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TournamentRequest"
+              $ref: "#/components/schemas/tournament_request"
       responses:
         "200":
           description: トーナメントの待機情報
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TournamentResponse"
+                $ref: "#/components/schemas/tournament_response"
         default:
           description: エラーレスポンスまたはその他のレスポンス
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/error_response"
     get:
       summary: トーナメントの表示
       description: 試合からトーナメントに戻るためのAPI。
@@ -40,13 +40,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TournamentResponse"
+                $ref: "#/components/schemas/tournament_response"
         default:
           description: エラーレスポンスまたはその他のレスポンス
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/error_response"
 
   /api/matches/local:
     get:
@@ -58,13 +58,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MatchResponse"
+                $ref: "#/components/schemas/match_response"
         default:
           description: エラーレスポンスまたはその他のレスポンス
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/error_response"
 
   /api/matches/local/score:
     patch:
@@ -75,30 +75,32 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ScoreRequest"
+              $ref: "#/components/schemas/score_request"
       responses:
         "200":
           description: 更新された試合スコア情報
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ScoreResponse"
+                $ref: "#/components/schemas/score_response"
         default:
           description: エラーレスポンスまたはその他のレスポンス
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/error_response"
 
 components:
   schemas:
-    TournamentRequest:
+    tournament_request:
       type: object
       properties:
         players:
           type: array
           items:
             type: string
+      required:
+        - players
       example:
         players:
           - "Alice"
@@ -106,7 +108,7 @@ components:
           - "Charlie"
           - "David"
 
-    TournamentResponse:
+    tournament_response:
       type: object
       properties:
         participants:
@@ -115,35 +117,37 @@ components:
             type: object
             properties:
               player:
-                $ref: "#/components/schemas/Player"
-              tournamentplayer:
-                $ref: "#/components/schemas/TournamentPlayer"
+                $ref: "#/components/schemas/player"
+              tournament_players:
+                $ref: "#/components/schemas/tournament_player"
               next_player:
                 type: boolean
+      required:
+        - participants
       example:
         participants:
           - player:
               name: "Alice"
-            tournamentplayer:
+            tournament_players:
               victory_count: 0
             next_player: false
           - player:
               name: "Bob"
-            tournamentplayer:
+            tournament_players:
               victory_count: 1
             next_player: true
           - player:
               name: "Charlie"
-            tournamentplayer:
+            tournament_players:
               victory_count: 0
             next_player: true
           - player:
               name: "David"
-            tournamentplayer:
+            tournament_players:
               victory_count: 1
             next_player: false
 
-    MatchResponse:
+    match_response:
       type: object
       properties:
         match_id:
@@ -154,37 +158,38 @@ components:
             type: object
             properties:
               player:
-                $ref: "#/components/schemas/Player"
-              matchdetail:
-                $ref: "#/components/schemas/MatchDetail"
+                $ref: "#/components/schemas/player"
+              match_details:
+                $ref: "#/components/schemas/match_details"
+      required:
+        - match_id
+        - players
       example:
         match_id: 1
         players:
           - player:
               name: "Alice"
-            matchdetail:
+            match_details:
               player_id: 1
               match_id: 1
               score: 1
           - player:
               name: "Bob"
-            matchdetail:
+            match_details:
               player_id: 2
               match_id: 1
               score: 0
 
-    ScoreRequest:
+    score_request:
       type: object
       properties:
-        match_id:
-          type: integer
-        player_id:
-          type: integer
+        match_details:
+          $ref: "#/components/schemas/match_details"
       example:
         match_id: 1
         player_id: 1
 
-    ScoreResponse:
+    score_response:
       type: object
       properties:
         players:
@@ -193,40 +198,47 @@ components:
             type: object
             properties:
               player:
-                $ref: "#/components/schemas/Player"
-              matchdetail:
-                $ref: "#/components/schemas/MatchDetail"
+                $ref: "#/components/schemas/player"
+              match_details:
+                $ref: "#/components/schemas/match_details"
         end_match:
           type: boolean
+      required:
+        - players
+        - end_match
       example:
         players:
           - player:
               name: "Alice"
-            matchdetail:
+            match_details:
               player_id: 1
               match_id: 1
               score: 1
           - player:
               name: "Bob"
-            matchdetail:
+            match_details:
               player_id: 2
               match_id: 1
               score: 0
         end_match: true
 
-    Player:
+    player:
       type: object
       properties:
         name:
           type: string
+      required:
+        - name
 
-    TournamentPlayer:
+    tournament_player:
       type: object
       properties:
         victory_count:
           type: integer
+      required:
+        - victory_count
 
-    MatchDetail:
+    match_details:
       type: object
       properties:
         player_id:
@@ -235,14 +247,20 @@ components:
           type: integer
         score:
           type: integer
+      required:
+        - player_id
+        - match_id
 
-    ErrorResponse:
+    error_response:
       type: object
       properties:
         error_code:
           type: integer
         message:
           type: string
+      required:
+        - error_code
+        - message
       example:
         error_code: 400
         message: "無効なリクエストです。"
