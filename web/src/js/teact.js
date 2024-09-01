@@ -221,11 +221,17 @@ function useState(initial) {
 
 function useEffect(callback, deps) {
   const oldDeps = wipFiber.alternate?.hooks?.[hookIndex]?.deps
+  const hook = {
+    deps,
+    callback,
+  }
+
   const hasChanged = !oldDeps || oldDeps.some((dep, index) => dep !== deps[index])
   if (hasChanged) {
     callback()
   }
-  wipFiber.hooks.push({ deps })
+
+  wipFiber.hooks.push(hook)
   hookIndex++
 }
 
