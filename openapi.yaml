@@ -7,9 +7,15 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 
+tags:
+  - name: local_play
+    description: localでponggameを遊ぶためのAPI
+
 paths:
   /api/tournaments/local:
     post:
+      tags:
+        - local_play
       summary: トーナメントの作成
       description: プレイヤーのリストを使用して新しいトーナメントを作成します。プレイヤーの数は2の累乗（例：2、4、8、16）でなければなりません。
       requestBody:
@@ -32,6 +38,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/error_response"
     get:
+      tags:
+        - local_play
       summary: トーナメントの表示
       description: 試合からトーナメントに戻るためのAPI。
       responses:
@@ -50,6 +58,8 @@ paths:
 
   /api/matches/local:
     get:
+      tags:
+        - local_play
       summary: 試合の開始
       description: 次の試合の詳細を取得します。
       responses:
@@ -58,7 +68,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/match_response"
+                $ref: "#/components/schemas/match_status"
         default:
           description: エラーレスポンスまたはその他のレスポンス
           content:
@@ -68,6 +78,8 @@ paths:
 
   /api/matches/local/score:
     patch:
+      tags:
+        - local_play
       summary: スコアの更新
       description: 試合中のプレイヤーのスコアを増加させます。
       requestBody:
@@ -75,14 +87,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/score_request"
+              $ref: "#/components/schemas/score"
       responses:
         "200":
           description: 更新された試合スコア情報
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/score_response"
+                $ref: "#/components/schemas/match_status"
         default:
           description: エラーレスポンスまたはその他のレスポンス
           content:
@@ -147,49 +159,7 @@ components:
               victory_count: 1
             next_player: false
 
-    match_response:
-      type: object
-      properties:
-        match_id:
-          type: integer
-        players:
-          type: array
-          items:
-            type: object
-            properties:
-              player:
-                $ref: "#/components/schemas/player"
-              match_details:
-                $ref: "#/components/schemas/match_details"
-      required:
-        - match_id
-        - players
-      example:
-        match_id: 1
-        players:
-          - player:
-              name: "Alice"
-            match_details:
-              player_id: 1
-              match_id: 1
-              score: 1
-          - player:
-              name: "Bob"
-            match_details:
-              player_id: 2
-              match_id: 1
-              score: 0
-
-    score_request:
-      type: object
-      properties:
-        match_details:
-          $ref: "#/components/schemas/match_details"
-      example:
-        match_id: 1
-        player_id: 1
-
-    score_response:
+    match_status:
       type: object
       properties:
         players:
@@ -207,6 +177,7 @@ components:
         - players
         - end_match
       example:
+        match_id: 1
         players:
           - player:
               name: "Alice"
@@ -220,7 +191,15 @@ components:
               player_id: 2
               match_id: 1
               score: 0
-        end_match: true
+
+    score:
+      type: object
+      properties:
+        match_details:
+          $ref: "#/components/schemas/match_details"
+      example:
+        match_id: 1
+        player_id: 1
 
     player:
       type: object
