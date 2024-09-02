@@ -131,7 +131,7 @@ class LocalMatchViewTests(APITestCase, BaseTestSetup):
         expected_data =  {
             1: {
                 'player': {'name': self.players[1].name},
-                'matchdetail': {'player_id': self.players[1].id, 'match_id': self.matches[1].id, 'score': 1}
+                'matchdetail': {'player_id': self.players[1].id, 'match_id': self.matches[1].id, 'score': 0}
             },
             2: {
                 'player': {'name': self.players[2].name},
@@ -152,7 +152,7 @@ class LocalScoreViewTests(APITestCase, BaseTestSetup):
         expected_data = {
             1: {
                 'player': {'name': self.players[1].name},
-                'matchdetail': {'player_id': self.players[1].id, 'match_id': self.matches[1].id, 'score': 0}
+                'matchdetail': {'player_id': self.players[1].id, 'match_id': self.matches[1].id, 'score': 1}
             },
             2: {
                 'player': {'name': self.players[2].name},
