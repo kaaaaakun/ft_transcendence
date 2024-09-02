@@ -124,6 +124,25 @@ class MatchDetailSerializerTests(BaseTestSetup):
         print(serializer.errors)
         self.assertFalse(is_valid, msg = serializer.errors)
 
+class LocalMatchViewTests(APITestCase, BaseTestSetup):
+    def test_get_match(self):
+        url = reverse('local')
+        response = self.client.get(url)
+        expected_data =  {
+            1: {
+                'player': {'name': self.players[1].name},
+                'matchdetail': {'player_id': self.players[1].id, 'match_id': self.matches[1].id, 'score': 1}
+            },
+            2: {
+                'player': {'name': self.players[2].name},
+                'matchdetail': {'player_id': self.players[2].id, 'match_id': self.matches[1].id, 'score': 0}
+            },
+            'match_end': False
+        }
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, expected_data)
+
+
 class LocalScoreViewTests(APITestCase, BaseTestSetup):
     def test_increment_score(self):
         url = reverse('local_score')
@@ -133,7 +152,7 @@ class LocalScoreViewTests(APITestCase, BaseTestSetup):
         expected_data = {
             1: {
                 'player': {'name': self.players[1].name},
-                'matchdetail': {'player_id': self.players[1].id, 'match_id': self.matches[1].id, 'score': 1}
+                'matchdetail': {'player_id': self.players[1].id, 'match_id': self.matches[1].id, 'score': 0}
             },
             2: {
                 'player': {'name': self.players[2].name},
