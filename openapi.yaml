@@ -134,6 +134,8 @@ components:
                 $ref: "#/components/schemas/tournament_player"
               next_player:
                 type: boolean
+        # end_tournament:
+        #   type: boolean
       required:
         - participants
       example:
@@ -158,6 +160,7 @@ components:
             tournament_players:
               victory_count: 1
             next_player: false
+        # end_tournament: false
 
     match_status:
       type: object
@@ -177,7 +180,6 @@ components:
         - players
         - end_match
       example:
-        match_id: 1
         players:
           - player:
               name: "Alice"
@@ -243,3 +245,4 @@ components:
       example:
         error_code: 400
         message: "無効なリクエストです。"
+
