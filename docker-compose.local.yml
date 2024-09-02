@@ -6,6 +6,13 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - vol_rdbms:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     ports:
       - "5432:5432"
     networks:
@@ -22,9 +29,11 @@ services:
     build:
       context: reverseproxy/
     container_name: "reverseproxy"
+    image: nginx:1.26.1-alpine
     ports:
       - "80:80"
-      - "443:443"
+    volumes:
+      - ./nginx/nginx.local.conf:/etc/nginx/nginx.conf
     networks:
       - net_pong
 
@@ -37,7 +46,6 @@ services:
     ports:
       - "8000:8000"
 
-
 networks:
   net_pong:
     name: "net_pong"
@@ -47,6 +55,3 @@ volumes:
     name: "vol_reverseproxy"
   vol_rdbms:
     name: "vol_rdbms"
-
-
-
