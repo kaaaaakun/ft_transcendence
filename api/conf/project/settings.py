@@ -40,9 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # apps made
-    'plyr',
-    'tmt',
-    'mtch',
+    'player',
+    'tournament',
+    'match',
 
     # 3rd party
     'rest_framework',

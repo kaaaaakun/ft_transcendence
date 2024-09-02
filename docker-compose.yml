@@ -6,8 +6,15 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - "5432:5432"
+    volumes:
+      - vol_rdbms:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    expose:
+      - "5432"
     networks:
       - net_pong
 
@@ -34,6 +41,8 @@ services:
     build:
       context: api/
     container_name: "api"
+    expose:
+      - "8000"
     networks:
       - net_pong
 
