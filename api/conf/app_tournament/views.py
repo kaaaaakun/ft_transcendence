@@ -29,7 +29,7 @@ class TournamentPlayerViewSet(viewsets.ModelViewSet):
 
 class LocalTournamentView(APIView):
     def post(self, request):
-        player_names = request.data.getlist('players')
+        player_names = request.data.get('players', [])
         if not player_names:
             return Response("player names are required.", status=status.HTTP_400_BAD_REQUEST)
         # プレイヤー名をシャッフル

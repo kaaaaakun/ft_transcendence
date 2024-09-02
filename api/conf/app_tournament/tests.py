@@ -15,7 +15,7 @@ from .utils import create_tournament, create_next_tournament_match, create_tourn
 
 
 # class BaseTestSetup(TestCase):
-class BaseTestSetup(TestCase):
+class BaseTestSetup(APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Create tournaments
@@ -91,6 +91,8 @@ class TournamentPlayerSerializerTest(BaseTestSetup):
         serializer = TournamentPlayerSerializer(data={'tournament_id': self.tournament1.id, 'player_id': self.players[2].id , 'status': '12345678901', 'victory_count': 0})
         self.assertFalse(serializer.is_valid(), msg = serializer.errors)
 
+    
+class LocalTournamentViewTest(APITestCase):
     def test_two_palyers(self):
         Tournament.objects.all().delete()
         TournamentPlayer.objects.all().delete()
