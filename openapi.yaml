@@ -248,4 +248,3 @@ components:
       example:
         error_code: 400
         message: "無効なリクエストです。"
-
