@@ -146,6 +146,7 @@ class LocalMatchViewTests(APITestCase, BaseTestSetup):
 class LocalScoreViewTests(APITestCase, BaseTestSetup):
     def test_increment_score(self):
         url = reverse('local_score')
+        print(url)
         data = {'matchdetail': {'match_id': self.matches[1].id, 'player_id': self.players[1].id}}
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
