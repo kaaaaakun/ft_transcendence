@@ -3,6 +3,10 @@ info:
   title: Tournament API
   version: 1.0.0
   description: トーナメント、試合、プレイヤーの管理用API。
+  contact:
+    name: とらせん
+    url: https://www.example.com/support
+    email: support@example.com    
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -193,6 +197,8 @@ components:
               player_id: 2
               match_id: 1
               score: 0
+        end_match:
+            false
 
     score:
       type: object
