@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import Player
 import re
 
-CHARACTERS_NOT_ALLOWD = r"[<>&\"\'\"]"
+CHARACTERS_NOT_ALLOWD = r"[<>&'\"]"
 
 class PlayerSerializer(serializers.ModelSerializer):
 	class Meta:
