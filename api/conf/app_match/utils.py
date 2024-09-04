@@ -1,31 +1,47 @@
 from .models import Match, MatchDetail
-from .serializers import MatchDetailSerializer
+from .serializers import MatchSerializer, MatchDetailSerializer
 from rest_framework.exceptions import ValidationError
 from django.forms.models import model_to_dict
-from tournament.utils import ( update_tournamentplayer_status, increment_tournamentplayer_vcount )
-# ついでに作ってみたけど検証してない機能
-#
-# # Validate MatchDetail
-# # args: match_id: int, player_id: int, score: int, result: str
-# # return: MatchDetailのオブジェクト
-# def validate_matchdetail_data(match_id, player_id, score, result)
-#     matchdetail_data = {
-#         'match_id': match_id,
-#         'player_id': player_id,
-#         'score': score,
-#         'result': result
-#     }
-#     matchdetail_serializer = MatchDetailSerializer(data = matchdetail_serializer)
-#     if matchdetail_serializer.is_valid(raise_exception = True):
-#         return matchdetail_serializer.validated_data
-#     else:
-#         raise ValidationError(matchdetail_serializer.error)
 
-# # MatchDetailをDBに登録する
-# # args: MatchDetail(validated)のオブジェクト
-# # return: MatchDetailのインスタンス
-# def register_matchdetail(valid_matchdetail):
-#     return MatchDetail.objects.create(**valid_matchdetail)
+def create_match(tournament_id, player1, player2):
+    match_data = {
+        'tournament_id': tournament_id,
+        'status': 'start'
+    }
+    match_serializer = MatchSerializer(data = match_data)
+    if match_serializer.is_valid(raise_exception = True):
+        match = match_serializer.save()
+    else:
+        raise ValidationError(match_serializer.error)
+    try:
+        matchdetail1 = register_matchdetail(validate_matchdetail_data(match.id, player1.player_id.id, 0, 'await'))
+        matchdetail2 = register_matchdetail(validate_matchdetail_data(match.id, player2.player_id.id, 0, 'await'))
+    except ValidationError as e:
+        raise ValidationError(e.detail)
+    return match, matchdetail1, matchdetail2
+
+#
+# Validate MatchDetail
+# args: match_id: int, player_id: int, score: int, result: str
+# return: MatchDetailのオブジェクト
+def validate_matchdetail_data(match_id, player_id, score, result):
+    matchdetail_data = {
+        'match_id': match_id,
+        'player_id': player_id,
+        'score': score,
+        'result': result
+    }
+    matchdetail_serializer = MatchDetailSerializer(data = matchdetail_data)
+    if matchdetail_serializer.is_valid(raise_exception = True):
+        return matchdetail_serializer.validated_data
+    else:
+        raise ValidationError(matchdetail_serializer.error)
+
+# MatchDetailをDBに登録する
+# args: MatchDetail(validated)のオブジェクト
+# return: MatchDetailのインスタンス
+def register_matchdetail(valid_matchdetail):
+    return MatchDetail.objects.create(**valid_matchdetail)
 
 
 # MatchDetailのスコアをインクリメントする（DBへの保存はしない）
@@ -88,6 +104,7 @@ def create_ponggame_data(matchdetail):
     }
 
 def update_when_match_end(match_id, player_id, tournament_id):
+    from tournament.utils import ( update_tournamentplayer_status, increment_tournamentplayer_vcount )
     opponent_player_id = get_opponent_player_id(match_id, player_id)
     # Update MatchDetail result
     update_matchdetail_result(match_id, player_id, 'win')
