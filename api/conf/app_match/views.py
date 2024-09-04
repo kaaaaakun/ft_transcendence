@@ -28,6 +28,14 @@ class MatchDetailViewSet(viewsets.ModelViewSet):
     serializer_class = MatchDetailSerializer
 # end
 
+class LocalMatchView(APIView):
+    def get(self, request):
+        match_id = Match.objects.filter(status = 'start').first().id
+        if match_id is None:
+            return Response({"error": "Match with start status not found."}, status=status.HTTP_404_NOT_FOUND)
+        response_data = create_ponggame_dataset(get_matchdetail_with_related_data(match_id))
+        return Response(response_data, status=status.HTTP_200_OK)
+
 class LocalScoreView(APIView):
     def patch(self, request):
         match_id = request.data.get('matchdetail', {}).get('match_id')
@@ -35,7 +43,7 @@ class LocalScoreView(APIView):
 
         if match_id is None or player_id is None:
             return Response({"error": "match_id and player_id are required."}, status=status.HTTP_400_BAD_REQUEST)
-    
+
         # スコアをインクリメントしたMatchDetailのインスタンスを取得
         matchdetail_instance = increment_score(match_id, player_id)
         if matchdetail_instance is None:
