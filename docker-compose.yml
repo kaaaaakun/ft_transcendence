@@ -61,6 +61,10 @@ services:
     depends_on:
       rdbms:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-H", "Host: reverseproxy", "http://localhost:8000"]
+      interval: 5s
+      retries: 5
 
 networks:
   net_pong:
