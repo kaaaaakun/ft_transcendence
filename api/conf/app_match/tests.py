@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from tournament.models import Tournament, tournament_players
+from tournament.models import tournaments, tournament_players
 from player.models import players
 from .models import matches, match_details
 from .serializers import matchesSerializer, match_detailsSerializer
@@ -14,9 +14,9 @@ class BaseTestSetup(TestCase):
     @classmethod
     def setUpTestData(cls):
         # Create tournaments
-        cls.tournament1 = Tournament.objects.create(id = 1, num_of_player = '2', status = 'start')
-        cls.tournament2 = Tournament.objects.create(id = 2, num_of_player = '4', status = 'end')
-        cls.tournament3 = Tournament.objects.create(id = 3, num_of_player = '8', status = 'start')
+        cls.tournament1 = tournaments.objects.create(id = 1, num_of_player = '2', status = 'start')
+        cls.tournament2 = tournaments.objects.create(id = 2, num_of_player = '4', status = 'end')
+        cls.tournament3 = tournaments.objects.create(id = 3, num_of_player = '8', status = 'start')
 
         # Create players
         cls.players = {}

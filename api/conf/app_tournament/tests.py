@@ -1,10 +1,10 @@
 from django.test import TestCase
 
-from .models import Tournament, tournament_players
+from .models import tournaments, tournament_players
 from player.models import players
 from player.utils import validate_players, register_players
 from match.models import matches, match_details
-from .serializers import TournamentSerializer, tournament_playersSerializer
+from .serializers import tournamentsSerializer, tournament_playersSerializer
 from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
 
@@ -19,47 +19,47 @@ class BaseTestSetup(APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Create tournaments
-        cls.tournament1 = Tournament.objects.create(id = 1, num_of_player = '2', status = 'start')
-        cls.tournament2 = Tournament.objects.create(id = 2, num_of_player = '4', status = 'end')
-        cls.tournament3 = Tournament.objects.create(id = 3, num_of_player = '8', status = 'start')
-        cls.tournament4 = Tournament.objects.create(id = 4, num_of_player = '8', status = 'end')
+        cls.tournament1 = tournaments.objects.create(id = 1, num_of_player = '2', status = 'start')
+        cls.tournament2 = tournaments.objects.create(id = 2, num_of_player = '4', status = 'end')
+        cls.tournament3 = tournaments.objects.create(id = 3, num_of_player = '8', status = 'start')
+        cls.tournament4 = tournaments.objects.create(id = 4, num_of_player = '8', status = 'end')
 
         # Create players
         cls.players = {}
         for i in range(1, 3):
             cls.players[i] = players.objects.create(id = i, name = f'P{i}')
 
-class TournamentSerializerTest(BaseTestSetup):
+class tournamentsSerializerTest(BaseTestSetup):
     def test_valid_data(self):
-        serializer = TournamentSerializer(data={'num_of_player': 4, 'status': 'start'})
+        serializer = tournamentsSerializer(data={'num_of_player': 4, 'status': 'start'})
         self.assertTrue(serializer.is_valid(), serializer.errors)
     
     def test_extra_fields(self):
-        serializer = TournamentSerializer(data={'num_of_player': 4, 'status': 'start', 'extra_field': 'value'})
+        serializer = tournamentsSerializer(data={'num_of_player': 4, 'status': 'start', 'extra_field': 'value'})
         self.assertTrue(serializer.is_valid(), serializer.errors)
 
     def test_extra_value(self):
-      serializer = TournamentSerializer(data={'num_of_player': 4, 'status': ['start', 'end']})
+      serializer = tournamentsSerializer(data={'num_of_player': 4, 'status': ['start', 'end']})
       self.assertFalse(serializer.is_valid(), msg = serializer.errors)
 
     def test_missing_field(self):
-      serializer = TournamentSerializer(data={'status': 'start'})
+      serializer = tournamentsSerializer(data={'status': 'start'})
       self.assertFalse(serializer.is_valid(), msg = serializer.errors)
 
     def test_invalid_num_of_player(self):
-      serializer = TournamentSerializer(data={'num_of_player': 3, 'status': 'start'})
+      serializer = tournamentsSerializer(data={'num_of_player': 3, 'status': 'start'})
       self.assertFalse(serializer.is_valid(), msg = serializer.errors)
     
     def test_invalid_status(self):
-      serializer = TournamentSerializer(data={'num_of_player': 4, 'status': 'invalid'})
+      serializer = tournamentsSerializer(data={'num_of_player': 4, 'status': 'invalid'})
       self.assertFalse(serializer.is_valid(), msg = serializer.errors)
 
     def test_literal_num_of_player(self):
-      serializer = TournamentSerializer(data={'num_of_player': 'string', 'status': 'start'})
+      serializer = tournamentsSerializer(data={'num_of_player': 'string', 'status': 'start'})
       self.assertFalse(serializer.is_valid(), msg = serializer.errors)
 
     def test_overlength_status(self):
-      serializer = TournamentSerializer(data={'num_of_player': 4, 'status': '12345678901'})
+      serializer = tournamentsSerializer(data={'num_of_player': 4, 'status': '12345678901'})
       self.assertFalse(serializer.is_valid(), msg = serializer.errors)
 
 class tournament_playersSerializerTest(BaseTestSetup):
@@ -94,7 +94,7 @@ class tournament_playersSerializerTest(BaseTestSetup):
     
 class LocalTournamentViewTest(APITestCase):
     def test_two_palyers(self):
-        Tournament.objects.all().delete()
+        tournaments.objects.all().delete()
         tournament_players.objects.all().delete()
         players.objects.all().delete()
         matches.objects.all().delete()
@@ -122,7 +122,7 @@ class LocalTournamentViewTest(APITestCase):
         )
     
     def test_four_players(self):
-        Tournament.objects.all().delete()
+        tournaments.objects.all().delete()
         tournament_players.objects.all().delete()
         players.objects.all().delete()
         matches.objects.all().delete()
@@ -176,7 +176,7 @@ class LocalTournamentViewTest(APITestCase):
         )
 
     def test_eight_players(self):
-      Tournament.objects.all().delete()
+      tournaments.objects.all().delete()
       tournament_players.objects.all().delete()
       players.objects.all().delete()
       matches.objects.all().delete()

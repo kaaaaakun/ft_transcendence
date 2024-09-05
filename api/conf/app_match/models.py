@@ -1,9 +1,9 @@
 from django.db import models
-from tournament.models import Tournament
+from tournament.models import tournaments
 from player.models import players
 
 class matches(models.Model):
-    tournament_id = models.ForeignKey(Tournament, on_delete=models.CASCADE)
+    tournament_id = models.ForeignKey(tournaments, on_delete=models.CASCADE)
     status = models.CharField(max_length=10)
 
 class match_details(models.Model):

@@ -1,13 +1,13 @@
 from rest_framework import serializers
-from .models import Tournament, tournament_players
+from .models import tournaments, tournament_players
 
 TOURNAMENT_STATUS_CHOICES = ['start', 'end']
 TOURNAMENT_PLAYER_STATUS_CHOICES = ['start', 'end', 'await']
 NUM_OF_PLAYER_CHOICES = [2, 4, 8]
 
-class TournamentSerializer(serializers.ModelSerializer):
+class tournamentsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Tournament
+        model = tournaments
         fields = '__all__'
 
     def validate(self, data):
@@ -16,9 +16,9 @@ class TournamentSerializer(serializers.ModelSerializer):
         if 'num_of_player' not in data:
             raise serializers.ValidationError("key 'num_of_player' is required.")
         if data['status'] not in TOURNAMENT_STATUS_CHOICES:
-            raise serializers.ValidationError("Tournament 'status' is invalid value.")
+            raise serializers.ValidationError("tournaments 'status' is invalid value.")
         if data['num_of_player'] not in NUM_OF_PLAYER_CHOICES:
-            raise serializers.ValidationError(f"Tournament 'num_of_player':{data['num_of_player']} is invalid.")
+            raise serializers.ValidationError(f"tournaments 'num_of_player':{data['num_of_player']} is invalid.")
         return data
 
 class tournament_playersSerializer(serializers.ModelSerializer):
@@ -40,7 +40,7 @@ class tournament_playersSerializer(serializers.ModelSerializer):
         if data['victory_count'] < 0:
             raise serializers.ValidationError("tournament_players 'victory_count' must be a non-negative integer.")
         
-        tournament = Tournament.objects.get(id = data['tournament_id'].id)
+        tournament = tournaments.objects.get(id = data['tournament_id'].id)
         if tournament.status == 'end':
             raise serializers.ValidationError("Cannot create a tournamentplayer for a tournament that has already ended.")
         

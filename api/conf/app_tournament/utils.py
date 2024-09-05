@@ -1,5 +1,5 @@
-from .models import Tournament, tournament_players
-from .serializers import TournamentSerializer , tournament_playersSerializer
+from .models import tournaments, tournament_players
+from .serializers import tournamentsSerializer , tournament_playersSerializer
 from rest_framework.exceptions import ValidationError
 from django.db.models import F
 
@@ -38,7 +38,7 @@ def create_tournament_data(tournamentplayer, is_next_player):
 
 # トーナメントを作成する
 # args: playersインスタンスのリスト
-# return: Tournamentのインスタンス, tournament_playersのインスタンスのリスト
+# return: tournamentsのインスタンス, tournament_playersのインスタンスのリスト
 def create_tournament(players):
     try:
         tournament = register_tournament(validate_tournament(len(players), 'start'))
@@ -64,25 +64,25 @@ def create_next_tournament_match(tournament_id):
     return create_match(tournament_id, tournamentplayers[0], tournamentplayers[1])
 
 
-# Validate Tournament
+# Validate tournaments
 # args: トーナメントの参加人数, トーナメントのステータス
-# return: Tournamentのインスタンス
+# return: tournamentsのインスタンス
 def validate_tournament(num_of_player, status):
     tournament_data = {
         'num_of_player': num_of_player,
         'status': status
     }
-    tournament_serializer = TournamentSerializer(data = tournament_data)
+    tournament_serializer = tournamentsSerializer(data = tournament_data)
     if tournament_serializer.is_valid(raise_exception = True):
         return tournament_serializer.validated_data
     else:
         return None
 
 # トーナメントをDBに登録する
-# args: Tournament(validated)のインスタンス
-# return: Tournamentのオブジェクト
+# args: tournaments(validated)のインスタンス
+# return: tournamentsのオブジェクト
 def register_tournament(valid_tournament):
-    return Tournament.objects.create(**valid_tournament)
+    return tournaments.objects.create(**valid_tournament)
 
 def validate_tournament_player(tournament_id, player_id, status, victory_count):
     tournament_player_data = {
@@ -136,7 +136,7 @@ def is_round_end(tournament_id):
 def update_tournamentplayer_win_to_await(tournament_id):
     tournament_players.objects.filter(tournament_id = tournament_id, status = 'win').update(status = 'await')
 
-# Tournamentがが終了したかを判定する
+# tournamentsがが終了したかを判定する
 def is_tournament_end(tournament_id):
     tournamentplayers = tournament_players.objects.filter(tournament_id = tournament_id)
     # awaitステータスのプレイヤー1人だけの場合はトーナメント終了
@@ -145,6 +145,6 @@ def is_tournament_end(tournament_id):
         return True
     return False
 
-# Tournamentのstatusを更新する
+# tournamentsのstatusを更新する
 def update_tournament_status(tournament_id, status):
-    Tournament.objects.filter(id = tournament_id).update(status = status)
+    tournaments.objects.filter(id = tournament_id).update(status = status)
