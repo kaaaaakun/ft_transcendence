@@ -1,14 +1,14 @@
 from rest_framework import serializers
-from .models import Match, match_details
+from .models import matches, match_details
 from tournament.models import Tournament, tournament_players
 from player.models import Player
 
 MATCH_STATUS_CHOICES = ['start', 'end']
 MATCHDETAIL_RESULT_CHOICES = ['win', 'lose', 'await']
 
-class MatchSerializer(serializers.ModelSerializer):
+class matchesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Match
+        model = matches
         fields = '__all__'
 
     def validate(self, data):
@@ -20,7 +20,7 @@ class MatchSerializer(serializers.ModelSerializer):
 
         # dataのフィールド値が期待と異なる
         if data['status'] not in MATCH_STATUS_CHOICES:
-            raise serializers.ValidationError("Match 'status' is invalid value.")
+            raise serializers.ValidationError("matches 'status' is invalid value.")
 
         # dataのForeignKeyの値が、新しいデータの追加条件に適合していない
         tournament = data.get('tournament_id')
@@ -47,9 +47,9 @@ class match_detailsSerializer(serializers.ModelSerializer):
 
         # dataのフィールド値が期待と異なる
         if data['score'] < 0:
-            raise serializers.ValidationError("Match 'score' can't set below 0.")
+            raise serializers.ValidationError("matches 'score' can't set below 0.")
         if data['result'] not in MATCHDETAIL_RESULT_CHOICES:
-            raise serializers.ValidationError("Matchdetail 'result' is invalid value.")
+            raise serializers.ValidationError("matchesdetail 'result' is invalid value.")
 
         # dataのForeignKeyの値が、新しいデータの追加条件に適合していない
         match = data.get('match_id')
@@ -62,6 +62,6 @@ class match_detailsSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("This player is not part of Tournament player.")
 
         if not self.instance and match_details.objects.filter(match_id=match, player_id=player).exists():
-            raise serializers.ValidationError("Matchdetail is already exist.")
+            raise serializers.ValidationError("matchesdetail is already exist.")
         
         return data

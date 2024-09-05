@@ -2,8 +2,8 @@ from django.test import TestCase
 
 from tournament.models import Tournament, tournament_players
 from player.models import Player
-from .models import Match, match_details
-from .serializers import MatchSerializer, match_detailsSerializer
+from .models import matches, match_details
+from .serializers import matchesSerializer, match_detailsSerializer
 from django.contrib.auth.models import User
 
 from django.urls import reverse
@@ -34,11 +34,11 @@ class BaseTestSetup(TestCase):
 
         # Create matches
         cls.matches = {}
-        cls.matches[1] = Match.objects.create(tournament_id = cls.tournament1, status = 'start')
-        cls.matches[2] = Match.objects.create(tournament_id = cls.tournament3, status = 'start')
-        cls.matches[3] = Match.objects.create(tournament_id = cls.tournament1, status = 'end')
-        cls.matches[4] = Match.objects.create(tournament_id = cls.tournament2, status = 'start')
-        cls.matches[5] = Match.objects.create(tournament_id = cls.tournament3, status = 'start')
+        cls.matches[1] = matches.objects.create(tournament_id = cls.tournament1, status = 'start')
+        cls.matches[2] = matches.objects.create(tournament_id = cls.tournament3, status = 'start')
+        cls.matches[3] = matches.objects.create(tournament_id = cls.tournament1, status = 'end')
+        cls.matches[4] = matches.objects.create(tournament_id = cls.tournament2, status = 'start')
+        cls.matches[5] = matches.objects.create(tournament_id = cls.tournament3, status = 'start')
 
         # Create matchdetails
         cls.matchdetails = {}
@@ -48,45 +48,45 @@ class BaseTestSetup(TestCase):
         # Create admin user
         cls.admin = User.objects.create_user(username = 'admin', password = 'pass', is_staff = True)
 
-class MatchSerializerTests(BaseTestSetup):
+class matchesSerializerTests(BaseTestSetup):
     def test_valid_data(self):
-        serializer = MatchSerializer(data={'tournament_id': self.tournament1.id, 'status': 'start'})
+        serializer = matchesSerializer(data={'tournament_id': self.tournament1.id, 'status': 'start'})
         self.assertTrue(serializer.is_valid(), msg = serializer.errors)
 
     def test_extra_field(self):
-        serializer = MatchSerializer(data={'tournament_id': self.tournament1.id, 'status': 'start', 'extra_field': 'value'})
+        serializer = matchesSerializer(data={'tournament_id': self.tournament1.id, 'status': 'start', 'extra_field': 'value'})
         self.assertTrue(serializer.is_valid(), msg = serializer.errors)
     
     def test_extra_value(self):
-        serializer = MatchSerializer(data={'tournament_id': self.tournament1.id, 'status': ['start', 'end']})
+        serializer = matchesSerializer(data={'tournament_id': self.tournament1.id, 'status': ['start', 'end']})
         self.assertFalse(serializer.is_valid(), msg = serializer.errors)
 
     def test_missing_field(self):
-        serializer = MatchSerializer(data={'status': 'start'})
+        serializer = matchesSerializer(data={'status': 'start'})
         self.assertFalse(serializer.is_valid(), msg = serializer.errors)
 
     def test_nonexistent_tournament(self):
-        serializer = MatchSerializer(data={'tournament_id': 9999, 'status': 'start'})
+        serializer = matchesSerializer(data={'tournament_id': 9999, 'status': 'start'})
         self.assertFalse(serializer.is_valid(), msg = serializer.errors)
 
     def test_literal_tournament(self):
-        serializer = MatchSerializer(data={'tournament': 'invalid', 'status': 'start'})
+        serializer = matchesSerializer(data={'tournament': 'invalid', 'status': 'start'})
         self.assertFalse(serializer.is_valid(), msg = serializer.errors)
     
     def test_ended_tournament(self):
-        serializer = MatchSerializer(data={'tournament_id': self.tournament2.id, 'status': 'start'})
+        serializer = matchesSerializer(data={'tournament_id': self.tournament2.id, 'status': 'start'})
         self.assertFalse(serializer.is_valid(), msg = serializer.errors)
 
     def test_invalid_status(self):
-        serializer = MatchSerializer(data={'tournament': self.tournament1.id, 'status': 'invalid'})
+        serializer = matchesSerializer(data={'tournament': self.tournament1.id, 'status': 'invalid'})
         self.assertFalse(serializer.is_valid())
 
     def test_overlength_status(self):
-        serializer = MatchSerializer(data={'tournament_id': self.tournament1.id, 'status': '12345678901'})
+        serializer = matchesSerializer(data={'tournament_id': self.tournament1.id, 'status': '12345678901'})
         self.assertFalse(serializer.is_valid(), msg = serializer.errors)
     
     def test_empty_status(self):
-        serializer = MatchSerializer(data={'tournament_id': self.tournament1.id, 'status': ''})
+        serializer = matchesSerializer(data={'tournament_id': self.tournament1.id, 'status': ''})
         self.assertFalse(serializer.is_valid(), msg = serializer.errors)
 
 class match_detailsSerializerTests(BaseTestSetup):

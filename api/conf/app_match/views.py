@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from .models import Match, match_details
-from .serializers import MatchSerializer, match_detailsSerializer
+from .models import matches, match_details
+from .serializers import matchesSerializer, match_detailsSerializer
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -18,9 +18,9 @@ END_OF_GAME_SCORE = 10
 
 # start: ユースケースでは本来必要ないが、データの確認のために追加
 @method_decorator(admin_only, name = 'dispatch')
-class MatchViewSet(viewsets.ModelViewSet):
-    queryset = Match.objects.all()
-    serializer_class = MatchSerializer
+class matchesViewSet(viewsets.ModelViewSet):
+    queryset = matches.objects.all()
+    serializer_class = matchesSerializer
 
 @method_decorator(admin_only, name = 'dispatch')
 class match_detailsViewSet(viewsets.ModelViewSet):
@@ -30,9 +30,9 @@ class match_detailsViewSet(viewsets.ModelViewSet):
 
 class LocalMatchView(APIView):
     def get(self, request):
-        match_id = Match.objects.filter(status = 'start').first().id
+        match_id = matches.objects.filter(status = 'start').first().id
         if match_id is None:
-            return Response({"error": "Match with start status not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "matches with start status not found."}, status=status.HTTP_404_NOT_FOUND)
         response_data = create_ponggame_dataset(get_matchdetail_with_related_data(match_id))
         return Response(response_data, status=status.HTTP_200_OK)
 
@@ -58,7 +58,7 @@ class LocalScoreView(APIView):
         # 対戦が終了した時の処理
         if matchdetail.score >= END_OF_GAME_SCORE:
             # Prepare variables use several times
-            tournament_id = Match.objects.get(id=match_id).tournament_id
+            tournament_id = matches.objects.get(id=match_id).tournament_id
             # シンプルなテーブル更新処理
             update_when_match_end(match_id, player_id, tournament_id)
 

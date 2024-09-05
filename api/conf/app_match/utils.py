@@ -1,5 +1,5 @@
-from .models import Match, match_details
-from .serializers import MatchSerializer, match_detailsSerializer
+from .models import matches, match_details
+from .serializers import matchesSerializer, match_detailsSerializer
 from rest_framework.exceptions import ValidationError
 from django.forms.models import model_to_dict
 
@@ -8,7 +8,7 @@ def create_match(tournament_id, player1, player2):
         'tournament_id': tournament_id,
         'status': 'start'
     }
-    match_serializer = MatchSerializer(data = match_data)
+    match_serializer = matchesSerializer(data = match_data)
     if match_serializer.is_valid(raise_exception = True):
         match = match_serializer.save()
     else:
@@ -66,9 +66,9 @@ def validate_and_update_matchdetail(matchdetail_instance):
     else:
         raise ValidationError(matchdetail_serializer.error)
 
-# Matchからmatch_detailsとその関連データを取得する
+# matchesからmatch_detailsとその関連データを取得する
 # args: match_id: int
-# return: match_detailsのQuerySet (関連するPlayerおよびMatchデータを含む)
+# return: match_detailsのQuerySet (関連するPlayerおよびmatchesデータを含む)
 def get_matchdetail_with_related_data(match_id):
     return match_details.objects.filter(match_id=match_id).select_related('player_id', 'match_id')
 
@@ -89,7 +89,7 @@ def create_ponggame_dataset(matchdetails_with_related):
     return ponggame_dataset
 
 # 対戦画面に必要なplayerごとのデータを作成する
-# args: match_detailsのインスタンス (関連するPlayerおよびMatchデータを含む方が良い）
+# args: match_detailsのインスタンス (関連するPlayerおよびmatchesデータを含む方が良い）
 # return: JSON
 def create_ponggame_data(matchdetail):
     return {
@@ -109,7 +109,7 @@ def update_when_match_end(match_id, player_id, tournament_id):
     # Update match_details result
     update_matchdetail_result(match_id, player_id, 'win')
     update_matchdetail_result(match_id, opponent_player_id, 'lose')
-    # Update Match status
+    # Update matches status
     update_match_status(match_id, 'end')
     # Update tournament_players status and victory_count
     update_tournamentplayer_status(tournament_id, player_id, 'win')
@@ -123,4 +123,4 @@ def get_opponent_player_id(match_id, player_id):
     return match_details.objects.filter(match_id = match_id).exclude(player_id = player_id).first().player_id.id
 
 def update_match_status(match_id, status):
-    Match.objects.filter(id = match_id).update(status = status)
+    matches.objects.filter(id = match_id).update(status = status)

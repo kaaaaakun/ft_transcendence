@@ -55,7 +55,7 @@ def create_tournament(players):
 
 # 次のトーナメントマッチを作成する
 # args: tournament_id
-# return: Matchのインスタンス, match_detailsのインスタンス2つ
+# return: matchesのインスタンス, match_detailsのインスタンス2つ
 def create_next_tournament_match(tournament_id):
     from match.utils import create_match
     tournamentplayers = tournament_players.objects.filter(tournament_id = tournament_id, status = 'await')
