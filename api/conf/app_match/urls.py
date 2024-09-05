@@ -1,10 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import MatchViewSet, MatchDetailViewSet, LocalMatchView, LocalScoreView
+from .views import MatchViewSet, match_detailsViewSet, LocalMatchView, LocalScoreView
 
 router = DefaultRouter()
 router.register(r'match', MatchViewSet, basename='match')
-router.register(r'detail', MatchDetailViewSet, basename='detail')
+router.register(r'detail', match_detailsViewSet, basename='detail')
 
 urlpatterns = [
     path('', include(router.urls)),

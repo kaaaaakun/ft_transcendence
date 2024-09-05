@@ -3,7 +3,7 @@ from django.test import TestCase
 from .models import Tournament, tournament_players
 from player.models import Player
 from player.utils import validate_players, register_players
-from match.models import Match, MatchDetail
+from match.models import Match, match_details
 from .serializers import TournamentSerializer, tournament_playersSerializer
 from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
@@ -98,7 +98,7 @@ class LocalTournamentViewTest(APITestCase):
         tournament_players.objects.all().delete()
         Player.objects.all().delete()
         Match.objects.all().delete()
-        MatchDetail.objects.all().delete()
+        match_details.objects.all().delete()
         url = reverse('local_tournament')
         data = {'players': ['P1', 'P2']}
         response = self.client.post(url, data, format='json')
@@ -126,7 +126,7 @@ class LocalTournamentViewTest(APITestCase):
         tournament_players.objects.all().delete()
         Player.objects.all().delete()
         Match.objects.all().delete()
-        MatchDetail.objects.all().delete()
+        match_details.objects.all().delete()
         player_names = ['P1', 'P2', 'P3', 'P4']
         players = register_players(validate_players(player_names))
         tournament, created_tournament_players = create_tournament(players)
@@ -180,7 +180,7 @@ class LocalTournamentViewTest(APITestCase):
       tournament_players.objects.all().delete()
       Player.objects.all().delete()
       Match.objects.all().delete()
-      MatchDetail.objects.all().delete()
+      match_details.objects.all().delete()
       player_names = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8']
       players = register_players(validate_players(player_names))
       tournament, created_tournament_players = create_tournament(players)

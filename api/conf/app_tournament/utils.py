@@ -10,7 +10,7 @@ def get_tournamentplayer_with_related_data(tournament_id):
     return tournament_players.objects.filter(tournament_id=tournament_id).select_related('tournament_id', 'player_id')
 
 # トーナメントのデータセットを作成する
-# args: tournament_playersのインスタンスのリスト, MatchDetailのインスタンス2つ
+# args: tournament_playersのインスタンスのリスト, match_detailsのインスタンス2つ
 # return: トーナメントデータセット
 def create_tournament_dataset(tournamentplayer_with_related, matchdetail1, matchdetail2):
     tournament_dataset = {}
@@ -55,7 +55,7 @@ def create_tournament(players):
 
 # 次のトーナメントマッチを作成する
 # args: tournament_id
-# return: Matchのインスタンス, MatchDetailのインスタンス2つ
+# return: Matchのインスタンス, match_detailsのインスタンス2つ
 def create_next_tournament_match(tournament_id):
     from match.utils import create_match
     tournamentplayers = tournament_players.objects.filter(tournament_id = tournament_id, status = 'await')

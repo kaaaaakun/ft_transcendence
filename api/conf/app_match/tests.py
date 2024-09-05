@@ -2,8 +2,8 @@ from django.test import TestCase
 
 from tournament.models import Tournament, tournament_players
 from player.models import Player
-from .models import Match, MatchDetail
-from .serializers import MatchSerializer, MatchDetailSerializer
+from .models import Match, match_details
+from .serializers import MatchSerializer, match_detailsSerializer
 from django.contrib.auth.models import User
 
 from django.urls import reverse
@@ -42,8 +42,8 @@ class BaseTestSetup(TestCase):
 
         # Create matchdetails
         cls.matchdetails = {}
-        cls.matchdetails[1] = MatchDetail.objects.create(match_id = cls.matches[1], player_id = cls.players[1], score = 0, result = 'await')
-        cls.matchdetails[2] = MatchDetail.objects.create(match_id = cls.matches[1], player_id = cls.players[2], score = 0, result = 'await')
+        cls.matchdetails[1] = match_details.objects.create(match_id = cls.matches[1], player_id = cls.players[1], score = 0, result = 'await')
+        cls.matchdetails[2] = match_details.objects.create(match_id = cls.matches[1], player_id = cls.players[2], score = 0, result = 'await')
 
         # Create admin user
         cls.admin = User.objects.create_user(username = 'admin', password = 'pass', is_staff = True)
@@ -89,37 +89,37 @@ class MatchSerializerTests(BaseTestSetup):
         serializer = MatchSerializer(data={'tournament_id': self.tournament1.id, 'status': ''})
         self.assertFalse(serializer.is_valid(), msg = serializer.errors)
 
-class MatchDetailSerializerTests(BaseTestSetup):
+class match_detailsSerializerTests(BaseTestSetup):
     def test_valid_data(self):
-        serializer = MatchDetailSerializer(data={'match_id': self.matches[2].id, 'player_id': self.players[1].id, 'score': 0, 'result': 'await'})
+        serializer = match_detailsSerializer(data={'match_id': self.matches[2].id, 'player_id': self.players[1].id, 'score': 0, 'result': 'await'})
         self.assertTrue(serializer.is_valid(), msg = serializer.errors)
 
     def test_minus_score(self):
-        serializer = MatchDetailSerializer(data={'match_id': self.matches[2].id, 'player_id': self.players[2].id, 'score': -1, 'result': 'await'})
+        serializer = match_detailsSerializer(data={'match_id': self.matches[2].id, 'player_id': self.players[2].id, 'score': -1, 'result': 'await'})
         is_valid = serializer.is_valid()
         print(serializer.errors) # もしエラーメッセージを出力したいときはこうする。なお、関数名のアルファベット順に出力される（defの定義順ではない）。
         self.assertFalse(is_valid, msg = serializer.errors)
 
     def test_invalid_result(self):
-        serializer = MatchDetailSerializer(data={'match_id': self.matches[2].id, 'player_id': self.players[2].id, 'score': 0, 'result': 'invalid'})
+        serializer = match_detailsSerializer(data={'match_id': self.matches[2].id, 'player_id': self.players[2].id, 'score': 0, 'result': 'invalid'})
         is_valid = serializer.is_valid()
         print(serializer.errors)
         self.assertFalse(is_valid, msg = serializer.errors)
     
     def test_ended_match(self):
-        serializer = MatchDetailSerializer(data={'match_id': self.matches[3].id, 'player_id': self.players[1].id, 'score': 0, 'result': 'await'})
+        serializer = match_detailsSerializer(data={'match_id': self.matches[3].id, 'player_id': self.players[1].id, 'score': 0, 'result': 'await'})
         is_valid = serializer.is_valid()
         print(serializer.errors)
         self.assertFalse(is_valid, msg = serializer.errors)
     
     def test_nonexistent_tournamentplayer(self):
-        serializer = MatchDetailSerializer(data={'match_id': self.matches[4].id, 'player_id': 1, 'score': 0, 'result': 'await'})
+        serializer = match_detailsSerializer(data={'match_id': self.matches[4].id, 'player_id': 1, 'score': 0, 'result': 'await'})
         is_valid = serializer.is_valid()
         print(serializer.errors)
         self.assertFalse(is_valid, msg = serializer.errors)
 
     def test_existed_matchdetail(self):
-        serializer = MatchDetailSerializer(data={'match_id': self.matches[1].id, 'player_id': self.players[1].id, 'score': 0, 'result': 'await'})
+        serializer = match_detailsSerializer(data={'match_id': self.matches[1].id, 'player_id': self.players[1].id, 'score': 0, 'result': 'await'})
         is_valid = serializer.is_valid()
         print(serializer.errors)
         self.assertFalse(is_valid, msg = serializer.errors)

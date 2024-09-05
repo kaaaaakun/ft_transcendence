@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Match, MatchDetail
+from .models import Match, match_details
 from tournament.models import Tournament, tournament_players
 from player.models import Player
 
@@ -29,9 +29,9 @@ class MatchSerializer(serializers.ModelSerializer):
         
         return data
 
-class MatchDetailSerializer(serializers.ModelSerializer):
+class match_detailsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = MatchDetail
+        model = match_details
         fields = '__all__'
 
     def validate(self, data):
@@ -61,7 +61,7 @@ class MatchDetailSerializer(serializers.ModelSerializer):
         if not tournament_players.objects.filter(tournament_id = tournament, player_id = player).exists():
             raise serializers.ValidationError("This player is not part of Tournament player.")
 
-        if not self.instance and MatchDetail.objects.filter(match_id=match, player_id=player).exists():
+        if not self.instance and match_details.objects.filter(match_id=match, player_id=player).exists():
             raise serializers.ValidationError("Matchdetail is already exist.")
         
         return data

@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from .models import Match, MatchDetail
-from .serializers import MatchSerializer, MatchDetailSerializer
+from .models import Match, match_details
+from .serializers import MatchSerializer, match_detailsSerializer
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -23,9 +23,9 @@ class MatchViewSet(viewsets.ModelViewSet):
     serializer_class = MatchSerializer
 
 @method_decorator(admin_only, name = 'dispatch')
-class MatchDetailViewSet(viewsets.ModelViewSet):
-    queryset = MatchDetail.objects.all()
-    serializer_class = MatchDetailSerializer
+class match_detailsViewSet(viewsets.ModelViewSet):
+    queryset = match_details.objects.all()
+    serializer_class = match_detailsSerializer
 # end
 
 class LocalMatchView(APIView):
@@ -44,12 +44,12 @@ class LocalScoreView(APIView):
         if match_id is None or player_id is None:
             return Response({"error": "match_id and player_id are required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # スコアをインクリメントしたMatchDetailのインスタンスを取得
+        # スコアをインクリメントしたmatch_detailsのインスタンスを取得
         matchdetail_instance = increment_score(match_id, player_id)
         if matchdetail_instance is None:
-            return Response({"error": "MatchDetail not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "match_details not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        # MatchDetailのDB情報を更新
+        # match_detailsのDB情報を更新
         try:
             matchdetail = validate_and_update_matchdetail(matchdetail_instance)
         except ValidationError as e:
