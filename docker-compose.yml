@@ -27,8 +27,6 @@ services:
       - vol_static_builder:/usr/src/vite
 
   reverseproxy:
-    build:
-      context: reverseproxy/
     container_name: "reverseproxy"
     image: nginx:1.26.1-alpine
     ports:
@@ -39,8 +37,7 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     networks:
       - net_pong
-    volumes:
-      - vol_static_builder:/var/www/html
+      
   api:
     build:
       context: api/
@@ -55,8 +52,6 @@ networks:
     name: "net_pong"
 
 volumes:
-  vol_reverseproxy:
-    name: "vol_reverseproxy"
   vol_rdbms:
     name: "vol_rdbms"
   vol_static_builder:
