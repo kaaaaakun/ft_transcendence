@@ -37,7 +37,7 @@ def create_tournament_data(tournamentplayer, is_next_player):
     }
 
 # トーナメントを作成する
-# args: Playerインスタンスのリスト
+# args: playersインスタンスのリスト
 # return: Tournamentのインスタンス, tournament_playersのインスタンスのリスト
 def create_tournament(players):
     try:

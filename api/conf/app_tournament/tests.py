@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from .models import Tournament, tournament_players
-from player.models import Player
+from player.models import players
 from player.utils import validate_players, register_players
 from match.models import matches, match_details
 from .serializers import TournamentSerializer, tournament_playersSerializer
@@ -27,7 +27,7 @@ class BaseTestSetup(APITestCase):
         # Create players
         cls.players = {}
         for i in range(1, 3):
-            cls.players[i] = Player.objects.create(id = i, name = f'P{i}')
+            cls.players[i] = players.objects.create(id = i, name = f'P{i}')
 
 class TournamentSerializerTest(BaseTestSetup):
     def test_valid_data(self):
@@ -96,7 +96,7 @@ class LocalTournamentViewTest(APITestCase):
     def test_two_palyers(self):
         Tournament.objects.all().delete()
         tournament_players.objects.all().delete()
-        Player.objects.all().delete()
+        players.objects.all().delete()
         matches.objects.all().delete()
         match_details.objects.all().delete()
         url = reverse('local_tournament')
@@ -124,12 +124,12 @@ class LocalTournamentViewTest(APITestCase):
     def test_four_players(self):
         Tournament.objects.all().delete()
         tournament_players.objects.all().delete()
-        Player.objects.all().delete()
+        players.objects.all().delete()
         matches.objects.all().delete()
         match_details.objects.all().delete()
         player_names = ['P1', 'P2', 'P3', 'P4']
-        players = register_players(validate_players(player_names))
-        tournament, created_tournament_players = create_tournament(players)
+        registered_players = register_players(validate_players(player_names))
+        tournament, created_tournament_players = create_tournament(registered_players)
         self.assertEqual(tournament.num_of_player, 4)
         self.assertEqual(tournament.status, 'start')
         for i in range(4):
@@ -178,12 +178,12 @@ class LocalTournamentViewTest(APITestCase):
     def test_eight_players(self):
       Tournament.objects.all().delete()
       tournament_players.objects.all().delete()
-      Player.objects.all().delete()
+      players.objects.all().delete()
       matches.objects.all().delete()
       match_details.objects.all().delete()
       player_names = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8']
-      players = register_players(validate_players(player_names))
-      tournament, created_tournament_players = create_tournament(players)
+      registered_players = register_players(validate_players(player_names))
+      tournament, created_tournament_players = create_tournament(registered_players)
       self.assertEqual(tournament.num_of_player, 8)
       self.assertEqual(tournament.status, 'start')
       for i in range(8):

@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from tournament.models import Tournament, tournament_players
-from player.models import Player
+from player.models import players
 from .models import matches, match_details
 from .serializers import matchesSerializer, match_detailsSerializer
 from django.contrib.auth.models import User
@@ -21,7 +21,7 @@ class BaseTestSetup(TestCase):
         # Create players
         cls.players = {}
         for i in range(1, 9):
-            cls.players[i] = Player.objects.create(id = i, name = f'P{i}')
+            cls.players[i] = players.objects.create(id = i, name = f'P{i}')
 
         # Create tournamentplayers
         cls.tournamentplayers = {}

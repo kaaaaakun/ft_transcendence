@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import matches, match_details
 from tournament.models import Tournament, tournament_players
-from player.models import Player
+from player.models import players
 
 MATCH_STATUS_CHOICES = ['start', 'end']
 MATCHDETAIL_RESULT_CHOICES = ['win', 'lose', 'await']

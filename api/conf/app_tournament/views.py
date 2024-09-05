@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from player.utils import validate_players, register_players
 from .utils import create_tournament, create_next_tournament_match, create_tournament_dataset, get_tournamentplayer_with_related_data
-from player.serializers import PlayerSerializer
+from player.serializers import playersSerializer
 
 from django.utils.decorators import method_decorator
 from utils.decorators import admin_only
@@ -34,7 +34,7 @@ class LocalTournamentView(APIView):
             return Response("player names are required.", status=status.HTTP_400_BAD_REQUEST)
         # プレイヤー名をシャッフル
         random.shuffle(player_names)
-        # PlayerをDBに登録
+        # playersをDBに登録
         try:
             players = register_players(validate_players(player_names))
         except ValidationError as e:

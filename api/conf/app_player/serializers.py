@@ -1,12 +1,12 @@
 from rest_framework import serializers
-from .models import Player
+from .models import players
 import re
 
 CHARACTERS_NOT_ALLOWD = r"[<>&'\"]"
 
-class PlayerSerializer(serializers.ModelSerializer):
+class playersSerializer(serializers.ModelSerializer):
 	class Meta:
-		model = Player
+		model = players
 		fields = '__all__'
 
 	# 受け取ったdataが、モデルのフィールドに適合するか検証する。

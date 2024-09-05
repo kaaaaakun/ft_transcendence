@@ -68,7 +68,7 @@ def validate_and_update_matchdetail(matchdetail_instance):
 
 # matchesからmatch_detailsとその関連データを取得する
 # args: match_id: int
-# return: match_detailsのQuerySet (関連するPlayerおよびmatchesデータを含む)
+# return: match_detailsのQuerySet (関連するplayersおよびmatchesデータを含む)
 def get_matchdetail_with_related_data(match_id):
     return match_details.objects.filter(match_id=match_id).select_related('player_id', 'match_id')
 
@@ -89,7 +89,7 @@ def create_ponggame_dataset(matchdetails_with_related):
     return ponggame_dataset
 
 # 対戦画面に必要なplayerごとのデータを作成する
-# args: match_detailsのインスタンス (関連するPlayerおよびmatchesデータを含む方が良い）
+# args: match_detailsのインスタンス (関連するplayersおよびmatchesデータを含む方が良い）
 # return: JSON
 def create_ponggame_data(matchdetail):
     return {
