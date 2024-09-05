@@ -26,10 +26,8 @@ test match # エンドポイントのテスト。manage.pyのあるディレク�
 ## ディレクトリ構成
 ```
 ├── Dockerfile
-├── docker-compose.yml # 開発フェーズのコンテナ作成用
 ├── Makefile # 開発フェーズのコンテナ作成用
 ├── README.md
-├── .env.sampme # 開発フェーズのコンテナ作成用
 ├── conf # Djangoアプリなどの動作に必要なファイル。Dockerfileでコンテナへコピーする。
 │   ├── app_xxx # アプリ毎にディレクトリとソースファイルを作成
 │   │   ├── ~~.py
@@ -46,9 +44,11 @@ test match # エンドポイントのテスト。manage.pyのあるディレク�
 │   │   └── decorators.py
 │   └── project # プロジェクトディレクトリのソースファイル
 │       ├── settings.py
-│       ├── urls.py
-│       └── dev # 開発フェーズの設定用
-│           └── settings.py
+│       └── urls.py
+├── dev # 開発フェーズ専用のファイル類
+│   ├── docker-compose.yml
+│   ├── settings.py
+│   └── .env.sample
 └── tool # ファイルが1つだけなら親ディレクトリにファイルを移動するかも
     └── entrypoint.sh
 ```
