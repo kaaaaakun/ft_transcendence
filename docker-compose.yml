@@ -37,7 +37,14 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     networks:
       - net_pong
-      
+    # depends_on:
+    #   api:
+    #     condition: service_healthy
+    #   static-builder:
+    #     condition: service_healthy
+    #   rdbms:
+    #     condition: service_healthy
+
   api:
     build:
       context: api/
