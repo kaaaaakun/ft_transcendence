@@ -111,7 +111,7 @@ def update_when_match_end(match_id, player_id, tournament_id):
     update_matchdetail_result(match_id, opponent_player_id, 'lose')
     # Update Match status
     update_match_status(match_id, 'end')
-    # Update TournamentPlayer status and victory_count
+    # Update tournament_players status and victory_count
     update_tournamentplayer_status(tournament_id, player_id, 'win')
     update_tournamentplayer_status(tournament_id, opponent_player_id, 'lose')
     increment_tournamentplayer_vcount(tournament_id, player_id)    

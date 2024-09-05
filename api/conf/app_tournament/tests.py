@@ -1,10 +1,10 @@
 from django.test import TestCase
 
-from .models import Tournament, TournamentPlayer
+from .models import Tournament, tournament_players
 from player.models import Player
 from player.utils import validate_players, register_players
 from match.models import Match, MatchDetail
-from .serializers import TournamentSerializer, TournamentPlayerSerializer
+from .serializers import TournamentSerializer, tournament_playersSerializer
 from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
 
@@ -62,40 +62,40 @@ class TournamentSerializerTest(BaseTestSetup):
       serializer = TournamentSerializer(data={'num_of_player': 4, 'status': '12345678901'})
       self.assertFalse(serializer.is_valid(), msg = serializer.errors)
 
-class TournamentPlayerSerializerTest(BaseTestSetup):
+class tournament_playersSerializerTest(BaseTestSetup):
     def test_valid_data(self):
-        serializer = TournamentPlayerSerializer(data={'tournament_id': self.tournament1.id, 'player_id': self.players[1].id , 'status': 'await', 'victory_count': 0})
+        serializer = tournament_playersSerializer(data={'tournament_id': self.tournament1.id, 'player_id': self.players[1].id , 'status': 'await', 'victory_count': 0})
         self.assertTrue(serializer.is_valid(), serializer.errors)
 
     def test_minus_victory_count(self):
-        serializer = TournamentPlayerSerializer(data={'tournament_id': self.tournament1.id, 'player_id': self.players[2].id , 'status': 'await', 'victory_count': -1})
+        serializer = tournament_playersSerializer(data={'tournament_id': self.tournament1.id, 'player_id': self.players[2].id , 'status': 'await', 'victory_count': -1})
         self.assertFalse(serializer.is_valid(), msg = serializer.errors)
 
     def test_extra_fields(self):
-        serializer = TournamentPlayerSerializer(data={'tournament_id': self.tournament1.id, 'player_id': self.players[2].id , 'status': 'await', 'victory_count': 0, 'extra_field': 'value'})
+        serializer = tournament_playersSerializer(data={'tournament_id': self.tournament1.id, 'player_id': self.players[2].id , 'status': 'await', 'victory_count': 0, 'extra_field': 'value'})
         self.assertTrue(serializer.is_valid(), serializer.errors)
     
     def test_missing_field(self):
-        serializer = TournamentPlayerSerializer(data={'player_id': self.players[2].id , 'status': 'await', 'victory_count': 0})
+        serializer = tournament_playersSerializer(data={'player_id': self.players[2].id , 'status': 'await', 'victory_count': 0})
         self.assertFalse(serializer.is_valid(), msg = serializer.errors)
 
     def test_invalid_status(self):
-        serializer = TournamentPlayerSerializer(data={'tournament_id': self.tournament1.id, 'player_id': self.players[2].id , 'status': 'invalid', 'victory_count': 0})
+        serializer = tournament_playersSerializer(data={'tournament_id': self.tournament1.id, 'player_id': self.players[2].id , 'status': 'invalid', 'victory_count': 0})
         self.assertFalse(serializer.is_valid(), msg = serializer.errors)
 
     def test_invalid_victory_count(self):
-        serializer = TournamentPlayerSerializer(data={'tournament_id': self.tournament1.id, 'player_id': self.players[2].id , 'status': 'await', 'victory_count': 'string'})
+        serializer = tournament_playersSerializer(data={'tournament_id': self.tournament1.id, 'player_id': self.players[2].id , 'status': 'await', 'victory_count': 'string'})
         self.assertFalse(serializer.is_valid(), msg = serializer.errors)  
 
     def test_overlength_status(self):
-        serializer = TournamentPlayerSerializer(data={'tournament_id': self.tournament1.id, 'player_id': self.players[2].id , 'status': '12345678901', 'victory_count': 0})
+        serializer = tournament_playersSerializer(data={'tournament_id': self.tournament1.id, 'player_id': self.players[2].id , 'status': '12345678901', 'victory_count': 0})
         self.assertFalse(serializer.is_valid(), msg = serializer.errors)
 
     
 class LocalTournamentViewTest(APITestCase):
     def test_two_palyers(self):
         Tournament.objects.all().delete()
-        TournamentPlayer.objects.all().delete()
+        tournament_players.objects.all().delete()
         Player.objects.all().delete()
         Match.objects.all().delete()
         MatchDetail.objects.all().delete()
@@ -123,20 +123,20 @@ class LocalTournamentViewTest(APITestCase):
     
     def test_four_players(self):
         Tournament.objects.all().delete()
-        TournamentPlayer.objects.all().delete()
+        tournament_players.objects.all().delete()
         Player.objects.all().delete()
         Match.objects.all().delete()
         MatchDetail.objects.all().delete()
         player_names = ['P1', 'P2', 'P3', 'P4']
         players = register_players(validate_players(player_names))
-        tournament, tournament_players = create_tournament(players)
+        tournament, created_tournament_players = create_tournament(players)
         self.assertEqual(tournament.num_of_player, 4)
         self.assertEqual(tournament.status, 'start')
         for i in range(4):
-            self.assertEqual(tournament_players[i].tournament_id.id, tournament.id)
-            self.assertEqual(tournament_players[i].player_id.name, f'P{i+1}')
-            self.assertEqual(tournament_players[i].status, 'await')
-            self.assertEqual(tournament_players[i].victory_count, 0)
+            self.assertEqual(created_tournament_players[i].tournament_id.id, tournament.id)
+            self.assertEqual(created_tournament_players[i].player_id.name, f'P{i+1}')
+            self.assertEqual(created_tournament_players[i].status, 'await')
+            self.assertEqual(created_tournament_players[i].victory_count, 0)
         match, matchdetail1, matchdetail2 = create_next_tournament_match(tournament.id)
         self.assertEqual(match.status, 'start')
         self.assertEqual(matchdetail1.player_id.name, 'P1')
@@ -177,20 +177,20 @@ class LocalTournamentViewTest(APITestCase):
 
     def test_eight_players(self):
       Tournament.objects.all().delete()
-      TournamentPlayer.objects.all().delete()
+      tournament_players.objects.all().delete()
       Player.objects.all().delete()
       Match.objects.all().delete()
       MatchDetail.objects.all().delete()
       player_names = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8']
       players = register_players(validate_players(player_names))
-      tournament, tournament_players = create_tournament(players)
+      tournament, created_tournament_players = create_tournament(players)
       self.assertEqual(tournament.num_of_player, 8)
       self.assertEqual(tournament.status, 'start')
       for i in range(8):
-          self.assertEqual(tournament_players[i].tournament_id.id, tournament.id)
-          self.assertEqual(tournament_players[i].player_id.name, f'P{i+1}')
-          self.assertEqual(tournament_players[i].status, 'await')
-          self.assertEqual(tournament_players[i].victory_count, 0)
+          self.assertEqual(created_tournament_players[i].tournament_id.id, tournament.id)
+          self.assertEqual(created_tournament_players[i].player_id.name, f'P{i+1}')
+          self.assertEqual(created_tournament_players[i].status, 'await')
+          self.assertEqual(created_tournament_players[i].victory_count, 0)
       match, matchdetail1, matchdetail2 = create_next_tournament_match(tournament.id)
       self.assertEqual(match.status, 'start')
       self.assertEqual(matchdetail1.player_id.name, 'P1')

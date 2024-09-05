@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Match, MatchDetail
-from tournament.models import Tournament, TournamentPlayer
+from tournament.models import Tournament, tournament_players
 from player.models import Player
 
 MATCH_STATUS_CHOICES = ['start', 'end']
@@ -58,7 +58,7 @@ class MatchDetailSerializer(serializers.ModelSerializer):
 
         tournament = match.tournament_id
         player = data.get('player_id')
-        if not TournamentPlayer.objects.filter(tournament_id = tournament, player_id = player).exists():
+        if not tournament_players.objects.filter(tournament_id = tournament, player_id = player).exists():
             raise serializers.ValidationError("This player is not part of Tournament player.")
 
         if not self.instance and MatchDetail.objects.filter(match_id=match, player_id=player).exists():

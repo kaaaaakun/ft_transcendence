@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from tournament.models import Tournament, TournamentPlayer
+from tournament.models import Tournament, tournament_players
 from player.models import Player
 from .models import Match, MatchDetail
 from .serializers import MatchSerializer, MatchDetailSerializer
@@ -26,11 +26,11 @@ class BaseTestSetup(TestCase):
         # Create tournamentplayers
         cls.tournamentplayers = {}
         for i in range(1, 3):
-            cls.tournamentplayers[i] = TournamentPlayer.objects.create(player_id = cls.players[i], tournament_id = cls.tournament1, victory_count = 0, status = 'await')
+            cls.tournamentplayers[i] = tournament_players.objects.create(player_id = cls.players[i], tournament_id = cls.tournament1, victory_count = 0, status = 'await')
         for i in range(3, 7):
-            cls.tournamentplayers[i] = TournamentPlayer.objects.create(player_id = cls.players[i], tournament_id = cls.tournament2, victory_count = 0, status = 'await')
+            cls.tournamentplayers[i] = tournament_players.objects.create(player_id = cls.players[i], tournament_id = cls.tournament2, victory_count = 0, status = 'await')
         for i in range(1, 9):
-            cls.tournamentplayers[i] = TournamentPlayer.objects.create(player_id = cls.players[i], tournament_id = cls.tournament3, victory_count = 0, status = 'await')
+            cls.tournamentplayers[i] = tournament_players.objects.create(player_id = cls.players[i], tournament_id = cls.tournament3, victory_count = 0, status = 'await')
 
         # Create matches
         cls.matches = {}
@@ -176,11 +176,11 @@ class LocalScoreViewTests(APITestCase, BaseTestSetup):
         self.matches[1].refresh_from_db()
         self.assertEqual(self.matches[1].status, 'end')
         self.tournamentplayers[1].refresh_from_db() # リフレッシュの機能不全のため, tournamentplayerはget()で取得する。
-        self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament1.id, player_id = self.players[1].id).victory_count, 0)
-        self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament1.id, player_id = self.players[1].id).status, 'lose')
+        self.assertEqual(tournament_players.objects.get(tournament_id = self.tournament1.id, player_id = self.players[1].id).victory_count, 0)
+        self.assertEqual(tournament_players.objects.get(tournament_id = self.tournament1.id, player_id = self.players[1].id).status, 'lose')
         self.tournamentplayers[2].refresh_from_db()
-        self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament1.id, player_id = self.players[2].id).victory_count, 1)
-        self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament1.id, player_id = self.players[2].id).status, 'win')
+        self.assertEqual(tournament_players.objects.get(tournament_id = self.tournament1.id, player_id = self.players[2].id).victory_count, 1)
+        self.assertEqual(tournament_players.objects.get(tournament_id = self.tournament1.id, player_id = self.players[2].id).status, 'win')
         self.tournament1.refresh_from_db()
         self.assertEqual(self.tournament1.status, 'end')
         self.assertEqual(response.data['match_end'], True)

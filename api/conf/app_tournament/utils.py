@@ -1,16 +1,16 @@
-from .models import Tournament, TournamentPlayer
-from .serializers import TournamentSerializer , TournamentPlayerSerializer
+from .models import Tournament, tournament_players
+from .serializers import TournamentSerializer , tournament_playersSerializer
 from rest_framework.exceptions import ValidationError
 from django.db.models import F
 
 # トーナメントの参加者を取得する
 # args: tournament_id
-# return: TournamentPlayerのインスタンスのリスト
+# return: tournament_playersのインスタンスのリスト
 def get_tournamentplayer_with_related_data(tournament_id):
-    return TournamentPlayer.objects.filter(tournament_id=tournament_id).select_related('tournament_id', 'player_id')
+    return tournament_players.objects.filter(tournament_id=tournament_id).select_related('tournament_id', 'player_id')
 
 # トーナメントのデータセットを作成する
-# args: TournamentPlayerのインスタンスのリスト, MatchDetailのインスタンス2つ
+# args: tournament_playersのインスタンスのリスト, MatchDetailのインスタンス2つ
 # return: トーナメントデータセット
 def create_tournament_dataset(tournamentplayer_with_related, matchdetail1, matchdetail2):
     tournament_dataset = {}
@@ -23,7 +23,7 @@ def create_tournament_dataset(tournamentplayer_with_related, matchdetail1, match
     return tournament_dataset
 
 # トーナメントデータを作成する
-# args: TournamentPlayerのインスタンス, 次のプレイヤーかどうか
+# args: tournament_playersのインスタンス, 次のプレイヤーかどうか
 # return: トーナメントデータ
 def create_tournament_data(tournamentplayer, is_next_player):
     return {
@@ -38,7 +38,7 @@ def create_tournament_data(tournamentplayer, is_next_player):
 
 # トーナメントを作成する
 # args: Playerインスタンスのリスト
-# return: Tournamentのインスタンス, TournamentPlayerのインスタンスのリスト
+# return: Tournamentのインスタンス, tournament_playersのインスタンスのリスト
 def create_tournament(players):
     try:
         tournament = register_tournament(validate_tournament(len(players), 'start'))
@@ -58,7 +58,7 @@ def create_tournament(players):
 # return: Matchのインスタンス, MatchDetailのインスタンス2つ
 def create_next_tournament_match(tournament_id):
     from match.utils import create_match
-    tournamentplayers = TournamentPlayer.objects.filter(tournament_id = tournament_id, status = 'await')
+    tournamentplayers = tournament_players.objects.filter(tournament_id = tournament_id, status = 'await')
     if (tournamentplayers.count() < 2):
         raise ValidationError("Not enough players with status 'await' to create a match.")
     return create_match(tournament_id, tournamentplayers[0], tournamentplayers[1])
@@ -91,7 +91,7 @@ def validate_tournament_player(tournament_id, player_id, status, victory_count):
         'status': status,
         'victory_count': victory_count
     }
-    tournament_player_serializer = TournamentPlayerSerializer(data = tournament_player_data)
+    tournament_player_serializer = tournament_playersSerializer(data = tournament_player_data)
     if tournament_player_serializer.is_valid(raise_exception = True):
         return tournament_player_serializer.validated_data
     else:
@@ -107,38 +107,38 @@ def validate_tournament_players(tournament_id, players, status = 'await', victor
     return valid_tournament_players
 
 # トーナメントプレイヤーをDBに登録する
-# args: TournamentPlayer(validated)のインスタンス
-# return: TournamentPlayerのオブジェクト
+# args: tournament_players(validated)のインスタンス
+# return: tournament_playersのオブジェクト
 def register_tournament_players(valid_tournament_players_data):
 	players = []
 	for player_data in valid_tournament_players_data:
-			player = TournamentPlayer.objects.create(**player_data)
+			player = tournament_players.objects.create(**player_data)
 			players.append(player)
 	return players
 
-# TournamentPlayerのステータスを更新する
+# tournament_playersのステータスを更新する
 def update_tournamentplayer_status(tournament_id, player_id, status):
-    TournamentPlayer.objects.filter(tournament_id = tournament_id, player_id = player_id).update(status = status)
+    tournament_players.objects.filter(tournament_id = tournament_id, player_id = player_id).update(status = status)
 
-# TournamentPlayerのvcountをインクリメントする
+# tournament_playersのvcountをインクリメントする
 def increment_tournamentplayer_vcount(tournament_id, player_id):
-    TournamentPlayer.objects.filter(tournament_id = tournament_id, player_id = player_id).update(victory_count = F('victory_count') + 1)
+    tournament_players.objects.filter(tournament_id = tournament_id, player_id = player_id).update(victory_count = F('victory_count') + 1)
 
-# TournamentPlayerでラウンドが終了したかどうかを判定する
+# tournament_playersでラウンドが終了したかどうかを判定する
 def is_round_end(tournament_id):
-    tournamentplayers = TournamentPlayer.objects.filter(tournament_id = tournament_id)
+    tournamentplayers = tournament_players.objects.filter(tournament_id = tournament_id)
     # awaitステータスのプレイヤーがいたらラウンド終了ではない
     if tournamentplayers.filter(status = 'await').exists():
         return False
     return True
 
-# TournamentPlayerのwinをawaitに変更する
+# tournament_playersのwinをawaitに変更する
 def update_tournamentplayer_win_to_await(tournament_id):
-    TournamentPlayer.objects.filter(tournament_id = tournament_id, status = 'win').update(status = 'await')
+    tournament_players.objects.filter(tournament_id = tournament_id, status = 'win').update(status = 'await')
 
 # Tournamentがが終了したかを判定する
 def is_tournament_end(tournament_id):
-    tournamentplayers = TournamentPlayer.objects.filter(tournament_id = tournament_id)
+    tournamentplayers = tournament_players.objects.filter(tournament_id = tournament_id)
     # awaitステータスのプレイヤー1人だけの場合はトーナメント終了
     if tournamentplayers.filter(status = 'await').count() == 1:
         tournamentplayers.filter(status = 'await').update(status = 'win')
