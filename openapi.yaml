@@ -1,0 +1,250 @@
+openapi: 3.0.0
+info:
+  title: Tournament API
+  version: 1.0.0
+  description: トーナメント、試合、プレイヤーの管理用API。
+  contact:
+    name: とらせん
+    url: https://www.example.com/support
+    email: support@example.com    
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+tags:
+  - name: local_play
+    description: localでponggameを遊ぶためのAPI
+
+paths:
+  /api/tournaments/local:
+    post:
+      tags:
+        - local_play
+      summary: トーナメントの作成
+      description: プレイヤーのリストを使用して新しいトーナメントを作成します。プレイヤーの数は2の累乗（例：2、4、8、16）でなければなりません。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/tournament_request"
+      responses:
+        "200":
+          description: トーナメントの待機情報
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/tournament_response"
+        default:
+          description: エラーレスポンスまたはその他のレスポンス
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+    get:
+      tags:
+        - local_play
+      summary: トーナメントの表示
+      description: 試合からトーナメントに戻るためのAPI。
+      responses:
+        "200":
+          description: トーナメント表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/tournament_response"
+        default:
+          description: エラーレスポンスまたはその他のレスポンス
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+
+  /api/matches/local:
+    get:
+      tags:
+        - local_play
+      summary: 試合の開始
+      description: 次の試合の詳細を取得します。
+      responses:
+        "200":
+          description: 試合情報
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/match_status"
+        default:
+          description: エラーレスポンスまたはその他のレスポンス
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+
+  /api/matches/local/score:
+    patch:
+      tags:
+        - local_play
+      summary: スコアの更新
+      description: 試合中のプレイヤーのスコアを増加させます。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/score"
+      responses:
+        "200":
+          description: 更新された試合スコア情報
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/match_status"
+        default:
+          description: エラーレスポンスまたはその他のレスポンス
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+
+components:
+  schemas:
+    tournament_request:
+      type: object
+      properties:
+        players:
+          type: array
+          items:
+            type: string
+      required:
+        - players
+      example:
+        players:
+          - "Alice"
+          - "Bob"
+          - "Charlie"
+          - "David"
+
+    tournament_response:
+      type: object
+      properties:
+        participants:
+          type: array
+          items:
+            type: object
+            properties:
+              player:
+                $ref: "#/components/schemas/player"
+              tournament_players:
+                $ref: "#/components/schemas/tournament_player"
+              next_player:
+                type: boolean
+      required:
+        - participants
+      example:
+        participants:
+          - player:
+              name: "Alice"
+            tournament_players:
+              victory_count: 0
+            next_player: false
+          - player:
+              name: "Bob"
+            tournament_players:
+              victory_count: 1
+            next_player: true
+          - player:
+              name: "Charlie"
+            tournament_players:
+              victory_count: 0
+            next_player: true
+          - player:
+              name: "David"
+            tournament_players:
+              victory_count: 1
+            next_player: false
+
+    match_status:
+      type: object
+      properties:
+        players:
+          type: array
+          items:
+            type: object
+            properties:
+              player:
+                $ref: "#/components/schemas/player"
+              match_details:
+                $ref: "#/components/schemas/match_details"
+        end_match:
+          type: boolean
+      required:
+        - players
+        - end_match
+      example:
+        players:
+          - player:
+              name: "Alice"
+            match_details:
+              player_id: 1
+              match_id: 1
+              score: 1
+          - player:
+              name: "Bob"
+            match_details:
+              player_id: 2
+              match_id: 1
+              score: 0
+        end_match:
+            false
+
+    score:
+      type: object
+      properties:
+        match_details:
+          $ref: "#/components/schemas/match_details"
+      example:
+        match_id: 1
+        player_id: 1
+
+    player:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+        - name
+
+    tournament_player:
+      type: object
+      properties:
+        victory_count:
+          type: integer
+      required:
+        - victory_count
+
+    match_details:
+      type: object
+      properties:
+        player_id:
+          type: integer
+        match_id:
+          type: integer
+        score:
+          type: integer
+      required:
+        - player_id
+        - match_id
+
+    error_response:
+      type: object
+      properties:
+        error_code:
+          type: integer
+        message:
+          type: string
+      required:
+        - error_code
+        - message
+      example:
+        error_code: 400
+        message: "無効なリクエストです。"
