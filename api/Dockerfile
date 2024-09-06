@@ -120,7 +120,7 @@ FROM development_common AS development_asgi
 #########################
 FROM base AS deploy_wsgi
 
-ENTRYPOINT [ "trans/entrypoint.sh" ]
+ENTRYPOINT [ "/trans/entrypoint.sh" ]
 CMD [ "sh", "-c", "gunicorn ${DJANGO_PROJECT_NAME}.wsgi:application --bind ${BIND_ADDRESS}:${BIND_PORT}" ]
 
 

@@ -48,11 +48,26 @@ services:
   api:
     build:
       context: api/
+      target: deploy_wsgi
     container_name: "api"
     expose:
       - "8000"
     networks:
       - net_pong
+    environment:
+      DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME}
+      DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL}
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    depends_on:
+      rdbms:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-H", "Host: reverseproxy", "http://localhost:8000"]
+      interval: 5s
+      retries: 5
 
 networks:
   net_pong:
