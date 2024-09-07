@@ -10,19 +10,19 @@ ARG PSYCOPG_VERSION=3.1.8
 ARG DJANGO_VERSION=4.2
 ARG DJANGO_REST_VERSION=3.15.2
 ARG GUNICORN_VERSION=23.0.0
-
 ## misc
 
 
-# コンテナ起動後にも利用する環境変数
-## Djangoのsuperuser作成時のデフォルト値(https://kamatimaru.hatenablog.com/entry/2021/02/28/030646)
+# コンテナ起動後にも利用する環境変数(secretは.envへ)
 ENV DJANGO_PROJECT_NAME trans
 ENV DJANGO_PROJECT_DIR /${DJANGO_PROJECT_NAME}/
 RUN export SECRET_KEY=$(python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())') && \
     echo "SECRET_KEY=${SECRET_KEY}" >> /etc/environment
 ENV SECRET_KEY=$SECRET_KEY
+ENV BIND_ADDRESS 0.0.0.0
+ENV BIND_PORT 8000
 
-# 必要なソフト(bainary)をインストール
+# install for deploy
 RUN apt-get update
 ## gcc: psycopgのインストールに必要
 ## libpq-dev: psycopgの動作に必要
@@ -75,17 +75,25 @@ RUN python ${DJANGO_PROJECT_DIR}manage.py makemigrations
 COPY tool/entrypoint.sh ${DJANGO_PROJECT_DIR}
 RUN chmod +x ${DJANGO_PROJECT_DIR}entrypoint.sh
 
+############################
+# development common stage #
+############################
+FROM base AS development_common
+
+# dev用の制限が緩いsettings.pyをコピー
+COPY dev/settings.py ${DJANGO_PROJECT_DIR}${DJANGO_PROJECT_NAME}/
+
+# コンテナ内で"test"コマンドを実行すると、Djangoのtestが実行できるようにaliasを設定
+RUN echo "alias test='python manage.py test'" >> ~/.bashrc
+
 
 ##################################
 # development_djangoserver stage #
 ##################################
-FROM base AS development_djangoserver
+FROM development_common AS development_djangoserver
 
 # コンテナ内で"run"コマンドを実行すると、Djangoの開発サーバーが起動するようにaliasを設定
-RUN echo "alias run='python manage.py runserver 0.0.0.0:8000'" >> ~/.bashrc
-
-# コンテナ内で"test"コマンドを実行すると、Djangoのtestが実行できるようにaliasを設定
-RUN echo "alias test='python manage.py test'" >> ~/.bashrc
+RUN echo "alias run='python manage.py runserver ${BIND_ADDRESS}:${BIND_PORT}'" >> ~/.bashrc
 
 ENTRYPOINT [ "/trans/entrypoint.sh" ]
 CMD ["sleep", "infinity"]
@@ -93,10 +101,10 @@ CMD ["sleep", "infinity"]
 ##########################
 # development_wsgi stage #
 ##########################
-FROM base AS development_wsgi
+FROM development_common AS development_wsgi
 
 # コンテナ内で"run"コマンドを実行すると、Gunicornが起動するようにaliasを設定
-RUN echo "alias run='gunicorn ${DJANGO_PROJECT_NAME}.wsgi:application --bind 0.0.0.0:8000'" >> ~/.bashrc
+RUN echo "alias run='gunicorn ${DJANGO_PROJECT_NAME}.wsgi:application --bind ${BIND_ADDRESS}:${BIND_PORT}'" >> ~/.bashrc
 
 ENTRYPOINT [ "/trans/entrypoint.sh" ]
 CMD ["sleep", "infinity"]
@@ -104,10 +112,19 @@ CMD ["sleep", "infinity"]
 ##########################
 # development_asgi stage #
 ##########################
-FROM base AS development_asgi
+FROM development_common AS development_asgi
 
 
-###############
-# build stage #
-###############
-FROM base AS build
+#########################
+# deploy_wsgi stage #
+#########################
+FROM base AS deploy_wsgi
+
+ENTRYPOINT [ "/trans/entrypoint.sh" ]
+CMD [ "sh", "-c", "gunicorn ${DJANGO_PROJECT_NAME}.wsgi:application --bind ${BIND_ADDRESS}:${BIND_PORT}" ]
+
+
+#########################
+# deploy_asgi stage #
+#########################
+FROM base AS deploy_asgi

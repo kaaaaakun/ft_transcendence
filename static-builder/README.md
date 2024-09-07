@@ -87,7 +87,7 @@ function Counter() {
     Teact.createElement("p", null, `Count: ${count}`),
     Teact.createElement(
       "button",
-      { onClick: () => setCount(count + 1) },
+      { onClick: () => setCount((c) => c + 1) },
       "Increment",
     ),
   );
@@ -112,6 +112,35 @@ function ParentComponent() {
 
 function ChildComponent({ onClick }) {
   return Teact.createElement('button', { onClick: onClick }, 'Increment')
+}
+```
+
+### useEffectフック
+
+第二引数で指定した依存関係が変化すると第一引数で渡したコールバックが実行される
+
+```js
+function Counter() {
+  const [count, setCount] = Teact.useState(0)
+
+  Teact.useEffect(() => {
+    console.log('count', count)
+  }, [count])
+
+  return Teact.createElement(
+    'div',
+    {},
+    Teact.createElement(
+      'h1',
+      {},
+      count
+    ),
+    Teact.createElement(
+      'button',
+      { onClick: () => setCount((c) => c + 1) },
+      'Count'
+    ),
+  )
 }
 ```
 
