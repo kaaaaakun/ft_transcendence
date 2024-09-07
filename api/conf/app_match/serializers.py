@@ -1,10 +1,10 @@
 from rest_framework import serializers
 from .models import Match, MatchDetail
-from tmt.models import Tournament, TournamentPlayer
-from plyr.models import Player
+from tournament.models import Tournament, TournamentPlayer
+from player.models import Player
 
-STATUS_CHOICES = ['start', 'end']
-RESULT_CHOICES = ['win', 'lose', 'await']
+MATCH_STATUS_CHOICES = ['start', 'end']
+MATCHDETAIL_RESULT_CHOICES = ['win', 'lose', 'await']
 
 class MatchSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,7 +19,7 @@ class MatchSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("key 'status' is required.")
 
         # dataのフィールド値が期待と異なる
-        if data['status'] not in STATUS_CHOICES:
+        if data['status'] not in MATCH_STATUS_CHOICES:
             raise serializers.ValidationError("Match 'status' is invalid value.")
 
         # dataのForeignKeyの値が、新しいデータの追加条件に適合していない
@@ -48,7 +48,7 @@ class MatchDetailSerializer(serializers.ModelSerializer):
         # dataのフィールド値が期待と異なる
         if data['score'] < 0:
             raise serializers.ValidationError("Match 'score' can't set below 0.")
-        if data['result'] not in RESULT_CHOICES:
+        if data['result'] not in MATCHDETAIL_RESULT_CHOICES:
             raise serializers.ValidationError("Matchdetail 'result' is invalid value.")
 
         # dataのForeignKeyの値が、新しいデータの追加条件に適合していない
@@ -61,7 +61,7 @@ class MatchDetailSerializer(serializers.ModelSerializer):
         if not TournamentPlayer.objects.filter(tournament_id = tournament, player_id = player).exists():
             raise serializers.ValidationError("This player is not part of Tournament player.")
 
-        if MatchDetail.objects.filter(match_id=match, player_id=player).exists():
+        if not self.instance and MatchDetail.objects.filter(match_id=match, player_id=player).exists():
             raise serializers.ValidationError("Matchdetail is already exist.")
         
         return data

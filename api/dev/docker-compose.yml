@@ -3,7 +3,7 @@ services:
   # バックエンドのサービス
   backend:
     build:
-      context: .
+      context: ../
       dockerfile: ./Dockerfile
       target: development_djangoserver # 開発用のDockerfileのターゲット
     ports:
@@ -18,11 +18,11 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     depends_on:
-      db:
+      rdbms:
         condition: service_healthy
 
 
-  db:
+  rdbms:
     image: postgres:latest
     volumes:
       - postgres_data:/var/lib/postgresql/data/

@@ -6,40 +6,75 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - "5432:5432"
+    volumes:
+      - vol_rdbms:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    expose:
+      - "5432"
     networks:
       - net_pong
 
   static-builder:
     build:
       context: static-builder/
+      target: build
     container_name: "static-builder"
+    volumes:
+      - vol_static_builder:/usr/src/vite
 
   reverseproxy:
-    build:
-      context: reverseproxy/
     container_name: "reverseproxy"
+    image: nginx:1.26.1-alpine
     ports:
       - "80:80"
       - "443:443"
+    volumes:
+      # TODO mount ssl/tls certificate volume
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     networks:
       - net_pong
+    # depends_on:
+    #   api:
+    #     condition: service_healthy
+    #   static-builder:
+    #     condition: service_healthy
+    #   rdbms:
+    #     condition: service_healthy
 
   api:
     build:
       context: api/
+      target: deploy_wsgi
     container_name: "api"
+    expose:
+      - "8000"
     networks:
       - net_pong
+    environment:
+      DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME}
+      DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL}
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    depends_on:
+      rdbms:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-H", "Host: reverseproxy", "http://localhost:8000"]
+      interval: 5s
+      retries: 5
 
 networks:
   net_pong:
     name: "net_pong"
 
 volumes:
-  vol_reverseproxy:
-    name: "vol_reverseproxy"
   vol_rdbms:
     name: "vol_rdbms"
-
+  vol_static_builder:
+    name: "vol_static_builder"
