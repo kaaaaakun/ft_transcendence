@@ -30,8 +30,6 @@ services:
     entrypoint: ["sh", "-c", "pnpm config set store-dir /tmp/pnpm/store && pnpm install --frozen-lockfile && pnpm dev"]
 
   reverseproxy:
-    build:
-      context: reverseproxy/
     container_name: "reverseproxy"
     image: nginx:1.26.1-alpine
     ports:
@@ -40,6 +38,14 @@ services:
       - ./nginx/nginx.local.conf:/etc/nginx/nginx.conf
     networks:
       - net_pong
+    # depends_on:
+    #   api:
+    #     condition: service_healthy
+    #   static-builder:
+    #     condition: service_healthy
+    #   rdbms:
+    #     condition: service_healthy
+
 
   api:
     build:
@@ -70,7 +76,5 @@ networks:
     name: "net_pong"
 
 volumes:
-  vol_reverseproxy:
-    name: "vol_reverseproxy"
   vol_rdbms:
     name: "vol_rdbms"
