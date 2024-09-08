@@ -20,6 +20,7 @@ def create_tournament_dataset(tournamentplayer_with_related, matchdetail1, match
                                                     (matchdetail1.player_id.id == tournamentplayer.player_id.id
                                                         or matchdetail2.player_id.id == tournamentplayer.player_id.id)))
     tournament_dataset['participants'] = participants
+    tournament_dataset['tournament_id'] = matchdetail1.match_id.tournament_id.id
     return tournament_dataset
 
 # トーナメントデータを作成する
@@ -30,7 +31,7 @@ def create_tournament_data(tournamentplayer, is_next_player):
         "player": {
             "name": tournamentplayer.player_id.name
         },
-        "tournamentplayer": {
+        "tournament_players": {
             "victory_count": tournamentplayer.victory_count
         },
         "next_player": is_next_player
