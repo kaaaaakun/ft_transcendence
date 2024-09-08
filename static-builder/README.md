@@ -94,6 +94,27 @@ function Counter() {
 }
 ```
 
+### useCallbackフック
+
+```js
+function ParentComponent() {
+  const [count, setCount] = Teact.useState(0)
+  const incrementCount = Teact.useCallback(() => {
+    setCount(prevCount => prevCount + 1)
+  }, []) // 空の依存配列は、このコールバックが再作成されないことを意味します
+  return Teact.createElement(
+    'div',
+    null,
+    Teact.createElement('p', null, `Count: ${count}`),
+    Teact.createElement(ChildComponent, { onClick: incrementCount }),
+  )
+}
+
+function ChildComponent({ onClick }) {
+  return Teact.createElement('button', { onClick: onClick }, 'Increment')
+}
+```
+
 ### useEffectフック
 
 第二引数で指定した依存関係が変化すると第一引数で渡したコールバックが実行される

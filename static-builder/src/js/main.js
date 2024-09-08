@@ -1,9 +1,7 @@
 import '@/scss/styles.scss'
-import javascriptLogo from '@/assets/images/javascript.svg'
+import DefaultButton from '@/js/components/ui/button'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/teact'
-import viteLogo from '/vite.svg'
-import DefaultButton from '@/js/components/ui/button';
 
 function App() {
   return BaseLayout(
@@ -13,13 +11,13 @@ function App() {
       Teact.createElement(
         'h3',
         { className: 'mb-5 text-center text-light' },
-        '遊ぶモードを選んでください'
+        '遊ぶモードを選んでください',
       ),
       Teact.createElement(
         'div',
         { className: 'd-grid gap-2 col-3 mx-auto' },
-        DefaultButton({ text: '１人対戦'}),
-        DefaultButton({ text: 'トーナメント'}),
+        DefaultButton({ text: '１人対戦' }),
+        DefaultButton({ text: 'トーナメント' }),
       ),
     ),
   )

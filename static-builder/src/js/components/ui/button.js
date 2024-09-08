@@ -1,8 +1,6 @@
-import { Teact } from '@/js/teact';
+import { Teact } from '@/js/teact'
 
-const DefaultButton = ({
-  type = 'button', text, onClick,
-}) => {
+const DefaultButton = ({ type = 'button', text, onClick }) => {
   return Teact.createElement(
     'button',
     {
@@ -14,4 +12,4 @@ const DefaultButton = ({
   )
 }
 
-export default DefaultButton;
+export default DefaultButton
