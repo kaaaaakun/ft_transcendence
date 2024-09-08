@@ -100,7 +100,6 @@ function Pong() {
       }
       if (ballX + ballSize > canvas.width - paddleWidth && ballY >= paddle2Y && ballY <= paddle2Y + paddleHeight) {
         ballSpeedX = -ballSpeedX;
-        console.log('hit');
       }
       
       if (ballX - ballSize < 0) {
