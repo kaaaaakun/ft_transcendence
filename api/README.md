@@ -1,17 +1,17 @@
 # API
 ## セットアップ
-以下のコマンドを実行したのち、http://localhost:8000/api + /endpointにアクセスすると利用できる
+以下のコマンドを実行したのち、http://localhost:8000/api + /endpointにアクセスすると利用できる  
 ```
 $ > cd api
 $ > make
-$ > docker exec -it api-backend-1 bash
+$ > docker exec -it dev-backend-1 bash
 $container > run
 ```
 
 ## APIエンドポイントの一覧
-must update here.. api.yamlを参照
+openapi.yamlを参照
 
-DBのテーブルにアクセスするuriは、25％ではadminにのみ公開している。(ex. tournaments/tournaments)
+DBのテーブルにアクセスするuriは、25％ではadminにのみ公開している。(ex. tournaments/tournaments)  
 /api/admin/でログインしたら利用できる。
 
 ## よく使いそうなコマンド
@@ -28,7 +28,8 @@ test match # エンドポイントのテスト。manage.pyのあるディレク�
 ├── Dockerfile
 ├── Makefile # 開発フェーズのコンテナ作成用
 ├── README.md
-├── conf # Djangoアプリなどの動作に必要なファイル。Dockerfileでコンテナへコピーする。
+├── .dockerignore
+├── conf # Djangoの動作に必要なファイル。Dockerfileでコンテナへコピーする。
 │   ├── app_xxx # アプリ毎にディレクトリとソースファイルを作成
 │   │   ├── ~~.py
 │   │   └── ~~.py
@@ -50,5 +51,5 @@ test match # エンドポイントのテスト。manage.pyのあるディレク�
 │   ├── settings.py
 │   └── .env.sample
 └── tool # ファイルが1つだけなら親ディレクトリにファイルを移動するかも
-    └── entrypoint.sh
+    └── entrypoint.sh # コンテナ起動後に実行するコマンド集
 ```
