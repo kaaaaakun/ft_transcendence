@@ -23,13 +23,13 @@ function createTextElement(text) {
 const svgTag = ['svg', 'path', 'text', 'rect']
 
 function createDom(fiber) {
-  const isSvg = svgTag.includes(fiber.type);
+  const isSvg = svgTag.includes(fiber.type)
   const dom =
     fiber.type === 'TEXT_ELEMENT'
       ? document.createTextNode(fiber.props.nodeValue || '')
       : isSvg
-      ? document.createElementNS('http://www.w3.org/2000/svg', fiber.type)
-      : document.createElement(fiber.type)
+        ? document.createElementNS('http://www.w3.org/2000/svg', fiber.type)
+        : document.createElement(fiber.type)
 
   updateDom(dom, {}, fiber.props, isSvg)
 
@@ -46,39 +46,38 @@ function updateDom(dom, prevProps = {}, nextProps = {}) {
   // Remove old or changed event listeners
   for (const name of Object.keys(prevProps)) {
     if (isEvent(name)) {
-      const eventType = name.toLowerCase().substring(2);
-      dom.removeEventListener(eventType, prevProps[name]);
+      const eventType = name.toLowerCase().substring(2)
+      dom.removeEventListener(eventType, prevProps[name])
     }
   }
-  
 
   // Add new event listeners
   for (const name of Object.keys(nextProps)) {
     if (isEvent(name) && isNew(prevProps, nextProps)(name)) {
-      const eventType = name.toLowerCase().substring(2);
-      dom.addEventListener(eventType, nextProps[name]);
+      const eventType = name.toLowerCase().substring(2)
+      dom.addEventListener(eventType, nextProps[name])
     }
   }
-  
+
   // Remove old properties
   for (const name of Object.keys(nextProps)) {
     if (isEvent(name)) {
-      const eventType = name.toLowerCase().substring(2);
-      dom.addEventListener(eventType, nextProps[name]);
+      const eventType = name.toLowerCase().substring(2)
+      dom.addEventListener(eventType, nextProps[name])
     }
   }
-  
+
   // Set new or changed properties
   for (const name of Object.keys(nextProps)) {
     if (isProperty(name) && isNew(prevProps, nextProps)(name)) {
       if (isSvg) {
-        dom.setAttribute(name, nextProps[name]);
+        dom.setAttribute(name, nextProps[name])
       } else {
-        dom[name] = nextProps[name];
+        dom[name] = nextProps[name]
       }
     }
   }
-  
+
   // handle className specifically
   if (!isSvg && prevProps.className !== nextProps.className) {
     dom.className = nextProps.className || ''
@@ -219,6 +218,42 @@ function useState(initial) {
   return [hook.state, setState]
 }
 
+function useEffect(callback, deps) {
+  const oldDeps = wipFiber.alternate?.hooks?.[hookIndex]?.deps
+  const hook = {
+    deps,
+    callback,
+  }
+
+  const hasChanged =
+    !oldDeps || oldDeps.some((dep, index) => dep !== deps[index])
+  if (hasChanged) {
+    callback()
+  }
+
+  wipFiber.hooks.push(hook)
+  hookIndex++
+}
+
+function useCallback(callback, deps) {
+  const oldDeps = wipFiber.alternate?.hooks?.[hookIndex]?.deps
+  const hook = {
+    callback,
+    deps,
+  }
+
+  const hasChanged =
+    !oldDeps || oldDeps.some((dep, index) => dep !== deps[index])
+  if (hasChanged) {
+    hook.callback = callback
+    hook.deps = deps
+  }
+
+  wipFiber.hooks.push(hook)
+  hookIndex++
+  return hook.callback
+}
+
 function updateHostComponent(fiber) {
   if (!fiber.dom) {
     fiber.dom = createDom(fiber)
@@ -228,7 +263,6 @@ function updateHostComponent(fiber) {
   const elements = fiber.props?.children || []
   reconcileChildren(fiber, elements)
 }
-
 
 function reconcileChildren(wipFiber, elements) {
   let index = 0
@@ -289,4 +323,6 @@ export const Teact = {
   createElement,
   render,
   useState,
+  useCallback,
+  useEffect,
 }
