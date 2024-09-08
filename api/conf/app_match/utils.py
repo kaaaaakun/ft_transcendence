@@ -14,8 +14,8 @@ def create_match(tournament_id, player1, player2):
     else:
         raise ValidationError(match_serializer.error)
     try:
-        matchdetail1 = register_matchdetail(validate_matchdetail_data(match.id, player1.player_id.id, 0, 'await'))
-        matchdetail2 = register_matchdetail(validate_matchdetail_data(match.id, player2.player_id.id, 0, 'await'))
+        matchdetail1 = register_matchdetail(validate_matchdetail_data(match.id, player1.id, 0, 'await'))
+        matchdetail2 = register_matchdetail(validate_matchdetail_data(match.id, player2.id, 0, 'await'))
     except ValidationError as e:
         raise ValidationError(e.detail)
     return match, matchdetail1, matchdetail2
