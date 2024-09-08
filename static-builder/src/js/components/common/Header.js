@@ -38,20 +38,20 @@ export const Header = () => {
           Teact.createElement(
             'li',
             { className: 'nav-item' },
-            Teact.createElement(
-              'a',
-              { className: 'nav-link text-white', href: '/services' },
-              'Services',
-            ),
+            Link({
+              to: '/services',
+              className: 'nav-link text-white',
+              children: ['Services'],
+            }),
           ),
           Teact.createElement(
             'li',
             { className: 'nav-item' },
-            Teact.createElement(
-              'a',
-              { className: 'nav-link text-white', href: '/contact' },
-              'Contact',
-            ),
+            Link({
+              to: '/contact',
+              className: 'nav-link text-white',
+              children: ['Contact'],
+            }),
           ),
         ),
       ),

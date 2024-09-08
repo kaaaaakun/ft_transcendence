@@ -5,7 +5,7 @@ import { Home } from '@/js/pages/Home'
 
 function App() {
   return Router(
-    Route({ path: '/', component: Teact.createElement(Home) }),
+    Route({ path: '/', component: Home() }),
     Route({
       path: '/about',
       component: Teact.createElement('h1', null, 'About'),

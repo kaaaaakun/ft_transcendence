@@ -6,14 +6,11 @@ let setCurrentPath = () => {}
 export function Router() {
   const [currentPath, setPath] = Teact.useState(window.location.pathname)
   setCurrentPath = setPath
-  let route;
 
-  Teact.useEffect(() => {
-    route = routes.find(r => r.path === currentPath)
-  }, [currentPath])
-
-  console.log(route)
-  return route ? route.component : Teact.createElement('h1', null, '404 Not Found')
+  const route = routes.find(r => r.path === currentPath)
+  return route
+    ? route.component
+    : Teact.createElement('h1', null, '404 Not Found')
 }
 
 export function Route({ path, component }) {
@@ -21,15 +18,16 @@ export function Route({ path, component }) {
   return null
 }
 
-export function Link({ to, children }) {
+export function Link({ to, className, children }) {
   const handleClick = e => {
+    // NOTE: preventDefaultすると関数コンポーネントの差分検出がうまく行ってなくて期待通りの動作をしないので一時的にコメントアウト
     e.preventDefault()
     navigate(to)
   }
 
   return Teact.createElement(
     'a',
-    { href: to, onClick: handleClick },
+    { href: to, onClick: handleClick, className: className },
     ...children,
   )
 }
