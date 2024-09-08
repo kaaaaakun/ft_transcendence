@@ -1,13 +1,15 @@
 function createElement(type, props, ...children) {
+  const ref = props?.ref;  // propsからrefを抽出
   return {
     type,
     props: {
       ...props,
+      ref,  // refもpropsに含める
       children: children.map(child =>
         typeof child === 'object' ? child : createTextElement(child),
       ),
     },
-  }
+  };
 }
 
 function createTextElement(text) {
