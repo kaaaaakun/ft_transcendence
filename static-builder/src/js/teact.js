@@ -319,10 +319,24 @@ function reconcileChildren(wipFiber, elements) {
   }
 }
 
+function useRef(initialValue) {
+  const oldHook = wipFiber.alternate?.hooks?.[hookIndex];
+  const hook = {
+    current: oldHook ? oldHook.current : initialValue,
+  };
+
+  wipFiber.hooks.push(hook);
+  hookIndex++;
+  return hook;
+}
+
+
+
 export const Teact = {
   createElement,
   render,
   useState,
   useCallback,
   useEffect,
+  useRef,
 }
