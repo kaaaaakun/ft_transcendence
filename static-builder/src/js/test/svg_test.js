@@ -1,8 +1,6 @@
 import '@/scss/styles.scss'
-import javascriptLogo from '@/assets/images/javascript.svg'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/teact'
-import viteLogo from '/vite.svg'
 
 // SVG要素を仮想DOM形式で作成する関数
 function svgTest({ players }) {
