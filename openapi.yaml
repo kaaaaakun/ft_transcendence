@@ -138,6 +138,8 @@ components:
                 $ref: "#/components/schemas/tournament_player"
               next_player:
                 type: boolean
+        tournament_id:
+            type: integer
       required:
         - participants
       example:
@@ -162,6 +164,7 @@ components:
             tournament_players:
               victory_count: 1
             next_player: false
+        tournament_id: 12345
 
     match_status:
       type: object
