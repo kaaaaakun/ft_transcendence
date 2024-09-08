@@ -114,13 +114,21 @@ class LocalTournamentViewTest(APITestCase):
                     'tournament_players': {'victory_count': 0},
                     'next_player': True
                 },
-            ],
-            'tournament_id': 1
+            ]
         }
         self.assertEqual(
           sorted(response.data['participants'], key=lambda x: x['player']['name']),
           sorted(expected_data['participants'], key=lambda x: x['player']['name'])
         )
+        post_response_tournament_id = response.data['tournament_id']
+        
+        cookie = f'tournament_id={response.data["tournament_id"]}'
+        response = self.client.get(url, HTTP_COOKIE=cookie)
+        self.assertEqual(
+          sorted(response.data['participants'], key=lambda x: x['player']['name']),
+          sorted(expected_data['participants'], key=lambda x: x['player']['name'])
+        )
+        self.assertEqual(response.data['tournament_id'], post_response_tournament_id)
     
     def test_four_players(self):
         Tournament.objects.all().delete()
@@ -146,7 +154,7 @@ class LocalTournamentViewTest(APITestCase):
         self.assertEqual(matchdetail2.score, 0)
         self.assertEqual(matchdetail1.result, 'await')
         self.assertEqual(matchdetail2.result, 'await')
-        response_data = create_tournament_dataset(get_tournamentplayer_with_related_data(tournament.id), matchdetail1, matchdetail2)
+        response_data = create_tournament_dataset(get_tournamentplayer_with_related_data(tournament.id))
         expected_data = {
             'participants': [
                 {
@@ -201,7 +209,7 @@ class LocalTournamentViewTest(APITestCase):
         self.assertEqual(matchdetail2.score, 0)
         self.assertEqual(matchdetail1.result, 'await')
         self.assertEqual(matchdetail2.result, 'await')
-        response_data = create_tournament_dataset(get_tournamentplayer_with_related_data(tournament.id), matchdetail1, matchdetail2)
+        response_data = create_tournament_dataset(get_tournamentplayer_with_related_data(tournament.id))
         expected_data = {
             'participants': [
                 {
