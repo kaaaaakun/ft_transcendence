@@ -10,7 +10,8 @@ from .utils import ( increment_score, validate_and_update_matchdetail,
     get_matchdetail_with_related_data, update_when_match_end, create_ponggame_dataset )
 from rest_framework.exceptions import ValidationError
 from tournament.utils import ( update_tournamentplayer_status, increment_tournamentplayer_vcount, 
-    is_round_end, update_tournamentplayer_win_to_await, is_tournament_end, update_tournament_status )
+    is_round_end, update_tournamentplayer_win_to_await, is_tournament_end, update_tournament_status,
+    create_next_tournament_match )
 
 from django.utils.decorators import method_decorator
 from utils.decorators import admin_only
@@ -87,8 +88,8 @@ class LocalScoreView(APIView):
             # トーナメントの終了判定
             if is_tournament_end(tournament_id):
                 update_tournament_status(tournament_id.id, 'end')
-            else: # create_next_match(to be implemented)
-                pass
+            else:
+                create_next_tournament_match(tournament_id)
 
         # Responseの作成
         response_data = create_ponggame_dataset(get_matchdetail_with_related_data(match_id))
