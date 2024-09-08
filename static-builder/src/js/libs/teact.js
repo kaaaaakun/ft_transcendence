@@ -218,6 +218,42 @@ function useState(initial) {
   return [hook.state, setState]
 }
 
+function useEffect(callback, deps) {
+  const oldDeps = wipFiber.alternate?.hooks?.[hookIndex]?.deps
+  const hook = {
+    deps,
+    callback,
+  }
+
+  const hasChanged =
+    !oldDeps || oldDeps.some((dep, index) => dep !== deps[index])
+  if (hasChanged) {
+    callback()
+  }
+
+  wipFiber.hooks.push(hook)
+  hookIndex++
+}
+
+function useCallback(callback, deps) {
+  const oldDeps = wipFiber.alternate?.hooks?.[hookIndex]?.deps
+  const hook = {
+    callback,
+    deps,
+  }
+
+  const hasChanged =
+    !oldDeps || oldDeps.some((dep, index) => dep !== deps[index])
+  if (hasChanged) {
+    hook.callback = callback
+    hook.deps = deps
+  }
+
+  wipFiber.hooks.push(hook)
+  hookIndex++
+  return hook.callback
+}
+
 function updateHostComponent(fiber) {
   if (!fiber.dom) {
     fiber.dom = createDom(fiber)
@@ -275,7 +311,7 @@ function reconcileChildren(wipFiber, elements) {
     if (index === 0) {
       wipFiber.child = newFiber
     } else {
-      prevSibling && (prevSibling.sibling = newFiber)
+      prevSibling.sibling = newFiber
     }
 
     prevSibling = newFiber
@@ -287,4 +323,6 @@ export const Teact = {
   createElement,
   render,
   useState,
+  useCallback,
+  useEffect,
 }

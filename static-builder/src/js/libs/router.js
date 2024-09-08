@@ -6,8 +6,12 @@ let setCurrentPath = () => {}
 export function Router() {
   const [currentPath, setPath] = Teact.useState(window.location.pathname)
   setCurrentPath = setPath
+  let route;
 
-  const route = routes.find(r => r.path === currentPath)
+  Teact.useEffect(() => {
+    route = routes.find(r => r.path === currentPath)
+  }, [currentPath])
+
   console.log(route)
   return route ? route.component : Teact.createElement('h1', null, '404 Not Found')
 }
