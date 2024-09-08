@@ -76,9 +76,11 @@ def get_matchdetail_with_related_data(match_id):
 # args: MatchDetailのリスト
 # return: JSON形式のデータ
 def create_ponggame_dataset(matchdetails_with_related):
+    match_data = []
+    for matchdetail in matchdetails_with_related:
+        match_data.append(create_ponggame_data(matchdetail))
     ponggame_dataset = {}
-    for index, matchdetail in enumerate(matchdetails_with_related, start=1):
-        ponggame_dataset[index] = create_ponggame_data(matchdetail)
+    ponggame_dataset['players'] = match_data
 
     # add key match_end
     if (matchdetails_with_related[0].match_id.status == 'end'):
@@ -96,7 +98,7 @@ def create_ponggame_data(matchdetail):
         'player': {
             'name': matchdetail.player_id.name
         },
-        'matchdetail': {
+        'match_details': {
             'player_id': matchdetail.player_id.id,
             'match_id': matchdetail.match_id.id,
             'score': matchdetail.score
