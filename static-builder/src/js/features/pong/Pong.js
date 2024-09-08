@@ -51,13 +51,17 @@ function Pong() {
 
     const context = canvas.getContext('2d');
 
-    const paddleWidth = 10, paddleHeight = 100, ballSize = 10;
+    const paddleWidth = 10;
+    const paddleHeight = 100;
+    const ballSize = 10;
     let paddle1Y = (canvas.height - paddleHeight) / 2;
     let paddle2Y = (canvas.height - paddleHeight) / 2;
     let ballX = canvas.width / 2;
     let ballY = canvas.height / 2;
-    let ballSpeedX = 5, ballSpeedY = 5;
-    let paddle1Speed = 0, paddle2Speed = 0;
+    let ballSpeedX = 5;
+    let ballSpeedY = 5;
+    let paddle1Speed = 0;
+    let paddle2Speed = 0;
 
     function drawRect(x, y, width, height, color) {
       context.fillStyle = color;
@@ -121,7 +125,7 @@ function Pong() {
       drawRect(0, 0, canvas.width, canvas.height, '#1E1E2C');
       drawRect(0, paddle1Y, paddleWidth, paddleHeight, 'white');
       drawRect(canvas.width - paddleWidth, paddle2Y, paddleWidth, paddleHeight, 'white');
-      if (score1 === 10 || score2 === 10) {}else {
+      if (score1 !== 10 && score2 !== 10) {
         drawBall(ballX, ballY, ballSize, '#FFD700');
       }
       // スコアを描画
