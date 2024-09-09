@@ -1,4 +1,4 @@
-import { Teact } from '@/js/teact'
+import { Teact } from '@/js/libs/teact'
 
 export const Title = () => {
   return Teact.createElement(
