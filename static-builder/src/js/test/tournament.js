@@ -1,12 +1,10 @@
 import '@/scss/styles.scss'
+import { Tournament } from '@/js/features/tournament/Tournament'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/teact'
-import { Tournament } from '@/js/features/tournament/Tournament'
 
 function App({ players }) {
-  return BaseLayout(
-    Tournament({players})
-  )
+  return BaseLayout(Tournament({ players }))
 }
 
 const players = {
@@ -22,5 +20,5 @@ const players = {
   ],
 };
 
-const container = document.getElementById('app');
-Teact.render(Teact.createElement(App, { players }), container);
+const container = document.getElementById('app')
+Teact.render(Teact.createElement(App, { players }), container)
