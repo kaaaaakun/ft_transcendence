@@ -10,14 +10,16 @@ function App({ players }) {
 }
 
 const players = {
-  1: { name: "Alice", victoryCount: 1, nextPlayer: false },
-  2: { name: "Bob", victoryCount: 0, nextPlayer: false },
-  3: { name: "Charlie", victoryCount: 2, nextPlayer: true },
-  4: { name: "David", victoryCount: 0, nextPlayer: false },
-  5: { name: "Eve", victoryCount: 1, nextPlayer: false },
-  6: { name: "Frank", victoryCount: 0, nextPlayer: false },
-  7: { name: "Grace", victoryCount: 2, nextPlayer: true },
-  8: { name: "Hank", victoryCount: 0, nextPlayer: false }
+  participants: [
+    { name: "Alice", victoryCount: 1, nextPlayer: false },
+    { name: "Bob", victoryCount: 0, nextPlayer: false },
+    { name: "Charlie", victoryCount: 2, nextPlayer: true },
+    { name: "David", victoryCount: 0, nextPlayer: false },
+    // { name: "Eve", victoryCount: 1, nextPlayer: false },
+    // { name: "Frank", victoryCount: 0, nextPlayer: false },
+    // { name: "Grace", victoryCount: 2, nextPlayer: true },
+    // { name: "Hank", victoryCount: 0, nextPlayer: false }
+  ],
 };
 
 const container = document.getElementById('app');
