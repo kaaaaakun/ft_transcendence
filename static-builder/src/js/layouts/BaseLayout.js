@@ -1,6 +1,6 @@
 import { Header } from '@/js/components/common/Header'
 import { Title } from '@/js/components/common/Title'
-import { Teact } from '@/js/teact'
+import { Teact } from '@/js/libs/teact'
 
 export const BaseLayout = children => {
   return Teact.createElement(

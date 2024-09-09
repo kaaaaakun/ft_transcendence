@@ -186,72 +186,9 @@ function updateFunctionComponent(fiber) {
   wipFiber = fiber
   hookIndex = 0
   wipFiber.hooks = []
+  // NOTE: 関数コンポーネントは関数を実行して返されたコンポーネントをfiberに格納する
   const children = [fiber.type(fiber.props)]
   reconcileChildren(fiber, children)
-}
-
-function useState(initial) {
-  const oldHook = wipFiber.alternate?.hooks?.[hookIndex]
-  const hook = {
-    state: oldHook ? oldHook.state : initial,
-    queue: [],
-  }
-
-  const actions = oldHook ? oldHook.queue : []
-  for (const action of actions) {
-    hook.state = action(hook.state)
-  }
-
-  const setState = action => {
-    hook.queue.push(action)
-    wipRoot = {
-      dom: currentRoot.dom,
-      props: currentRoot.props,
-      alternate: currentRoot,
-    }
-    nextUnitOfWork = wipRoot
-    deletions = []
-  }
-
-  wipFiber.hooks.push(hook)
-  hookIndex++
-  return [hook.state, setState]
-}
-
-function useEffect(callback, deps) {
-  const oldDeps = wipFiber.alternate?.hooks?.[hookIndex]?.deps
-  const hook = {
-    deps,
-    callback,
-  }
-
-  const hasChanged =
-    !oldDeps || oldDeps.some((dep, index) => dep !== deps[index])
-  if (hasChanged) {
-    callback()
-  }
-
-  wipFiber.hooks.push(hook)
-  hookIndex++
-}
-
-function useCallback(callback, deps) {
-  const oldDeps = wipFiber.alternate?.hooks?.[hookIndex]?.deps
-  const hook = {
-    callback,
-    deps,
-  }
-
-  const hasChanged =
-    !oldDeps || oldDeps.some((dep, index) => dep !== deps[index])
-  if (hasChanged) {
-    hook.callback = callback
-    hook.deps = deps
-  }
-
-  wipFiber.hooks.push(hook)
-  hookIndex++
-  return hook.callback
 }
 
 function updateHostComponent(fiber) {
@@ -317,6 +254,70 @@ function reconcileChildren(wipFiber, elements) {
     prevSibling = newFiber
     index++
   }
+}
+
+function useState(initial) {
+  const oldHook = wipFiber.alternate?.hooks?.[hookIndex]
+  const hook = {
+    state: oldHook ? oldHook.state : initial,
+    queue: [],
+  }
+
+  const actions = oldHook ? oldHook.queue : []
+  for (const action of actions) {
+    hook.state = action(hook.state)
+  }
+
+  const setState = action => {
+    hook.queue.push(action)
+    wipRoot = {
+      dom: currentRoot.dom,
+      props: currentRoot.props,
+      alternate: currentRoot,
+    }
+    nextUnitOfWork = wipRoot
+    deletions = []
+  }
+
+  wipFiber.hooks.push(hook)
+  hookIndex++
+  return [hook.state, setState]
+}
+
+function useEffect(callback, deps) {
+  const oldDeps = wipFiber.alternate?.hooks?.[hookIndex]?.deps
+  const hook = {
+    deps,
+    callback,
+  }
+
+  const hasChanged =
+    !oldDeps || oldDeps.some((dep, index) => dep !== deps[index])
+  if (hasChanged) {
+    callback()
+  }
+
+  wipFiber.hooks.push(hook)
+  hookIndex++
+}
+
+function useCallback(callback, deps) {
+  const oldDeps = wipFiber.alternate?.hooks?.[hookIndex]?.deps
+  const hook = {
+    callback,
+    deps,
+  }
+
+  const hasChanged =
+    !oldDeps || oldDeps.some((dep, index) => dep !== deps[index])
+  if (hasChanged) {
+    hook.callback = callback
+    hook.deps = deps
+  }
+
+  wipFiber.hooks.push(hook)
+  hookIndex++
+  return hook.callback
 }
 
 export const Teact = {

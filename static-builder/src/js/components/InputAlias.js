@@ -1,7 +1,7 @@
 import '@/scss/styles.scss'
 import { DefaultButton } from '@/js/components/ui/button'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
-import { Teact } from '@/js/teact'
+import { Teact } from '@/js/libs/teact'
 
 function handleSubmit(event) {
   event.preventDefault() // フォームのデフォルトの送信を防ぐ（ページリロード防止）

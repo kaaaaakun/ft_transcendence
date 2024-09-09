@@ -28,6 +28,19 @@ class TournamentPlayerViewSet(viewsets.ModelViewSet):
 # :end
 
 class LocalTournamentView(APIView):
+    def get(self, request):
+        cookie_tournament_id = request.COOKIES.get('tournament_id')
+        # Is there a match with the start status?
+        if cookie_tournament_id is None:
+            return Response({"error": "tournament_id is required."}, status=status.HTTP_400_NOT_FOUND)
+        try:
+            tournament = Tournament.objects.get(id=cookie_tournament_id)
+        except Tournament.DoesNotExist:
+            return Response({"error": "Tournament not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        response_data = create_tournament_dataset(get_tournamentplayer_with_related_data(tournament.id))
+        return Response(response_data, status=status.HTTP_200_OK)
+
     def post(self, request):
         player_names = request.data.get('players', [])
         if not player_names:
@@ -47,9 +60,9 @@ class LocalTournamentView(APIView):
             return Response(e.detail, status = status.HTTP_400_BAD_REQUEST)
 
         try:
-            match, matchdetail1, matchdetail2 = create_next_tournament_match(tournament.id)
+            create_next_tournament_match(tournament.id)
         except ValidationError as e:
             return Response(e.detail, status = status.HTTP_400_BAD_REQUEST)
 
-        response_data = create_tournament_dataset(get_tournamentplayer_with_related_data(tournament.id), matchdetail1, matchdetail2)
+        response_data = create_tournament_dataset(get_tournamentplayer_with_related_data(tournament.id))
         return Response(response_data, status = status.HTTP_201_CREATED)

@@ -1,4 +1,4 @@
-import { Teact } from '@/js/teact'
+import { Teact } from '@/js/libs/teact'
 
 const DefaultButton = ({ type = 'button', text, onClick }) => {
   return Teact.createElement(
