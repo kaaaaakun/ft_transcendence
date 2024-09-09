@@ -1,4 +1,4 @@
-import { Teact } from '@/js/teact';
+import { Teact } from '@/js/libs/teact';
 import { Pong } from '@/js/features/pong/Pong';
 
 const element = Teact.createElement(Pong);

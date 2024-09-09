@@ -1,6 +1,6 @@
 import '@/scss/styles.scss';
 import { BaseLayout } from '@/js/layouts/BaseLayout';
-import { Teact } from '@/js/teact';
+import { Teact } from '@/js/libs/teact';
 
 function Pong() {
   const [state, setState] = Teact.useState(0);
