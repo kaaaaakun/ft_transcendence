@@ -32,7 +32,7 @@ class LocalTournamentView(APIView):
         cookie_tournament_id = request.COOKIES.get('tournament_id')
         # Is there a match with the start status?
         if cookie_tournament_id is None:
-            return Response({"error": "tournament_id is required."}, status=status.HTTP_400_NOT_FOUND)
+            return Response({"error": "tournament_id is required."}, status=status.HTTP_400_BAD_REQUEST)
         try:
             tournament = Tournament.objects.get(id=cookie_tournament_id)
         except Tournament.DoesNotExist:
