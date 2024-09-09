@@ -286,9 +286,8 @@ function Tournament({ players }) {
   console.log(players.participants.length)
   if (players.participants.length === 8) {
     return TournamentEightPlayers(players.participants)
-  } else {
-    return TournamentFourPlayers(players.participants)
   }
+  return TournamentFourPlayers(players.participants)
 }
 
 export { Tournament }
