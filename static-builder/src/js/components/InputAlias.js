@@ -1,5 +1,5 @@
 import '@/scss/styles.scss'
-import DefaultButton from '@/js/components/ui/button'
+import { DefaultButton } from '@/js/components/ui/button'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/libs/teact'
 
