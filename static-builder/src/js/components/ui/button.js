@@ -12,4 +12,4 @@ const DefaultButton = ({ type = 'button', text, onClick }) => {
   )
 }
 
-export default DefaultButton
+export { DefaultButton }

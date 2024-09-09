@@ -1,5 +1,5 @@
 import '@/scss/styles.scss'
-import { Teact } from '@/js/teact'
+import { Teact } from '@/js/libs/teact'
 
 // SVG要素を仮想DOM形式で作成する関数
 function Tournament({ players }) {

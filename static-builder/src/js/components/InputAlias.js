@@ -1,5 +1,5 @@
 import '@/scss/styles.scss'
-import DefaultButton from '@/js/components/ui/button'
+import { DefaultButton } from '@/js/components/ui/button'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/libs/teact'
 
@@ -12,8 +12,6 @@ function handleSubmit(event) {
   formData.forEach((value, key) => {
     data[key] = value
   })
-
-  console.log('Form Data:', data)
 }
 
 function App() {
