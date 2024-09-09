@@ -106,12 +106,12 @@ class LocalTournamentViewTest(APITestCase):
             'participants': [
                 {
                     'player': {'name': 'P1'},
-                    'tournamentplayer': {'victory_count': 0},
+                    'tournament_players': {'victory_count': 0},
                     'next_player': True
                 },
                 {
                     'player': {'name': 'P2'},
-                    'tournamentplayer': {'victory_count': 0},
+                    'tournament_players': {'victory_count': 0},
                     'next_player': True
                 },
             ]
@@ -120,6 +120,15 @@ class LocalTournamentViewTest(APITestCase):
           sorted(response.data['participants'], key=lambda x: x['player']['name']),
           sorted(expected_data['participants'], key=lambda x: x['player']['name'])
         )
+        post_response_tournament_id = response.data['tournament_id']
+        
+        cookie = f'tournament_id={response.data["tournament_id"]}'
+        response = self.client.get(url, HTTP_COOKIE=cookie)
+        self.assertEqual(
+          sorted(response.data['participants'], key=lambda x: x['player']['name']),
+          sorted(expected_data['participants'], key=lambda x: x['player']['name'])
+        )
+        self.assertEqual(response.data['tournament_id'], post_response_tournament_id)
     
     def test_four_players(self):
         Tournament.objects.all().delete()
@@ -145,30 +154,31 @@ class LocalTournamentViewTest(APITestCase):
         self.assertEqual(matchdetail2.score, 0)
         self.assertEqual(matchdetail1.result, 'await')
         self.assertEqual(matchdetail2.result, 'await')
-        response_data = create_tournament_dataset(get_tournamentplayer_with_related_data(tournament.id), matchdetail1, matchdetail2)
+        response_data = create_tournament_dataset(get_tournamentplayer_with_related_data(tournament.id))
         expected_data = {
             'participants': [
                 {
                     'player': {'name': 'P1'},
-                    'tournamentplayer': {'victory_count': 0},
+                    'tournament_players': {'victory_count': 0},
                     'next_player': True
                 },
                 {
                     'player': {'name': 'P2'},
-                    'tournamentplayer': {'victory_count': 0},
+                    'tournament_players': {'victory_count': 0},
                     'next_player': True
                 },
                 {
                     'player': {'name': 'P3'},
-                    'tournamentplayer': {'victory_count': 0},
+                    'tournament_players': {'victory_count': 0},
                     'next_player': False
                 },
                 {
                     'player': {'name': 'P4'},
-                    'tournamentplayer': {'victory_count': 0},
+                    'tournament_players': {'victory_count': 0},
                     'next_player': False
                 },
-            ]
+            ],
+            'tournament_id': 1
         }
         self.assertEqual(
           sorted(response_data['participants'], key=lambda x: x['player']['name']),
@@ -176,77 +186,76 @@ class LocalTournamentViewTest(APITestCase):
         )
 
     def test_eight_players(self):
-      Tournament.objects.all().delete()
-      TournamentPlayer.objects.all().delete()
-      Player.objects.all().delete()
-      Match.objects.all().delete()
-      MatchDetail.objects.all().delete()
-      player_names = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8']
-      players = register_players(validate_players(player_names))
-      tournament, tournament_players = create_tournament(players)
-      self.assertEqual(tournament.num_of_player, 8)
-      self.assertEqual(tournament.status, 'start')
-      for i in range(8):
-          self.assertEqual(tournament_players[i].tournament_id.id, tournament.id)
-          self.assertEqual(tournament_players[i].player_id.name, f'P{i+1}')
-          self.assertEqual(tournament_players[i].status, 'await')
-          self.assertEqual(tournament_players[i].victory_count, 0)
-      match, matchdetail1, matchdetail2 = create_next_tournament_match(tournament.id)
-      self.assertEqual(match.status, 'start')
-      self.assertEqual(matchdetail1.player_id.name, 'P1')
-      self.assertEqual(matchdetail2.player_id.name, 'P2')
-      self.assertEqual(matchdetail1.score, 0)
-      self.assertEqual(matchdetail2.score, 0)
-      self.assertEqual(matchdetail1.result, 'await')
-      self.assertEqual(matchdetail2.result, 'await')
-      response_data = create_tournament_dataset(get_tournamentplayer_with_related_data(tournament.id), matchdetail1, matchdetail2)
-      expected_data = {
-          'participants': [
-              {
-                  'player': {'name': 'P1'},
-                  'tournamentplayer': {'victory_count': 0},
-                  'next_player': True
-              },
-              {
-                  'player': {'name': 'P2'},
-                  'tournamentplayer': {'victory_count': 0},
-                  'next_player': True
-              },
-              {
-                  'player': {'name': 'P3'},
-                  'tournamentplayer': {'victory_count': 0},
-                  'next_player': False
-              },
-              {
-                  'player': {'name': 'P4'},
-                  'tournamentplayer': {'victory_count': 0},
-                  'next_player': False
-              },
-              {
-                  'player': {'name': 'P5'},
-                  'tournamentplayer': {'victory_count': 0},
-                  'next_player': False
-              },
-              {
-                  'player': {'name': 'P6'},
-                  'tournamentplayer': {'victory_count': 0},
-                  'next_player': False
-              },
-              {
-                  'player': {'name': 'P7'},
-                  'tournamentplayer': {'victory_count': 0},
-                  'next_player': False
-              },
-              {
-                  'player': {'name': 'P8'},
-                  'tournamentplayer': {'victory_count': 0},
-                  'next_player': False
-              },
-          ]
-      }
-      self.assertEqual(
-        sorted(response_data['participants'], key=lambda x: x['player']['name']),
-        sorted(expected_data['participants'], key=lambda x: x['player']['name'])
-      )
-
-
+        Tournament.objects.all().delete()
+        TournamentPlayer.objects.all().delete()
+        Player.objects.all().delete()
+        Match.objects.all().delete()
+        MatchDetail.objects.all().delete()
+        player_names = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8']
+        players = register_players(validate_players(player_names))
+        tournament, tournament_players = create_tournament(players)
+        self.assertEqual(tournament.num_of_player, 8)
+        self.assertEqual(tournament.status, 'start')
+        for i in range(8):
+            self.assertEqual(tournament_players[i].tournament_id.id, tournament.id)
+            self.assertEqual(tournament_players[i].player_id.name, f'P{i+1}')
+            self.assertEqual(tournament_players[i].status, 'await')
+            self.assertEqual(tournament_players[i].victory_count, 0)
+        match, matchdetail1, matchdetail2 = create_next_tournament_match(tournament.id)
+        self.assertEqual(match.status, 'start')
+        self.assertEqual(matchdetail1.player_id.name, 'P1')
+        self.assertEqual(matchdetail2.player_id.name, 'P2')
+        self.assertEqual(matchdetail1.score, 0)
+        self.assertEqual(matchdetail2.score, 0)
+        self.assertEqual(matchdetail1.result, 'await')
+        self.assertEqual(matchdetail2.result, 'await')
+        response_data = create_tournament_dataset(get_tournamentplayer_with_related_data(tournament.id))
+        expected_data = {
+            'participants': [
+                {
+                    'player': {'name': 'P1'},
+                    'tournament_players': {'victory_count': 0},
+                    'next_player': True
+                },
+                {
+                    'player': {'name': 'P2'},
+                    'tournament_players': {'victory_count': 0},
+                    'next_player': True
+                },
+                {
+                    'player': {'name': 'P3'},
+                    'tournament_players': {'victory_count': 0},
+                    'next_player': False
+                },
+                {
+                    'player': {'name': 'P4'},
+                    'tournament_players': {'victory_count': 0},
+                    'next_player': False
+                },
+                {
+                    'player': {'name': 'P5'},
+                    'tournament_players': {'victory_count': 0},
+                    'next_player': False
+                },
+                {
+                    'player': {'name': 'P6'},
+                    'tournament_players': {'victory_count': 0},
+                    'next_player': False
+                },
+                {
+                    'player': {'name': 'P7'},
+                    'tournament_players': {'victory_count': 0},
+                    'next_player': False
+                },
+                {
+                    'player': {'name': 'P8'},
+                    'tournament_players': {'victory_count': 0},
+                    'next_player': False
+                },
+            ],
+            'tournament_id': 1
+        }
+        self.assertEqual(
+            sorted(response_data['participants'], key=lambda x: x['player']['name']),
+            sorted(expected_data['participants'], key=lambda x: x['player']['name'])
+        )

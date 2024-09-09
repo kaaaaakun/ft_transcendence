@@ -125,47 +125,63 @@ class MatchDetailSerializerTests(BaseTestSetup):
         self.assertFalse(is_valid, msg = serializer.errors)
 
 class LocalMatchViewTests(APITestCase, BaseTestSetup):
-    def test_get_match(self):
+    def test_get_match_with_valid_tournament(self):
         url = reverse('local')
-        response = self.client.get(url)
+        cookie = f'tournament_id={self.tournament1.id}'
+        response = self.client.get(url, HTTP_COOKIE = cookie)
         expected_data =  {
-            1: {
-                'player': {'name': self.players[1].name},
-                'matchdetail': {'player_id': self.players[1].id, 'match_id': self.matches[1].id, 'score': 0}
-            },
-            2: {
-                'player': {'name': self.players[2].name},
-                'matchdetail': {'player_id': self.players[2].id, 'match_id': self.matches[1].id, 'score': 0}
-            },
+            'players': [
+                {
+                    'player': {'name': self.players[1].name},
+                    'match_details': {'player_id': self.players[1].id, 'match_id': self.matches[1].id, 'score': 0}
+                },
+                {
+                    'player': {'name': self.players[2].name},
+                    'match_details': {'player_id': self.players[2].id, 'match_id': self.matches[1].id, 'score': 0}
+                },
+            ],
             'match_end': False
         }
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
 
+    def test_get_match_with_ended_tournament(self):
+        url = reverse('local')
+        cookie = f'tournament_id={self.tournament2.id}'
+        response = self.client.get(url, HTTP_COOKIE = cookie)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_get_match_with_nonexistent_tournament(self):
+        url = reverse('local')
+        cookie = 'tournament_id=9999'
+        response = self.client.get(url, HTTP_COOKIE = cookie)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
 
 class LocalScoreViewTests(APITestCase, BaseTestSetup):
     def test_increment_score(self):
         url = reverse('local_score')
-        print(url)
-        data = {'matchdetail': {'match_id': self.matches[1].id, 'player_id': self.players[1].id}}
+        data = {'match_id': self.matches[1].id, 'player_id': self.players[1].id}
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        expected_data = {
-            1: {
-                'player': {'name': self.players[1].name},
-                'matchdetail': {'player_id': self.players[1].id, 'match_id': self.matches[1].id, 'score': 1}
-            },
-            2: {
-                'player': {'name': self.players[2].name},
-                'matchdetail': {'player_id': self.players[2].id, 'match_id': self.matches[1].id, 'score': 0}
-            },
+        expected_data =  {
+            'players': [
+                {
+                    'player': {'name': self.players[1].name},
+                    'match_details': {'player_id': self.players[1].id, 'match_id': self.matches[1].id, 'score': 1}
+                },
+                {
+                    'player': {'name': self.players[2].name},
+                    'match_details': {'player_id': self.players[2].id, 'match_id': self.matches[1].id, 'score': 0}
+                },
+            ],
             'match_end': False
         }
         self.assertEqual(response.data, expected_data)
     
     def test_increment_score_to_the_end(self):
         url = reverse('local_score')
-        data = {'matchdetail': {'match_id': self.matches[1].id, 'player_id': self.players[2].id}}
+        data = {'match_id': self.matches[1].id, 'player_id': self.players[2].id}
         for i in range(10):
             response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)

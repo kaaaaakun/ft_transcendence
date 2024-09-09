@@ -1,5 +1,6 @@
 from rest_framework import viewsets
 from .models import Match, MatchDetail
+from tournament.models import Tournament
 from .serializers import MatchSerializer, MatchDetailSerializer
 
 from rest_framework.views import APIView
@@ -9,7 +10,8 @@ from .utils import ( increment_score, validate_and_update_matchdetail,
     get_matchdetail_with_related_data, update_when_match_end, create_ponggame_dataset )
 from rest_framework.exceptions import ValidationError
 from tournament.utils import ( update_tournamentplayer_status, increment_tournamentplayer_vcount, 
-    is_round_end, update_tournamentplayer_win_to_await, is_tournament_end, update_tournament_status )
+    is_round_end, update_tournamentplayer_win_to_await, is_tournament_end, update_tournament_status,
+    create_next_tournament_match )
 
 from django.utils.decorators import method_decorator
 from utils.decorators import admin_only
@@ -30,19 +32,36 @@ class MatchDetailViewSet(viewsets.ModelViewSet):
 
 class LocalMatchView(APIView):
     def get(self, request):
-        match_id = Match.objects.filter(status = 'start').first().id
-        if match_id is None:
+        cookie_tournament_id = request.COOKIES.get('tournament_id')
+        # Is there a match with the start status?
+        if cookie_tournament_id is None:
+            return Response({"error": "tournament_id is required."}, status=status.HTTP_400_NOT_FOUND)
+        try:
+            tournament = Tournament.objects.get(id=cookie_tournament_id)
+        except Tournament.DoesNotExist:
+            return Response({"error": "Tournament not found."}, status=status.HTTP_404_NOT_FOUND)
+        if tournament.status != 'start':
+            return Response({"error": "Tournament is over."}, status=status.HTTP_400_BAD_REQUEST)
+        displayable_match_id = Match.objects.get(tournament_id = cookie_tournament_id, status = 'start').id
+
+        if displayable_match_id is None:
             return Response({"error": "Match with start status not found."}, status=status.HTTP_404_NOT_FOUND)
-        response_data = create_ponggame_dataset(get_matchdetail_with_related_data(match_id))
+        response_data = create_ponggame_dataset(get_matchdetail_with_related_data(displayable_match_id))
         return Response(response_data, status=status.HTTP_200_OK)
 
 class LocalScoreView(APIView):
     def patch(self, request):
-        match_id = request.data.get('matchdetail', {}).get('match_id')
-        player_id = request.data.get('matchdetail', {}).get('player_id')
+        match_id = request.data.get('match_id')
+        player_id = request.data.get('player_id')
 
         if match_id is None or player_id is None:
             return Response({"error": "match_id and player_id are required."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            match = Match.objects.get(id=match_id)
+        except Match.DoesNotExist:
+            return Response({"error": "Match not found."}, status=status.HTTP_404_NOT_FOUND)
+        if match.status == 'end':
+            return Response({"error": "Match is over."}, status=status.HTTP_400_BAD_REQUEST)
 
         # スコアをインクリメントしたMatchDetailのインスタンスを取得
         matchdetail_instance = increment_score(match_id, player_id)
@@ -69,8 +88,8 @@ class LocalScoreView(APIView):
             # トーナメントの終了判定
             if is_tournament_end(tournament_id):
                 update_tournament_status(tournament_id.id, 'end')
-            else: # create_next_match(to be implemented)
-                pass
+            else:
+                create_next_tournament_match(tournament_id)
 
         # Responseの作成
         response_data = create_ponggame_dataset(get_matchdetail_with_related_data(match_id))
