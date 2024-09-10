@@ -1,13 +1,8 @@
 # ignore all .env file to protect sensitive data
-*/.env
+**/.env
 
 # ignore all .gitignore file to protect sensitive data
-*/.gitignore
+**/.gitignore
 
 # ignore all .DS_Store file to protect sensitive data and avoid cache
-*/.DS_Store
-
-# ignore all other Container files
-./reverseproxy/*
-./static-builder/*
-./rdbms/*
+**/.DS_Store

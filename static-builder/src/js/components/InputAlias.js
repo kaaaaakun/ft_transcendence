@@ -1,7 +1,7 @@
 import '@/scss/styles.scss'
-import DefaultButton from '@/js/components/ui/button'
+import { DefaultButton } from '@/js/components/ui/button'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
-import { Teact } from '@/js/teact'
+import { Teact } from '@/js/libs/teact'
 
 function handleSubmit(event) {
   event.preventDefault() // フォームのデフォルトの送信を防ぐ（ページリロード防止）
@@ -12,8 +12,6 @@ function handleSubmit(event) {
   formData.forEach((value, key) => {
     data[key] = value
   })
-
-  console.log('Form Data:', data)
 }
 
 function App() {

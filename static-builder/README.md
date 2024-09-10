@@ -44,7 +44,9 @@ pnpm fix # Biome でlintエラーを修正し、コードをフォーマット
 │   ├── index.html
 │   ├── js # スクリプト
 │   │   ├── main.js
-│   │   └── teact.js
+│   │   ├── components # コンポーネント
+│   │   ├── pages # ページ
+│   │   └── libs # ライブラリ
 │   └── scss # スタイルシート
 │       └── styles.scss
 └── vite.config.js # Vite の設定ファイル
