@@ -1,4 +1,5 @@
-DOCKER_COMPOSE = docker compose -f ./docker-compose.yml
+ENV_FILE_PATH = .env.sample
+DOCKER_COMPOSE = docker compose --env-file ${ENV_FILE_PATH} -f ./docker-compose.yml
 
 all: run
 
