@@ -1,11 +1,18 @@
 import '@/scss/styles.scss'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/libs/teact'
+import { DefaultButton } from '@/js/components/ui/button'
 
-function Pong() {
+function Pong( {data} ) {
   const [state, setState] = Teact.useState(0)
-  let score1 = 0
-  let score2 = 0
+  const match_id = data["match_id"]
+  document.cookie = "match_id=" + match_id;
+  let score1 = data["players"][0]["matchdetail"]["score"]
+  let score2 = data["players"][1]["matchdetail"]["score"]
+  const player1name = data["players"][0]["player"]["name"]
+  const player2name = data["players"][1]["player"]["name"]
+  const player1id = data["players"][0]["matchdetail"]["player_id"]
+  const player2id = data["players"][1]["matchdetail"]["player_id"]
 
   Teact.useEffect(() => {
     const canvas = document.getElementById('pongCanvas')
@@ -81,10 +88,27 @@ function Pong() {
       }
 
       if (ballX - ballSize < 0) {
-        score2++
+        // response = fetch('127.0.0.1:8000/api/tournaments/local',{
+        //   method: 'PATCH',
+        //   body: JSON.stringify({
+        //       "match_id": match_id,
+        //       "player_id": player2id
+        //   }),
+        // })
+        // const result = response.json(); 
+        // score2 = result["players"][1]["matchdetail"]["score"]
+        score2++;
         resetBall()
       } else if (ballX + ballSize > canvas.width) {
-        score1++
+        // response = fetch('127.0.0.1:8000/api/tournaments/local',{
+        //   method: 'PATCH',
+        //   body: JSON.stringify({
+        //       "match_id": match_id,
+        //       "player_id": player1id
+        //   }),
+        // })
+        // score1 = result["players"][0]["matchdetail"]["score"]
+        score1++;
         resetBall()
       }
     }
@@ -184,14 +208,14 @@ function Pong() {
     Teact.createElement(
       'div',
       { style: { display: 'flex', alignItems: 'center' } },
-      Teact.createElement('div', { id: 'leftPlayer', style: { writingMode: 'vertical-rl', textAlign: 'center', fontSize: '32px', color: 'white', marginRight: '30px' } }, 'A'),
+      Teact.createElement('div', { id: 'leftPlayer', style: { writingMode: 'vertical-rl', textAlign: 'center', fontSize: '32px', color: 'white', marginRight: '30px' } }, player1name),
       Teact.createElement(
         'div',
         { style: { position: 'relative', width: '600px', height: '400px', backgroundColor: '#1E1E2C' } },
         Teact.createElement('canvas', { id: 'pongCanvas', width: '600', height: '400' })
       ),
-      Teact.createElement('div', { id: 'rightPlayer', style: { writingMode: 'vertical-rl', textAlign: 'center', fontSize: '32px', color: 'white', marginLeft: '30px' } }, 'D')
-    )
+      Teact.createElement('div', { id: 'rightPlayer', style: { writingMode: 'vertical-rl', textAlign: 'center', fontSize: '32px', color: 'white', marginLeft: '30px' } }, player2name)
+    ),
   ))
 }
 
