@@ -7,48 +7,8 @@ function Pong() {
   let score1 = 0
   let score2 = 0
 
-  const startGame = () => {
-    const gameContainer = document.createElement('div')
-    gameContainer.id = 'gameContainer'
-    gameContainer.style.display = 'flex'
-    gameContainer.style.justifyContent = 'center'
-    gameContainer.style.alignItems = 'center'
-
-    const leftPlayer = document.createElement('div')
-    leftPlayer.id = 'leftPlayer'
-    leftPlayer.style.writingMode = 'vertical-rl'
-    leftPlayer.style.textAlign = 'center'
-    leftPlayer.style.fontSize = '32px'
-    leftPlayer.style.color = 'white'
-    leftPlayer.style.marginRight = '30px'
-    leftPlayer.textContent = 'A'
-
-    const rightPlayer = document.createElement('div')
-    rightPlayer.id = 'rightPlayer'
-    rightPlayer.style.writingMode = 'vertical-rl'
-    rightPlayer.style.textAlign = 'center'
-    rightPlayer.style.fontSize = '32px'
-    rightPlayer.style.color = 'white'
-    rightPlayer.style.marginLeft = '30px'
-    rightPlayer.textContent = 'D'
-
-    const canvasContainer = document.createElement('div')
-    canvasContainer.style.position = 'relative'
-    canvasContainer.style.width = '600px'
-    canvasContainer.style.height = '400px'
-    canvasContainer.style.backgroundColor = '#1E1E2C'
-
-    const canvas = document.createElement('canvas')
-    canvas.id = 'pongCanvas'
-    canvas.width = 600
-    canvas.height = 400
-
-    canvasContainer.appendChild(canvas)
-    gameContainer.appendChild(leftPlayer)
-    gameContainer.appendChild(canvasContainer)
-    gameContainer.appendChild(rightPlayer)
-    document.getElementById('pong').appendChild(gameContainer)
-
+  Teact.useEffect(() => {
+    const canvas = document.getElementById('pongCanvas')
     const context = canvas.getContext('2d')
 
     const paddleWidth = 10
@@ -215,15 +175,25 @@ function Pong() {
       clearInterval(intervalId)
       document.removeEventListener('keydown', keyDownHandler)
       document.removeEventListener('keyup', keyUpHandler)
-      gameContainer.remove()
     }
-  }
+  }, [])
 
-  if (state === 0) {
-    startGame()
-  }
-
-  return BaseLayout()
+  return BaseLayout(Teact.createElement(
+    'div',
+    { id: 'pong', style: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' } },
+    Teact.createElement(
+      'div',
+      { style: { display: 'flex', alignItems: 'center' } },
+      Teact.createElement('div', { id: 'leftPlayer', style: { writingMode: 'vertical-rl', textAlign: 'center', fontSize: '32px', color: 'white', marginRight: '30px' } }, 'A'),
+      Teact.createElement(
+        'div',
+        { style: { position: 'relative', width: '600px', height: '400px', backgroundColor: '#1E1E2C' } },
+        Teact.createElement('canvas', { id: 'pongCanvas', width: '600', height: '400' })
+      ),
+      Teact.createElement('div', { id: 'rightPlayer', style: { writingMode: 'vertical-rl', textAlign: 'center', fontSize: '32px', color: 'white', marginLeft: '30px' } }, 'D')
+    )
+  ))
 }
+
 
 export { Pong }
