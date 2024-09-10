@@ -52,10 +52,9 @@ function createPlayerBoard(player, x, y) {
 }
 
 function createChampionPlayerBoard(players) {
-  
   console.log(sumVictoryCount(players, 0, players.length - 1))
   if (sumVictoryCount(players, 0, players.length - 1) === players.length - 1) {
-    const ret =  createPlayerBoard(getMostVictoriesPlayer(players), 173, 10)
+    const ret = createPlayerBoard(getMostVictoriesPlayer(players), 173, 10)
     return ret
   }
   return []
@@ -95,9 +94,9 @@ function TournamentTwoPlayers(players) {
         stroke: sumVictoryCount(players, 0, 1) >= 1 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
-      ...createChampionPlayerBoard(players)
+      ...createChampionPlayerBoard(players),
     ),
-  );
+  )
 }
 
 function TournamentFourPlayers(players) {
