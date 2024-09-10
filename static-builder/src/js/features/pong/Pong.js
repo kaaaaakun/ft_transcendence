@@ -204,24 +204,24 @@ function Pong( {data} ) {
 
   return BaseLayout(Teact.createElement(
     'div',
-    { id: 'pong', className: 'd-flex justify-content-center align-items-center' }, // Bootstrapクラス
+    { id: 'pong', className: 'd-flex justify-content-center align-items-center' },
     Teact.createElement(
       'div',
-      { className: 'd-flex align-items-center justify-content-center' }, // Bootstrapクラス
+      { className: 'd-flex align-items-center justify-content-center' },
       Teact.createElement('div', { 
         id: 'leftPlayer', 
-        className: 'text-center fs-2 text-white me-3', // Bootstrapクラス (fs-2でフォントサイズ、me-3でマージン)
-        style: { writingMode: 'vertical-rl' } // Bootstrapでは対応できない部分はstyleで指定
+        className: 'text-center fs-2 text-white me-3',
+        style: { writingMode: 'vertical-rl' }
       }, player1name),
       Teact.createElement(
         'div',
-        { className: 'position-relative', style: { width: '600px', height: '400px', backgroundColor: '#1E1E2C' } }, // カスタムスタイルのまま
+        { className: 'position-relative', style: { width: '600px', height: '400px', backgroundColor: '#1E1E2C' } },
         Teact.createElement('canvas', { id: 'pongCanvas', width: '600', height: '400' })
       ),
       Teact.createElement('div', { 
         id: 'rightPlayer', 
-        className: 'text-center fs-2 text-white ms-3', // Bootstrapクラス (fs-2でフォントサイズ、ms-3でマージン)
-        style: { writingMode: 'vertical-rl' } // Bootstrapでは対応できない部分はstyleで指定
+        className: 'text-center fs-2 text-white ms-3',
+        style: { writingMode: 'vertical-rl' }
       }, player2name)
     ),
   ));  
