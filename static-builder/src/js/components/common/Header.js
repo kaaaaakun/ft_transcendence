@@ -1,5 +1,5 @@
-import { Teact } from '@/js/teact'
-
+import { Link } from '@/js/libs/router'
+import { Teact } from '@/js/libs/teact'
 export const Header = () => {
   return Teact.createElement(
     'header',
@@ -29,29 +29,29 @@ export const Header = () => {
           Teact.createElement(
             'li',
             { className: 'nav-item' },
-            Teact.createElement(
-              'a',
-              { className: 'nav-link text-white', href: '/about' },
-              'About',
-            ),
+            Link({
+              to: '/about',
+              className: 'nav-link text-white',
+              children: ['About'],
+            }),
           ),
           Teact.createElement(
             'li',
             { className: 'nav-item' },
-            Teact.createElement(
-              'a',
-              { className: 'nav-link text-white', href: '/services' },
-              'Services',
-            ),
+            Link({
+              to: '/services',
+              className: 'nav-link text-white',
+              children: ['Services'],
+            }),
           ),
           Teact.createElement(
             'li',
             { className: 'nav-item' },
-            Teact.createElement(
-              'a',
-              { className: 'nav-link text-white', href: '/contact' },
-              'Contact',
-            ),
+            Link({
+              to: '/contact',
+              className: 'nav-link text-white',
+              children: ['Contact'],
+            }),
           ),
         ),
       ),

@@ -1,25 +1,19 @@
 import '@/scss/styles.scss'
-import DefaultButton from '@/js/components/ui/button'
-import { BaseLayout } from '@/js/layouts/BaseLayout'
-import { Teact } from '@/js/teact'
+import { Route, Router } from '@/js/libs/router'
+import { Teact } from '@/js/libs/teact'
+import { Home } from '@/js/pages/Home'
 
 function App() {
-  return BaseLayout(
-    Teact.createElement(
-      'div',
-      { className: 'container vh-100' },
-      Teact.createElement(
-        'h3',
-        { className: 'mb-5 text-center text-light' },
-        '遊ぶモードを選んでください',
-      ),
-      Teact.createElement(
-        'div',
-        { className: 'd-grid gap-2 col-3 mx-auto' },
-        DefaultButton({ text: '１人対戦' }),
-        DefaultButton({ text: 'トーナメント' }),
-      ),
-    ),
+  return Router(
+    Route({ path: '/', component: Home() }),
+    Route({
+      path: '/about',
+      component: Teact.createElement('h1', null, 'About'),
+    }),
+    Route({
+      path: '/contact',
+      component: Teact.createElement('h1', null, 'Contact'),
+    }),
   )
 }
 

@@ -1,6 +1,6 @@
 import '@/scss/styles.scss'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
-import { Teact } from '@/js/teact'
+import { Teact } from '@/js/libs/teact'
 
 // SVG要素を仮想DOM形式で作成する関数
 function svgTest({ players }) {
