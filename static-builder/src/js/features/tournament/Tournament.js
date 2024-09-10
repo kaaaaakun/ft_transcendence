@@ -9,6 +9,16 @@ function sumVictoryCount(players, start, end) {
   return sum
 }
 
+function getMostVictoriesPlayer(players) {
+  let ret = players[0]
+  for (const player of players) {
+    if (player.victoryCount > ret.victoryCount) {
+      ret = player
+    }
+  }
+  return ret
+}
+
 function createPlayerBoard(player, x, y) {
   const xAdjustment = 5
   const yAdjustment = 12
@@ -39,6 +49,55 @@ function createPlayerBoard(player, x, y) {
       player.name,
     ),
   ]
+}
+
+function createChampionPlayerBoard(players) {
+  
+  console.log(sumVictoryCount(players, 0, players.length - 1))
+  if (sumVictoryCount(players, 0, players.length - 1) === players.length - 1) {
+    const ret =  createPlayerBoard(getMostVictoriesPlayer(players), 173, 10)
+    return ret
+  }
+  return []
+}
+
+function TournamentTwoPlayers(players) {
+  return Teact.createElement(
+    'div',
+    { className: 'position-relative shift-up-200' },
+    Teact.createElement(
+      'svg',
+      {
+        xmlns: 'http://www.w3.org/2000/svg',
+        height: '100vh',
+        viewBox: '-40,-30, 528,209',
+        id: 'canvas',
+        class: 'svg mx-auto p-2',
+        width: '100%',
+      },
+      // 左プレイヤー
+      Teact.createElement('path', {
+        d: 'M133,30 L224,30z',
+        stroke: players[0].victoryCount >= 1 ? 'yellow' : 'black',
+        'stroke-width': '2',
+      }),
+      ...createPlayerBoard(players[0], 2, 30),
+
+      // 右プレイヤー
+      Teact.createElement('path', {
+        d: 'M315,30 L224,30z',
+        stroke: players[1].victoryCount >= 1 ? 'yellow' : 'black',
+        'stroke-width': '2',
+      }),
+      ...createPlayerBoard(players[1], 329, 30),
+      Teact.createElement('path', {
+        d: 'M224,30 L224,10z',
+        stroke: sumVictoryCount(players, 0, 1) >= 1 ? 'yellow' : 'black',
+        'stroke-width': '2',
+      }),
+      ...createChampionPlayerBoard(players)
+    ),
+  );
 }
 
 function TournamentFourPlayers(players) {
@@ -115,6 +174,7 @@ function TournamentFourPlayers(players) {
         stroke: sumVictoryCount(players, 2, 3) >= 2 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
+      ...createChampionPlayerBoard(players),
     ),
   )
 }
@@ -278,16 +338,23 @@ function TournamentEightPlayers(players) {
         stroke: sumVictoryCount(players, 4, 7) >= 4 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
+      ...createChampionPlayerBoard(players),
     ),
   )
 }
 
 function Tournament({ players }) {
-  console.log(players.participants.length)
-  if (players.participants.length === 8) {
-    return TournamentEightPlayers(players.participants)
+  console.log(players)
+  switch (players.participants.length) {
+    case 8:
+      return TournamentEightPlayers(players.participants)
+    case 4:
+      return TournamentFourPlayers(players.participants)
+    case 2:
+      return TournamentTwoPlayers(players.participants)
+    default:
+      return Teact.createElement('h1', null, '400 Bad Request')
   }
-  return TournamentFourPlayers(players.participants)
 }
 
 export { Tournament }
