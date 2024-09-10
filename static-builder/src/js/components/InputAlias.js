@@ -12,8 +12,6 @@ function handleSubmit(event) {
   formData.forEach((value, key) => {
     data[key] = value
   })
-
-  console.log('Form Data:', data)
 }
 
 function App() {
