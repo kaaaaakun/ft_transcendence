@@ -36,6 +36,7 @@ class LocalTournamentView(APIView):
             tournament = Tournament.objects.get(id=cookie_tournament_id)
             response_data = create_tournament_dataset(get_tournamentplayer_with_related_data(tournament.id))
             return Response(response_data, status=status.HTTP_200_OK)
+
         except Tournament.DoesNotExist:
             return Response({"error": "Tournament not found."}, status = status.HTTP_404_NOT_FOUND)
         except DatabaseError as e:

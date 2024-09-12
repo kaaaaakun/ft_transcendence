@@ -61,20 +61,11 @@ class LocalScoreView(APIView):
             if match.status == 'end':
                 return Response({"error": "Match is over."}, status = status.HTTP_400_BAD_REQUEST)
 
-        except Match.DoesNotExist:
-            return Response({"error": "Match not found."}, status = status.HTTP_404_NOT_FOUND)
-        except DatabaseError as e:
-            return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
-        except Exception as e:
-            return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
+            # スコアをインクリメントしたMatchDetailのインスタンスを取得
+            matchdetail_instance = increment_score(match_id, player_id)
+            if matchdetail_instance is None:
+                return Response({"error": "MatchDetail not found."}, status = status.HTTP_404_NOT_FOUND)
 
-        # スコアをインクリメントしたMatchDetailのインスタンスを取得
-        matchdetail_instance = increment_score(match_id, player_id)
-        if matchdetail_instance is None:
-            return Response({"error": "MatchDetail not found."}, status = status.HTTP_404_NOT_FOUND)
-
-        # MatchDetailのDB情報を更新
-        try:
             with transaction.atomic():
                 matchdetail = validate_and_update_matchdetail(matchdetail_instance)
 
@@ -101,6 +92,10 @@ class LocalScoreView(APIView):
 
         except ValidationError as e:
             return Response(e.detail, status = status.HTTP_400_BAD_REQUEST)
+        except Match.DoesNotExist:
+            return Response({"error": "Match not found."}, status = status.HTTP_404_NOT_FOUND)
+        except MatchDetail.DoesNotExist:
+            return Response({"error": "MatchDetail not found."}, status = status.HTTP_404_NOT_FOUND)
         except DatabaseError as e:
             return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as e:
