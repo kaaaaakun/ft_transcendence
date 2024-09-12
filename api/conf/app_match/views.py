@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from django.utils.decorators import method_decorator
-from django.db import transaction
+from django.db import transaction, DatabaseError
 
 from .models import Match, MatchDetail
 from tournament.models import Tournament
@@ -58,12 +58,15 @@ class LocalScoreView(APIView):
             return Response({"error": "match_id and player_id are required."}, status = status.HTTP_400_BAD_REQUEST)
         try:
             match = Match.objects.get(id=match_id)
+            if match.status == 'end':
+                return Response({"error": "Match is over."}, status = status.HTTP_400_BAD_REQUEST)
+
         except Match.DoesNotExist:
             return Response({"error": "Match not found."}, status = status.HTTP_404_NOT_FOUND)
+        except DatabaseError as e:
+            return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as e:
             return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
-        if match.status == 'end':
-            return Response({"error": "Match is over."}, status = status.HTTP_400_BAD_REQUEST)
 
         # スコアをインクリメントしたMatchDetailのインスタンスを取得
         matchdetail_instance = increment_score(match_id, player_id)
@@ -98,5 +101,7 @@ class LocalScoreView(APIView):
 
         except ValidationError as e:
             return Response(e.detail, status = status.HTTP_400_BAD_REQUEST)
+        except DatabaseError as e:
+            return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as e:
             return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
