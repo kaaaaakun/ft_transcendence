@@ -31,101 +31,119 @@
     instance = new TournamentApi.LocalPlayApi();
   });
 
-  var getProperty = function (object, getter, property) {
-    // Use getter method if present; otherwise, get the property directly.
-    if (typeof object[getter] === "function") return object[getter]();
-    else return object[property];
-  };
-
-  var setProperty = function (object, setter, property, value) {
-    // Use setter method if present; otherwise, set the property directly.
-    if (typeof object[setter] === "function") object[setter](value);
-    else object[property] = value;
+  var checkPlayerMatchDetails = function(player) {
+    expect(player).to.have.property('player');
+    expect(player.player).to.have.property('name');
+    expect(player.player.name).to.be.a('string');
+    expect(player).to.have.property('match_details');
+    expect(player.match_details).to.have.property('player_id');
+    expect(player.match_details.player_id).to.be.a('number');
+    expect(player.match_details).to.have.property('match_id');
+    expect(player.match_details.match_id).to.be.a('number');
+    expect(player.match_details).to.have.property('score');
+    expect(player.match_details.score).to.be.a('number');
   };
 
   describe("LocalPlayApi", function () {
     describe("apiMatchesLocalGet", function () {
       it("should call apiMatchesLocalGet successfully", function (done) {
-        //uncomment below and update the code to test apiMatchesLocalGet
-        //instance.apiMatchesLocalGet(function(error) {
-        //  if (error) throw error;
-        //expect().to.be();
-        //});
-        done();
+        instance.apiMatchesLocalGet(function(error, response) {
+          if (error) return done(error);
+          try {
+            expect(response).to.be.an('object');
+            expect(response).to.have.property('players');
+            expect(response.players).to.be.an('array');
+            response.players.forEach(checkPlayerMatchDetails);
+            done();
+          } catch (e) {
+            done(e);
+          }
+        });
       });
     });
+
     describe("apiMatchesLocalScorePatch", function () {
       it("should call apiMatchesLocalScorePatch successfully", function (done) {
-        //uncomment below and update the code to test apiMatchesLocalScorePatch
-        //instance.apiMatchesLocalScorePatch(function(error) {
-        //  if (error) throw error;
-        //expect().to.be();
-        //});
-        done();
+        var scoreData = {
+          match_id: 1,
+          player_id: 1
+        };
+        instance.apiMatchesLocalScorePatch(scoreData, function(error, response) {
+          if (error) return done(error);
+          try {
+            expect(response).to.be.an('object');
+            expect(response).to.have.property('players');
+            expect(response.players).to.be.an('array');
+            response.players.forEach(checkPlayerMatchDetails);
+            expect(response).to.have.property('end_match');
+            expect(response.end_match).to.be.a('boolean');
+            done();
+          } catch (e) {
+            done(e);
+          }
+        });
       });
     });
+
     describe("apiTournamentsLocalGet", function () {
       it("should call apiTournamentsLocalGet successfully", function (done) {
-        //uncomment below and update the code to test apiTournamentsLocalGet
-        //instance.apiTournamentsLocalGet(function(error) {
-        //  if (error) throw error;
-        //expect().to.be();
-        //});
-        done();
+        instance.apiTournamentsLocalGet(function(error, response) {
+          if (error) return done(error);
+          try {
+            expect(response).to.be.an('object');
+            expect(response).to.have.property('participants');
+            expect(response.participants).to.be.an('array');
+            response.participants.forEach(function(participant) {
+              expect(participant).to.have.property('player');
+              expect(participant.player).to.have.property('name');
+              expect(participant.player.name).to.be.a('string');
+              expect(participant).to.have.property('tournament_players');
+              expect(participant.tournament_players).to.have.property('victory_count');
+              expect(participant.tournament_players.victory_count).to.be.a('number');
+              expect(participant).to.have.property('next_player');
+              expect(participant.next_player).to.be.a('boolean');
+            });
+            expect(response).to.have.property('tournament_id');
+            expect(response.tournament_id).to.be.a('number');
+            done();
+          } catch (e) {
+            done(e);
+          }
+        });
       });
     });
+
     describe("apiTournamentsLocalPost", function () {
       it("should call apiTournamentsLocalPost successfully", function (done) {
-        // モックデータやテスト用のデータを用意する
         var tournamentData = {
-          players: ["Alice", "Bob", "Charlie", "David"], // 2の累乗のプレイヤー数
+          players: ["Alice", "Bob", "Charlie", "David"]
         };
 
-        // API メソッドを呼び出す
-        instance.apiTournamentsLocalPost(
-          tournamentData,
-          function (error, response) {
-            if (error) {
-              // エラーが発生した場合は、テストを失敗させる
-              console.log("Error:", error); // エラーメッセージをログに出力
-
-              return done(error);
-            }
-
-            // レスポンスがオブジェクトであることを確認
-            expect(response).to.be.an("object");
-
-            // tournament_id がレスポンスに含まれていることを確認
-            expect(response).to.have.property("tournament_id");
-            expect(response.tournament_id).to.be.a("number"); // tournament_id が数値であること
-
-            // participants が含まれていることを確認
-            expect(response).to.have.property("participants");
-            expect(response.participants).to.be.an("array"); // participants が配列であること
-
-            // participants の各要素が期待通りの構造を持つか確認
+        instance.apiTournamentsLocalPost(tournamentData, function (error, response) {
+          if (error) return done(error);
+          try {
+            expect(response).to.be.an('object');
+            expect(response).to.have.property('tournament_id');
+            expect(response.tournament_id).to.be.a('number');
+            expect(response).to.have.property('participants');
+            expect(response.participants).to.be.an('array');
             response.participants.forEach(function (participant) {
-              expect(participant).to.have.property("player"); // player が含まれていること
-              expect(participant.player).to.have.property("name"); // player.name が含まれていること
-              expect(participant.player.name).to.be.a("string"); // player.name が文字列であること
-
-              expect(participant).to.have.property("tournament_players"); // tournament_players が含まれていること
-              expect(participant.tournament_players).to.have.property(
-                "victory_count"
-              ); // 勝利数が含まれていること
-              expect(participant.tournament_players.victory_count).to.be.a(
-                "number"
-              ); // victory_count が数値であること
-
-              expect(participant).to.have.property("next_player"); // next_player が含まれていること
-              expect(participant.next_player).to.be.a("boolean"); // next_player がブール値であること
+              expect(participant).to.have.property('player');
+              expect(participant.player).to.have.property('name');
+              expect(participant.player.name).to.be.a('string');
+              expect(participant).to.have.property('tournament_players');
+              expect(participant.tournament_players).to.have.property('victory_count');
+              expect(participant.tournament_players.victory_count).to.be.a('number');
+              expect(participant).to.have.property('next_player');
+              expect(participant.next_player).to.be.a('boolean');
             });
-
-            // テストが成功したことを示す
             done();
+          } catch (e) {
+            done(e);
           }
-        );
+        });
       });
     });
   });
 });
+

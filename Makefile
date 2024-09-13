@@ -46,6 +46,10 @@ clean:
 
 # -- mockサーバーを立てる
 mock:
-	prism mock openapi.yaml
+	sudo prism mock openapi.yaml -p 80
 
-PHONY:generate clean mock
+# -- テスト
+test:
+	cd gen_openapi && npm install && npm test
+
+PHONY:generate clean mock test
