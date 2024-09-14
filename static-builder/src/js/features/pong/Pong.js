@@ -6,12 +6,12 @@ import { DefaultButton } from '@/js/components/ui/button'
 function Pong({ data }) {
   const [state, setState] = Teact.useState(0)
   const match_id = data['match_id']
-  let score1 = data['players'][0]['matchdetail']['score']
-  let score2 = data['players'][1]['matchdetail']['score']
-  const player1name = data['players'][0]['player']['name']
-  const player2name = data['players'][1]['player']['name']
-  const player1id = data['players'][0]['matchdetail']['player_id']
-  const player2id = data['players'][1]['matchdetail']['player_id']
+  let score1 = data['players'][0]['matchdetail'].score
+  let score2 = data['players'][1]['matchdetail'].score
+  const player1_name = data['players'][0]['player'].name
+  const player2_name = data['players'][1]['player'].name
+  const player1_id = data['players'][0]['matchdetail'].player_id
+  const player2_id = data['players'][1]['matchdetail'].player_id
 
   Teact.useEffect(() => {
     const canvas = document.getElementById('pongCanvas')
@@ -84,10 +84,10 @@ function Pong({ data }) {
         })
         .then(data => {
           canStart = true
-          if (player_id === player1id) {
-            score1 = data['players'][0]['match_details']['score']
+          if (player_id === player1_id) {
+            score1 = data['players'][0]['match_details'].score
           } else {
-            score2 = data['players'][1]['match_details']['score']
+            score2 = data['players'][1]['match_details'].score
           }
           console.log('Success:', data) // サーバーからのレスポンスデータを処理
         })
@@ -121,9 +121,9 @@ function Pong({ data }) {
       }
 
       if (ballX - ballSize < 0) {
-        scoreGoal(player2id)
+        scoreGoal(player2_id)
       } else if (ballX + ballSize > canvas.width) {
-        scoreGoal(player1id)
+        scoreGoal(player1_id)
       }
     }
 
@@ -242,7 +242,7 @@ function Pong({ data }) {
             className: 'text-center fs-2 text-white me-3',
             style: { writingMode: 'vertical-rl' },
           },
-          player1name,
+          player1_name,
         ),
         Teact.createElement(
           'div',
@@ -267,7 +267,7 @@ function Pong({ data }) {
             className: 'text-center fs-2 text-white ms-3',
             style: { writingMode: 'vertical-rl' },
           },
-          player2name,
+          player2_name,
         ),
       ),
     ),
