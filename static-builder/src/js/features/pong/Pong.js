@@ -6,7 +6,6 @@ import { DefaultButton } from '@/js/components/ui/button'
 function Pong( {data} ) {
   const [state, setState] = Teact.useState(0)
   const match_id = data["match_id"]
-  document.cookie = "match_id=" + match_id;
   let score1 = data["players"][0]["matchdetail"]["score"]
   let score2 = data["players"][1]["matchdetail"]["score"]
   const player1name = data["players"][0]["player"]["name"]
@@ -25,10 +24,11 @@ function Pong( {data} ) {
     let paddle2Y = (canvas.height - paddleHeight) / 2
     let ballX = canvas.width / 2
     let ballY = canvas.height / 2
-    let ballSpeedX = 5
-    let ballSpeedY = 5
+    let ballSpeedX = 0
+    let ballSpeedY = 0
     let paddle1Speed = 0
     let paddle2Speed = 0
+    let canStart = true
 
     function drawRect(x, y, width, height, color) {
       context.fillStyle = color
@@ -64,6 +64,38 @@ function Pong( {data} ) {
       }
     }
 
+    function scoreGoal(player_id) {
+      fetch('http://127.0.0.1:4010/api/matches/local/score',{
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',  // JSONデータを送信するためのヘッダー
+        },
+        body: JSON.stringify({
+            "match_id": match_id,
+            "player_id": player_id
+        }),
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();  // レスポンスをJSONとしてパース
+      })
+      .then(data => {
+        canStart = true
+        if (player_id === player1id) {
+          score1 = data["players"][0]["match_details"]["score"]
+        } else {
+          score2 = data["players"][1]["match_details"]["score"]
+        }
+        console.log('Success:', data);  // サーバーからのレスポンスデータを処理
+      })
+      .catch(error => {
+        console.error('Error:', error);  // エラー処理
+      });
+      resetBall()
+    }
+
     function moveBall() {
       ballX += ballSpeedX
       ballY += ballSpeedY
@@ -88,28 +120,9 @@ function Pong( {data} ) {
       }
 
       if (ballX - ballSize < 0) {
-        // response = fetch('127.0.0.1:8000/api/tournaments/local',{
-        //   method: 'PATCH',
-        //   body: JSON.stringify({
-        //       "match_id": match_id,
-        //       "player_id": player2id
-        //   }),
-        // })
-        // const result = response.json(); 
-        // score2 = result["players"][1]["matchdetail"]["score"]
-        score2++;
-        resetBall()
+        scoreGoal(player2id)
       } else if (ballX + ballSize > canvas.width) {
-        // response = fetch('127.0.0.1:8000/api/tournaments/local',{
-        //   method: 'PATCH',
-        //   body: JSON.stringify({
-        //       "match_id": match_id,
-        //       "player_id": player1id
-        //   }),
-        // })
-        // score1 = result["players"][0]["matchdetail"]["score"]
-        score1++;
-        resetBall()
+        scoreGoal(player1id)
       }
     }
 
@@ -190,8 +203,17 @@ function Pong( {data} ) {
       }
     }
 
+    function startPong(e) {
+      if (canStart === true) {
+        ballSpeedX = 5
+        ballSpeedY = 5
+        canStart = false
+      }
+    }
+
     document.addEventListener('keydown', keyDownHandler)
     document.addEventListener('keyup', keyUpHandler)
+    document.addEventListener('click', startPong)
 
     const intervalId = setInterval(update, 1000 / 60)
 
