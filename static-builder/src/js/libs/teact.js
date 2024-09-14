@@ -113,6 +113,12 @@ function commitWork(fiber) {
 
   commitWork(fiber.child)
   commitWork(fiber.sibling)
+
+  if (fiber.effects) {
+    for (const effect of fiber.effects) {
+      effect()
+    }
+  }
 }
 
 function commitDeletion(fiber, domParent) {
@@ -186,6 +192,7 @@ function updateFunctionComponent(fiber) {
   wipFiber = fiber
   hookIndex = 0
   wipFiber.hooks = []
+  wipFiber.effects = []
   // NOTE: 関数コンポーネントは関数を実行して返されたコンポーネントをfiberに格納する
   const children = [fiber.type(fiber.props)]
   reconcileChildren(fiber, children)
@@ -294,7 +301,7 @@ function useEffect(callback, deps) {
   const hasChanged =
     !oldDeps || oldDeps.some((dep, index) => dep !== deps[index])
   if (hasChanged) {
-    callback()
+    wipFiber.effects.push(callback)
   }
 
   wipFiber.hooks.push(hook)
