@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from django.utils.decorators import method_decorator
-from django.db import transaction
+from django.db import transaction, DatabaseError
 
 from .models import Match, MatchDetail
 from tournament.models import Tournament
@@ -38,16 +38,24 @@ class LocalMatchView(APIView):
             return Response({"error": "tournament_id is required."}, status = status.HTTP_404_NOT_FOUND)
         try:
             tournament = Tournament.objects.get(id=cookie_tournament_id)
+            if tournament.status != 'start':
+                return Response({"error": "Tournament is over."}, status = status.HTTP_400_BAD_REQUEST)
+            
+            displayable_match_id = Match.objects.get(tournament_id = cookie_tournament_id, status = 'start').id
+
+            response_data = create_ponggame_dataset(get_matchdetail_with_related_data(displayable_match_id))
+            return Response(response_data, status=status.HTTP_200_OK)
+        
         except Tournament.DoesNotExist:
             return Response({"error": "Tournament not found."}, status = status.HTTP_404_NOT_FOUND)
-        if tournament.status != 'start':
-            return Response({"error": "Tournament is over."}, status = status.HTTP_400_BAD_REQUEST)
-        displayable_match_id = Match.objects.get(tournament_id = cookie_tournament_id, status = 'start').id
-
-        if displayable_match_id is None:
+        except Match.DoesNotExist:
             return Response({"error": "Match with start status not found."}, status = status.HTTP_404_NOT_FOUND)
-        response_data = create_ponggame_dataset(get_matchdetail_with_related_data(displayable_match_id))
-        return Response(response_data, status=status.HTTP_200_OK)
+        except MatchDetail.DoesNotExist:
+            return Response({"error": "MatchDetail not found."}, status = status.HTTP_404_NOT_FOUND)
+        except DatabaseError as e:
+            return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class LocalScoreView(APIView):
     def patch(self, request):
@@ -58,20 +66,14 @@ class LocalScoreView(APIView):
             return Response({"error": "match_id and player_id are required."}, status = status.HTTP_400_BAD_REQUEST)
         try:
             match = Match.objects.get(id=match_id)
-        except Match.DoesNotExist:
-            return Response({"error": "Match not found."}, status = status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
-        if match.status == 'end':
-            return Response({"error": "Match is over."}, status = status.HTTP_400_BAD_REQUEST)
+            if match.status == 'end':
+                return Response({"error": "Match is over."}, status = status.HTTP_400_BAD_REQUEST)
 
-        # スコアをインクリメントしたMatchDetailのインスタンスを取得
-        matchdetail_instance = increment_score(match_id, player_id)
-        if matchdetail_instance is None:
-            return Response({"error": "MatchDetail not found."}, status = status.HTTP_404_NOT_FOUND)
+            # スコアをインクリメントしたMatchDetailのインスタンスを取得
+            matchdetail_instance = increment_score(match_id, player_id)
+            if matchdetail_instance is None:
+                return Response({"error": "MatchDetail not found."}, status = status.HTTP_404_NOT_FOUND)
 
-        # MatchDetailのDB情報を更新
-        try:
             with transaction.atomic():
                 matchdetail = validate_and_update_matchdetail(matchdetail_instance)
 
@@ -98,5 +100,11 @@ class LocalScoreView(APIView):
 
         except ValidationError as e:
             return Response(e.detail, status = status.HTTP_400_BAD_REQUEST)
+        except Match.DoesNotExist:
+            return Response({"error": "Match not found."}, status = status.HTTP_404_NOT_FOUND)
+        except MatchDetail.DoesNotExist:
+            return Response({"error": "MatchDetail not found."}, status = status.HTTP_404_NOT_FOUND)
+        except DatabaseError as e:
+            return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as e:
             return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)

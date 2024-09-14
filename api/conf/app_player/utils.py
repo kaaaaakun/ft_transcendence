@@ -22,6 +22,6 @@ def validate_players(player_names):
 def register_players(valid_players_data):
 	players = []
 	for player_data in valid_players_data:
-			player = Player.objects.create(**player_data)
-			players.append(player)
+		player = Player.objects.create(**player_data)
+		players.append(player)
 	return players
