@@ -1,17 +1,16 @@
 import '@/scss/styles.scss'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/libs/teact'
-import { DefaultButton } from '@/js/components/ui/button'
 
 function Pong({ data }) {
   const [state, setState] = Teact.useState(0)
-  const match_id = data['match_id']
-  let score1 = data['players'][0]['matchdetail'].score
-  let score2 = data['players'][1]['matchdetail'].score
-  const player1_name = data['players'][0]['player'].name
-  const player2_name = data['players'][1]['player'].name
-  const player1_id = data['players'][0]['matchdetail'].player_id
-  const player2_id = data['players'][1]['matchdetail'].player_id
+  const matchId = data.players[0].match_details.match_id
+  let score1 = data.players[0].match_details.score
+  let score2 = data.players[1].match_details.score
+  const player1Name = data.players[0].player.name
+  const player2Name = data.players[1].player.name
+  const player1Id = data.players[0].match_details.player_id
+  const player2Id = data.players[1].match_details.player_id
 
   Teact.useEffect(() => {
     const canvas = document.getElementById('pongCanvas')
@@ -64,7 +63,7 @@ function Pong({ data }) {
       }
     }
 
-    function scoreGoal(player_id) {
+    function scoreGoal(playerId) {
       fetch('http://127.0.0.1:4010/api/matches/local/score', {
         //TODO 実際のurlに変更する必要あり（今はmockのurl)
         method: 'PATCH',
@@ -72,8 +71,8 @@ function Pong({ data }) {
           'Content-Type': 'application/json', // JSONデータを送信するためのヘッダー
         },
         body: JSON.stringify({
-          match_id: match_id,
-          player_id: player_id,
+          match_id: matchId,
+          player_id: playerId,
         }),
       })
         .then(response => {
@@ -84,10 +83,10 @@ function Pong({ data }) {
         })
         .then(data => {
           canStart = true
-          if (player_id === player1_id) {
-            score1 = data['players'][0]['match_details'].score
+          if (playerId === player1Id) {
+            score1 = data.players[0].match_details.score
           } else {
-            score2 = data['players'][1]['match_details'].score
+            score2 = data.players[1].match_details.score
           }
           console.log('Success:', data) // サーバーからのレスポンスデータを処理
         })
@@ -121,9 +120,9 @@ function Pong({ data }) {
       }
 
       if (ballX - ballSize < 0) {
-        scoreGoal(player2_id)
+        scoreGoal(player2Id)
       } else if (ballX + ballSize > canvas.width) {
-        scoreGoal(player1_id)
+        scoreGoal(player1Id)
       }
     }
 
@@ -242,7 +241,7 @@ function Pong({ data }) {
             className: 'text-center fs-2 text-white me-3',
             style: { writingMode: 'vertical-rl' },
           },
-          player1_name,
+          player1Name,
         ),
         Teact.createElement(
           'div',
@@ -267,7 +266,7 @@ function Pong({ data }) {
             className: 'text-center fs-2 text-white ms-3',
             style: { writingMode: 'vertical-rl' },
           },
-          player2_name,
+          player2Name,
         ),
       ),
     ),
