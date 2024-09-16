@@ -42,16 +42,8 @@ def create_tournament_data(tournamentplayer, is_next_player):
 # args: Playerインスタンスのリスト
 # return: Tournamentのインスタンス, TournamentPlayerのインスタンスのリスト
 def create_tournament(players):
-    try:
-        tournament = register_tournament(validate_tournament(len(players), 'start'))
-    except ValueError as e:
-        raise ValidationError(e.detail)
-    
-    try:
-        valid_tournament_players = validate_tournament_players(tournament.id, players)
-    except ValueError as e:
-        raise ValidationError(e.detail)
-    
+    tournament = register_tournament(validate_tournament(len(players), 'start'))
+    valid_tournament_players = validate_tournament_players(tournament.id, players)
     tournament_players = register_tournament_players(valid_tournament_players)
     return tournament, tournament_players
 
@@ -101,11 +93,8 @@ def validate_tournament_player(tournament_id, player_id, status, victory_count):
     
 def validate_tournament_players(tournament_id, players, status = 'await', victory_count = 0):
     valid_tournament_players = []
-    try:
-        for player in players:
-            valid_tournament_players.append(validate_tournament_player(tournament_id, player.id, status, victory_count))
-    except ValidationError as e:
-        raise ValidationError(e.detail)
+    for player in players:
+        valid_tournament_players.append(validate_tournament_player(tournament_id, player.id, status, victory_count))
     return valid_tournament_players
 
 # トーナメントプレイヤーをDBに登録する
