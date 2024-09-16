@@ -42,7 +42,7 @@ export function Link({ to, className, children, state }) {
   )
 }
 
-export function navigate(to, state = {}) {
+function navigate(to, state = {}) {
   window.history.pushState(state, '', to)
   currentState = state
   setCurrentPath(to, state)
