@@ -5,17 +5,13 @@ import { Home } from '@/js/pages/Home'
 
 // TODO About ページのrouteを設定したら消す
 const Tournament = () => {
-  const loc= useLocation();
+  const loc = useLocation()
 
   Teact.useEffect(() => {
     console.log(loc)
   }, [])
 
-  return Teact.createElement(
-    'h1',
-    null,
-    'tournament'
-  )
+  return Teact.createElement('h1', null, 'tournament')
 }
 
 function App() {
@@ -31,8 +27,8 @@ function App() {
     }),
     Route({
       path: '/tournament',
-      component: Tournament
-    })
+      component: Tournament,
+    }),
   )
 }
 

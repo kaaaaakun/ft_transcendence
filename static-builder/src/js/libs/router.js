@@ -1,7 +1,9 @@
 import { Teact } from '@/js/libs/teact'
 
 const routes = []
-let setCurrentPath = () => {}
+let setCurrentPath = () => {
+  return
+}
 let currentState = {}
 
 export function Router() {
@@ -58,7 +60,7 @@ export function useNavigate() {
   }
 }
 
-window.addEventListener('popstate', (event) => {
+window.addEventListener('popstate', event => {
   currentState = event.state || {}
   setCurrentPath(window.location.pathname, currentState)
 })

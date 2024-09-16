@@ -21,10 +21,13 @@ export const Home = () => {
         DefaultButton({ text: '１人対戦', onClick: () => navigate('/game') }), // TBD
         DefaultButton({
           text: 'トーナメント',
-          onClick: () => navigate('/tournament', {player: {
-            name: 'John',
-            score: 0,
-          }}),
+          onClick: () =>
+            navigate('/tournament', {
+              player: {
+                name: 'John',
+                score: 0,
+              },
+            }),
         }), // TBD
       ),
     ),
