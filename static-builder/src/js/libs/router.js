@@ -8,9 +8,14 @@ export function Router() {
   setCurrentPath = setPath
 
   const route = routes.find(r => r.path === currentPath)
-  return route
-    ? route.component
-    : Teact.createElement('h1', null, '404 Not Found')
+  if (!route) {
+    return Teact.createElement('h1', null, '404 Not Found')
+  }
+
+  if (route.component instanceof Function) {
+    return Teact.createElement(route.component)
+  }
+  return route.component
 }
 
 export function Route({ path, component }) {
