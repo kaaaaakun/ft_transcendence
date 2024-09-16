@@ -2,53 +2,17 @@ import '@/scss/styles.scss'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/libs/teact'
 
-function Pong() {
-  const [state, setState] = Teact.useState(0)
-  let score1 = 0
-  let score2 = 0
+function Pong({ data }) {
+  const matchId = data.players[0].match_details.match_id
+  let score1 = data.players[0].match_details.score
+  let score2 = data.players[1].match_details.score
+  const player1Name = data.players[0].player.name
+  const player2Name = data.players[1].player.name
+  const player1Id = data.players[0].match_details.player_id
+  const player2Id = data.players[1].match_details.player_id
 
-  const startGame = () => {
-    const gameContainer = document.createElement('div')
-    gameContainer.id = 'gameContainer'
-    gameContainer.style.display = 'flex'
-    gameContainer.style.justifyContent = 'center'
-    gameContainer.style.alignItems = 'center'
-
-    const leftPlayer = document.createElement('div')
-    leftPlayer.id = 'leftPlayer'
-    leftPlayer.style.writingMode = 'vertical-rl'
-    leftPlayer.style.textAlign = 'center'
-    leftPlayer.style.fontSize = '32px'
-    leftPlayer.style.color = 'white'
-    leftPlayer.style.marginRight = '30px'
-    leftPlayer.textContent = 'A'
-
-    const rightPlayer = document.createElement('div')
-    rightPlayer.id = 'rightPlayer'
-    rightPlayer.style.writingMode = 'vertical-rl'
-    rightPlayer.style.textAlign = 'center'
-    rightPlayer.style.fontSize = '32px'
-    rightPlayer.style.color = 'white'
-    rightPlayer.style.marginLeft = '30px'
-    rightPlayer.textContent = 'D'
-
-    const canvasContainer = document.createElement('div')
-    canvasContainer.style.position = 'relative'
-    canvasContainer.style.width = '600px'
-    canvasContainer.style.height = '400px'
-    canvasContainer.style.backgroundColor = '#1E1E2C'
-
-    const canvas = document.createElement('canvas')
-    canvas.id = 'pongCanvas'
-    canvas.width = 600
-    canvas.height = 400
-
-    canvasContainer.appendChild(canvas)
-    gameContainer.appendChild(leftPlayer)
-    gameContainer.appendChild(canvasContainer)
-    gameContainer.appendChild(rightPlayer)
-    document.getElementById('pong').appendChild(gameContainer)
-
+  Teact.useEffect(() => {
+    const canvas = document.getElementById('pongCanvas')
     const context = canvas.getContext('2d')
 
     const paddleWidth = 10
@@ -58,10 +22,11 @@ function Pong() {
     let paddle2Y = (canvas.height - paddleHeight) / 2
     let ballX = canvas.width / 2
     let ballY = canvas.height / 2
-    let ballSpeedX = 5
-    let ballSpeedY = 5
+    let ballSpeedX = 0
+    let ballSpeedY = 0
     let paddle1Speed = 0
     let paddle2Speed = 0
+    let canStart = true
 
     function drawRect(x, y, width, height, color) {
       context.fillStyle = color
@@ -97,6 +62,39 @@ function Pong() {
       }
     }
 
+    function scoreGoal(playerId) {
+      fetch('http://127.0.0.1:4010/api/matches/local/score', {
+        //TODO 実際のurlに変更する必要あり（今はmockのurl)
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json', // JSONデータを送信するためのヘッダー
+        },
+        body: JSON.stringify({
+          match_id: matchId,
+          player_id: playerId,
+        }),
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok')
+          }
+          return response.json() // レスポンスをJSONとしてパース
+        })
+        .then(data => {
+          canStart = true
+          if (playerId === player1Id) {
+            score1 = data.players[0].match_details.score
+          } else {
+            score2 = data.players[1].match_details.score
+          }
+          console.log('Success:', data) // サーバーからのレスポンスデータを処理
+        })
+        .catch(error => {
+          console.error('Error:', error) // エラー処理
+        })
+      resetBall()
+    }
+
     function moveBall() {
       ballX += ballSpeedX
       ballY += ballSpeedY
@@ -121,11 +119,9 @@ function Pong() {
       }
 
       if (ballX - ballSize < 0) {
-        score2++
-        resetBall()
+        scoreGoal(player2Id)
       } else if (ballX + ballSize > canvas.width) {
-        score1++
-        resetBall()
+        scoreGoal(player1Id)
       }
     }
 
@@ -177,7 +173,6 @@ function Pong() {
           canvas.height / 2,
         )
       }
-      setState(state => state + 1)
     }
 
     function keyDownHandler(e) {
@@ -206,8 +201,17 @@ function Pong() {
       }
     }
 
+    function startPong(e) {
+      if (canStart === true) {
+        ballSpeedX = 5
+        ballSpeedY = 5
+        canStart = false
+      }
+    }
+
     document.addEventListener('keydown', keyDownHandler)
     document.addEventListener('keyup', keyUpHandler)
+    document.addEventListener('click', startPong)
 
     const intervalId = setInterval(update, 1000 / 60)
 
@@ -215,15 +219,56 @@ function Pong() {
       clearInterval(intervalId)
       document.removeEventListener('keydown', keyDownHandler)
       document.removeEventListener('keyup', keyUpHandler)
-      gameContainer.remove()
     }
-  }
+  }, [])
 
-  if (state === 0) {
-    startGame()
-  }
-
-  return BaseLayout()
+  return BaseLayout(
+    Teact.createElement(
+      'div',
+      {
+        id: 'pong',
+        className: 'd-flex justify-content-center align-items-center',
+      },
+      Teact.createElement(
+        'div',
+        { className: 'd-flex align-items-center justify-content-center' },
+        Teact.createElement(
+          'div',
+          {
+            id: 'leftPlayer',
+            className: 'text-center fs-2 text-white me-3',
+            style: { writingMode: 'vertical-rl' },
+          },
+          player1Name,
+        ),
+        Teact.createElement(
+          'div',
+          {
+            className: 'position-relative',
+            style: {
+              width: '600px',
+              height: '400px',
+              backgroundColor: '#1E1E2C',
+            },
+          },
+          Teact.createElement('canvas', {
+            id: 'pongCanvas',
+            width: '600',
+            height: '400',
+          }),
+        ),
+        Teact.createElement(
+          'div',
+          {
+            id: 'rightPlayer',
+            className: 'text-center fs-2 text-white ms-3',
+            style: { writingMode: 'vertical-rl' },
+          },
+          player2Name,
+        ),
+      ),
+    ),
+  )
 }
 
 export { Pong }
