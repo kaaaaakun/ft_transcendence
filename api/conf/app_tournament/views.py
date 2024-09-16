@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.utils.decorators import method_decorator
-from django.db import transaction
+from django.db import transaction, DatabaseError
 
 from .models import Tournament, TournamentPlayer
 from .serializers import TournamentSerializer, TournamentPlayerSerializer
@@ -34,11 +34,16 @@ class LocalTournamentView(APIView):
             return Response({"error": "tournament_id is required."}, status = status.HTTP_400_BAD_REQUEST)
         try:
             tournament = Tournament.objects.get(id=cookie_tournament_id)
+            response_data = create_tournament_dataset(get_tournamentplayer_with_related_data(tournament.id))
+            return Response(response_data, status=status.HTTP_200_OK)
+
         except Tournament.DoesNotExist:
             return Response({"error": "Tournament not found."}, status = status.HTTP_404_NOT_FOUND)
+        except DatabaseError as e:
+            return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-        response_data = create_tournament_dataset(get_tournamentplayer_with_related_data(tournament.id))
-        return Response(response_data, status=status.HTTP_200_OK)
 
     def post(self, request):
         player_names = request.data.get('players', [])
@@ -61,5 +66,7 @@ class LocalTournamentView(APIView):
 
         except ValidationError as e:
             return Response(e.detail, status = status.HTTP_400_BAD_REQUEST)
+        except DatabaseError as e:
+            return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as e:
             return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)        
