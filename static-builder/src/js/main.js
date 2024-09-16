@@ -1,10 +1,16 @@
 import '@/scss/styles.scss'
-import { Route, Router, Link } from '@/js/libs/router'
+import { Route, Router, useLocation } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import { Home } from '@/js/pages/Home'
 
 // TODO About ページのrouteを設定したら消す
 const Tournament = () => {
+  const loc= useLocation();
+
+  Teact.useEffect(() => {
+    console.log(loc)
+  }, [])
+
   return Teact.createElement(
     'h1',
     null,
