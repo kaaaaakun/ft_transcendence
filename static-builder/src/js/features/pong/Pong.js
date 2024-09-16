@@ -3,7 +3,6 @@ import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/libs/teact'
 
 function Pong({ data }) {
-  const [state, setState] = Teact.useState(0)
   const matchId = data.players[0].match_details.match_id
   let score1 = data.players[0].match_details.score
   let score2 = data.players[1].match_details.score
@@ -174,7 +173,6 @@ function Pong({ data }) {
           canvas.height / 2,
         )
       }
-      setState(state => state + 1)
     }
 
     function keyDownHandler(e) {
