@@ -22,19 +22,19 @@ function handleSubmit(event) {
     },
     body: JSON.stringify(data),
   })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not ok')
-    }
-    return response.json() // レスポンスをJSONとしてパース
-  })
-  .then(data => {
-    console.log('Success:', data) // レスポンスをコンソールに出力
-    navigate('/tournament', { state: data })
-  })
-  .catch(error => {
-    console.error('Error:', error) // エラー処理
-  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+      return response.json() // レスポンスをJSONとしてパース
+    })
+    .then(data => {
+      console.log('Success:', data) // レスポンスをコンソールに出力
+      navigate('/tournament', { state: data })
+    })
+    .catch(error => {
+      console.error('Error:', error) // エラー処理
+    })
 }
 
 export const InputAlias = () => {

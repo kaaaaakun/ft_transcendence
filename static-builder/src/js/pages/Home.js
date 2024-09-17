@@ -22,21 +22,21 @@ export const Home = () => {
           text: '2人対戦',
           onClick: () =>
             navigate('/input_alias', {
-              player_num: 2
+              player_num: 2,
             }),
         }), // TBD
         DefaultButton({
           text: '4人対戦',
           onClick: () =>
             navigate('/input_alias', {
-              player_num: 4
+              player_num: 4,
             }),
         }), // TBD
         DefaultButton({
           text: '8人対戦',
           onClick: () =>
             navigate('/input_alias', {
-              player_num: 8
+              player_num: 8,
             }),
         }), // TBD
       ),
