@@ -1,9 +1,11 @@
 import { DefaultButton } from '@/js/components/ui/button'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
-import { navigate } from '@/js/libs/router'
+import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 
 export const Home = () => {
+  const navigate = useNavigate()
+
   return BaseLayout(
     Teact.createElement(
       'div',
@@ -19,7 +21,13 @@ export const Home = () => {
         DefaultButton({ text: '１人対戦', onClick: () => navigate('/game') }), // TBD
         DefaultButton({
           text: 'トーナメント',
-          onClick: () => navigate('/tournament'),
+          onClick: () =>
+            navigate('/tournament', {
+              player: {
+                name: 'John',
+                score: 0,
+              },
+            }),
         }), // TBD
       ),
     ),
