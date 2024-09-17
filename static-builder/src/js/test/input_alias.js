@@ -1,4 +1,3 @@
-import { Teact } from '@/js/libs/teact'
 import { InputAlias } from '@/js/pages/InputAlias'
 
 export function testInputAlias() {

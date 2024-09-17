@@ -3,17 +3,19 @@ import { Route, Router, useLocation } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import { Home } from '@/js/pages/Home'
 import { InputAlias } from '@/js/pages/InputAlias'
+import { Tournament } from '@/js/pages/Tournament'
+import { Pong } from '@/js/pages/Pong'
 
 // TODO About ページのrouteを設定したら消す
-const Tournament = () => {
-  const loc = useLocation()
+// const Tournament = () => {
+//   const loc = useLocation()
 
-  Teact.useEffect(() => {
-    console.log(loc)
-  }, [])
+//   Teact.useEffect(() => {
+//     console.log(loc)
+//   }, [])
 
-  return Teact.createElement('h1', null, 'tournament')
-}
+//   return Teact.createElement('h1', null, 'tournament')
+// }
 
 function App() {
   return Router(
@@ -33,6 +35,10 @@ function App() {
     Route({
       path: '/tournament',
       component: Tournament,
+    }),
+    Route({
+      path: '/game',
+      component: Pong,
     }),
   )
 }

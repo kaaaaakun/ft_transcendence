@@ -1,18 +1,45 @@
 import '@/scss/styles.scss'
 import { Teact } from '@/js/libs/teact'
+import { useNavigate, useLocation } from '@/js/libs/router'
+import { BaseLayout } from '@/js/layouts/BaseLayout'
+import { DefaultButton } from '@/js/components/ui/button'
 
 function sumVictoryCount(players, start, end) {
   let sum = 0
   for (let i = start; i <= end; i++) {
-    sum += players[i].victoryCount
+    sum += players[i].tournament_players.victory_count
   }
   return sum
+}
+
+function fetchMatch() {
+  const navigate = useNavigate()
+  console.log('fetchMatch')
+  fetch('http://127.0.0.1:4010/api/matches/local', {
+    method: 'GET',
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+      return response.json() // レスポンスをJSONとしてパース
+    })
+    .then(data => {
+      console.log('Success:', data) // レスポンスをコンソールに出力
+      navigate('/game', { data })
+    })
+    .catch(error => {
+      console.error('Error:', error) // エラー処理
+    })
 }
 
 function getMostVictoriesPlayer(players) {
   let ret = players[0]
   for (const player of players) {
-    if (player.victoryCount > ret.victoryCount) {
+    if (
+      player.tournament_players.victory_count >
+      ret.tournament_players.victory_count
+    ) {
       ret = player
     }
   }
@@ -32,7 +59,7 @@ function createPlayerBoard(player, x, y) {
       y: y - yAdjustment,
       width: textWidth,
       height: textHeight,
-      fill: player.nextPlayer ? fighterColor : otherColor,
+      fill: player.next_player ? fighterColor : otherColor,
       stroke: 'white',
       'stroke-width': 0.5,
     }),
@@ -46,7 +73,7 @@ function createPlayerBoard(player, x, y) {
         fill: 'white',
         textLength: '100',
       },
-      player.name,
+      player.player.name,
     ),
   ]
 }
@@ -77,7 +104,8 @@ function TournamentTwoPlayers(players) {
       // 左プレイヤー
       Teact.createElement('path', {
         d: 'M133,30 L224,30z',
-        stroke: players[0].victoryCount >= 1 ? 'yellow' : 'black',
+        stroke:
+          players[0].tournament_players.victory_count >= 1 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       ...createPlayerBoard(players[0], 2, 30),
@@ -85,7 +113,8 @@ function TournamentTwoPlayers(players) {
       // 右プレイヤー
       Teact.createElement('path', {
         d: 'M315,30 L224,30z',
-        stroke: players[1].victoryCount >= 1 ? 'yellow' : 'black',
+        stroke:
+          players[1].tournament_players.victory_count >= 1 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       ...createPlayerBoard(players[1], 329, 30),
@@ -116,46 +145,54 @@ function TournamentFourPlayers(players) {
       },
       Teact.createElement('path', {
         d: 'M133,30 L165,30z',
-        stroke: players[0].victoryCount >= 0 ? 'yellow' : 'black',
+        stroke:
+          players[0].tournament_players.victory_count >= 0 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       ...createPlayerBoard(players[0], 2, 30),
       Teact.createElement('path', {
         d: 'M164,30 L164,45z',
-        stroke: players[0].victoryCount >= 1 ? 'yellow' : 'black',
+        stroke:
+          players[0].tournament_players.victory_count >= 1 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       Teact.createElement('path', {
         d: 'M133,60 L165,60z',
-        stroke: players[1].victoryCount >= 0 ? 'yellow' : 'black',
+        stroke:
+          players[1].tournament_players.victory_count >= 0 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       ...createPlayerBoard(players[1], 2, 60),
       Teact.createElement('path', {
         d: 'M164,60 L164,45z',
-        stroke: players[1].victoryCount >= 1 ? 'yellow' : 'black',
+        stroke:
+          players[1].tournament_players.victory_count >= 1 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       Teact.createElement('path', {
         d: 'M255,30 L223,30z',
-        stroke: players[2].victoryCount >= 0 ? 'yellow' : 'black',
+        stroke:
+          players[2].tournament_players.victory_count >= 0 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       ...createPlayerBoard(players[2], 329, 30),
       Teact.createElement('path', {
         d: 'M224,30 L224,45z',
-        stroke: players[2].victoryCount >= 1 ? 'yellow' : 'black',
+        stroke:
+          players[2].tournament_players.victory_count >= 1 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       Teact.createElement('path', {
         d: 'M255,60 L223,60z',
-        stroke: players[3].victoryCount >= 0 ? 'yellow' : 'black',
+        stroke:
+          players[3].tournament_players.victory_count >= 0 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       ...createPlayerBoard(players[3], 329, 60),
       Teact.createElement('path', {
         d: 'M224,60 L224,45z',
-        stroke: players[3].victoryCount >= 1 ? 'yellow' : 'black',
+        stroke:
+          players[3].tournament_players.victory_count >= 1 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       Teact.createElement('path', {
@@ -196,90 +233,106 @@ function TournamentEightPlayers(players) {
       },
       Teact.createElement('path', {
         d: 'M133,30 L165,30z',
-        stroke: players[0].victoryCount >= 0 ? 'yellow' : 'black',
+        stroke:
+          players[0].tournament_players.victory_count >= 0 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       ...createPlayerBoard(players[0], 2, 30),
       Teact.createElement('path', {
         d: 'M164,30 L164,45z',
-        stroke: players[0].victoryCount >= 1 ? 'yellow' : 'black',
+        stroke:
+          players[0].tournament_players.victory_count >= 1 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       Teact.createElement('path', {
         d: 'M133,60 L165,60z',
-        stroke: players[1].victoryCount >= 0 ? 'yellow' : 'black',
+        stroke:
+          players[1].tournament_players.victory_count >= 0 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       ...createPlayerBoard(players[1], 2, 60),
       Teact.createElement('path', {
         d: 'M164,60 L164,45z',
-        stroke: players[1].victoryCount >= 1 ? 'yellow' : 'black',
+        stroke:
+          players[1].tournament_players.victory_count >= 1 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       Teact.createElement('path', {
         d: 'M133,90 L165,90z',
-        stroke: players[2].victoryCount >= 0 ? 'yellow' : 'black',
+        stroke:
+          players[2].tournament_players.victory_count >= 0 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       ...createPlayerBoard(players[2], 2, 90),
       Teact.createElement('path', {
         d: 'M164,90 L164,105z',
-        stroke: players[2].victoryCount >= 1 ? 'yellow' : 'black',
+        stroke:
+          players[2].tournament_players.victory_count >= 1 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       Teact.createElement('path', {
         d: 'M133,120 L165,120z',
-        stroke: players[3].victoryCount >= 0 ? 'yellow' : 'black',
+        stroke:
+          players[3].tournament_players.victory_count >= 0 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       ...createPlayerBoard(players[3], 2, 120),
       Teact.createElement('path', {
         d: 'M164,120 L164,105z',
-        stroke: players[3].victoryCount >= 1 ? 'yellow' : 'black',
+        stroke:
+          players[3].tournament_players.victory_count >= 1 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       Teact.createElement('path', {
         d: 'M315,30 L283,30z',
-        stroke: players[4].victoryCount >= 0 ? 'yellow' : 'black',
+        stroke:
+          players[4].tournament_players.victory_count >= 0 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       ...createPlayerBoard(players[4], 329, 30),
       Teact.createElement('path', {
         d: 'M284,30 L284,45z',
-        stroke: players[4].victoryCount >= 1 ? 'yellow' : 'black',
+        stroke:
+          players[4].tournament_players.victory_count >= 1 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       Teact.createElement('path', {
         d: 'M315,60 L283,60z',
-        stroke: players[5].victoryCount >= 0 ? 'yellow' : 'black',
+        stroke:
+          players[5].tournament_players.victory_count >= 0 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       ...createPlayerBoard(players[5], 329, 60),
       Teact.createElement('path', {
         d: 'M284,60 L284,45z',
-        stroke: players[5].victoryCount >= 1 ? 'yellow' : 'black',
+        stroke:
+          players[5].tournament_players.victory_count >= 1 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       Teact.createElement('path', {
         d: 'M315,90 L283,90z',
-        stroke: players[6].victoryCount >= 0 ? 'yellow' : 'black',
+        stroke:
+          players[6].tournament_players.victory_count >= 0 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       ...createPlayerBoard(players[6], 329, 90),
       Teact.createElement('path', {
         d: 'M284,90 L284,105z',
-        stroke: players[6].victoryCount >= 1 ? 'yellow' : 'black',
+        stroke:
+          players[6].tournament_players.victory_count >= 1 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       Teact.createElement('path', {
         d: 'M315,120 L283,120z',
-        stroke: players[7].victoryCount >= 0 ? 'yellow' : 'black',
+        stroke:
+          players[7].tournament_players.victory_count >= 0 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       ...createPlayerBoard(players[7], 329, 120),
       Teact.createElement('path', {
         d: 'M284,120 L284,105z',
-        stroke: players[7].victoryCount >= 1 ? 'yellow' : 'black',
+        stroke:
+          players[7].tournament_players.victory_count >= 1 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       Teact.createElement('path', {
@@ -342,8 +395,7 @@ function TournamentEightPlayers(players) {
   )
 }
 
-function Tournament({ players }) {
-  console.log(players)
+function ConditionalBranch(players) {
   switch (players.participants.length) {
     case 8:
       return TournamentEightPlayers(players.participants)
@@ -356,4 +408,25 @@ function Tournament({ players }) {
   }
 }
 
-export { Tournament }
+export const Tournament = () => {
+  const loc = useLocation()
+  if (!loc.state || !loc.state.data) {
+    return Teact.createElement('h1', null, '400 Bad Request')
+  }
+  const players = loc.state.data
+  return BaseLayout(
+    Teact.createElement(
+      'div',
+      { className: 'container' },
+      ConditionalBranch(players),
+      Teact.createElement(
+        'div',
+        { className: 'd-grid gap-2 col-3 mx-auto' },
+        DefaultButton({
+          text: '対戦へ',
+          onClick: fetchMatch,
+        }),
+      ),
+    ),
+  )
+}

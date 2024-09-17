@@ -2,9 +2,10 @@ import '@/scss/styles.scss'
 import { DefaultButton } from '@/js/components/ui/button'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/libs/teact'
-import { useLocation, useNavigate } from '../libs/router'
+import { useNavigate, useLocation } from '../libs/router'
 
 function handleSubmit(event) {
+  const navigate = useNavigate()
   event.preventDefault() // フォームのデフォルトの送信を防ぐ（ページリロード防止）
 
   const formData = new FormData(event.target)
@@ -14,7 +15,7 @@ function handleSubmit(event) {
   formData.forEach((value, key) => {
     players.push(value)
   })
-  data['players'] = players
+  data.players = players
   fetch('http://127.0.0.1:4010/api/tournaments/local', {
     method: 'POST',
     headers: {
@@ -30,7 +31,7 @@ function handleSubmit(event) {
     })
     .then(data => {
       console.log('Success:', data) // レスポンスをコンソールに出力
-      navigate('/tournament', { state: data })
+      navigate('/tournament', { data })
     })
     .catch(error => {
       console.error('Error:', error) // エラー処理
@@ -41,7 +42,7 @@ export const InputAlias = () => {
   const loc = useLocation()
   let num = 0
   if (loc.state) {
-    num = loc.state.player_num
+    num = loc.state.playerNum
   }
   return BaseLayout(
     Teact.createElement(
