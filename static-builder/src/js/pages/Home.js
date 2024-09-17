@@ -18,15 +18,25 @@ export const Home = () => {
       Teact.createElement(
         'div',
         { className: 'd-grid gap-2 col-3 mx-auto' },
-        DefaultButton({ text: '１人対戦', onClick: () => navigate('/game') }), // TBD
         DefaultButton({
-          text: 'トーナメント',
+          text: '2人対戦',
           onClick: () =>
-            navigate('/tournament', {
-              player: {
-                name: 'John',
-                score: 0,
-              },
+            navigate('/input_alias', {
+              player_num: 2
+            }),
+        }), // TBD
+        DefaultButton({
+          text: '4人対戦',
+          onClick: () =>
+            navigate('/input_alias', {
+              player_num: 4
+            }),
+        }), // TBD
+        DefaultButton({
+          text: '8人対戦',
+          onClick: () =>
+            navigate('/input_alias', {
+              player_num: 8
             }),
         }), // TBD
       ),

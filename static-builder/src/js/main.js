@@ -2,6 +2,7 @@ import '@/scss/styles.scss'
 import { Route, Router, useLocation } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import { Home } from '@/js/pages/Home'
+import { InputAlias } from '@/js/pages/InputAlias'
 
 // TODO About ページのrouteを設定したら消す
 const Tournament = () => {
@@ -24,6 +25,10 @@ function App() {
     Route({
       path: '/contact',
       component: Teact.createElement('h1', null, 'Contact'),
+    }),
+    Route({
+      path: '/input_alias',
+      component: InputAlias,
     }),
     Route({
       path: '/tournament',
