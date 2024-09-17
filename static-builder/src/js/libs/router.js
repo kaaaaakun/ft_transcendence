@@ -1,16 +1,29 @@
 import { Teact } from '@/js/libs/teact'
 
 const routes = []
-let setCurrentPath = () => {}
+let setCurrentPath = () => {
+  return
+}
+let currentState = {}
 
 export function Router() {
   const [currentPath, setPath] = Teact.useState(window.location.pathname)
-  setCurrentPath = setPath
+  const [state, setState] = Teact.useState(currentState)
+  setCurrentPath = (path, state = {}) => {
+    setPath(() => path)
+    setState(() => state)
+  }
 
   const route = routes.find(r => r.path === currentPath)
-  return route
-    ? route.component
-    : Teact.createElement('h1', null, '404 Not Found')
+  if (!route) {
+    return Teact.createElement('h1', null, '404 Not Found')
+  }
+
+  if (route.component instanceof Function) {
+    return Teact.createElement(route.component, { state })
+  }
+
+  return route.component
 }
 
 export function Route({ path, component }) {
@@ -18,11 +31,10 @@ export function Route({ path, component }) {
   return null
 }
 
-export function Link({ to, className, children }) {
+export function Link({ to, className, children, state }) {
   const handleClick = e => {
-    // NOTE: preventDefaultすると関数コンポーネントの差分検出がうまく行ってなくて期待通りの動作をしないので一時的にコメントアウト
     e.preventDefault()
-    navigate(to)
+    navigate(to, state)
   }
 
   return Teact.createElement(
@@ -32,11 +44,23 @@ export function Link({ to, className, children }) {
   )
 }
 
-export function navigate(to) {
-  window.history.pushState({}, '', to)
-  setCurrentPath(() => to)
+function navigate(to, state = {}) {
+  window.history.pushState(state, '', to)
+  currentState = state
+  setCurrentPath(to, state)
 }
 
-window.addEventListener('popstate', () => {
-  setCurrentPath(() => window.location.pathname)
+export function useLocation() {
+  return { pathname: window.location.pathname, state: currentState }
+}
+
+export function useNavigate() {
+  return (to, state = {}) => {
+    navigate(to, state)
+  }
+}
+
+window.addEventListener('popstate', event => {
+  currentState = event.state || {}
+  setCurrentPath(window.location.pathname, currentState)
 })
