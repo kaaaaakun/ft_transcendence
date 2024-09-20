@@ -40,11 +40,13 @@ pnpm fix # Biome でlintエラーを修正し、コードをフォーマット
 │   ├── assets # 画像などのリソース
 │   │   └── images
 │   │       └── javascript.svg
-│   ├── components
 │   ├── index.html
 │   ├── js # スクリプト
 │   │   ├── main.js
 │   │   ├── components # コンポーネント
+│   │   ├── features # 機能ごとのcomponents, hooks, etc.
+│   │   ├── infrastructures
+│   │   │   └── api
 │   │   ├── pages # ページ
 │   │   └── libs # ライブラリ
 │   └── scss # スタイルシート
