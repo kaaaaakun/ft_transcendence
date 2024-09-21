@@ -5,11 +5,8 @@ import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { DefaultButton } from '@/js/components/ui/button'
 
 function sumVictoryCount(players, start, end) {
-  let sum = 0
-  for (let i = start; i <= end; i++) {
-    sum += players[i].tournament_players.victory_count
-  }
-  return sum
+  return players.slice(start, end + 1)
+    .reduce((sum, player) => sum + player.tournament_players.victory_count, 0)
 }
 
 function fetchMatch() {
@@ -34,17 +31,11 @@ function fetchMatch() {
 }
 
 function getMostVictoriesPlayer(players) {
-  let ret = players[0]
-  for (const player of players) {
-    if (
-      player.tournament_players.victory_count >
-      ret.tournament_players.victory_count
-    ) {
-      ret = player
-    }
-  }
-  return ret
+  return players.reduce((prev, current) => 
+    prev.tournament_players.victory_count > current.tournament_players.victory_count ? prev : current
+  );
 }
+
 
 function createPlayerBoard(player, x, y) {
   const xAdjustment = 5
