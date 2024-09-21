@@ -1,5 +1,6 @@
 ENV_FILE_PATH = .env.sample
 DOCKER_COMPOSE = docker compose --env-file ${ENV_FILE_PATH} -f ./docker-compose.yml
+CERT_DIR = ./reverseproxy/tools
 
 all: run
 
@@ -27,6 +28,13 @@ ps:
 
 PHONY: run re build up down fdown image-prune ps generate
 
+# -- 証明書の作成
+cert:
+	make -C $(CERT_DIR)
+
+cert_crean:
+	rm -rf ./reverseproxy/ssl/
+
 # -- OpenAPIを利用したコードの生成
 OPENAPI_SPEC := openapi.yaml
 OUTPUT_DIR := gen_openapi
@@ -48,4 +56,4 @@ clean:
 mock:
 	prism mock openapi.yaml
 
-PHONY:generate clean mock
+PHONY:generate clean mock cert
