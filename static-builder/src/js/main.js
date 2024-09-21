@@ -1,5 +1,5 @@
 import '@/scss/styles.scss'
-import { Route, Router} from '@/js/libs/router'
+import { Route, Router } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import { Home } from '@/js/pages/Home'
 import { InputAlias } from '@/js/pages/InputAlias'

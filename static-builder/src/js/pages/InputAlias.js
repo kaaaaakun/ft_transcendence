@@ -40,7 +40,7 @@ function handleSubmit(event) {
 
 export const InputAlias = () => {
   const loc = useLocation()
-  let num = loc.state?.playerNum ?? 0
+  const num = loc.state?.playerNum ?? 0
   return BaseLayout(
     Teact.createElement(
       'div',
