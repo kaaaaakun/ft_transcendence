@@ -24,6 +24,8 @@ services:
       target: development
     container_name: "static-builder"
     restart: on-failure
+    environment:
+      - VITE_API_URL
     volumes:
       - ./static-builder:/usr/src/vite
     networks:

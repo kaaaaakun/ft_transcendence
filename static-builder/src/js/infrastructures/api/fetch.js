@@ -5,39 +5,50 @@ class FetchWrapper {
 
   async get(url) {
     const response = await fetch(`${this.baseUrl}${url}`)
-    return response.json()
+    return response
   }
 
   async put(url, data) {
     const response = await fetch(`${this.baseUrl}${url}`, {
       method: 'PUT',
-      body: JSON.stringify(data),
+      body: data ? JSON.stringify(data) : {},
       headers: {
         'Content-Type': 'application/json',
       },
     })
-    return response.json()
+    return response
   }
 
   async post(url, data) {
     const response = await fetch(`${this.baseUrl}${url}`, {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: data ? JSON.stringify(data) : {},
       headers: {
         'Content-Type': 'application/json',
       },
     })
-    return response.json()
+    return response
+  }
+
+  async patch(url, data) {
+    const response = await fetch(`${this.baseUrl}${url}`, {
+      method: 'PATCH',
+      body: data ? JSON.stringify(data) : {},
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    return response
   }
 
   async delete(url) {
     const response = await fetch(`${this.baseUrl}${url}`, {
       method: 'DELETE',
     })
-    return response.json()
+    return response
   }
 }
 
 export const api = new FetchWrapper(
-  import.meta.env.VITE_API_URL ?? 'http://localhost:4010',
+  import.meta.env.VITE_API_URL ?? 'http://localhost',
 )
