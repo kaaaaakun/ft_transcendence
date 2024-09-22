@@ -86,8 +86,8 @@ function updateDom(dom, prevProps = {}, nextProps = {}) {
 
 function commitRoot() {
   deletions.forEach(commitWork)
-  commitWork(wipRoot.child)
   currentRoot = wipRoot
+  commitWork(wipRoot.child)
   wipRoot = null
 }
 
@@ -277,7 +277,11 @@ function useState(initial) {
   }
 
   const setState = action => {
-    hook.queue.push(action)
+    if (action instanceof Function) {
+      hook.queue.push(action)
+    } else {
+      hook.queue.push(() => action)
+    }
     wipRoot = {
       dom: currentRoot.dom,
       props: currentRoot.props,
