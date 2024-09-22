@@ -4,7 +4,10 @@ class FetchWrapper {
   }
 
   async get(url) {
-    const response = await fetch(`${this.baseUrl}${url}`)
+    const response = await fetch(`${this.baseUrl}${url}`, {
+      method: 'GET',
+      credentials: 'include',
+    })
     return response
   }
 
@@ -15,6 +18,7 @@ class FetchWrapper {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
     })
     return response
   }
@@ -26,6 +30,7 @@ class FetchWrapper {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
     })
     return response
   }
@@ -37,6 +42,7 @@ class FetchWrapper {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
     })
     return response
   }
@@ -44,6 +50,7 @@ class FetchWrapper {
   async delete(url) {
     const response = await fetch(`${this.baseUrl}${url}`, {
       method: 'DELETE',
+      credentials: 'include',
     })
     return response
   }
