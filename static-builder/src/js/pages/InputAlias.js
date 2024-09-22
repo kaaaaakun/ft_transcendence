@@ -3,6 +3,7 @@ import { DefaultButton } from '@/js/components/ui/button'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/libs/teact'
 import { useNavigate, useLocation } from '../libs/router'
+import { api } from '@/js/infrastructures/api/fetch'
 
 function handleSubmit(event) {
   const navigate = useNavigate()
@@ -16,13 +17,7 @@ function handleSubmit(event) {
     players.push(value)
   })
   data.players = players
-  fetch('http://localhost:8000/api/tournaments/local/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  })
+  api.post('/api/tournaments/local/', data)
     .then(response => {
       if (!response.ok) {
         throw new Error('Network response was not ok')

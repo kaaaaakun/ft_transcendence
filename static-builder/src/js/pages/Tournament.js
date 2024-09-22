@@ -3,6 +3,7 @@ import { Teact } from '@/js/libs/teact'
 import { useNavigate, useLocation } from '@/js/libs/router'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { DefaultButton } from '@/js/components/ui/button'
+import { api } from '@/js/infrastructures/api/fetch'
 
 function sumVictoryCount(participants, start, end) {
   return participants
@@ -19,11 +20,7 @@ function fetchMatch(tournamentEnd) {
     navigate('/')
     return
   }
-  console.log('fetchMatch')
-  fetch('http://localhost:8000/api/matches/local/', {
-    method: 'GET',
-    credentials: 'include'
-  })
+  api.get('/api/matches/local/')
     .then(response => {
       if (!response.ok) {
         throw new Error('Network response was not ok')
