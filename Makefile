@@ -32,7 +32,7 @@ PHONY: run re build up down fdown image-prune ps generate
 cert:
 	make -C $(CERT_DIR)
 
-cert_crean:
+cert_clean:
 	rm -rf ./reverseproxy/ssl/
 
 # -- OpenAPIを利用したコードの生成
