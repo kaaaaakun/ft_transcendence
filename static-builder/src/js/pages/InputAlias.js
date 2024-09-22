@@ -2,52 +2,57 @@ import '@/scss/styles.scss'
 import { DefaultButton } from '@/js/components/ui/button'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/libs/teact'
+import { useNavigate, useLocation } from '../libs/router'
 
 function handleSubmit(event) {
+  const navigate = useNavigate()
   event.preventDefault() // フォームのデフォルトの送信を防ぐ（ページリロード防止）
 
   const formData = new FormData(event.target)
 
   const data = {}
+  const players = []
   formData.forEach((value, key) => {
-    data[key] = value
+    players.push(value)
   })
+  data.players = players
+  fetch('http://127.0.0.1:4010/api/tournaments/local', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+      return response.json() // レスポンスをJSONとしてパース
+    })
+    .then(data => {
+      console.log('Success:', data) // レスポンスをコンソールに出力
+      navigate('/tournament', { data })
+    })
+    .catch(error => {
+      console.error('Error:', error) // エラー処理
+    })
 }
 
-function App() {
-  const [numberOfPlayers, setNumberOfPlayers] = Teact.useState(2)
-
+export const InputAlias = () => {
+  const loc = useLocation()
+  const num = loc.state?.playerNum ?? 0
   return BaseLayout(
     Teact.createElement(
       'div',
       { className: 'container' },
-      Teact.createElement(
-        'div',
-        { className: 'd-flex justify-content-center' },
-        DefaultButton({
-          text: '2 Players',
-          onClick: () => setNumberOfPlayers(c => 2),
-        }),
-        DefaultButton({
-          text: '4 Players',
-          onClick: () => setNumberOfPlayers(c => 4),
-        }),
-        DefaultButton({
-          text: '8 Players',
-          onClick: () => setNumberOfPlayers(c => 8),
-        }),
-      ),
       Teact.createElement(
         'form',
         {
           onSubmit: handleSubmit,
           className: 'text-center mt-3 d-grid gap-2 col-3 mx-auto',
         },
-        ...Array.from({ length: 4 }, (_, i) => {
-          const className =
-            i >= numberOfPlayers / 2
-              ? 'form-control mt-2 bg-secondary'
-              : 'form-control mt-2'
+        ...Array.from({ length: num / 2 }, (_, i) => {
+          const className = 'form-control mt-2'
           return Teact.createElement(
             'div',
             { className: 'row form-group', key: i },
@@ -59,7 +64,6 @@ function App() {
                 className: className,
                 placeholder: `Player ${i * 2 + 1}`,
                 name: `player${i * 2}`,
-                disabled: i >= numberOfPlayers / 2,
               }),
             ),
             Teact.createElement(
@@ -70,7 +74,6 @@ function App() {
                 className: className,
                 placeholder: `Player ${i * 2 + 2}`,
                 name: `player${i * 2 + 1}`,
-                disabled: i >= numberOfPlayers / 2,
               }),
             ),
           )
@@ -80,6 +83,3 @@ function App() {
     ),
   )
 }
-
-const container = document.getElementById('app')
-Teact.render(Teact.createElement(App), container)

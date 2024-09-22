@@ -1,8 +1,25 @@
 import '@/scss/styles.scss'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/libs/teact'
+import { useLocation } from '@/js/libs/router'
 
-function Pong({ data }) {
+const Pong = () => {
+  const loc = useLocation()
+  if (!loc.state) {
+    return BaseLayout(
+      Teact.createElement(
+        'div',
+        { className: 'container' },
+        Teact.createElement(
+          'h1',
+          { className: 'text-center text-light' },
+          'Error',
+        ),
+      ),
+    )
+  }
+  console.log(loc.state)
+  const data = loc.state.data
   const matchId = data.players[0].match_details.match_id
   let score1 = data.players[0].match_details.score
   let score2 = data.players[1].match_details.score
