@@ -1,5 +1,5 @@
 ENV_FILE_PATH = .env.sample
-DOCKER_COMPOSE = docker compose --env-file ${ENV_FILE_PATH} -f ./docker-compose.yml
+DOCKER_COMPOSE = docker compose --env-file ${ENV_FILE_PATH} -f ./docker-compose.local.yml
 CERT_DIR = ./reverseproxy/tools
 
 all: run
@@ -32,7 +32,7 @@ PHONY: run re build up down fdown image-prune ps generate
 cert:
 	make -C $(CERT_DIR)
 
-cert_crean:
+cert_clean:
 	rm -rf ./reverseproxy/ssl/
 
 # -- OpenAPIを利用したコードの生成
