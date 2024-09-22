@@ -2,6 +2,7 @@ services:
   rdbms:
     image: postgres:16-alpine
     container_name: "rdbms"
+    restart: on-failure
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -13,6 +14,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 120s
     ports:
       - "5432:5432"
     networks:
@@ -23,28 +25,38 @@ services:
       context: static-builder/
       target: development
     container_name: "static-builder"
+    restart: on-failure
     ports:
       - "5173:5173"
     volumes:
       - ./static-builder:/usr/src/vite
+    networks:
+      - net_pong
+    healthcheck:
+      test: ["CMD", "curl", "-I", "http://localhost:5173/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 120s
     entrypoint: ["sh", "-c", "pnpm config set store-dir /tmp/pnpm/store && pnpm install --frozen-lockfile && pnpm dev"]
 
   reverseproxy:
     container_name: "reverseproxy"
+    restart: on-failure
     image: nginx:1.26.1-alpine
     ports:
       - "80:80"
     volumes:
-      - ./nginx/nginx.local.conf:/etc/nginx/nginx.conf
+      - ./reverseproxy/nginx.local.conf:/etc/nginx/nginx.conf
     networks:
       - net_pong
-    # depends_on:
-    #   api:
-    #     condition: service_healthy
-    #   static-builder:
-    #     condition: service_healthy
-    #   rdbms:
-    #     condition: service_healthy
+    depends_on:
+      api:
+        condition: service_healthy
+      static-builder:
+        condition: service_healthy
+      rdbms:
+        condition: service_healthy
 
 
   api:
@@ -52,6 +64,7 @@ services:
       context: api/
       target: development_djangoserver
     container_name: "api"
+    restart: on-failure
     networks:
       - net_pong
     ports:
@@ -70,6 +83,7 @@ services:
       test: ["CMD", "curl", "-H", "Host: reverseproxy", "http://localhost:8000"]
       interval: 5s
       retries: 5
+      start_period: 120s
 
 networks:
   net_pong:
