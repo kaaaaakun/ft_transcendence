@@ -1,4 +1,4 @@
 *.un~
 .env
 .DS_Store
-reverseproxy/ssh/*
+reverseproxy/ssl/*
