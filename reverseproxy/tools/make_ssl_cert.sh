@@ -7,9 +7,9 @@ source ../../.env
 
 # 出力ディレクトリ
 SSL_DIR="../ssl"
-KEY_FILE="$SSL_DIR/ft_transcendence.key"
-CSR_FILE="$SSL_DIR/ft_transcendence.csr"
-CRT_FILE="$SSL_DIR/ft_transcendence.crt"
+KEY_FILE="$SSL_DIR/ca-certificates.key"
+CSR_FILE="$SSL_DIR/ca-certificates.csr"
+CRT_FILE="$SSL_DIR/ca-certificates.crt"
 
 # SSL ディレクトリが存在しない場合は作成
 mkdir -p "$SSL_DIR"
