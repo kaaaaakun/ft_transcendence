@@ -15,8 +15,6 @@ services:
       timeout: 5s
       retries: 5
       start_period: 120s
-    ports:
-      - "5432:5432"
     networks:
       - net_pong
 
@@ -26,8 +24,6 @@ services:
       target: development
     container_name: "static-builder"
     restart: on-failure
-    ports:
-      - "5173:5173"
     volumes:
       - ./static-builder:/usr/src/vite
     networks:
@@ -67,8 +63,6 @@ services:
     restart: on-failure
     networks:
       - net_pong
-    ports:
-      - "8000:8000"
     environment:
       DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME}
       DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL}
