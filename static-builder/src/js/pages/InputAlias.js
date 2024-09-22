@@ -16,7 +16,7 @@ function handleSubmit(event) {
     players.push(value)
   })
   data.players = players
-  fetch('http://127.0.0.1:4010/api/tournaments/local', {
+  fetch('http://localhost:8000/api/tournaments/local/', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -27,14 +27,15 @@ function handleSubmit(event) {
       if (!response.ok) {
         throw new Error('Network response was not ok')
       }
-      return response.json() // レスポンスをJSONとしてパース
+      return response.json()
     })
     .then(data => {
-      console.log('Success:', data) // レスポンスをコンソールに出力
+      console.log('Success:', data)
+      document.cookie = " tournament_id=" + data.tournament_id + "; path=/";
       navigate('/tournament', { data })
     })
     .catch(error => {
-      console.error('Error:', error) // エラー処理
+      console.error('Error:', error)
     })
 }
 

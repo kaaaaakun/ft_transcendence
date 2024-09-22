@@ -1,7 +1,31 @@
 import '@/scss/styles.scss'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/libs/teact'
-import { useLocation } from '@/js/libs/router'
+import { useNavigate, useLocation } from '@/js/libs/router'
+import { DefaultButton } from '@/js/components/ui/button'
+
+function fetchTournament() {
+  const navigate = useNavigate()
+  fetch('http://localhost:8000/api/tournaments/local/', {
+    method: 'GET',
+    credentials: 'include'
+  })
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(errData => {
+          throw new Error(errData.error || 'Unknown error occurred')
+        })
+      }
+      return response.json()
+    })
+    .then(data => {
+      console.log('Success:', data)
+      navigate('/tournament', { data })
+    })
+    .catch(error => {
+      console.error('Error:', error)
+    })
+  }
 
 const Pong = () => {
   const loc = useLocation()
@@ -80,8 +104,7 @@ const Pong = () => {
     }
 
     function scoreGoal(playerId) {
-      fetch('http://127.0.0.1:4010/api/matches/local/score', {
-        //TODO 実際のurlに変更する必要あり（今はmockのurl)
+      fetch('http://localhost:8000/api/matches/local/score/', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json', // JSONデータを送信するためのヘッダー
@@ -242,47 +265,59 @@ const Pong = () => {
   return BaseLayout(
     Teact.createElement(
       'div',
-      {
-        id: 'pong',
-        className: 'd-flex justify-content-center align-items-center',
-      },
+      { className: 'container' },
       Teact.createElement(
         'div',
-        { className: 'd-flex align-items-center justify-content-center' },
+        {
+          id: 'pong',
+          className: 'd-flex justify-content-center align-items-center',
+        },
         Teact.createElement(
           'div',
-          {
-            id: 'leftPlayer',
-            className: 'text-center fs-2 text-white me-3',
-            style: { writingMode: 'vertical-rl' },
-          },
-          player1Name,
-        ),
-        Teact.createElement(
-          'div',
-          {
-            className: 'position-relative',
-            style: {
-              width: '600px',
-              height: '400px',
-              backgroundColor: '#1E1E2C',
+          { className: 'd-flex align-items-center justify-content-center' },
+          Teact.createElement(
+            'div',
+            {
+              id: 'leftPlayer',
+              className: 'text-center fs-2 text-white me-3',
+              style: { writingMode: 'vertical-rl' },
             },
-          },
-          Teact.createElement('canvas', {
-            id: 'pongCanvas',
-            width: '600',
-            height: '400',
-          }),
+            player1Name,
+          ),
+          Teact.createElement(
+            'div',
+            {
+              className: 'position-relative',
+              style: {
+                width: '600px',
+                height: '400px',
+                backgroundColor: '#1E1E2C',
+              },
+            },
+            Teact.createElement('canvas', {
+              id: 'pongCanvas',
+              width: '600',
+              height: '400',
+            }),
+          ),
+          Teact.createElement(
+            'div',
+            {
+              id: 'rightPlayer',
+              className: 'text-center fs-2 text-white ms-3',
+              style: { writingMode: 'vertical-rl' },
+            },
+            player2Name,
+          ),
         ),
-        Teact.createElement(
-          'div',
-          {
-            id: 'rightPlayer',
-            className: 'text-center fs-2 text-white ms-3',
-            style: { writingMode: 'vertical-rl' },
-          },
-          player2Name,
-        ),
+      ),
+      Teact.createElement(
+        'div',
+        { className: 'd-grid gap-2 col-3 mx-auto' },
+        DefaultButton({
+          text: '対戦へ',
+          onClick: () => fetchTournament(),
+        }),
       ),
     ),
   )
