@@ -3,8 +3,8 @@ import { DefaultButton } from '@/js/components/ui/button'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/libs/teact'
 import { useNavigate, useLocation } from '../libs/router'
-import { api } from '@/js/infrastructures/api/fetch'
 import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
+import { cookie } from '@/js/infrastructures/cookie/cookie'
 
 function handleSubmit(event) {
   const navigate = useNavigate()
@@ -21,7 +21,7 @@ function handleSubmit(event) {
   tournamentsApi.createLocalTournament(data)
     .then(data => {
       console.log('Success:', data)
-      document.cookie = `tournament_id=${data.tournament_id}; path=/`;
+      cookie.setTournamentID(data.tournament_id)
       navigate('/tournament', { data })
     })
     .catch(error => {

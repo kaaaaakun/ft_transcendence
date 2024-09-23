@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from '@/js/libs/router'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { DefaultButton } from '@/js/components/ui/button'
 import { api } from '@/js/infrastructures/api/fetch'
+import { cookie } from '@/js/infrastructures/cookie/cookie'
 
 function sumVictoryCount(participants, start, end) {
   return participants
@@ -17,6 +18,7 @@ function sumVictoryCount(participants, start, end) {
 function fetchMatch(tournamentEnd) {
   const navigate = useNavigate()
   if (tournamentEnd) {
+    cookie.deleteTournamentID()
     navigate('/')
     return
   }
