@@ -17,7 +17,8 @@ function handleSubmit(event) {
     players.push(value)
   })
   data.players = players
-  api.post('/api/tournaments/local/', data)
+  api
+    .post('/api/tournaments/local/', data)
     .then(response => {
       if (!response.ok) {
         throw new Error('Network response was not ok')
@@ -26,7 +27,7 @@ function handleSubmit(event) {
     })
     .then(data => {
       console.log('Success:', data)
-      document.cookie = " tournament_id=" + data.tournament_id + "; path=/";
+      document.cookie = `tournament_id=${data.tournament_id}; path=/`;
       navigate('/tournament', { data })
     })
     .catch(error => {

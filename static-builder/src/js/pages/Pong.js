@@ -7,7 +7,8 @@ import { api } from '@/js/infrastructures/api/fetch'
 
 function fetchTournament() {
   const navigate = useNavigate()
-  api.get('/api/tournaments/local/')
+  api
+    .get('/api/tournaments/local/')
     .then(response => {
       if (!response.ok) {
         return response.json().then(errData => {
@@ -23,7 +24,7 @@ function fetchTournament() {
     .catch(error => {
       console.error('Error:', error)
     })
-  }
+}
 
 const Pong = () => {
   const loc = useLocation()
@@ -105,10 +106,11 @@ const Pong = () => {
     function scoreGoal(playerId) {
       ballSpeedX = 0
       ballSpeedY = 0
-      api.patch('/api/matches/local/score/', {
-        match_id: matchId,
-        player_id: playerId,
-      })
+      api
+        .patch('/api/matches/local/score/', {
+          match_id: matchId,
+          player_id: playerId,
+        })
         .then(response => {
           if (!response.ok) {
             throw new Error('Network response was not ok')
