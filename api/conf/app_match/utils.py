@@ -78,6 +78,7 @@ def create_ponggame_dataset(matchdetails_with_related):
     match_data = []
     for matchdetail in matchdetails_with_related:
         match_data.append(create_ponggame_data(matchdetail))
+    sorted(match_data, key = lambda x: x['match_details']['player_id'])
     ponggame_dataset = {}
     ponggame_dataset['players'] = match_data
 
