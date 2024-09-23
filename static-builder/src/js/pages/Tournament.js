@@ -18,7 +18,7 @@ function sumVictoryCount(participants, start, end) {
 function fetchMatch(tournamentEnd) {
   const navigate = useNavigate()
   if (tournamentEnd) {
-    cookie.deleteTournamentID()
+    cookie.deleteTournamentId()
     navigate('/')
     return
   }
