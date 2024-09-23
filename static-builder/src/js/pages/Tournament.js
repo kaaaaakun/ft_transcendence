@@ -3,6 +3,7 @@ import { Teact } from '@/js/libs/teact'
 import { useNavigate, useLocation } from '@/js/libs/router'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { DefaultButton } from '@/js/components/ui/button'
+import { api } from '@/js/infrastructures/api/fetch'
 
 function sumVictoryCount(participants, start, end) {
   return participants
@@ -13,12 +14,13 @@ function sumVictoryCount(participants, start, end) {
     )
 }
 
-function fetchMatch() {
+function fetchMatch(tournamentEnd) {
   const navigate = useNavigate()
-  console.log('fetchMatch')
-  fetch('http://127.0.0.1:4010/api/matches/local', {
-    method: 'GET',
-  })
+  if (tournamentEnd) {
+    navigate('/')
+    return
+  }
+  api.get('/api/matches/local/')
     .then(response => {
       if (!response.ok) {
         throw new Error('Network response was not ok')
@@ -75,12 +77,8 @@ function createParticipantBoard(participant, x, y) {
   ]
 }
 
-function createChampionParticipantBoard(participants) {
-  console.log(sumVictoryCount(participants, 0, participants.length - 1))
-  if (
-    sumVictoryCount(participants, 0, participants.length - 1) ===
-    participants.length - 1
-  ) {
+function createChampionParticipantBoard(participants, tournamentEnd) {
+  if (tournamentEnd) {
     const ret = createParticipantBoard(
       getMostVictoriesParticipants(participants),
       173,
@@ -91,7 +89,8 @@ function createChampionParticipantBoard(participants) {
   return []
 }
 
-function TournamentTwoParticipants(participants) {
+function TournamentTwoParticipants(participants, tournamentEnd) {
+  // const navigate = useNavigate()
   return Teact.createElement(
     'div',
     { className: 'position-relative shift-up-200' },
@@ -131,20 +130,21 @@ function TournamentTwoParticipants(participants) {
         stroke: sumVictoryCount(participants, 0, 1) >= 1 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
-      ...createChampionParticipantBoard(participants),
+      ...createChampionParticipantBoard(participants, tournamentEnd),
     ),
     Teact.createElement(
       'div',
       { className: 'd-grid gap-2 col-3 mx-auto shift-up-200' },
       DefaultButton({
-        text: '対戦へ',
-        onClick: fetchMatch,
+        text: tournamentEnd ? 'ホームへ' : '対戦へ',
+        onClick: () => fetchMatch(tournamentEnd),
       }),
     ),
   )
 }
 
-function TournamentFourParticipants(participants) {
+function TournamentFourParticipants(participants, tournamentEnd) {
+  const navigate = useNavigate()
   return Teact.createElement(
     'div',
     { className: 'position-relative shift-up-200' },
@@ -242,21 +242,22 @@ function TournamentFourParticipants(participants) {
         stroke: sumVictoryCount(participants, 2, 3) >= 2 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
-      ...createChampionParticipantBoard(participants),
+      ...createChampionParticipantBoard(participants, tournamentEnd),
     ),
     Teact.createElement(
       'div',
       { className: 'd-grid gap-2 col-3 mx-auto shift-up-200' },
       DefaultButton({
-        text: '対戦へ',
-        onClick: fetchMatch,
+        text: tournamentEnd ? 'ホームへ' : '対戦へ',
+        onClick: () => fetchMatch(tournamentEnd),
       }),
     ),
   )
 }
 
 // SVG要素を仮想DOM形式で作成する関数
-function TournamentEightParticipants(participants) {
+function TournamentEightParticipants(participants, tournamentEnd) {
+  const navigate = useNavigate()
   return Teact.createElement(
     'div',
     { className: 'position-relative shift-up-200' },
@@ -462,27 +463,31 @@ function TournamentEightParticipants(participants) {
         stroke: sumVictoryCount(participants, 4, 7) >= 4 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
-      ...createChampionParticipantBoard(participants),
+      ...createChampionParticipantBoard(participants, tournamentEnd),
     ),
     Teact.createElement(
       'div',
       { className: 'd-grid gap-2 col-3 mx-auto shift-up-200' },
       DefaultButton({
-        text: '対戦へ',
-        onClick: fetchMatch,
+        text: tournamentEnd ? 'ホームへ' : '対戦へ',
+        onClick: () => fetchMatch(tournamentEnd),
       }),
     ),
   )
 }
 
 function ConditionalBranch(participants) {
+  if (participants.participants.length < 2) {
+    return Teact.createElement('h1', null, '400 Bad Request')
+  }
+  const tournamentEnd = sumVictoryCount(participants.participants, 0, participants.participants.length - 1) === participants.participants.length - 1
   switch (participants.participants.length) {
     case 8:
-      return TournamentEightParticipants(participants.participants)
+      return TournamentEightParticipants(participants.participants, tournamentEnd)
     case 4:
-      return TournamentFourParticipants(participants.participants)
+      return TournamentFourParticipants(participants.participants, tournamentEnd)
     case 2:
-      return TournamentTwoParticipants(participants.participants)
+      return TournamentTwoParticipants(participants.participants, tournamentEnd)
     default:
       return Teact.createElement('h1', null, '400 Bad Request')
   }
