@@ -4,11 +4,11 @@ import { Teact } from '@/js/libs/teact'
 import { useNavigate, useLocation } from '@/js/libs/router'
 import { DefaultButton } from '@/js/components/ui/button'
 import { api } from '@/js/infrastructures/api/fetch'
+import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
 
 function fetchTournament() {
   const navigate = useNavigate()
-  api
-    .get('/api/tournaments/local/')
+  tournamentsApi.fetchLocalTournament()
     .then(response => {
       if (!response.ok) {
         return response.json().then(errData => {
