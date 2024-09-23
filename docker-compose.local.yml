@@ -80,7 +80,6 @@ services:
       interval: 5s
       retries: 5
       start_period: 120s
-    entrypoint: ["sh", "-c", "python manage.py runserver 0.0.0.0:8000"]
 
 networks:
   net_pong:

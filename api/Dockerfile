@@ -107,7 +107,7 @@ FROM development_common AS development_wsgi
 RUN echo "alias run='gunicorn ${DJANGO_PROJECT_NAME}.wsgi:application --bind ${BIND_ADDRESS}:${BIND_PORT}'" >> ~/.bashrc
 
 ENTRYPOINT [ "/trans/entrypoint.sh" ]
-CMD ["sleep", "infinity"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
 ##########################
 # development_asgi stage #
