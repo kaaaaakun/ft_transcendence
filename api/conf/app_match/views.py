@@ -92,7 +92,7 @@ class LocalScoreView(APIView):
                     if is_tournament_end(tournament_id):
                         update_tournament_status(tournament_id.id, 'end')
                     else:
-                        create_next_tournament_match(tournament_id)
+                        create_next_tournament_match(tournament_id.id)
 
             # Responseの作成
             response_data = create_ponggame_dataset(get_matchdetail_with_related_data(match_id))
