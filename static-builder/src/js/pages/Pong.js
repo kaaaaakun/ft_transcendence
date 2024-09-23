@@ -8,7 +8,8 @@ import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
 
 function fetchTournament() {
   const navigate = useNavigate()
-  tournamentsApi.fetchLocalTournament()
+  tournamentsApi
+    .fetchLocalTournament()
     .then(data => {
       console.log('Success:', data)
       navigate('/tournament', { data })

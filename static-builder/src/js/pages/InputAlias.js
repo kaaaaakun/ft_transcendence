@@ -18,7 +18,8 @@ function handleSubmit(event) {
     players.push(value)
   })
   data.players = players
-  tournamentsApi.createLocalTournament(data)
+  tournamentsApi
+    .createLocalTournament(data)
     .then(data => {
       console.log('Success:', data)
       cookie.setTournamentID(data.tournament_id)
