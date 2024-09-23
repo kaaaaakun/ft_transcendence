@@ -19,12 +19,6 @@ function handleSubmit(event) {
   })
   data.players = players
   tournamentsApi.createLocalTournament(data)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok')
-      }
-      return response.json()
-    })
     .then(data => {
       console.log('Success:', data)
       document.cookie = `tournament_id=${data.tournament_id}; path=/`;
