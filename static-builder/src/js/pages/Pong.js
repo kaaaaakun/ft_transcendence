@@ -6,7 +6,13 @@ import { DefaultButton } from '@/js/components/ui/button'
 import { api } from '@/js/infrastructures/api/fetch'
 import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
 
+// TODO: useStateでボタンを消したりできるようにしたら消す
+let endMatch = false
+
 function fetchTournament() {
+  if (!endMatch) {
+    return
+  }
   const navigate = useNavigate()
   tournamentsApi
     .fetchLocalTournament()
@@ -205,6 +211,7 @@ const Pong = () => {
           canvas.width / 2,
           canvas.height / 2,
         )
+        endMatch = true
       }
     }
 
@@ -308,7 +315,7 @@ const Pong = () => {
         'div',
         { className: 'd-grid gap-2 col-3 mx-auto' },
         DefaultButton({
-          text: '対戦へ',
+          text: 'トーナメント画面へ',
           onClick: () => fetchTournament(),
         }),
       ),

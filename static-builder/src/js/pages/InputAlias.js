@@ -22,7 +22,7 @@ function handleSubmit(event) {
     .createLocalTournament(data)
     .then(data => {
       console.log('Success:', data)
-      cookie.setTournamentID(data.tournament_id)
+      cookie.setTournamentId(data.tournament_id)
       navigate('/tournament', { data })
     })
     .catch(error => {
