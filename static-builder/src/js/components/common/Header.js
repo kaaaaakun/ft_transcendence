@@ -31,7 +31,7 @@ export const Header = () => {
             { className: 'nav-item' },
             Link({
               to: '/about',
-              className: 'nav-link text-white',
+              className: 'nav-link text-white no-pointer-events',
               children: ['About'],
             }),
           ),
@@ -40,7 +40,7 @@ export const Header = () => {
             { className: 'nav-item' },
             Link({
               to: '/services',
-              className: 'nav-link text-white',
+              className: 'nav-link text-white no-pointer-events',
               children: ['Services'],
             }),
           ),
@@ -49,7 +49,7 @@ export const Header = () => {
             { className: 'nav-item' },
             Link({
               to: '/contact',
-              className: 'nav-link text-white',
+              className: 'nav-link text-white no-pointer-events',
               children: ['Contact'],
             }),
           ),
