@@ -4,6 +4,7 @@ import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/libs/teact'
 import { useNavigate, useLocation } from '../libs/router'
 import { api } from '@/js/infrastructures/api/fetch'
+import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
 
 function handleSubmit(event) {
   const navigate = useNavigate()
@@ -17,8 +18,7 @@ function handleSubmit(event) {
     players.push(value)
   })
   data.players = players
-  api
-    .post('/api/tournaments/local/', data)
+  tournamentsApi.createLocalTournament(data)
     .then(response => {
       if (!response.ok) {
         throw new Error('Network response was not ok')
