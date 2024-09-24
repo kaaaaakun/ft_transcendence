@@ -69,6 +69,14 @@ const Pong = () => {
     let paddle2Speed = 0
     let canStart = true
 
+    const startButton = document.createElement('button')
+    startButton.className = 'btn btn-primary btn-lg bg-darkblue'
+    startButton.textContent = 'ボール発射'
+    document.getElementById('utilButton').appendChild(startButton)
+    startButton.addEventListener('click', startPong)
+
+
+
     function drawRect(x, y, width, height, color) {
       context.fillStyle = color
       context.fillRect(x, y, width, height)
