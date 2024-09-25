@@ -251,8 +251,12 @@ const Pong = () => {
 
     function startPong(e) {
       if (canStart === true) {
-        ballSpeedX = 5
-        ballSpeedY = 5
+        ballSpeedX = (Math.random() * 0.5 + 0.5) * (Math.random() < 0.5 ? 1 : -1)
+        ballSpeedY = Math.random( ) - 0.5
+        const normalizer = Math.sqrt(ballSpeedX ** 2 + ballSpeedY ** 2)
+        ballSpeedX =  ballSpeedX * 7 / normalizer
+        ballSpeedY =  ballSpeedY * 7 / normalizer
+        console.log(ballSpeedX, ballSpeedY)
         canStart = false
       }
     }
