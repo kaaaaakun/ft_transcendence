@@ -18,8 +18,9 @@ def create_tournament_dataset(tournamentplayer_with_related):
     await_players = tournamentplayer_with_related.filter(status = 'await')
     for tournamentplayer in tournamentplayer_with_related:
         participants.append(create_tournament_data(tournamentplayer,
-                                                    (await_players[0].player_id == tournamentplayer.player_id) or
-                                                    (await_players[1].player_id == tournamentplayer.player_id)))
+                                                    (await_players.count() >= 2 and
+                                                    ((await_players[0].player_id == tournamentplayer.player_id) or
+                                                    (await_players[1].player_id == tournamentplayer.player_id)))))
     tournament_dataset['participants'] = participants
     tournament_dataset['tournament_id'] = tournamentplayer_with_related[0].tournament_id.id
     return tournament_dataset

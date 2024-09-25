@@ -20,7 +20,7 @@ class BaseTestSetup(TestCase):
 
         # Create players
         cls.players = {}
-        for i in range(1, 9):
+        for i in range(1, 15):
             cls.players[i] = Player.objects.create(id = i, name = f'P{i}')
 
         # Create tournamentplayers
@@ -29,7 +29,7 @@ class BaseTestSetup(TestCase):
             cls.tournamentplayers[i] = TournamentPlayer.objects.create(player_id = cls.players[i], tournament_id = cls.tournament1, victory_count = 0, status = 'await')
         for i in range(3, 7):
             cls.tournamentplayers[i] = TournamentPlayer.objects.create(player_id = cls.players[i], tournament_id = cls.tournament2, victory_count = 0, status = 'await')
-        for i in range(1, 9):
+        for i in range(7, 15):
             cls.tournamentplayers[i] = TournamentPlayer.objects.create(player_id = cls.players[i], tournament_id = cls.tournament3, victory_count = 0, status = 'await')
 
         # Create matches
@@ -44,6 +44,8 @@ class BaseTestSetup(TestCase):
         cls.matchdetails = {}
         cls.matchdetails[1] = MatchDetail.objects.create(match_id = cls.matches[1], player_id = cls.players[1], score = 0, result = 'await')
         cls.matchdetails[2] = MatchDetail.objects.create(match_id = cls.matches[1], player_id = cls.players[2], score = 0, result = 'await')
+        cls.matchdetails[3] = MatchDetail.objects.create(match_id = cls.matches[2], player_id = cls.players[7], score = 0, result = 'await')
+        cls.matchdetails[4] = MatchDetail.objects.create(match_id = cls.matches[2], player_id = cls.players[8], score = 0, result = 'await')
 
         # Create admin user
         cls.admin = User.objects.create_user(username = 'admin', password = 'pass', is_staff = True)
@@ -91,17 +93,17 @@ class MatchSerializerTests(BaseTestSetup):
 
 class MatchDetailSerializerTests(BaseTestSetup):
     def test_valid_data(self):
-        serializer = MatchDetailSerializer(data={'match_id': self.matches[2].id, 'player_id': self.players[1].id, 'score': 0, 'result': 'await'})
+        serializer = MatchDetailSerializer(data={'match_id': self.matches[2].id, 'player_id': self.players[9].id, 'score': 0, 'result': 'await'})
         self.assertTrue(serializer.is_valid(), msg = serializer.errors)
 
     def test_minus_score(self):
-        serializer = MatchDetailSerializer(data={'match_id': self.matches[2].id, 'player_id': self.players[2].id, 'score': -1, 'result': 'await'})
+        serializer = MatchDetailSerializer(data={'match_id': self.matches[2].id, 'player_id': self.players[10].id, 'score': -1, 'result': 'await'})
         is_valid = serializer.is_valid()
         print(serializer.errors) # もしエラーメッセージを出力したいときはこうする。なお、関数名のアルファベット順に出力される（defの定義順ではない）。
         self.assertFalse(is_valid, msg = serializer.errors)
 
     def test_invalid_result(self):
-        serializer = MatchDetailSerializer(data={'match_id': self.matches[2].id, 'player_id': self.players[2].id, 'score': 0, 'result': 'invalid'})
+        serializer = MatchDetailSerializer(data={'match_id': self.matches[2].id, 'player_id': self.players[10].id, 'score': 0, 'result': 'invalid'})
         is_valid = serializer.is_valid()
         print(serializer.errors)
         self.assertFalse(is_valid, msg = serializer.errors)
@@ -119,7 +121,7 @@ class MatchDetailSerializerTests(BaseTestSetup):
         self.assertFalse(is_valid, msg = serializer.errors)
 
     def test_existed_matchdetail(self):
-        serializer = MatchDetailSerializer(data={'match_id': self.matches[1].id, 'player_id': self.players[1].id, 'score': 0, 'result': 'await'})
+        serializer = MatchDetailSerializer(data={'match_id': self.matches[1].id, 'player_id': self.players[7].id, 'score': 0, 'result': 'await'})
         is_valid = serializer.is_valid()
         print(serializer.errors)
         self.assertFalse(is_valid, msg = serializer.errors)
@@ -199,6 +201,28 @@ class LocalScoreViewTests(APITestCase, BaseTestSetup):
         self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament1.id, player_id = self.players[2].id).status, 'win')
         self.tournament1.refresh_from_db()
         self.assertEqual(self.tournament1.status, 'end')
+        self.assertEqual(response.data['match_end'], True)
+
+    def test_increment_score_to_the_end_eight_player(self):
+        url = reverse('local_score')
+        data = {'match_id': self.matches[2].id, 'player_id': self.players[8].id}
+        for i in range(10):
+            response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.matchdetails[3].refresh_from_db() # 以前利用したクエリのキャッシュを無効化するために、refresh_from_db()を使う。使わないと、以前の値が返される。
+        self.assertEqual(self.matchdetails[3].result, 'lose')
+        self.matchdetails[4].refresh_from_db()
+        self.assertEqual(self.matchdetails[4].result, 'win')
+        self.matches[2].refresh_from_db()
+        self.assertEqual(self.matches[2].status, 'end')
+        self.tournamentplayers[7].refresh_from_db() # リフレッシュの機能不全のため, tournamentplayerはget()で取得する。
+        self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament3.id, player_id = self.players[7].id).victory_count, 0)
+        self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament3.id, player_id = self.players[7].id).status, 'lose')
+        self.tournamentplayers[2].refresh_from_db()
+        self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament3.id, player_id = self.players[8].id).victory_count, 1)
+        self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament3.id, player_id = self.players[8].id).status, 'win')
+        self.tournament1.refresh_from_db()
+        self.assertEqual(self.tournament3.status, 'start')
         self.assertEqual(response.data['match_end'], True)
 
 class AdminOnlyTests(APITestCase, BaseTestSetup):
