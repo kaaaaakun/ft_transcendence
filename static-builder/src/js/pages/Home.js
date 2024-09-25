@@ -2,6 +2,8 @@ import { DefaultButton } from '@/js/components/ui/button'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
+import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
+import { cookie } from '@/js/infrastructures/cookie/cookie'
 
 export const Home = () => {
   const navigate = useNavigate()
@@ -39,6 +41,20 @@ export const Home = () => {
               playerNum: 8,
             }),
         }), // TBD
+        cookie.checkTournamentIdExists()
+          ? DefaultButton({
+              text: '続きから',
+              onClick: () =>
+                tournamentsApi
+                  .fetchLocalTournament()
+                  .then(data => {
+                    navigate('/tournament', { data })
+                  })
+                  .catch(error => {
+                    console.error('Error:', error)
+                  }),
+            })
+          : null,
       ),
     ),
   )

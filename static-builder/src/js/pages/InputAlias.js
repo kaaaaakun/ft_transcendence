@@ -3,7 +3,8 @@ import { DefaultButton } from '@/js/components/ui/button'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/libs/teact'
 import { useNavigate, useLocation } from '../libs/router'
-import { api } from '@/js/infrastructures/api/fetch'
+import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
+import { cookie } from '@/js/infrastructures/cookie/cookie'
 
 function handleSubmit(event) {
   const navigate = useNavigate()
@@ -17,17 +18,11 @@ function handleSubmit(event) {
     players.push(value)
   })
   data.players = players
-  api
-    .post('/api/tournaments/local/', data)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok')
-      }
-      return response.json()
-    })
+  tournamentsApi
+    .createLocalTournament(data)
     .then(data => {
       console.log('Success:', data)
-      document.cookie = `tournament_id=${data.tournament_id}; path=/`;
+      cookie.setTournamentId(data.tournament_id)
       navigate('/tournament', { data })
     })
     .catch(error => {
