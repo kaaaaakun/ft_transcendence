@@ -321,7 +321,7 @@ const Pong = () => {
       ),
       Teact.createElement(
         'div',
-        { className: 'd-grid gap-2 col-3 mx-auto' },
+        { className: 'd-grid gap-2 col-3 mx-auto', id: 'utilButton' },
         DefaultButton({
           text: '対戦へ',
           onClick: () => fetchTournament(),
