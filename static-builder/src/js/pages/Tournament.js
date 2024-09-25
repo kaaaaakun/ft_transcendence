@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from '@/js/libs/router'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { DefaultButton } from '@/js/components/ui/button'
 import { api } from '@/js/infrastructures/api/fetch'
+import { cookie } from '@/js/infrastructures/cookie/cookie'
 
 function sumVictoryCount(participants, start, end) {
   return participants
@@ -17,10 +18,12 @@ function sumVictoryCount(participants, start, end) {
 function fetchMatch(tournamentEnd) {
   const navigate = useNavigate()
   if (tournamentEnd) {
+    cookie.deleteTournamentId()
     navigate('/')
     return
   }
-  api.get('/api/matches/local/')
+  api
+    .get('/api/matches/local/')
     .then(response => {
       if (!response.ok) {
         throw new Error('Network response was not ok')
@@ -480,12 +483,24 @@ function ConditionalBranch(participants) {
   if (participants.participants.length < 2) {
     return Teact.createElement('h1', null, '400 Bad Request')
   }
-  const tournamentEnd = sumVictoryCount(participants.participants, 0, participants.participants.length - 1) === participants.participants.length - 1
+  const tournamentEnd =
+    sumVictoryCount(
+      participants.participants,
+      0,
+      participants.participants.length - 1,
+    ) ===
+    participants.participants.length - 1
   switch (participants.participants.length) {
     case 8:
-      return TournamentEightParticipants(participants.participants, tournamentEnd)
+      return TournamentEightParticipants(
+        participants.participants,
+        tournamentEnd,
+      )
     case 4:
-      return TournamentFourParticipants(participants.participants, tournamentEnd)
+      return TournamentFourParticipants(
+        participants.participants,
+        tournamentEnd,
+      )
     case 2:
       return TournamentTwoParticipants(participants.participants, tournamentEnd)
     default:
