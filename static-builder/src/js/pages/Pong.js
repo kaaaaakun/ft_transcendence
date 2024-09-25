@@ -259,7 +259,7 @@ const Pong = () => {
 
     document.addEventListener('keydown', keyDownHandler)
     document.addEventListener('keyup', keyUpHandler)
-    document.addEventListener('click', startPong)
+    // document.addEventListener('click', startPong)
 
     const intervalId = setInterval(update, 1000 / 60)
 
