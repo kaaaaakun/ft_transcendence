@@ -323,16 +323,16 @@ const Pong = () => {
           ),
         ),
       ),
-      endMatch ?
       Teact.createElement(
         'div',
         { className: 'd-grid gap-2 col-3 mx-auto', id: 'utilButton' },
+        endMatch ?
         DefaultButton({
           text: 'トーナメント画面へ',
           onClick: () => fetchTournament(endMatch),
-        }),
-      )
-      : null,
+        })
+        : null,
+      ),
     ),
   )
 }
