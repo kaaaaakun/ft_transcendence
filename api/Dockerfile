@@ -96,7 +96,7 @@ FROM development_common AS development_djangoserver
 RUN echo "alias run='python manage.py runserver ${BIND_ADDRESS}:${BIND_PORT}'" >> ~/.bashrc
 
 ENTRYPOINT [ "/trans/entrypoint.sh" ]
-CMD ["sleep", "infinity"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
 ##########################
 # development_wsgi stage #
