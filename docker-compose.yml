@@ -20,23 +20,11 @@ services:
 
   static-builder:
     build:
-      context: ./static-builder/
-      target: development
+      context: static-builder/
+      target: build
     container_name: "static-builder"
-    restart: on-failure
-    environment:
-      VITE_API_URL: ${VITE_API_URL}
     volumes:
-      - ./static-builder:/usr/src/vite
-    networks:
-      - net_pong
-    healthcheck:
-      test: ["CMD", "curl", "-I", "http://localhost:5173/"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 120s
-    entrypoint: ["sh", "-c", "pnpm config set store-dir /tmp/pnpm/store && pnpm install --frozen-lockfile && pnpm dev"]
+      - vol_static_builder:/usr/src/vite
 
   reverseproxy:
     container_name: "reverseproxy"
@@ -47,15 +35,16 @@ services:
     volumes:
       - ./reverseproxy/ssl/:/etc/ssl/
       - ./reverseproxy/nginx.conf:/etc/nginx/nginx.conf
+      - vol_static_builder:/usr/share/nginx/html  # vol_static_builderをマウント
     networks:
       - net_pong
     depends_on:
       api:
         condition: service_healthy
-      static-builder:
-        condition: service_healthy
       rdbms:
         condition: service_healthy
+      static-builder:
+        condition: service_started
 
   api:
     build:
