@@ -68,6 +68,14 @@ const Pong = () => {
     let paddle2Speed = 0
     let canStart = true
 
+    const startButton = document.createElement('button')
+    startButton.className = 'btn btn-primary btn-lg bg-darkblue'
+    startButton.textContent = 'ボール発射'
+    document.getElementById('utilButton').appendChild(startButton)
+    startButton.addEventListener('click', startPong)
+
+
+
     function drawRect(x, y, width, height, color) {
       context.fillStyle = color
       context.fillRect(x, y, width, height)
@@ -243,15 +251,19 @@ const Pong = () => {
 
     function startPong(e) {
       if (canStart === true) {
-        ballSpeedX = 5
-        ballSpeedY = 5
+        ballSpeedX = (Math.random() * 0.5 + 0.5) * (Math.random() < 0.5 ? 1 : -1)
+        ballSpeedY = Math.random( ) - 0.5
+        const normalizer = Math.sqrt(ballSpeedX ** 2 + ballSpeedY ** 2)
+        ballSpeedX =  ballSpeedX * 7 / normalizer
+        ballSpeedY =  ballSpeedY * 7 / normalizer
+        console.log(ballSpeedX, ballSpeedY)
         canStart = false
       }
     }
 
     document.addEventListener('keydown', keyDownHandler)
     document.addEventListener('keyup', keyUpHandler)
-    document.addEventListener('click', startPong)
+    // document.addEventListener('click', startPong)
 
     const intervalId = setInterval(update, 1000 / 60)
 
@@ -311,16 +323,16 @@ const Pong = () => {
           ),
         ),
       ),
-      endMatch ?
       Teact.createElement(
         'div',
-        { className: 'd-grid gap-2 col-3 mx-auto' },
+        { className: 'd-grid gap-2 col-3 mx-auto', id: 'utilButton' },
+        endMatch ?
         DefaultButton({
           text: 'トーナメント画面へ',
           onClick: () => fetchTournament(endMatch),
-        }),
-      )
-      : null,
+        })
+        : null,
+      ),
     ),
   )
 }
