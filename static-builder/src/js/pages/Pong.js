@@ -6,10 +6,9 @@ import { DefaultButton } from '@/js/components/ui/button'
 import { api } from '@/js/infrastructures/api/fetch'
 import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
 
-// TODO: useStateでボタンを消したりできるようにしたら消す
-let endMatch = false
 
-function fetchTournament() {
+
+function fetchTournament(endMatch) {
   if (!endMatch) {
     return
   }
@@ -26,6 +25,7 @@ function fetchTournament() {
 }
 
 const Pong = () => {
+  const [endMatch, setEndMatch] = Teact.useState(false)
   const loc = useLocation()
   if (!loc.state) {
     return BaseLayout(
@@ -219,7 +219,7 @@ const Pong = () => {
           canvas.width / 2,
           canvas.height / 2,
         )
-        endMatch = true
+        setEndMatch(true)
       }
     }
 
@@ -323,14 +323,16 @@ const Pong = () => {
           ),
         ),
       ),
+      endMatch ?
       Teact.createElement(
         'div',
         { className: 'd-grid gap-2 col-3 mx-auto', id: 'utilButton' },
         DefaultButton({
           text: 'トーナメント画面へ',
-          onClick: () => fetchTournament(),
+          onClick: () => fetchTournament(endMatch),
         }),
-      ),
+      )
+      : null,
     ),
   )
 }
