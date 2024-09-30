@@ -44,7 +44,7 @@ services:
       rdbms:
         condition: service_healthy
       static-builder:
-        condition: service_started
+        condition: service_completed_successfully
 
   api:
     build:
