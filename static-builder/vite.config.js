@@ -8,6 +8,7 @@ export default defineConfig({
       "~bootstrap": path.resolve(__dirname, "node_modules/bootstrap"),
     },
   },
+  assetsInclude: ["**/*.svg", "**/*.png", "**/*.jpg", "**/*.jpeg",],
   server: {
     host: "0.0.0.0",
   },

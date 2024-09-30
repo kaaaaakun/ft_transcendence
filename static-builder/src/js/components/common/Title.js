@@ -1,4 +1,5 @@
 import { Teact } from '@/js/libs/teact'
+import TitleImage from '/title.png'
 
 export const Title = () => {
   return Teact.createElement(
@@ -7,7 +8,7 @@ export const Title = () => {
       className: 'text-center',
     },
     Teact.createElement('img', {
-      src: '/src/assets/images/title.png',
+      src: TitleImage,
       alt: 'Title',
       height: '200',
     }),
