@@ -37,9 +37,6 @@ pnpm fix # Biome でlintエラーを修正し、コードをフォーマット
 ├── public # 静的ファイル
 │   └── vite.svg
 ├── src
-│   ├── assets # 画像などのリソース
-│   │   └── images
-│   │       └── javascript.svg
 │   ├── index.html
 │   ├── js # スクリプト
 │   │   ├── main.js
