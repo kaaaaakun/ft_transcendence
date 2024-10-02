@@ -1,5 +1,7 @@
 import { Link } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
+import Icon from '/icon.png'
+
 export const Header = () => {
   return Teact.createElement(
     'header',
@@ -14,7 +16,7 @@ export const Header = () => {
         'a',
         { href: '/', className: 'text-white' },
         Teact.createElement('img', {
-          src: '/src/assets/images/icon.png',
+          src: Icon,
           alt: 'Logo',
           width: '30',
           height: '30',
