@@ -1,8 +1,16 @@
 ENV_FILE_PATH = .env.sample
-DOCKER_COMPOSE = docker compose --env-file ${ENV_FILE_PATH} -f ./docker-compose.local.yml
-CERT_DIR = ./reverseproxy/tools
+DOCKER_COMPOSE = docker compose --env-file ${ENV_FILE_PATH} -f ./docker-compose.yml
+CERT_SCRIPT_DIR = ./reverseproxy/tools
+CERT_DIR = ./reverseproxy/ssl
+
+ifdef WITH_LOCAL
+	DOCKER_COMPOSE = docker compose --env-file ${ENV_FILE_PATH} -f ./docker-compose.local.yml
+endif
 
 all: run
+
+local:
+	$(MAKE) WITH_LOCAL=1 run
 
 run: build up
 
@@ -11,7 +19,7 @@ re: down image-prune run
 build:
 	$(DOCKER_COMPOSE) build --no-cache
 
-up:
+up: cert
 	$(DOCKER_COMPOSE) up -d
 
 fdown:
@@ -30,10 +38,14 @@ PHONY: run re build up down fdown image-prune ps generate
 
 # -- 証明書の作成
 cert:
-	make -C $(CERT_DIR)
+	@if [ ! -d "$(CERT_DIR)" ]; then \
+		make -C $(CERT_SCRIPT_DIR); \
+	else \
+		echo "certificates already exist"; \
+	fi
 
 cert_clean:
-	rm -rf ./reverseproxy/ssl/
+	rm -rf $(CERT_DIR)
 
 # -- OpenAPIを利用したコードの生成
 OPENAPI_SPEC := openapi.yaml
