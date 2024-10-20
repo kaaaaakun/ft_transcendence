@@ -297,20 +297,38 @@ function useState(initial) {
 }
 
 function useEffect(callback, deps) {
-  const oldDeps = wipFiber.alternate?.hooks?.[hookIndex]?.deps
+  const oldHook = wipFiber.alternate?.hooks?.[hookIndex];
   const hook = {
     deps,
-    callback,
-  }
+    cleanup: null,
+  };
 
-  const hasChanged =
-    !oldDeps || oldDeps.some((dep, index) => dep !== deps[index])
+  const hasChanged = !oldHook?.deps ||
+    oldHook.deps.some((dep, index) => dep !== deps[index]);
+
   if (hasChanged) {
-    wipFiber.effects.push(callback)
+    if (oldHook && typeof oldHook.cleanup === 'function') {
+      wipFiber.effects.push(() => {
+        oldHook.cleanup();
+        const cleanup = callback();
+        if (typeof cleanup === 'function') {
+          hook.cleanup = cleanup;
+        }
+      });
+    } else {
+      wipFiber.effects.push(() => {
+        const cleanup = callback();
+        if (typeof cleanup === 'function') {
+          hook.cleanup = cleanup;
+        }
+      });
+    }
+  } else {
+    hook.cleanup = oldHook.cleanup;
   }
 
-  wipFiber.hooks.push(hook)
-  hookIndex++
+  wipFiber.hooks.push(hook);
+  hookIndex++;
 }
 
 function useCallback(callback, deps) {
