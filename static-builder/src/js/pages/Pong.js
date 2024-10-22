@@ -1,12 +1,10 @@
 import '@/scss/styles.scss'
-import { BaseLayout } from '@/js/layouts/BaseLayout'
-import { Teact } from '@/js/libs/teact'
-import { useNavigate, useLocation } from '@/js/libs/router'
 import { DefaultButton } from '@/js/components/ui/button'
 import { api } from '@/js/infrastructures/api/fetch'
 import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
-
-
+import { BaseLayout } from '@/js/layouts/BaseLayout'
+import { useLocation, useNavigate } from '@/js/libs/router'
+import { Teact } from '@/js/libs/teact'
 
 function fetchTournament(endMatch) {
   if (!endMatch) {
@@ -73,8 +71,6 @@ const Pong = () => {
     startButton.textContent = 'ボール発射'
     document.getElementById('utilButton').appendChild(startButton)
     startButton.addEventListener('click', startPong)
-
-
 
     function drawRect(x, y, width, height, color) {
       context.fillStyle = color
@@ -251,11 +247,12 @@ const Pong = () => {
 
     function startPong(e) {
       if (canStart === true) {
-        ballSpeedX = (Math.random() * 0.5 + 0.5) * (Math.random() < 0.5 ? 1 : -1)
-        ballSpeedY = Math.random( ) - 0.5
+        ballSpeedX =
+          (Math.random() * 0.5 + 0.5) * (Math.random() < 0.5 ? 1 : -1)
+        ballSpeedY = Math.random() - 0.5
         const normalizer = Math.sqrt(ballSpeedX ** 2 + ballSpeedY ** 2)
-        ballSpeedX =  ballSpeedX * 7 / normalizer
-        ballSpeedY =  ballSpeedY * 7 / normalizer
+        ballSpeedX = (ballSpeedX * 7) / normalizer
+        ballSpeedY = (ballSpeedY * 7) / normalizer
         console.log(ballSpeedX, ballSpeedY)
         canStart = false
       }
@@ -326,12 +323,12 @@ const Pong = () => {
       Teact.createElement(
         'div',
         { className: 'd-grid gap-2 col-3 mx-auto', id: 'utilButton' },
-        endMatch ?
-        DefaultButton({
-          text: 'トーナメント画面へ',
-          onClick: () => fetchTournament(endMatch),
-        })
-        : null,
+        endMatch
+          ? DefaultButton({
+              text: 'トーナメント画面へ',
+              onClick: () => fetchTournament(endMatch),
+            })
+          : null,
       ),
     ),
   )
