@@ -3,8 +3,8 @@ import { Route, Router } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import { Home } from '@/js/pages/Home'
 import { InputAlias } from '@/js/pages/InputAlias'
-import { Tournament } from '@/js/pages/Tournament'
 import { Pong } from '@/js/pages/Pong'
+import { Tournament } from '@/js/pages/Tournament'
 
 function App() {
   return Router(
