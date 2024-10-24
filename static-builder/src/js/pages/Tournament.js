@@ -1,10 +1,10 @@
 import '@/scss/styles.scss'
-import { Teact } from '@/js/libs/teact'
-import { useNavigate, useLocation } from '@/js/libs/router'
-import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { DefaultButton } from '@/js/components/ui/button'
 import { api } from '@/js/infrastructures/api/fetch'
 import { cookie } from '@/js/infrastructures/cookie/cookie'
+import { BaseLayout } from '@/js/layouts/BaseLayout'
+import { useLocation, useNavigate } from '@/js/libs/router'
+import { Teact } from '@/js/libs/teact'
 
 function sumVictoryCount(participants, start, end) {
   return participants

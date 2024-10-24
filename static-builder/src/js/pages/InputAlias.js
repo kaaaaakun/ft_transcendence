@@ -1,10 +1,10 @@
 import '@/scss/styles.scss'
 import { DefaultButton } from '@/js/components/ui/button'
-import { BaseLayout } from '@/js/layouts/BaseLayout'
-import { Teact } from '@/js/libs/teact'
-import { useNavigate, useLocation } from '../libs/router'
 import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
 import { cookie } from '@/js/infrastructures/cookie/cookie'
+import { BaseLayout } from '@/js/layouts/BaseLayout'
+import { Teact } from '@/js/libs/teact'
+import { useLocation, useNavigate } from '../libs/router'
 
 function handleSubmit(event) {
   const navigate = useNavigate()
