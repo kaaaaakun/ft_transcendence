@@ -23,7 +23,7 @@ services:
       context: static-builder/
       target: build
       args:
-        VITE_API_URL: "ima kaita"
+        - VITE_API_URL
     container_name: "static-builder"
     volumes:
       - vol_static_builder:/usr/src/vite
