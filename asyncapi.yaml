@@ -1,0 +1,142 @@
+asyncapi: 3.0.0
+info:
+  title: ft_transcendence
+  version: 1.0.0
+  description: This API is designed for a pong game.
+
+channels:
+  match:
+    address: /api/ws/matches
+    messages:
+      MatchSend:
+        $ref: '#/components/messages/MatchSend'
+      MatchStateUpdate:
+        $ref: '#/components/messages/MatchStateUpdate'
+      MatchGoalUpdate:
+        $ref: '#/components/messages/MatchGoalUpdate'
+
+operations:
+  sendMatchInput:
+    action: send
+    channel:
+      $ref: '#/channels/match'
+    messages:
+      - $ref: '#/channels/match/messages/MatchSend'
+      
+  receiveMatchState:
+    action: receive
+    channel:
+      $ref: '#/channels/match'
+    messages:
+      - $ref: '#/channels/match/messages/MatchStateUpdate'
+
+  receiveMatchGoal:
+    action: receive
+    channel:
+      $ref: '#/channels/match'
+    messages:
+      - $ref: '#/channels/match/messages/MatchGoalUpdate'
+
+components:
+  messages:
+    MatchSend:  # フロント -> バックへのキーボード入力
+      payload:
+        type: object
+        required:
+          - upDownKey
+        properties:
+          upDownKey:
+            $ref: '#/components/schemas/UpDownKey'
+
+    MatchStateUpdate: # バック -> フロント ゲーム状態の更新
+      payload:
+        type: object
+        required:
+          - paddlePositions
+          - ballPosition
+        properties:
+          paddlePositions:
+            $ref: '#/components/schemas/PaddlePositions'
+          ballPosition:
+            $ref: '#/components/schemas/BallPosition'
+
+    MatchGoalUpdate: # バック -> フロント 得点が入ったときの処理
+      payload:
+        type: object
+        required:
+          - scores
+          - paddlePositions
+          - ballPosition
+        properties:
+          scores:
+            $ref: '#/components/schemas/Scores'
+          paddlePositions:
+            $ref: '#/components/schemas/PaddlePositions'
+          ballPosition:
+            $ref: '#/components/schemas/BallPosition'
+
+  schemas:
+    UpDownKey:
+      description: "True indicates that the paddle is moving up, while false indicates that the paddle is moving down."
+      type: array
+      minItems: 1
+      maxItems: 2
+      items:
+        type: object
+        required:
+          - userId
+          - upDownKey
+        properties:
+          userId:
+            type: string
+          upDownKey:
+            type: boolean
+
+    PaddlePositions:
+      description: Vertical position of player's paddles for both players
+      type: array
+      minItems: 2
+      maxItems: 2
+      items:
+        type: object
+        required:
+          - userId
+          - paddlePosition
+        properties:
+          userId:
+            type: string
+          paddlePosition:
+            type: number
+            format: float
+
+    BallPosition:
+      type: object
+      required:
+        - x
+        - y
+      properties:
+        x:
+          type: number
+          format: float
+          description: Horizontal position of the ball
+        y:
+          type: number
+          format: float
+          description: Vertical position of the ball
+
+    Scores:
+      description: Current scores of both players
+      type: array
+      minItems: 2
+      maxItems: 2
+      items:
+        type: object
+        required:
+          - userId
+          - score
+        properties:
+          userId:
+            type: string
+          score:
+            type: integer
+
