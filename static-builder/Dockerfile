@@ -18,6 +18,8 @@ COPY package.json pnpm-lock.yaml ./
 # build stage
 FROM base AS build
 
+ARG VITE_API_URL
+
 WORKDIR /usr/src/vite
 
 COPY ./ ./
