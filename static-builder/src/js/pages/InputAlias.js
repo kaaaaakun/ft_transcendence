@@ -4,7 +4,7 @@ import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
 import { cookie } from '@/js/infrastructures/cookie/cookie'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { Teact } from '@/js/libs/teact'
-import { useLocation, useNavigate } from '../libs/router'
+import { useNavigate, useSearchParams } from '../libs/router'
 
 function handleSubmit(event) {
   const navigate = useNavigate()
@@ -31,8 +31,8 @@ function handleSubmit(event) {
 }
 
 export const InputAlias = () => {
-  const loc = useLocation()
-  const num = loc.state?.playerNum ?? 0
+  const params = useSearchParams()
+  const numPlayers = params.get('players')
   return BaseLayout(
     Teact.createElement(
       'div',
@@ -43,7 +43,7 @@ export const InputAlias = () => {
           onSubmit: handleSubmit,
           className: 'text-center mt-3 d-grid gap-2 col-3 mx-auto',
         },
-        ...Array.from({ length: num / 2 }, (_, i) => {
+        ...Array.from({ length: numPlayers / 2 }, (_, i) => {
           const className = 'form-control mt-2'
           return Teact.createElement(
             'div',

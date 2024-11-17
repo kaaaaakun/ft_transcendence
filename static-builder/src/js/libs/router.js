@@ -55,6 +55,10 @@ export function useLocation() {
   return { pathname: window.location.pathname, state: currentState }
 }
 
+export function useSearchParams() {
+  return new URLSearchParams(window.location.search)
+}
+
 export function useNavigate() {
   return (to, state = {}) => {
     navigate(to, state)
