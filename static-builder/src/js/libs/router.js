@@ -14,7 +14,8 @@ export function Router() {
     setState(() => state)
   }
 
-  const route = routes.find(r => r.path === currentPath)
+  const pathWithoutQuery = currentPath.split('?')[0]
+  const route = routes.find(r => r.path === pathWithoutQuery)
   if (!route) {
     return Teact.createElement('h1', null, '404 Not Found')
   }
