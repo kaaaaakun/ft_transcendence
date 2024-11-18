@@ -14,7 +14,8 @@ export function Router() {
     setState(() => state)
   }
 
-  const route = routes.find(r => r.path === currentPath)
+  const pathWithoutQuery = currentPath.split('?')[0]
+  const route = routes.find(r => r.path === pathWithoutQuery)
   if (!route) {
     return Teact.createElement('h1', null, '404 Not Found')
   }
@@ -52,6 +53,10 @@ function navigate(to, state = {}) {
 
 export function useLocation() {
   return { pathname: window.location.pathname, state: currentState }
+}
+
+export function useSearchParams() {
+  return new URLSearchParams(window.location.search)
 }
 
 export function useNavigate() {
