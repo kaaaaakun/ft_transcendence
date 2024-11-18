@@ -60,16 +60,18 @@ components:
       properties:
         x:
           type: number
-          format: floa
+          format: float
+        y:
+          type: number
+          format: float
     PlayerStatus:
       type: object
       required:
-        - paddlePosition
         - score
+        - paddlePosition
       properties:
+        score:
+          type: integer
         paddlePosition:
           type: number
           format: float
-        score:
-          type: integer
-
