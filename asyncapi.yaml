@@ -1,13 +1,27 @@
 ---
 asyncapi: 2.1.0
+id: 'urn:ft_transcendence'
+defaultContentType: 'application/json'
 info:
   title: ft_transcendence
   version: 1.0.0
   description: This API is designed for a pong game.
+  contact:
+    name: とらせん
+    email: ft_transcendence@example.com
+    url: 'https://example.com/contact'
+  license:
+    name: MIT
+    url: 'https://opensource.org/licenses/MIT'
+tags:
+  - name: pong
+    description: API for the pong game
+
 servers:
   localhost:
     url: 'ws://localhost/api/ws'
     protocol: ws
+
 channels:
   /api/ws/matches:
     publish:
@@ -67,11 +81,11 @@ components:
     PlayerStatus:
       type: object
       required:
-        - score
         - paddlePosition
+        - score
       properties:
-        score:
-          type: integer
         paddlePosition:
           type: number
           format: float
+        score:
+          type: integer
