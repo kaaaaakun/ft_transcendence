@@ -64,8 +64,26 @@ generate:
 clean:
 	rm -rf $(OUTPUT_DIR)
 
-# -- mockサーバーを立てる
+# -- OpenAPIをもとにmockサーバーを立てる
 mock:
 	prism mock openapi.yaml
+
+# -- AsyncAPIをもとにwebsoketmockサーバーを立てる
+mock-init:
+	cp -f asyncapi.yaml mock-server/
+	# async-serverディレクトリが存在しない場合にのみ作成
+	mkdir mock-server/async-server
+	docker build -t asyncapi-generator mock-server/ && \
+	docker run --name asyncapi-generator-container asyncapi-generator && \
+	docker cp asyncapi-generator-container:/async-server mock-server/ ; \
+	docker rm asyncapi-generator-container ; \
+	docker rmi asyncapi-generator
+	rm -rf mock-server/asyncapi.yaml
+
+# async-serverのコンテナを作成し、8080ポートで起動
+mock-start:
+	docker build -t async-server-image mock-server/async-server
+	# 8080ポートにアクセスすると通信ができる
+	docker run --name async-server -p 8080:80 async-server-image
 
 PHONY:generate clean mock cert
