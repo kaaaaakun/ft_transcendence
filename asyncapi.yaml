@@ -63,8 +63,11 @@ components:
       type: object
       required:
         - isUp
+        - keyInput
       properties:
         isUp:
+          type: boolean
+        keyInput:
           type: boolean
     BallPosition:
       type: object
