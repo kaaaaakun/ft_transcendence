@@ -82,7 +82,7 @@ mock-init:
 
 # async-serverのコンテナを作成し、8080ポートで起動
 mock-start:
-	# 8080ポートにアクセスすると通信ができる。imageは都度削除される
+	# imageは都度削除される
 	docker build -t async-server-image mock-server/async-server
 	docker run --rm --name async-server -p 8080:80 async-server-image
 
