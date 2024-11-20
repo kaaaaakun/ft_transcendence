@@ -1,0 +1,55 @@
+name: Issue Template Initializer
+
+on:
+  workflow_dispatch:
+  issues:
+    types: [opened]
+
+jobs:
+  add_template:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v2
+
+    - name: Add template to issue body
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        issue_number=${{ github.event.issue.number }}
+        repo=${{ github.repository }}
+
+        # Issueの本文を取得
+        issue_body=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+          "https://api.github.com/repos/$repo/issues/$issue_number" | jq -r .body)
+        
+        # 本文が既に存在する場合は終了
+        if [ "$issue_body" != "null" ] && [ -n "$issue_body" ]; then
+          echo "Issue body already exists."
+          exit 0
+        fi
+
+        # レビュワー選択用配列
+        words=("@soma0822" "@kaaaaakun" "@tkuramot" "@soragogo" "@jizots")
+        count=5
+
+        # ランダムに2人選択
+        index1=$(( RANDOM % count ))
+        index2=$(( RANDOM % count ))
+        
+        # 重複を避ける
+        while [ "$index1" -eq "$index2" ]; do
+          index2=$(( RANDOM % count ))
+        done
+
+        choice1=${words[$index1]}
+        choice2=${words[$index2]}
+
+        # テンプレート内容
+        template_content="#### チケットの背景\n- \n\n#### やりたいこと\n- \n\n#### やらないこと\n- \n\n#### チケットの達成条件・確認項目\n<!-- PR時に確認するべき具体的な内容をリストアップ -->\n- [ ] \n\n---\n<!-- 実装時・レビュー時、必要に応じて以下を記載 -->\n<!--\n#### 実装タスク (todoの記載)\n#### 調査報告\n#### 実装詳細\n#### 別チケの作成\n-->\n###### レビュワー: $choice1, $choice2"
+
+        # Issueを更新
+        curl -X PATCH -H "Authorization: token $GITHUB_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d "{\"body\": \"$template_content\"}" \
+          "https://api.github.com/repos/$repo/issues/$issue_number"
