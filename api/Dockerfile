@@ -114,6 +114,13 @@ CMD ["sleep", "infinity"]
 ##########################
 FROM development_common AS development_asgi
 
+RUN pip install --no-cache-dir 'channels[daphne]'
+
+# コンテナ内で"run"コマンドを実行すると、Djangoの開発サーバーが起動するようにaliasを設定
+RUN echo "alias run='python manage.py runserver ${BIND_ADDRESS}:${BIND_PORT}'" >> ~/.bashrc
+
+ENTRYPOINT [ "/trans/entrypoint.sh" ]
+CMD ["sleep", "infinity"]
 
 #########################
 # deploy_wsgi stage #

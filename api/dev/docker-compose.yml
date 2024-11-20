@@ -1,11 +1,11 @@
-# Djangoの開発用。グローバルdocker-compose.ymlができたら削除する
+# Djangoの開発環境用
 services:
   # バックエンドのサービス
-  backend:
+  api:
     build:
       context: ../
       dockerfile: ./Dockerfile
-      target: development_djangoserver # 開発用のDockerfileのターゲット
+      target: development_asgi # 開発用のDockerfileのターゲット
     ports:
       - "8000:8000"
     networks:
@@ -20,7 +20,8 @@ services:
     depends_on:
       rdbms:
         condition: service_healthy
-
+      in_memory_db:
+        condition: service_healthy
 
   rdbms:
     image: postgres:latest
@@ -34,6 +35,15 @@ services:
       - pong_network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U pong_user"]
+      interval: 15s
+      retries: 5
+
+  in_memory_db:
+    image: redis:latest
+    networks:
+      - pong_network
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping"]
       interval: 15s
       retries: 5
 

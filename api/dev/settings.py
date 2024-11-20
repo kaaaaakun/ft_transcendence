@@ -26,12 +26,16 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'default_secret_key-for-dev')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    # 3rd party apps. Install prior to 'django.contrib.staticfiles'
+    'daphne',
+
+    # django default
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,13 +43,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # apps made
+    # apps made for this project
     'player',
     'tournament',
     'match',
 
-    # 3rd party
+    # 3rd party apps
     'rest_framework',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -77,7 +82,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'trans.wsgi.application'
-
+ASGI_APPLICATION = 'trans.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
