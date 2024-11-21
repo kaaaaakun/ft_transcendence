@@ -114,7 +114,9 @@ CMD ["sleep", "infinity"]
 ##########################
 FROM development_common AS development_asgi
 
+# WS通信と一時メモリに必要なパッケージをインストール
 RUN pip install --no-cache-dir 'channels[daphne]'
+RUN pip install --no-cache-dir 'channels-redis'
 
 # コンテナ内で"run"コマンドを実行すると、Djangoの開発サーバーが起動するようにaliasを設定
 RUN echo "alias run='python manage.py runserver ${BIND_ADDRESS}:${BIND_PORT}'" >> ~/.bashrc
