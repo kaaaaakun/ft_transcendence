@@ -122,7 +122,9 @@ RUN pip install --no-cache-dir 'channels-redis'
 RUN echo "alias run='python manage.py runserver ${BIND_ADDRESS}:${BIND_PORT}'" >> ~/.bashrc
 
 ENTRYPOINT [ "/trans/entrypoint.sh" ]
+# コンテナに入ってからbashに切り替え手動でrunする。（簡単なコード変更のたびに再ビルドせず、コンテナ内でrunを繰り返せばOK）
 CMD ["sleep", "infinity"]
+# CMD ["bash", "-c", "source ~/.bashrc && run"]
 
 #########################
 # deploy_wsgi stage #
