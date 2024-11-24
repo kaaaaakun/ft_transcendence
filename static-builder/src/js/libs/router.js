@@ -10,6 +10,7 @@ export function Router() {
   const [currentPath, setPath] = Teact.useState(window.location.pathname)
   const [state, setState] = Teact.useState(currentState)
   setCurrentPath = (path, state = {}) => {
+    console.log('setCurrentPath', path, state)
     setPath(() => path)
     setState(() => state)
   }
@@ -45,10 +46,11 @@ export function Link({ to, className, children, state }) {
   )
 }
 
-function navigate(to, state = {}) {
-  window.history.pushState(state, '', to)
-  currentState = state
-  setCurrentPath(to, state)
+export function Navigate({ to, state }) {
+  Teact.useEffect(() => {
+    navigate(to, state)
+  }, [])
+  return null
 }
 
 export function useLocation() {
@@ -57,6 +59,12 @@ export function useLocation() {
 
 export function useSearchParams() {
   return new URLSearchParams(window.location.search)
+}
+
+function navigate(to, state = {}) {
+  window.history.pushState(state, '', to)
+  currentState = state
+  setCurrentPath(to, state)
 }
 
 export function useNavigate() {

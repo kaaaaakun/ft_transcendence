@@ -3,8 +3,8 @@ import { DefaultButton } from '@/js/components/ui/button'
 import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
 import { cookie } from '@/js/infrastructures/cookie/cookie'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
+import { Navigate, useNavigate, useSearchParams } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
-import { useNavigate, useSearchParams } from '../libs/router'
 
 function handleSubmit(event) {
   const navigate = useNavigate()
@@ -30,9 +30,16 @@ function handleSubmit(event) {
     })
 }
 
+const availablePlayers = [2, 4, 8]
+
 export const InputAlias = () => {
   const params = useSearchParams()
   const numPlayers = params.get('players')
+
+  if (!availablePlayers.includes(Number(numPlayers))) {
+    return Navigate({ to: '/input_alias?players=2' })
+  }
+
   return BaseLayout(
     Teact.createElement(
       'div',

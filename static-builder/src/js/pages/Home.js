@@ -22,25 +22,16 @@ export const Home = () => {
         { className: 'd-grid gap-2 col-3 mx-auto' },
         DefaultButton({
           text: '2人対戦',
-          onClick: () =>
-            navigate('/input_alias?players=2', {
-              playerNum: 2,
-            }),
-        }), // TBD
+          onClick: () => navigate('/input_alias?players=2'),
+        }),
         DefaultButton({
           text: '4人対戦',
-          onClick: () =>
-            navigate('/input_alias?players=4', {
-              playerNum: 4,
-            }),
-        }), // TBD
+          onClick: () => navigate('/input_alias?players=4'),
+        }),
         DefaultButton({
           text: '8人対戦',
-          onClick: () =>
-            navigate('/input_alias?players=8', {
-              playerNum: 8,
-            }),
-        }), // TBD
+          onClick: () => navigate('/input_alias?players=8'),
+        }),
         cookie.checkTournamentIdExists()
           ? DefaultButton({
               text: '続きから',
