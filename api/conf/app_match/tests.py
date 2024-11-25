@@ -132,17 +132,8 @@ class LocalMatchViewTests(APITestCase, BaseTestSetup):
         cookie = f'tournament_id={self.tournament1.id}'
         response = self.client.get(url, HTTP_COOKIE = cookie)
         expected_data =  {
-            'players': [
-                {
-                    'player': {'name': self.players[1].name},
-                    'match_details': {'player_id': self.players[1].id, 'match_id': self.matches[1].id, 'score': 0}
-                },
-                {
-                    'player': {'name': self.players[2].name},
-                    'match_details': {'player_id': self.players[2].id, 'match_id': self.matches[1].id, 'score': 0}
-                },
-            ],
-            'match_end': False
+            'left_player': {'player_name': self.players[1].name},
+            'right_player': {'player_name': self.players[2].name},
         }
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
@@ -167,24 +158,15 @@ class LocalScoreViewTests(APITestCase, BaseTestSetup):
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         expected_data =  {
-            'players': [
-                {
-                    'player': {'name': self.players[1].name},
-                    'match_details': {'player_id': self.players[1].id, 'match_id': self.matches[1].id, 'score': 1}
-                },
-                {
-                    'player': {'name': self.players[2].name},
-                    'match_details': {'player_id': self.players[2].id, 'match_id': self.matches[1].id, 'score': 0}
-                },
-            ],
-            'match_end': False
+            'left_player': {'player_name': self.players[1].name},
+            'right_player': {'player_name': self.players[2].name},
         }
         self.assertEqual(response.data, expected_data)
     
     def test_increment_score_to_the_end(self):
         url = reverse('local_score')
         data = {'match_id': self.matches[1].id, 'player_id': self.players[2].id}
-        for i in range(10):
+        for i in range(11):
             response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.matchdetails[1].refresh_from_db() # 以前利用したクエリのキャッシュを無効化するために、refresh_from_db()を使う。使わないと、以前の値が返される。
@@ -206,7 +188,7 @@ class LocalScoreViewTests(APITestCase, BaseTestSetup):
     def test_increment_score_to_the_end_eight_player(self):
         url = reverse('local_score')
         data = {'match_id': self.matches[2].id, 'player_id': self.players[8].id}
-        for i in range(10):
+        for i in range(11):
             response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.matchdetails[3].refresh_from_db() # 以前利用したクエリのキャッシュを無効化するために、refresh_from_db()を使う。使わないと、以前の値が返される。

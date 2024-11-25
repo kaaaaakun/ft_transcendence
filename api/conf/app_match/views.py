@@ -10,13 +10,13 @@ from .models import Match, MatchDetail
 from tournament.models import Tournament
 from .serializers import MatchSerializer, MatchDetailSerializer
 from .utils import ( increment_score, validate_and_update_matchdetail,
-    get_matchdetail_with_related_data, update_when_match_end, create_ponggame_dataset )
+    get_matchdetail_with_related_data, update_when_match_end, create_playerposition_dataset )
 from tournament.utils import ( update_tournamentplayer_status, increment_tournamentplayer_vcount, 
     is_round_end, update_tournamentplayer_win_to_await, is_tournament_end, update_tournament_status,
     create_next_tournament_match )
 from utils.decorators import admin_only
 
-END_OF_GAME_SCORE = 10
+END_OF_GAME_SCORE = 11
 
 # start: ユースケースでは本来必要ないが、データの確認のために追加
 @method_decorator(admin_only, name = 'dispatch')
@@ -43,9 +43,9 @@ class LocalMatchView(APIView):
             
             displayable_match_id = Match.objects.get(tournament_id = cookie_tournament_id, status = 'start').id
 
-            response_data = create_ponggame_dataset(get_matchdetail_with_related_data(displayable_match_id))
+            response_data = create_playerposition_dataset(get_matchdetail_with_related_data(displayable_match_id))
             return Response(response_data, status=status.HTTP_200_OK)
-        
+
         except Tournament.DoesNotExist:
             return Response({"error": "Tournament not found."}, status = status.HTTP_404_NOT_FOUND)
         except Match.DoesNotExist:
@@ -95,7 +95,7 @@ class LocalScoreView(APIView):
                         create_next_tournament_match(tournament_id.id)
 
             # Responseの作成
-            response_data = create_ponggame_dataset(get_matchdetail_with_related_data(match_id))
+            response_data = create_playerposition_dataset(get_matchdetail_with_related_data(match_id))
             return Response(response_data, status=status.HTTP_200_OK)
 
         except ValidationError as e:

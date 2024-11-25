@@ -69,8 +69,9 @@ def validate_and_update_matchdetail(matchdetail_instance):
 # args: match_id: int
 # return: MatchDetailのQuerySet (関連するPlayerおよびMatchデータを含む)
 def get_matchdetail_with_related_data(match_id):
-    return MatchDetail.objects.filter(match_id=match_id).select_related('player_id', 'match_id')
+    return MatchDetail.objects.filter(match_id=match_id).select_related('player_id', 'match_id').order_by('player_id')
 
+''' # 25%完成のフロントエンドPongのための関数
 # 対戦画面に必要なデータを作成する
 # args: MatchDetailのリスト
 # return: JSON形式のデータ
@@ -104,6 +105,14 @@ def create_ponggame_data(matchdetail):
             'score': matchdetail.score
         }
     }
+'''
+
+# Server-Side Pongのための関数
+def create_playerposition_dataset(matchdetails_with_related):
+    dataset = {'left_player': {'player_name': matchdetails_with_related[0].player_id.name},
+              'right_player': {'player_name': matchdetails_with_related[1].player_id.name}
+    }
+    return dataset
 
 def update_when_match_end(match_id, player_id, tournament_id):
     from tournament.utils import ( update_tournamentplayer_status, increment_tournamentplayer_vcount )
