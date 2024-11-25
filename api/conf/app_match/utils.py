@@ -109,8 +109,8 @@ def create_ponggame_data(matchdetail):
 
 # Server-Side Pongのための関数
 def create_playerposition_dataset(matchdetails_with_related):
-    dataset = {'left_player': {'player_name': matchdetails_with_related[0].player_id.name},
-              'right_player': {'player_name': matchdetails_with_related[1].player_id.name}
+    dataset = {'left': {'player_name': matchdetails_with_related[0].player_id.name},
+              'right': {'player_name': matchdetails_with_related[1].player_id.name}
     }
     return dataset
 

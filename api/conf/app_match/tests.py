@@ -132,8 +132,8 @@ class LocalMatchViewTests(APITestCase, BaseTestSetup):
         cookie = f'tournament_id={self.tournament1.id}'
         response = self.client.get(url, HTTP_COOKIE = cookie)
         expected_data =  {
-            'left_player': {'player_name': self.players[1].name},
-            'right_player': {'player_name': self.players[2].name},
+            'left': {'player_name': self.players[1].name},
+            'right': {'player_name': self.players[2].name},
         }
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
@@ -158,8 +158,8 @@ class LocalScoreViewTests(APITestCase, BaseTestSetup):
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         expected_data =  {
-            'left_player': {'player_name': self.players[1].name},
-            'right_player': {'player_name': self.players[2].name},
+            'left': {'player_name': self.players[1].name},
+            'right': {'player_name': self.players[2].name},
         }
         self.assertEqual(response.data, expected_data)
     
