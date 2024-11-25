@@ -143,23 +143,23 @@ components:
     match_status:
       type: object
       properties:
-        left_player:
+        left:
           type: object
           properties:
             player_name:
               type: string
-        right_player:
+        right:
           type: object
           properties:
             player_name:
               type: string
       required:
-        - left_player
-        - right_player
+        - left
+        - right
       example:
-        left_player:
+        left:
           player_name: "Alice"
-        right_player:
+        right:
           player_name: "Bob"
 
     player:
