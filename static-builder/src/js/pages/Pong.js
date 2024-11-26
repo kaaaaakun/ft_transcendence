@@ -262,6 +262,31 @@ const Pong = () => {
     document.addEventListener('keyup', keyUpHandler)
     // document.addEventListener('click', startPong)
 
+    const socket = new WebSocket('ws://localhost:8080/api/ws/matches');
+    // 接続が確立したとき
+    socket.addEventListener('open', () => {
+      console.log('サーバーに接続しました');
+      socket.send('こんにちは、サーバー！');
+    });
+
+    // サーバーからメッセージを受信したとき
+    socket.addEventListener('message', (event) => {
+      const gameState = JSON.parse(event.data);
+      console.log(gameState);
+      ballX = gameState.ballPosition.x;
+      
+    });
+
+    // エラーが発生したとき
+    socket.addEventListener('error', (error) => {
+      console.error('エラーが発生しました:', error);
+    });
+
+    // 接続が閉じられたとき
+    socket.addEventListener('close', () => {
+      console.log('接続が閉じられました');
+    });
+
     const intervalId = setInterval(update, 1000 / 60)
 
     return () => {
