@@ -69,48 +69,20 @@ def validate_and_update_matchdetail(matchdetail_instance):
 # args: match_id: int
 # return: MatchDetailのQuerySet (関連するPlayerおよびMatchデータを含む)
 def get_matchdetail_with_related_data(match_id):
-    return MatchDetail.objects.filter(match_id=match_id).select_related('player_id', 'match_id').order_by('player_id')
+    return MatchDetail.objects.filter(match_id=match_id).select_related('player_id', 'match_id')
 
-''' # 25%完成のフロントエンドPongのための関数
-# 対戦画面に必要なデータを作成する
-# args: MatchDetailのリスト
-# return: JSON形式のデータ
-def create_ponggame_dataset(matchdetails_with_related):
-    match_data = []
-    for matchdetail in matchdetails_with_related:
-        match_data.append(create_ponggame_data(matchdetail))
-    sorted_match_data = sorted(match_data, key = lambda x: x['match_details']['player_id'])
-    ponggame_dataset = {}
-    ponggame_dataset['players'] = sorted_match_data
-
-    # add key match_end
-    if (matchdetails_with_related[0].match_id.status == 'end'):
-        ponggame_dataset['match_end'] = True
+# MatchDetailをPlayerID順でソートする
+def sort_matchdetails_by_playerid(matchdetails_with_related):
+    if (matchdetails_with_related[0].player_id.id < matchdetails_with_related[1].player_id.id):
+        return matchdetails_with_related
     else:
-        ponggame_dataset['match_end'] = False
+        return matchdetails_with_related[::-1]
 
-    return ponggame_dataset
-
-# 対戦画面に必要なplayerごとのデータを作成する
-# args: MatchDetailのインスタンス (関連するPlayerおよびMatchデータを含む方が良い）
-# return: JSON
-def create_ponggame_data(matchdetail):
-    return {
-        'player': {
-            'name': matchdetail.player_id.name
-        },
-        'match_details': {
-            'player_id': matchdetail.player_id.id,
-            'match_id': matchdetail.match_id.id,
-            'score': matchdetail.score
-        }
-    }
-'''
-
-# Server-Side Pongのための関数
-def create_playerposition_dataset(matchdetails_with_related):
-    dataset = {'left': {'player_name': matchdetails_with_related[0].player_id.name},
-              'right': {'player_name': matchdetails_with_related[1].player_id.name}
+# MatchDetailからJSON形式のプレイヤー配置データを作成する
+def json_playerposition_from_matchdetails(matchdetails_with_related):
+    sorted_matchdetails = sort_matchdetails_by_playerid(matchdetails_with_related)
+    dataset = {'left': {'player_name': sorted_matchdetails[0].player_id.name},
+              'right': {'player_name': sorted_matchdetails[1].player_id.name}
     }
     return dataset
 
