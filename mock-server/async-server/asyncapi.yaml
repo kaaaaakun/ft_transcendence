@@ -62,10 +62,19 @@ components:
     KeyInput:
       type: object
       required:
-        - isUp
+        - key
+        - action
       properties:
-        isUp:
-          type: boolean
+        key:
+          type: string
+          enum:
+            - PaddleUpKey
+            - PaddleDownKey
+        action:
+          type: string
+          enum:
+            - push
+            - release
     BallPosition:
       type: object
       required:
