@@ -5,16 +5,15 @@ const service = module.exports = {};
  * @param {object} ws WebSocket connection.
  */
 service.onMatchStatus = async (ws) => {
-  // Define possible positions for the ball and paddles
+  // ランダムなボールとパドルの位置
   const ballPositions = [
     { x: 0.2, y: 0.3 },
     { x: 0.5, y: 0.5 },
     { x: 0.8, y: 0.7 },
   ];
-
   const paddlePositions = [0.3, 0.5, 0.7];
 
-  // Function to generate a random match status
+  // ランダムな match status の生成
   const generateRandomMatchStatus = () => ({
     left: {
       paddlePosition: paddlePositions[Math.floor(Math.random() * paddlePositions.length)],
@@ -27,7 +26,7 @@ service.onMatchStatus = async (ws) => {
     ballPosition: ballPositions[Math.floor(Math.random() * ballPositions.length)],
   });
 
-  // Interval function to send match status every 5 seconds
+  // 定期的に送信されるように
   const intervalId = setInterval(() => {
     const matchStatus = generateRandomMatchStatus();
 
@@ -41,41 +40,22 @@ service.onMatchStatus = async (ws) => {
 };
 
 /**
- * Handle key input messages sent from the client.
+ *
  * @param {object} ws WebSocket connection.
  * @param {object} options
  * @param {string} options.path The path in which the message was received.
  * @param {object} options.query The query parameters used when connecting to the server.
  * @param {object} options.message The received message.
- * @param {object} options.message.payload The payload containing key input data.
- * @param {object} options.message.payload.left Data for the left paddle.
- * @param {boolean} options.message.payload.left.isUp Whether the left paddle is moving up.
- * @param {object} options.message.payload.right Data for the right paddle.
- * @param {boolean} options.message.payload.right.isUp Whether the right paddle is moving up.
+ * @param {object} options.message.payload.left
+ * @param {string} options.message.payload.left.key
+ * @param {string} options.message.payload.left.action
+ * @param {object} options.message.payload.right
+ * @param {string} options.message.payload.right.key
+ * @param {string} options.message.payload.right.action
  */
  service.sendKeyInput = async (ws, { message, path, query }) => {
   try {
-    // Ensure message.payload exists before destructuring
-    const { left, right } = message.payload || {}; // fallback to empty object if payload is undefined
-
-    if (typeof left?.isUp !== "boolean" || typeof right?.isUp !== "boolean") {
-      throw new Error("Invalid input format: 'isUp' must be a boolean.");
-    }
-
-    // Example logic for reacting to key inputs
-    const updatedPaddlePositions = {
-      leftPaddlePosition: left.isUp ? 0.6 : 0.4, // Adjust position based on input
-      rightPaddlePosition: right.isUp ? 0.6 : 0.4,
-    };
-
-    // Notify the client about the new paddle positions
-    ws.send(JSON.stringify({
-      type: 'PaddleUpdate',
-      payload: updatedPaddlePositions,
-    }));
-
-    console.log(`Received input: ${JSON.stringify(message.payload)}`);
-
+    ws.send('入力を受け付けました。');
   } catch (error) {
     console.error("Error handling key input:", error.message);
   }
