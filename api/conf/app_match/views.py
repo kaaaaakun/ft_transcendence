@@ -34,6 +34,8 @@ class LocalMatchView(APIView):
         cookie_tournament_id = request.COOKIES.get('tournament_id')
         # Is there a match with the start status?
         if cookie_tournament_id is None:
+            # will be implemented in the future.
+            # PlayNowの場合はこちらになり、cookieにtournament_idがないので、player positionのレスポンスをデフォルトで返す
             return Response({"error": "tournament_id is required."}, status = status.HTTP_404_NOT_FOUND)
         try:
             tournament = Tournament.objects.get(id=cookie_tournament_id)
