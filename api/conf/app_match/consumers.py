@@ -3,7 +3,7 @@ import asyncio
 from asyncio import sleep
 import json
 
-from .game_logic import GameManager
+from .game_logic import GameManager, SimpleScoreManager
 from utils.websocket import get_tournament_id_from_scope
 
 FRAME = 10
@@ -13,7 +13,7 @@ class SMatchConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.accept()
         # ゲームロジック管理用のインスタンスを作成
-        self.game_manager = GameManager()
+        self.game_manager = GameManager(score_manager = SimpleScoreManager())
         self.frame_rate = 1 / FRAME
         self.is_running = True
         # ゲームループを開始
@@ -37,7 +37,7 @@ class SMatchConsumer(AsyncWebsocketConsumer):
             # クライアントにゲームの現在の状態を送信
             await self.send(text_data=json.dumps(self.game_manager.get_game_state()))
             # どちらかのスコアがENDに達したらゲームを終了
-            if self.game_manager.left_score == END_GAME_SCORE or self.game_manager.right_score == END_GAME_SCORE:
+            if self.game_manager.score_manager.get_score("left") == END_GAME_SCORE or self.game_manager.score_manager.get_score("right") == END_GAME_SCORE:
                 self.is_running = False
             # 次のフレームまで待機
             await asyncio.sleep(self.frame_rate)

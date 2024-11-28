@@ -1,5 +1,6 @@
 import math
 import random
+import redis
 
 # フィールド
 WALL_X_LIMIT = 500
@@ -21,59 +22,80 @@ PADDLE_Y_MAX = WALL_Y_LIMIT - (PADDLE_WIDTH / 2)
 PADDLE_SPEED = 1
 
 class GameManager:
-    def __init__(self):
+    def __init__(self, score_manager):
+        self.score_manager = score_manager
         self.ball = Ball()
         self.wall = Wall()
         self.left_paddle = Paddle(is_left = True)
         self.right_paddle = Paddle(is_left = False)
-        self.left_score = 0
-        self.right_score = 0
 
     def update_game_state(self):
-        # ボールとパドルの位置を更新
         self.ball.update_position()
         self.left_paddle.update_position()
         self.right_paddle.update_position()
 
-        # 衝突判定
         if self.wall.is_collision(self.ball):
             self.ball.set_radian(-self.ball.radian)
 
         if self.left_paddle.is_collision(self.ball):
             self.ball.bounce += 1
             self.ball.paddle_refrection(self.left_paddle)
-            if self.ball.bounce == 1:
-                self.ball.set_speed(self.ball.speed * 2)
         elif self.right_paddle.is_collision(self.ball):
             self.ball.bounce += 1
             self.ball.paddle_refrection(self.right_paddle)
-            if self.ball.bounce == 1:
-                self.ball.set_speed(self.ball.speed * 2)
-
-        # ゴール判定
-        if self.wall.is_goal(self.ball):
+        elif self.wall.is_goal(self.ball):
             if self.ball.isGoalLeft:
-                self.left_score += 1
+                self.score_manager.update_score("left", 1)
             else:
-                self.right_score += 1
-            print("Goal!")
+                self.score_manager.update_score("right", 1)
             self.ball.reset()
 
     def get_game_state(self):
         return {
             "left": {
                 "paddlePosition": self.left_paddle.y,
-                "score": self.left_score
+                "score": self.score_manager.get_score("left")
             },
             "right": {
                 "paddlePosition": self.right_paddle.y,
-                "score": self.right_score
+                "score": self.score_manager.get_score("right")
             },
             "ballPosition": {
                 "x": self.ball.x,
                 "y": self.ball.y
             }
         }
+
+class ScoreManager:
+    def update_score(self, side, points):
+        raise NotImplementedError
+
+    def get_score(self, side):
+        raise NotImplementedError
+
+class SimpleScoreManager(ScoreManager):
+    def __init__(self):
+        self.scores = {"left": 0, "right": 0}
+
+    def update_score(self, side, points):
+        self.scores[side] += points
+
+    def get_score(self, side):
+        return self.scores[side]
+
+class TournamentScoreManager(ScoreManager):
+    def __init__(self, match_id):
+        self.match_id = match_id
+        self.redis_client = redis.StrictRedis(host="dev-redis", port=6379, db=0)
+
+    def update_score(self, side, points):
+        redis_key = f"match:{self.match_id}:{side}_score"
+        current_score = int(self.redis_client.get(redis_key) or 0)
+        self.redis_client.set(redis_key, current_score + points)
+
+    def get_score(self, side):
+        redis_key = f"match:{self.match_id}:{side}_score"
+        return int(self.redis_client.get(redis_key) or 0)
 
 class Ball:
     def __init__(self):
