@@ -126,9 +126,9 @@ class MatchDetailSerializerTests(BaseTestSetup):
         print(serializer.errors)
         self.assertFalse(is_valid, msg = serializer.errors)
 
-class LocalMatchViewTests(APITestCase, BaseTestSetup):
+class LocalTMatchViewTests(APITestCase, BaseTestSetup):
     def test_get_match_with_valid_tournament(self):
-        url = reverse('local')
+        url = reverse('localtournament')
         cookie = f'tournament_id={self.tournament1.id}'
         response = self.client.get(url, HTTP_COOKIE = cookie)
         expected_data =  {
@@ -139,13 +139,13 @@ class LocalMatchViewTests(APITestCase, BaseTestSetup):
         self.assertEqual(response.data, expected_data)
 
     def test_get_match_with_ended_tournament(self):
-        url = reverse('local')
+        url = reverse('localtournament')
         cookie = f'tournament_id={self.tournament2.id}'
         response = self.client.get(url, HTTP_COOKIE = cookie)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_get_match_with_nonexistent_tournament(self):
-        url = reverse('local')
+        url = reverse('localtournament')
         cookie = 'tournament_id=9999'
         response = self.client.get(url, HTTP_COOKIE = cookie)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

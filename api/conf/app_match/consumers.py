@@ -3,7 +3,7 @@ import asyncio
 from asyncio import sleep
 import json
 
-from .game_logic import GameManager, Ball, Wall, Paddle
+from .game_logic import GameManager
 from utils.websocket import get_tournament_id_from_scope
 
 FRAME = 10
