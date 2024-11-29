@@ -42,18 +42,6 @@ def validate_matchdetail_data(match_id, player_id, score, result):
 def register_matchdetail(valid_matchdetail):
     return MatchDetail.objects.create(**valid_matchdetail)
 
-
-# MatchDetailのスコアをインクリメントする（DBへの保存はしない）
-# args: match_id: int, player_id: int
-# return: MatchDetailのオブジェクト
-def increment_score(match_id, player_id):
-    try:
-        matchdetail_instance = MatchDetail.objects.get(match_id = match_id, player_id = player_id)
-        matchdetail_instance.score += 1
-        return matchdetail_instance
-    except MatchDetail.DoesNotExist:
-        return None
-
 # MatchDetailのDB情報を更新する
 # args: MatchDetailのインスタンス
 # return: MatchDetailのインスタンス

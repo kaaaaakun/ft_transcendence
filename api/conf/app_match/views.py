@@ -2,17 +2,13 @@ from rest_framework import viewsets
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError
 from django.utils.decorators import method_decorator
-from django.db import transaction, DatabaseError
+from django.db import DatabaseError
 
 from .models import Match, MatchDetail
 from tournament.models import Tournament
 from .serializers import MatchSerializer, MatchDetailSerializer
-from .utils import ( increment_score, validate_and_update_matchdetail,
-    get_matchdetail_with_related_data, update_when_match_end, json_playerposition_from_matchdetails )
-from tournament.utils import ( is_round_end, update_tournamentplayer_win_to_await, is_tournament_end,
-    update_tournament_status, create_next_tournament_match )
+from .utils import ( get_matchdetail_with_related_data, json_playerposition_from_matchdetails )
 from utils.decorators import admin_only
 
 END_OF_GAME_SCORE = 11
