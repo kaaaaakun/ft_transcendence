@@ -69,11 +69,10 @@ class GameManager:
 class ScoreManager:
     def update_score(self, side, points):
         raise NotImplementedError
-
     def get_score(self, side):
         raise NotImplementedError
 
-class SimpleScoreManager(ScoreManager):
+class LocalSimpleScoreManager(ScoreManager):
     def __init__(self):
         self.scores = {"left": 0, "right": 0}
 
