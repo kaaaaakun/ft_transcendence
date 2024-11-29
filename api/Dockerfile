@@ -21,6 +21,7 @@ RUN export SECRET_KEY=$(python -c 'from django.core.management.utils import get_
 ENV SECRET_KEY=$SECRET_KEY
 ENV BIND_ADDRESS 0.0.0.0
 ENV BIND_PORT 8000
+ENV DJANGO_SETTINGS_MODULE=trans.settings
 
 # install for deploy
 RUN apt-get update
@@ -99,4 +100,4 @@ CMD ["sleep", "infinity"]
 FROM base AS deploy_asgi
 
 ENTRYPOINT [ "/trans/entrypoint.sh" ]
-CMD ["daphne", "-b", "${BIND_ADDRESS}", "-p", "${BIND_PORT}", "${DJANGO_PROJECT_NAME}.asgi:application"]
+CMD ["sh", "-c", "daphne -b ${BIND_ADDRESS} -p ${BIND_PORT} ${DJANGO_PROJECT_NAME}.asgi:application"]

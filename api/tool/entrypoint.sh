@@ -1,10 +1,15 @@
 #!/bin/sh
 
-# マイグレーション(modelのDBへの反映)を実行
+set -e  # エラーが発生したらスクリプトを停止する
+
+echo "Running migrations..."
 python ${DJANGO_PROJECT_DIR}manage.py migrate
 
-# 管理者ユーザーを作成。admin/にアクセスするとDBがみやすい。
+echo "Creating superuser if not exists..."
 python ${DJANGO_PROJECT_DIR}manage.py createsuperuser --noinput || true
 
-# DockerfileでCMDに指定されたコマンドを実行する
+echo "Checking Django settings..."
+python ${DJANGO_PROJECT_DIR}manage.py check || exit 1
+
+echo "Starting application..."
 exec "$@"

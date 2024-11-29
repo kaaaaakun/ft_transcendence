@@ -5,7 +5,7 @@ services:
     build:
       context: ../
       dockerfile: ./Dockerfile
-      target: development_asgi # 開発用のDockerfileのターゲット
+      target: deploy_asgi # 開発用のDockerfileのターゲット
     ports:
       - "8000:8000"
     networks:
