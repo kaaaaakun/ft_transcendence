@@ -84,17 +84,20 @@ class SimpleScoreManager(ScoreManager):
         return self.scores[side]
 
 class TournamentScoreManager(ScoreManager):
-    def __init__(self, match_id):
-        self.match_id = match_id
-        self.redis_client = redis.StrictRedis(host="dev-redis", port=6379, db=0)
+    def __init__(self, position_matchdetail):
+        self.position_matchdetail = position_matchdetail
+        self.redis_client = redis.StrictRedis(host = "dev-redis", port = 6379, db = 0)
 
     def update_score(self, side, points):
-        redis_key = f"match:{self.match_id}:{side}_score"
+        if side == "left":
+            redis_key = f"matchdetail:{self.position_matchdetail['left']}:score"
+        else:
+            redis_key = f"matchdetail:{self.position_matchdetail['right']}:score"
         current_score = int(self.redis_client.get(redis_key) or 0)
         self.redis_client.set(redis_key, current_score + points)
 
     def get_score(self, side):
-        redis_key = f"match:{self.match_id}:{side}_score"
+        redis_key = f"matchdetail:{self.position_matchdetail[side]}:score"
         return int(self.redis_client.get(redis_key) or 0)
 
 class Ball:

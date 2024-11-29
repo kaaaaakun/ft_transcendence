@@ -140,3 +140,4 @@ def is_tournament_end(tournament_id):
 # Tournamentのstatusを更新する
 def update_tournament_status(tournament_id, status):
     Tournament.objects.filter(id = tournament_id).update(status = status)
+

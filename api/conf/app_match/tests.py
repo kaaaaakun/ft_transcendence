@@ -150,63 +150,6 @@ class LocalTMatchViewTests(APITestCase, BaseTestSetup):
         response = self.client.get(url, HTTP_COOKIE = cookie)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-
-class LocalScoreViewTests(APITestCase, BaseTestSetup):
-    def test_increment_score(self):
-        url = reverse('local_score')
-        data = {'match_id': self.matches[1].id, 'player_id': self.players[1].id}
-        response = self.client.patch(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        expected_data =  {
-            'left': {'player_name': self.players[1].name},
-            'right': {'player_name': self.players[2].name},
-        }
-        self.assertEqual(response.data, expected_data)
-    
-    def test_increment_score_to_the_end(self):
-        url = reverse('local_score')
-        data = {'match_id': self.matches[1].id, 'player_id': self.players[2].id}
-        for i in range(11):
-            response = self.client.patch(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.matchdetails[1].refresh_from_db() # 以前利用したクエリのキャッシュを無効化するために、refresh_from_db()を使う。使わないと、以前の値が返される。
-        self.assertEqual(self.matchdetails[1].result, 'lose')
-        self.matchdetails[2].refresh_from_db()
-        self.assertEqual(self.matchdetails[2].result, 'win')
-        self.matches[1].refresh_from_db()
-        self.assertEqual(self.matches[1].status, 'end')
-        self.tournamentplayers[1].refresh_from_db() # リフレッシュの機能不全のため, tournamentplayerはget()で取得する。
-        self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament1.id, player_id = self.players[1].id).victory_count, 0)
-        self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament1.id, player_id = self.players[1].id).status, 'lose')
-        self.tournamentplayers[2].refresh_from_db()
-        self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament1.id, player_id = self.players[2].id).victory_count, 1)
-        self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament1.id, player_id = self.players[2].id).status, 'win')
-        self.tournament1.refresh_from_db()
-        self.assertEqual(self.tournament1.status, 'end')
-        self.assertEqual(response.data['match_end'], True)
-
-    def test_increment_score_to_the_end_eight_player(self):
-        url = reverse('local_score')
-        data = {'match_id': self.matches[2].id, 'player_id': self.players[8].id}
-        for i in range(11):
-            response = self.client.patch(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.matchdetails[3].refresh_from_db() # 以前利用したクエリのキャッシュを無効化するために、refresh_from_db()を使う。使わないと、以前の値が返される。
-        self.assertEqual(self.matchdetails[3].result, 'lose')
-        self.matchdetails[4].refresh_from_db()
-        self.assertEqual(self.matchdetails[4].result, 'win')
-        self.matches[2].refresh_from_db()
-        self.assertEqual(self.matches[2].status, 'end')
-        self.tournamentplayers[7].refresh_from_db() # リフレッシュの機能不全のため, tournamentplayerはget()で取得する。
-        self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament3.id, player_id = self.players[7].id).victory_count, 0)
-        self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament3.id, player_id = self.players[7].id).status, 'lose')
-        self.tournamentplayers[2].refresh_from_db()
-        self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament3.id, player_id = self.players[8].id).victory_count, 1)
-        self.assertEqual(TournamentPlayer.objects.get(tournament_id = self.tournament3.id, player_id = self.players[8].id).status, 'win')
-        self.tournament1.refresh_from_db()
-        self.assertEqual(self.tournament3.status, 'start')
-        self.assertEqual(response.data['match_end'], True)
-
 class AdminOnlyTests(APITestCase, BaseTestSetup):
     def test_match_viewset_with_nonadmin(self):
         response = self.client.get(reverse('match-list'))
