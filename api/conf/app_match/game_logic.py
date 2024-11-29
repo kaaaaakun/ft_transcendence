@@ -98,6 +98,11 @@ class TournamentScoreManager(ScoreManager):
     def get_score(self, side):
         redis_key = f"matchdetail:{self.position_matchdetail[side]}:score"
         return int(self.redis_client.get(redis_key) or 0)
+    
+    def delete_score(self):
+        left_key = f"matchdetail:{self.position_matchdetail['left']}:score"
+        right_key = f"matchdetail:{self.position_matchdetail['right']}:score"
+        self.redis_client.delete(left_key, right_key)
 
 class Ball:
     def __init__(self):

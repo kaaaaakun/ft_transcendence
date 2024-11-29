@@ -16,9 +16,10 @@ FRAME = 30 # フロントを見つつ調整
 END_GAME_SCORE = 3 # deploy時には11に変更
 
 # エラハンを完全無視、冗長さは少し無視してコーディングした
-# redisのデータ削除処理がないので、redisのデータが残り続ける
+
+# Baseクラス
 class LocalBaseMatchConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
+    async def connect(self): # クライアントからのWS接続時に呼び出される
         await self.accept()
         self.frame_rate = 1 / FRAME
         self.is_running = True
@@ -27,7 +28,7 @@ class LocalBaseMatchConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         self.is_running = False
 
-    async def receive(self, text_data):
+    async def receive(self, text_data): # クライアントからのメッセージ受信時に呼び出される
         data = json.loads(text_data)
         if "left" in data:
             self._handle_paddle_input(data["left"], self.game_manager.left_paddle)
@@ -65,6 +66,7 @@ class LocalSimpleMatchConsumer(LocalBaseMatchConsumer):
             await asyncio.sleep(self.frame_rate)
         await self.close()
 
+# Localでのトーナメントマッチの処理（リモートプレイヤーの導入時に削除予定）
 class LocalTournamentMatchConsumer(LocalBaseMatchConsumer):
     async def connect(self):
         self.tournament_id = get_tournament_id_from_scope(self.scope)
@@ -101,21 +103,23 @@ class LocalTournamentMatchConsumer(LocalBaseMatchConsumer):
 
     async def finalize_game_state(self):
         def sync_finalize():
+            # RDBのMatchDetailのスコアを更新して、Redisのスコアを削除
             self.sorted_matchedetails[0].score = self.game_manager.score_manager.get_score("left")
             self.sorted_matchedetails[1].score = self.game_manager.score_manager.get_score("right")
             self.sorted_matchedetails[0].save()
             self.sorted_matchedetails[1].save()
+            self.game_manager.score_manager.delete_score()
             # 勝者の判定
             if self.game_manager.score_manager.get_score("left") == END_GAME_SCORE:
                 winner_id = self.sorted_matchedetails[0].player_id
             else:
                 winner_id = self.sorted_matchedetails[1].player_id
-            # RDBの更新処理
+            # 関連するRDBの更新処理
             update_when_match_end(self.match_id, winner_id, self.tournament_id)
             # トーナメントラウンドが終了した時の処理
             if is_round_end(self.tournament_id):
                 update_tournamentplayer_win_to_await(self.tournament_id)
-            # トーナメントの終了判定
+            # トーナメントが終了した時の処理
             if is_tournament_end(self.tournament_id):
                 update_tournament_status(self.tournament_id, 'end')
             else:
