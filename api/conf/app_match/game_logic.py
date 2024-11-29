@@ -9,7 +9,7 @@ WALL_Y_LIMIT = 300
 BALL_RADIUS = 2
 BALL_INITIAL_X = WALL_X_LIMIT / 2
 BALL_INITIAL_Y = WALL_Y_LIMIT / 2
-BALL_INITIAL_SPEED = 10
+BALL_INITIAL_SPEED = 6
 BALL_RADIAN = random.uniform(-0.25, 0.25 * math.pi) * random.choice([1, -1]) # -45°~45° or 135°~225°
 # パドル
 PADDLE_WIDTH = 30
@@ -19,7 +19,7 @@ PADDLE_INITIAL_X_LEFT = PADDLE_CLEARANCE
 PADDLE_INITIAL_X_RIGHT = WALL_X_LIMIT - PADDLE_CLEARANCE
 PADDLE_Y_MIN = 0 + (PADDLE_WIDTH / 2)
 PADDLE_Y_MAX = WALL_Y_LIMIT - (PADDLE_WIDTH / 2)
-PADDLE_SPEED = 1
+PADDLE_SPEED = 15
 
 class GameManager:
     def __init__(self, score_manager):
@@ -140,6 +140,8 @@ class Ball:
         if not paddle.is_left: # 右パドルの場合は角度を反転
             new_radian = math.pi - new_radian
         self.set_radian(new_radian)
+        if self.bounce == 1:
+            self.set_speed(self.speed * 1.7)
 
     def calculate_velocity_components(self, speed, radian):
         self.vx = speed * math.cos(radian)
@@ -147,8 +149,9 @@ class Ball:
 
 class Wall:
     def is_collision(self, ball):
-        # ボールが壁に衝突したかどうかをチェック
-        if (ball.y - BALL_RADIUS) <= 0 or WALL_Y_LIMIT <= (ball.y + BALL_RADIUS):
+        # ボールが壁に衝突したかどうかをチェック。ただし、radianがすでに反転されている場合は無視
+        if ((ball.y - BALL_RADIUS) <= 0 and  ball.vy < 0) \
+            or (WALL_Y_LIMIT <= (ball.y + BALL_RADIUS) and ball.vy > 0):
             return True
         return False
 
@@ -171,7 +174,7 @@ class Paddle:
         else:
             self.x = PADDLE_INITIAL_X_RIGHT
         self.y = PADDLE_INITIAL_Y
-        self.movement_state = 0 # 0:stop, 1:up, -1:down
+        self.movement_state = 0 # 0:stop, 1:down, -1:up
 
     def set_movement(self, state):
         self.movement_state = state
