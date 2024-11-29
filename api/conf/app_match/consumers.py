@@ -12,7 +12,7 @@ from utils.websocket import get_tournament_id_from_scope
 from tournament.utils import ( is_round_end, update_tournamentplayer_win_to_await, is_tournament_end,
     update_tournament_status, create_next_tournament_match )
 
-FRAME = 10
+FRAME = 30 # フロントを見つつ調整
 END_GAME_SCORE = 3 # deploy時には11に変更
 
 # 冗長さとエラハンを完全無視してコーディングした
@@ -57,9 +57,9 @@ class SMatchConsumer(AsyncWebsocketConsumer):
         key = paddle_data["key"]
         action = paddle_data["action"]
         if key == "PaddleUpKey" and action == "push":
-            paddle.set_movement(1)
-        elif key == "PaddleDownKey" and action == "push":
             paddle.set_movement(-1)
+        elif key == "PaddleDownKey" and action == "push":
+            paddle.set_movement(1)
         elif action == "release":
             paddle.set_movement(0)
 
@@ -116,9 +116,9 @@ class TMatchConsumer(AsyncWebsocketConsumer):
         key = paddle_data["key"]
         action = paddle_data["action"]
         if key == "PaddleUpKey" and action == "push":
-            paddle.set_movement(1)
-        elif key == "PaddleDownKey" and action == "push":
             paddle.set_movement(-1)
+        elif key == "PaddleDownKey" and action == "push":
+            paddle.set_movement(1)
         elif action == "release":
             paddle.set_movement(0)
 
