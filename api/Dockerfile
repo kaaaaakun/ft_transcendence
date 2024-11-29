@@ -97,3 +97,6 @@ CMD ["sleep", "infinity"]
 # deploy_asgi stage #
 #########################
 FROM base AS deploy_asgi
+
+ENTRYPOINT [ "/trans/entrypoint.sh" ]
+CMD ["daphne", "-b", "${BIND_ADDRESS}", "-p", "${BIND_PORT}", "${DJANGO_PROJECT_NAME}.asgi:application"]
