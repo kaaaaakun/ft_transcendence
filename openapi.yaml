@@ -80,32 +80,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/error_response"
 
-  /api/matches/local/score:
-    patch:
-      tags:
-        - local_play
-      summary: スコアの更新
-      description: 試合中のプレイヤーのスコアを増加させます。
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/score"
-      responses:
-        "200":
-          description: 更新された試合スコア情報
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/match_status"
-        default:
-          description: エラーレスポンスまたはその他のレスポンス
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/error_response"
-
 components:
   schemas:
     tournament_request:
@@ -169,45 +143,24 @@ components:
     match_status:
       type: object
       properties:
-        players:
-          type: array
-          items:
-            type: object
-            properties:
-              player:
-                $ref: "#/components/schemas/player"
-              match_details:
-                $ref: "#/components/schemas/match_details"
-        end_match:
-          type: boolean
+        left:
+          type: object
+          properties:
+            player_name:
+              type: string
+        right:
+          type: object
+          properties:
+            player_name:
+              type: string
       required:
-        - players
-        - end_match
+        - left
+        - right
       example:
-        players:
-          - player:
-              name: "Alice"
-            match_details:
-              player_id: 1
-              match_id: 1
-              score: 1
-          - player:
-              name: "Bob"
-            match_details:
-              player_id: 2
-              match_id: 1
-              score: 0
-        end_match:
-            false
-
-    score:
-      type: object
-      properties:
-        match_details:
-          $ref: "#/components/schemas/match_details"
-      example:
-        match_id: 1
-        player_id: 1
+        left:
+          player_name: "Alice"
+        right:
+          player_name: "Bob"
 
     player:
       type: object
@@ -224,19 +177,6 @@ components:
           type: integer
       required:
         - victory_count
-
-    match_details:
-      type: object
-      properties:
-        player_id:
-          type: integer
-        match_id:
-          type: integer
-        score:
-          type: integer
-      required:
-        - player_id
-        - match_id
 
     error_response:
       type: object
