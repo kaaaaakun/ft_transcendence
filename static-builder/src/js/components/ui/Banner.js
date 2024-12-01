@@ -1,10 +1,6 @@
 import { Teact } from '@/js/libs/teact'
 
-export const Banner = ({
-  type,
-  message,
-  onClose,
-}) => {
+export const Banner = ({ type, message, onClose }) => {
   const [isClosed, setIsClosed] = Teact.useState(false)
 
   const handleClose = () => {
@@ -14,19 +10,26 @@ export const Banner = ({
     }
   }
 
-  const style = type === 'error' ? 'alert-danger' : type === 'warning' ? 'alert-warning' : 'alert-info'
+  const style =
+    type === 'error'
+      ? 'alert-danger'
+      : type === 'warning'
+        ? 'alert-warning'
+        : 'alert-info'
+  console.log('type', type)
+  console.log('style', style)
 
-  return !isClosed && Teact.createElement(
-    'div',
-    { className: `alert alert-dismissible fade show banner ${style}` },
-    message,
+  return (
+    !isClosed &&
     Teact.createElement(
-      'button',
-      {
+      'div',
+      { className: `alert alert-dismissible fade show banner ${style}` },
+      message,
+      Teact.createElement('button', {
         type: 'button',
         className: 'btn-close',
         onClick: handleClose,
-      },
-    ),
+      }),
+    )
   )
 }

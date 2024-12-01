@@ -4,7 +4,7 @@ import { Teact } from '@/js/libs/teact'
 export const useBanner = () => {
   const [banners, setBanners] = Teact.useState([])
 
-  const handleClose = (index) => {
+  const handleClose = index => {
     setBanners(prevBanners => prevBanners.filter((_, i) => i !== index))
   }
 
@@ -17,7 +17,7 @@ export const useBanner = () => {
         onClose: () => {
           onClose()
           handleClose(banners.length)
-        }
+        },
       }),
     ])
   }
@@ -31,7 +31,7 @@ export const useBanner = () => {
         onClose: () => {
           onClose()
           handleClose(banners.length)
-        }
+        },
       }),
     ])
   }
@@ -45,7 +45,7 @@ export const useBanner = () => {
         onClose: () => {
           onClose()
           handleClose(banners.length)
-        }
+        },
       }),
     ])
   }
