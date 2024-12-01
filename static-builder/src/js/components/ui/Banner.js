@@ -16,8 +16,6 @@ export const Banner = ({ type, message, onClose }) => {
       : type === 'warning'
         ? 'alert-warning'
         : 'alert-info'
-  console.log('type', type)
-  console.log('style', style)
 
   return (
     !isClosed &&
