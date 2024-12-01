@@ -1,7 +1,7 @@
 import { Teact } from '@/js/libs/teact'
 
 export const Banner = ({
-  type, // TODO: 'info' | 'warning' | 'error' でスタイルを変更するのに使う
+  type,
   message,
   onClose,
 }) => {
@@ -14,9 +14,11 @@ export const Banner = ({
     }
   }
 
+  const style = type === 'error' ? 'alert-danger' : type === 'warning' ? 'alert-warning' : 'alert-info'
+
   return !isClosed && Teact.createElement(
     'div',
-    { className: 'alert alert-warning alert-dismissible fade show banner' },
+    { className: `alert alert-dismissible fade show banner ${style}` },
     message,
     Teact.createElement(
       'button',
