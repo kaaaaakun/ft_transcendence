@@ -66,12 +66,6 @@ const Pong = () => {
     let paddle2Speed = 0
     let canStart = true
 
-    const startButton = document.createElement('button')
-    startButton.className = 'btn btn-primary btn-lg bg-darkblue'
-    startButton.textContent = 'ボール発射'
-    document.getElementById('utilButton').appendChild(startButton)
-    startButton.addEventListener('click', startPong)
-
     function drawRect(x, y, width, height, color) {
       context.fillStyle = color
       context.fillRect(x, y, width, height)
@@ -89,89 +83,6 @@ const Pong = () => {
       context.fillStyle = color
       context.textAlign = 'center'
       context.fillText(text, x, y)
-    }
-
-    function movePaddle() {
-      if (
-        paddle1Y + paddle1Speed > 0 &&
-        paddle1Y + paddleHeight + paddle1Speed < canvas.height
-      ) {
-        paddle1Y += paddle1Speed
-      }
-      if (
-        paddle2Y + paddle2Speed > 0 &&
-        paddle2Y + paddleHeight + paddle2Speed < canvas.height
-      ) {
-        paddle2Y += paddle2Speed
-      }
-    }
-
-    function scoreGoal(playerId) {
-      ballSpeedX = 0
-      ballSpeedY = 0
-      api
-        .patch('/api/matches/local/score/', {
-          match_id: matchId,
-          player_id: playerId,
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok')
-          }
-          return response.json() // レスポンスをJSONとしてパース
-        })
-        .then(data => {
-          canStart = true
-          if (playerId === player1Id) {
-            score1 = data.players[0].match_details.score
-          } else {
-            score2 = data.players[1].match_details.score
-          }
-          if (data.match_end === true) {
-            winner = score1 > score2 ? data.players[0] : data.players[1]
-          }
-          console.log('Success:', data) // サーバーからのレスポンスデータを処理
-        })
-        .catch(error => {
-          console.error('Error:', error) // エラー処理
-        })
-      resetBall()
-    }
-
-    function moveBall() {
-      ballX += ballSpeedX
-      ballY += ballSpeedY
-
-      if (ballY + ballSize > canvas.height || ballY - ballSize < 0) {
-        ballSpeedY = -ballSpeedY
-      }
-
-      if (
-        ballX - ballSize < paddleWidth &&
-        ballY > paddle1Y &&
-        ballY < paddle1Y + paddleHeight
-      ) {
-        ballSpeedX = -ballSpeedX
-      }
-      if (
-        ballX + ballSize > canvas.width - paddleWidth &&
-        ballY >= paddle2Y &&
-        ballY <= paddle2Y + paddleHeight
-      ) {
-        ballSpeedX = -ballSpeedX
-      }
-
-      if (ballX - ballSize < 0) {
-        scoreGoal(player2Id)
-      } else if (ballX + ballSize > canvas.width) {
-        scoreGoal(player1Id)
-      }
-    }
-
-    function resetBall() {
-      ballX = canvas.width / 2
-      ballY = canvas.height / 2
-      ballSpeedX = -ballSpeedX
     }
 
     function draw() {
@@ -205,8 +116,8 @@ const Pong = () => {
     }
 
     function update() {
-      movePaddle()
-      moveBall()
+      //movePaddle()
+      //moveBall()
       draw()
       if (winner !== null) {
         clearInterval(intervalId)
@@ -274,6 +185,11 @@ const Pong = () => {
       const gameState = JSON.parse(event.data);
       console.log(gameState);
       ballX = gameState.ballPosition.x;
+      ballY = gameState.ballPosition.y;
+      paddle1Y = gameState.right.paddlePosition;
+      paddle2Y = gameState.left.paddlePosition;
+      score1 =  gameState.right.score;
+      score2 =  gameState.left.score;
       
     });
 
