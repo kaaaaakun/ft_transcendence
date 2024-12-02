@@ -72,7 +72,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/match_status"
+                $ref: "#/components/schemas/match_status_local"
         default:
           description: エラーレスポンスまたはその他のレスポンス
           content:
@@ -99,7 +99,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/match_status"
+                $ref: "#/components/schemas/match_status_tournament"
         default:
           description: エラーレスポンスまたはその他のレスポンス
           content:
@@ -167,7 +167,7 @@ components:
             next_player: false
         tournament_id: 12345
 
-    match_status:
+    match_status_base:
       type: object
       properties:
         left:
@@ -183,11 +183,24 @@ components:
       required:
         - left
         - right
-      example:
-        left:
-          player_name: "Alice"
-        right:
-          player_name: "Bob"
+
+    match_status_local:
+      allOf:
+        - $ref: "#/components/schemas/match_status_base"
+        - example:
+            left:
+              player_name: "Alice"
+            right:
+              player_name: "Bob"
+
+    match_status_tournament:
+      allOf:
+        - $ref: "#/components/schemas/match_status_base"
+        - example:
+            left:
+              player_name: "L"
+            right:
+              player_name: "R"
 
     player:
       type: object
