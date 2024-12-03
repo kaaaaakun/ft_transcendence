@@ -6,6 +6,19 @@ import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { useLocation, useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 
+// 色
+const BACKGROUND_COLOR = '#1E1E2C'; // 定数: 背景色
+// フィールド
+const WALL_X_LIMIT = 500
+const WALL_Y_LIMIT = 300
+// ボール
+const BALL_RADIUS = 2
+// パドル
+const PADDLE_WIDTH = 30
+const PADDLE_CLEARANCE = 0
+const PADDLE_Y_MIN = 0 + (PADDLE_WIDTH / 2)
+const PADDLE_Y_MAX = WALL_Y_LIMIT - (PADDLE_WIDTH / 2)
+
 function fetchTournament(endMatch) {
   if (!endMatch) {
     return
@@ -65,6 +78,10 @@ const Pong = () => {
     let paddle1Speed = 0
     let paddle2Speed = 0
     let canStart = true
+    let isLeftPaddleUp = false
+    let isLeftPaddleDown = false
+    let isRightPaddleUp = false
+    let isRightPaddleDown = false
 
     function drawRect(x, y, width, height, color) {
       context.fillStyle = color
@@ -85,6 +102,7 @@ const Pong = () => {
       context.fillText(text, x, y)
     }
 
+    // 描画系
     function draw() {
       drawRect(0, 0, canvas.width, canvas.height, '#1E1E2C')
       drawRect(0, paddle1Y, paddleWidth, paddleHeight, 'white')
@@ -116,8 +134,6 @@ const Pong = () => {
     }
 
     function update() {
-      //movePaddle()
-      //moveBall()
       draw()
       if (winner !== null) {
         clearInterval(intervalId)
@@ -130,30 +146,47 @@ const Pong = () => {
       }
     }
 
+    // 1P（W: 上、S: 下）と2P（↑: 上、↓: 下）のキー割り当て
     function keyDownHandler(e) {
-      // 1P（W: 上、S: 下）と2P（↑: 上、↓: 下）のキー割り当て
-      if (e.key === 'ArrowUp') {
-        paddle2Speed = -6 // 2P（右側）
-      } else if (e.key === 'ArrowDown') {
-        paddle2Speed = 6 // 2P（右側）
-      } else if (e.key === 'w' || e.key === 'W') {
-        paddle1Speed = -6 // 1P（左側）
-      } else if (e.key === 's' || e.key === 'S') {
-        paddle1Speed = 6 // 1P（左側）
-      }
+        let message;
+    
+        if (e.key === 'ArrowUp' && !isRightPaddleUp) {
+            message =  {"right": { "key": "PaddleUpKey", "action": "push" }}
+            isRightPaddleUp = true;
+        } else if (e.key === 'ArrowDown'&& !isRightPaddleDown) {
+            message =  {"right": { "key": "PaddleDownKey", "action": "push" }}
+            isRightPaddleDown = true;
+        } else if ((e.key === 'w' || e.key === 'W') && !isLeftPaddleUp) {
+            message =  {"left": { "key": "PaddleUpKey", "action": "push" }}
+            isLeftPaddleUp = true;
+        } else if ((e.key === 's' || e.key === 'S') && !isLeftPaddleDown) {
+            message =  {"left": { "key": "PaddleDownKey", "action": "push" }}
+            isLeftPaddleDown = true;
+        } else { 
+            return
+        }
+        socket.send(JSON.stringify(message));
     }
 
     function keyUpHandler(e) {
-      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-        paddle2Speed = 0 // 2P（右側）
-      } else if (
-        e.key === 'w' ||
-        e.key === 'W' ||
-        e.key === 's' ||
-        e.key === 'S'
-      ) {
-        paddle1Speed = 0 // 1P（左側）
-      }
+        let message;
+    
+        if (e.key === 'ArrowUp' && isRightPaddleUp) {
+            message =  {"right": { "key": "PaddleUpKey", "action": "release" }}
+            isRightPaddleUp = false;
+        } else if (e.key === 'ArrowDown'&& isRightPaddleDown) {
+            message =  {"right": { "key": "PaddleDownKey", "action": "release" }}
+            isRightPaddleDown = false;
+        } else if ((e.key === 'w' || e.key === 'W') && isLeftPaddleUp) {
+            message =  {"left": { "key": "PaddleUpKey", "action": "release" }}
+            isLeftPaddleUp = false;
+        } else if ((e.key === 's' || e.key === 'S') && isLeftPaddleDown) {
+            message =  {"left": { "key": "PaddleDownKey", "action": "release" }}
+            isLeftPaddleDown = false;
+        } else { 
+            return
+        }
+        socket.send(JSON.stringify(message));
     }
 
     function startPong(e) {
@@ -239,15 +272,15 @@ const Pong = () => {
             {
               className: 'position-relative',
               style: {
-                width: '600px',
-                height: '400px',
-                backgroundColor: '#1E1E2C',
+                width: `${WALL_X_LIMIT}px`,
+                height: `${WALL_Y_LIMIT}px`,
+                backgroundColor: BACKGROUND_COLOR,
               },
             },
             Teact.createElement('canvas', {
               id: 'pongCanvas',
-              width: '600',
-              height: '400',
+              width: WALL_X_LIMIT,
+              height: WALL_Y_LIMIT,
             }),
           ),
           Teact.createElement(
