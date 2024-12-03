@@ -25,7 +25,7 @@ service.onMatchStatus = async (ws) => {
     },
     right: {
       paddlePosition: paddlePositions[Math.floor(Math.random() * paddlePositions.length)],
-      score: Math.floor(Math.random() * 10),
+      score: Math.floor(Math.random() * 12),
     },
     ballPosition: ballPositions[Math.floor(Math.random() * ballPositions.length)],
   });
