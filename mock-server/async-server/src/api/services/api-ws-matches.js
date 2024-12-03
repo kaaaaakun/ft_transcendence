@@ -7,11 +7,15 @@ const service = module.exports = {};
 service.onMatchStatus = async (ws) => {
   // ランダムなボールとパドルの位置
   const ballPositions = [
-    { x: 0.2, y: 0.3 },
-    { x: 0.5, y: 0.5 },
-    { x: 0.8, y: 0.7 },
+    { x: 330, y: 220 },
+    { x: 340, y: 270 },
+    { x: 100, y: 130 },
+    { x: 440, y: 20 },
+    { x: 40, y: 200 },
+    { x: 240, y: 30 },
+    { x: 200, y: 100 },
   ];
-  const paddlePositions = [0.3, 0.5, 0.7];
+  const paddlePositions = [30, 50, 270];
 
   // ランダムな match status の生成
   const generateRandomMatchStatus = () => ({
