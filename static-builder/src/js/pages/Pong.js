@@ -6,18 +6,15 @@ import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { useLocation, useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 
-// 色
-const BACKGROUND_COLOR = '#1E1E2C'; // 定数: 背景色
-// フィールド
+// バックエンドと共通の定数
+const BACKGROUND_COLOR = '#1E1E2C';
 const WALL_X_LIMIT = 500
 const WALL_Y_LIMIT = 300
-// ボール
-const BALL_RADIUS = 2
-// パドル
+const BALL_RADIUS = 2 // TODO:ask ちょっと小さすぎ？
 const PADDLE_WIDTH = 30
-const PADDLE_CLEARANCE = 0
-const PADDLE_Y_MIN = 0 + (PADDLE_WIDTH / 2)
-const PADDLE_Y_MAX = WALL_Y_LIMIT - (PADDLE_WIDTH / 2)
+
+// フロントのみの定数
+const PADDLE_HEIGHT = 10
 
 function fetchTournament(endMatch) {
   if (!endMatch) {
@@ -54,30 +51,23 @@ const Pong = () => {
   console.log(loc.state)
   const data = loc.state.data
   const matchId = data.players[0].match_details.match_id
-  let score1 = data.players[0].match_details.score
-  let score2 = data.players[1].match_details.score
   const player1Name = data.players[0].player.name
   const player2Name = data.players[1].player.name
-  const player1Id = data.players[0].match_details.player_id
-  const player2Id = data.players[1].match_details.player_id
   let winner = null
 
   Teact.useEffect(() => {
     const canvas = document.getElementById('pongCanvas')
     const context = canvas.getContext('2d')
 
-    const paddleWidth = 10
-    const paddleHeight = 100
-    const ballSize = 10
-    let paddle1Y = (canvas.height - paddleHeight) / 2
-    let paddle2Y = (canvas.height - paddleHeight) / 2
+    // 描画に必要な変更される情報
+    let rightPaddleY = (canvas.height - PADDLE_WIDTH) / 2
+    let leftPaddleY = (canvas.height - PADDLE_WIDTH) / 2
     let ballX = canvas.width / 2
     let ballY = canvas.height / 2
-    let ballSpeedX = 0
-    let ballSpeedY = 0
-    let paddle1Speed = 0
-    let paddle2Speed = 0
-    let canStart = true
+    let rightScore = 0
+    let leftScore = 0
+
+    // パドルの操作
     let isLeftPaddleUp = false
     let isLeftPaddleDown = false
     let isRightPaddleUp = false
@@ -104,32 +94,26 @@ const Pong = () => {
 
     // 描画系
     function draw() {
-      drawRect(0, 0, canvas.width, canvas.height, '#1E1E2C')
-      drawRect(0, paddle1Y, paddleWidth, paddleHeight, 'white')
-      drawRect(
-        canvas.width - paddleWidth,
-        paddle2Y,
-        paddleWidth,
-        paddleHeight,
-        'white',
-      )
+      drawRect(0, 0, canvas.width, canvas.height, BACKGROUND_COLOR) //canvasの描画
+      drawRect(0, rightPaddleY, PADDLE_HEIGHT, PADDLE_WIDTH, 'white') //パドルの描画(left)
+      drawRect(canvas.width - PADDLE_HEIGHT, leftPaddleY, PADDLE_HEIGHT, PADDLE_WIDTH, 'white') //パドルの描画(right)
       if (winner === null) {
-        drawBall(ballX, ballY, ballSize, '#FFD700')
+        drawBall(ballX, ballY, BALL_RADIUS, '#FFD700')
       }
       // スコアを描画
       drawText(
-        `${score1}`,
+        `${rightScore}`,
         canvas.width / 4,
         50,
         '48px sans-serif',
-        score1 === 10 ? 'yellow' : 'white',
+        rightScore === 10 ? 'yellow' : 'white',
       )
       drawText(
-        `${score2}`,
+        `${leftScore}`,
         (canvas.width / 4) * 3,
         50,
         '48px sans-serif',
-        score2 === 10 ? 'yellow' : 'white',
+        leftScore === 10 ? 'yellow' : 'white',
       )
     }
 
@@ -189,22 +173,8 @@ const Pong = () => {
         socket.send(JSON.stringify(message));
     }
 
-    function startPong(e) {
-      if (canStart === true) {
-        ballSpeedX =
-          (Math.random() * 0.5 + 0.5) * (Math.random() < 0.5 ? 1 : -1)
-        ballSpeedY = Math.random() - 0.5
-        const normalizer = Math.sqrt(ballSpeedX ** 2 + ballSpeedY ** 2)
-        ballSpeedX = (ballSpeedX * 7) / normalizer
-        ballSpeedY = (ballSpeedY * 7) / normalizer
-        console.log(ballSpeedX, ballSpeedY)
-        canStart = false
-      }
-    }
-
     document.addEventListener('keydown', keyDownHandler)
     document.addEventListener('keyup', keyUpHandler)
-    // document.addEventListener('click', startPong)
 
     const socket = new WebSocket('ws://localhost:8080/api/ws/matches');
     // 接続が確立したとき
@@ -216,13 +186,12 @@ const Pong = () => {
     // サーバーからメッセージを受信したとき
     socket.addEventListener('message', (event) => {
       const gameState = JSON.parse(event.data);
-      console.log(gameState);
       ballX = gameState.ballPosition.x;
       ballY = gameState.ballPosition.y;
-      paddle1Y = gameState.right.paddlePosition;
-      paddle2Y = gameState.left.paddlePosition;
-      score1 =  gameState.right.score;
-      score2 =  gameState.left.score;
+      rightPaddleY = gameState.right.paddlePosition;
+      leftPaddleY = gameState.left.paddlePosition;
+      rightScore =  gameState.right.score;
+      leftScore =  gameState.left.score;
       
     });
 
