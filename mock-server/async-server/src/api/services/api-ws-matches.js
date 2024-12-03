@@ -59,7 +59,6 @@ service.onMatchStatus = async (ws) => {
  */
  service.sendKeyInput = async (ws, { message, path, query }) => {
   try {
-    ws.send('入力を受け付けました。');
   } catch (error) {
     console.error("Error handling key input:", error.message);
   }
