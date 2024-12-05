@@ -184,8 +184,8 @@ const Pong = () => {
     document.addEventListener('keydown', keyDownHandler)
     document.addEventListener('keyup', keyUpHandler)
 
-    // const url = 'ws://localhost:8080/api/ws/matches' // mokc-server用
-    const url = 'ws://localhost/api/ws/matches'
+    const url = 'ws://localhost:8080/api/ws/matches' // mokc-server用
+    // const url = 'ws://localhost/api/ws/matches'   // prod用
     const socket = new WebSocket(url)
     socket.addEventListener('message', event => {
       const gameState = JSON.parse(event.data)
