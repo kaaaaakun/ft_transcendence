@@ -17,15 +17,19 @@ service.onMatchStatus = async (ws) => {
   ];
   const paddlePositions = [30, 50, 270];
 
+  let time = 0
+  let leftScore = 0
+  let rightScore = 0
+
   // ランダムな match status の生成
   const generateRandomMatchStatus = () => ({
     left: {
       paddlePosition: paddlePositions[Math.floor(Math.random() * paddlePositions.length)],
-      score: Math.floor(Math.random() * 10), // Random score for demonstration
+      score: leftScore,
     },
     right: {
       paddlePosition: paddlePositions[Math.floor(Math.random() * paddlePositions.length)],
-      score: Math.floor(Math.random() * 12),
+      score: rightScore,
     },
     ballPosition: ballPositions[Math.floor(Math.random() * ballPositions.length)],
   });
@@ -33,6 +37,12 @@ service.onMatchStatus = async (ws) => {
   // 定期的に送信されるように
   const intervalId = setInterval(() => {
     const matchStatus = generateRandomMatchStatus();
+      if (time % 10000) {
+        if (leftScore % 2 == 0)
+            rightScore++
+        leftScore++
+      }
+      time++
 
     ws.send(JSON.stringify(matchStatus));
   }, 500);

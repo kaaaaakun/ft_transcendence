@@ -136,8 +136,8 @@ const Pong = () => {
       draw()
     }
 
-    // 1P（W: 上、S: 下）と2P（↑: 上、↓: 下）のキー割り当て
     function keyDownHandler(e) {
+      // 1P（W: 上、S: 下）と2P（↑: 上、↓: 下）のキー割り当て
       let message
 
       if (e.key === 'ArrowUp' && !isRightPaddleUp) {
@@ -184,7 +184,9 @@ const Pong = () => {
     document.addEventListener('keydown', keyDownHandler)
     document.addEventListener('keyup', keyUpHandler)
 
-    const socket = new WebSocket('ws://localhost:8080/api/ws/matches')
+    // const url = 'ws://localhost:8080/api/ws/matches' // mokc-server用
+    const url = 'ws://localhost/api/ws/matches'
+    const socket = new WebSocket(url)
     socket.addEventListener('message', event => {
       const gameState = JSON.parse(event.data)
       console.log(gameState)
