@@ -17,8 +17,8 @@ PADDLE_CLEARANCE = 0
 PADDLE_INITIAL_Y = WALL_Y_LIMIT / 2
 PADDLE_INITIAL_X_LEFT = PADDLE_CLEARANCE
 PADDLE_INITIAL_X_RIGHT = WALL_X_LIMIT - PADDLE_CLEARANCE
-PADDLE_Y_MIN = 0 + (PADDLE_WIDTH / 2)
-PADDLE_Y_MAX = WALL_Y_LIMIT - (PADDLE_WIDTH / 2)
+PADDLE_Y_MIN = 0 + (PADDLE_HEIGHT / 2)
+PADDLE_Y_MAX = WALL_Y_LIMIT - (PADDLE_HEIGHT / 2)
 PADDLE_SPEED = 15
 
 class GameManager:
@@ -138,7 +138,7 @@ class Ball:
         self.calculate_velocity_components(new_speed, self.radian)
 
     def paddle_refrection(self, paddle):
-        relative_position = (self.y - paddle.y) / (PADDLE_WIDTH / 2)
+        relative_position = (self.y - paddle.y) / (PADDLE_HEIGHT / 2)
         max_radian = math.pi / 3  # 最大反射角（60°）
         new_radian = max(-max_radian, min(max_radian, math.pi / 4 * relative_position))  # -60° ~ 60°
         if not paddle.is_left: # 右パドルの場合は角度を反転
@@ -196,13 +196,13 @@ class Paddle:
         if self.is_left:
             if ( # ボールの左端がパドルより右側にある and ボールの中心がパドルの範囲内にある
                 (ball.x - BALL_RADIUS) <= self.x and
-                self.y - (PADDLE_WIDTH / 2) <= ball.y <= self.y + (PADDLE_WIDTH / 2)
+                self.y - (PADDLE_HEIGHT / 2) <= ball.y <= self.y + (PADDLE_HEIGHT / 2)
             ):
                 return True
         else:
             if (
                 self.x <= (ball.x + BALL_RADIUS) and
-                self.y - (PADDLE_WIDTH / 2) <= ball.y <= self.y + (PADDLE_WIDTH / 2)
+                self.y - (PADDLE_HEIGHT / 2) <= ball.y <= self.y + (PADDLE_HEIGHT / 2)
             ):
                 return True
         return False
