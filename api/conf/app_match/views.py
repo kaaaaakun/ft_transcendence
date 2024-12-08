@@ -26,7 +26,7 @@ class MatchDetailViewSet(viewsets.ModelViewSet):
 # end
 
 class LocalSimpleMatchView(APIView):
-    def get(self):
+    def get(self, request, *args, **kwargs):
         try:
             response_data = {'left': {'player_name': 'L'},
                             'right': {'player_name': 'R'}
