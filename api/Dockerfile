@@ -4,15 +4,6 @@
 # 軽そうなbaseイメージを選択(https://hub.docker.com/_/python)
 FROM python:3.9-slim AS base
 
-# ビルド時のみ利用する変数
-## version of installed packages
-ARG PSYCOPG_VERSION=3.1.8
-ARG DJANGO_VERSION=4.2
-ARG DJANGO_REST_VERSION=3.15.2
-ARG CHANNELS_VERSION=4.2.0
-ARG DAPHNE_VERSION=4.1.2
-ARG CHANNELS_REDIS_VERSION=4.2.1
-
 # コンテナ起動後にも利用する環境変数(secretは.envへ)
 ENV DJANGO_PROJECT_NAME trans
 ENV DJANGO_PROJECT_DIR /${DJANGO_PROJECT_NAME}/
@@ -43,12 +34,8 @@ RUN rm -rf /var/lib/apt/lists/*
 
 # APIサーバーおよび接続されたコンテナの操作に必要なライブラリのインストール
 RUN pip install --upgrade pip
-RUN pip install --no-cache-dir psycopg==${PSYCOPG_VERSION}
-RUN pip install --no-cache-dir Django==${DJANGO_VERSION}
-RUN pip install --no-cache-dir djangorestframework==${DJANGO_REST_VERSION}
-RUN pip install --no-cache-dir channels==${CHANNELS_VERSION}
-RUN pip install --no-cache-dir daphne==${DAPHNE_VERSION}
-RUN pip install --no-cache-dir channels-redis==${CHANNELS_REDIS_VERSION}
+COPY tool/requirements.txt tool/requirements.txt
+RUN pip install --no-cache-dir -r tool/requirements.txt
 
 # Create a Django project
 RUN django-admin startproject ${DJANGO_PROJECT_NAME}
