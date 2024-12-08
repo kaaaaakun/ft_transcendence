@@ -25,7 +25,7 @@ class MatchDetailViewSet(viewsets.ModelViewSet):
     serializer_class = MatchDetailSerializer
 # end
 
-class LocalSMatchView(APIView):
+class LocalSimpleMatchView(APIView):
     def get(self):
         try:
             response_data = {'left': {'player_name': 'L'},
@@ -35,7 +35,7 @@ class LocalSMatchView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class LocalTMatchView(APIView):
+class LocalTournamentMatchView(APIView):
     def get(self, request):
         cookie_tournament_id = request.COOKIES.get('tournament_id')
         # Is there a match with the start status?
