@@ -23,7 +23,7 @@ servers:
     protocol: ws
 
 channels:
-  /api/ws/LocalSimpleMatch:
+  /api/ws/local-simple-match:
     publish:
       operationId: sendKeyInputForSimpleMatch
       message:
@@ -33,7 +33,7 @@ channels:
       message:
         $ref: '#/components/messages/MatchStatus'
 
-  /api/ws/LocalTournamentMatch:
+  /api/ws/local-tournament-match:
     publish:
       operationId: sendKeyInputForTournamentMatch
       message:
