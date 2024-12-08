@@ -189,18 +189,18 @@ components:
         - $ref: "#/components/schemas/match_status_base"
         - example:
             left:
-              player_name: "Alice"
+              player_name: "L"
             right:
-              player_name: "Bob"
+              player_name: "R"
 
     match_status_tournament:
       allOf:
         - $ref: "#/components/schemas/match_status_base"
         - example:
             left:
-              player_name: "L"
+              player_name: "Alice"
             right:
-              player_name: "R"
+              player_name: "Bob"
 
     player:
       type: object
