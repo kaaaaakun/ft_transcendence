@@ -23,13 +23,23 @@ servers:
     protocol: ws
 
 channels:
-  /api/ws/matches:
+  /api/ws/local-simple-match:
     publish:
-      operationId: sendKeyInput
+      operationId: sendKeyInputForSimpleMatch
       message:
         $ref: '#/components/messages/KeyInput'
     subscribe:
-      operationId: onMatchStatus
+      operationId: onMatchStatusForSimpleMatch
+      message:
+        $ref: '#/components/messages/MatchStatus'
+
+  /api/ws/local-tournament-match:
+    publish:
+      operationId: sendKeyInputForTournamentMatch
+      message:
+        $ref: '#/components/messages/KeyInput'
+    subscribe:
+      operationId: onMatchStatusForTournamentMatch
       message:
         $ref: '#/components/messages/MatchStatus'
 
