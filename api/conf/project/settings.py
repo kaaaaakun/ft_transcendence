@@ -82,8 +82,6 @@ TEMPLATES = [
 ]
 
 ASGI_APPLICATION = 'trans.asgi.application'
-WSGI_APPLICATION = 'trans.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
