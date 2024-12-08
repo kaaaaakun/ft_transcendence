@@ -13,3 +13,24 @@
 .no-pointer-events {
   pointer-events: none;
 }
+
+.banner {
+  position: fixed;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%; /* 必要に応じて幅を調整 */
+  max-width: 60vw;
+  z-index: 1050; /* 他の要素よりも上に表示されるように設定 */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateX(-50%) translateY(-100%);
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+  }
+}
