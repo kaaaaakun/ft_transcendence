@@ -9,8 +9,9 @@ from .models import Match, MatchDetail
 from .utils import ( sort_matchdetails_by_playerid, 
     get_matchdetail_with_related_data, update_when_match_end, )
 from utils.websocket import get_tournament_id_from_scope
-from tournament.utils import ( is_round_end, update_tournamentplayer_win_to_await, is_tournament_end,
-    update_tournament_status, create_next_tournament_match )
+from tournament.models import Tournament
+from tournament.utils import ( update_tournamentplayer_win_to_await, is_tournament_end,
+    create_next_tournament_match )
 
 FRAME = 30 # フロントを見つつ調整
 END_GAME_SCORE = 3 # deploy時には11に変更
@@ -117,11 +118,11 @@ class LocalTournamentMatchConsumer(LocalBaseMatchConsumer):
             # 関連するRDBの更新処理
             update_when_match_end(self.match_id, winner_id, self.tournament_id)
             # トーナメントラウンドが終了した時の処理
-            if is_round_end(self.tournament_id):
+            if Tournament.is_round_end(self.tournament_id):
                 update_tournamentplayer_win_to_await(self.tournament_id)
             # トーナメントが終了した時の処理
             if is_tournament_end(self.tournament_id):
-                update_tournament_status(self.tournament_id, 'end')
+                Tournament.update_status(self.tournament_id, 'end')
             else:
                 create_next_tournament_match(self.tournament_id)            
         await sync_to_async(sync_finalize)()

@@ -1,7 +1,8 @@
-from .models import Match, MatchDetail
-from .serializers import MatchSerializer, MatchDetailSerializer
 from rest_framework.exceptions import ValidationError
 from django.forms.models import model_to_dict
+
+from .models import Match, MatchDetail
+from .serializers import MatchSerializer, MatchDetailSerializer
 
 def create_match(tournament_id, player1, player2):
     match_data = {
@@ -75,7 +76,7 @@ def json_playerposition_from_matchdetails(matchdetails_with_related):
     return dataset
 
 def update_when_match_end(match_id, player_id, tournament_id):
-    from tournament.utils import ( update_tournamentplayer_status, increment_tournamentplayer_vcount )
+    from tournament.models import TournamentPlayer
     opponent_player_id = get_opponent_player_id(match_id, player_id)
     # Update MatchDetail result
     update_matchdetail_result(match_id, player_id, 'win')
@@ -83,9 +84,9 @@ def update_when_match_end(match_id, player_id, tournament_id):
     # Update Match status
     update_match_status(match_id, 'end')
     # Update TournamentPlayer status and victory_count
-    update_tournamentplayer_status(tournament_id, player_id, 'win')
-    update_tournamentplayer_status(tournament_id, opponent_player_id, 'lose')
-    increment_tournamentplayer_vcount(tournament_id, player_id)    
+    TournamentPlayer.update_status(tournament_id, player_id, 'win')
+    TournamentPlayer.update_status(tournament_id, opponent_player_id, 'lose')
+    TournamentPlayer.increment_victory_count(tournament_id, player_id)    
 
 def update_matchdetail_result(match_id, player_id, result):
     MatchDetail.objects.filter(match_id = match_id, player_id = player_id).update(result = result)
