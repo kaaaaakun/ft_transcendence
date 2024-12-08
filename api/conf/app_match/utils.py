@@ -1,7 +1,8 @@
-from .models import Match, MatchDetail
-from .serializers import MatchSerializer, MatchDetailSerializer
 from rest_framework.exceptions import ValidationError
 from django.forms.models import model_to_dict
+
+from .models import Match, MatchDetail
+from .serializers import MatchSerializer, MatchDetailSerializer
 
 def create_match(tournament_id, player1, player2):
     match_data = {
@@ -42,18 +43,6 @@ def validate_matchdetail_data(match_id, player_id, score, result):
 def register_matchdetail(valid_matchdetail):
     return MatchDetail.objects.create(**valid_matchdetail)
 
-
-# MatchDetailのスコアをインクリメントする（DBへの保存はしない）
-# args: match_id: int, player_id: int
-# return: MatchDetailのオブジェクト
-def increment_score(match_id, player_id):
-    try:
-        matchdetail_instance = MatchDetail.objects.get(match_id = match_id, player_id = player_id)
-        matchdetail_instance.score += 1
-        return matchdetail_instance
-    except MatchDetail.DoesNotExist:
-        return None
-
 # MatchDetailのDB情報を更新する
 # args: MatchDetailのインスタンス
 # return: MatchDetailのインスタンス
@@ -71,42 +60,23 @@ def validate_and_update_matchdetail(matchdetail_instance):
 def get_matchdetail_with_related_data(match_id):
     return MatchDetail.objects.filter(match_id=match_id).select_related('player_id', 'match_id')
 
-# 対戦画面に必要なデータを作成する
-# args: MatchDetailのリスト
-# return: JSON形式のデータ
-def create_ponggame_dataset(matchdetails_with_related):
-    match_data = []
-    for matchdetail in matchdetails_with_related:
-        match_data.append(create_ponggame_data(matchdetail))
-    sorted_match_data = sorted(match_data, key = lambda x: x['match_details']['player_id'])
-    ponggame_dataset = {}
-    ponggame_dataset['players'] = sorted_match_data
-
-    # add key match_end
-    if (matchdetails_with_related[0].match_id.status == 'end'):
-        ponggame_dataset['match_end'] = True
+# MatchDetailをPlayerID順でソートする
+def sort_matchdetails_by_playerid(matchdetails_with_related):
+    if (matchdetails_with_related[0].player_id.id < matchdetails_with_related[1].player_id.id):
+        return matchdetails_with_related
     else:
-        ponggame_dataset['match_end'] = False
+        return matchdetails_with_related[::-1]
 
-    return ponggame_dataset
-
-# 対戦画面に必要なplayerごとのデータを作成する
-# args: MatchDetailのインスタンス (関連するPlayerおよびMatchデータを含む方が良い）
-# return: JSON
-def create_ponggame_data(matchdetail):
-    return {
-        'player': {
-            'name': matchdetail.player_id.name
-        },
-        'match_details': {
-            'player_id': matchdetail.player_id.id,
-            'match_id': matchdetail.match_id.id,
-            'score': matchdetail.score
-        }
+# MatchDetailからJSON形式のプレイヤー配置データを作成する
+def json_playerposition_from_matchdetails(matchdetails_with_related):
+    sorted_matchdetails = sort_matchdetails_by_playerid(matchdetails_with_related)
+    dataset = {'left': {'player_name': sorted_matchdetails[0].player_id.name},
+              'right': {'player_name': sorted_matchdetails[1].player_id.name}
     }
+    return dataset
 
 def update_when_match_end(match_id, player_id, tournament_id):
-    from tournament.utils import ( update_tournamentplayer_status, increment_tournamentplayer_vcount )
+    from tournament.models import TournamentPlayer
     opponent_player_id = get_opponent_player_id(match_id, player_id)
     # Update MatchDetail result
     update_matchdetail_result(match_id, player_id, 'win')
@@ -114,9 +84,9 @@ def update_when_match_end(match_id, player_id, tournament_id):
     # Update Match status
     update_match_status(match_id, 'end')
     # Update TournamentPlayer status and victory_count
-    update_tournamentplayer_status(tournament_id, player_id, 'win')
-    update_tournamentplayer_status(tournament_id, opponent_player_id, 'lose')
-    increment_tournamentplayer_vcount(tournament_id, player_id)    
+    TournamentPlayer.update_status(tournament_id, player_id, 'win')
+    TournamentPlayer.update_status(tournament_id, opponent_player_id, 'lose')
+    TournamentPlayer.increment_victory_count(tournament_id, player_id)    
 
 def update_matchdetail_result(match_id, player_id, result):
     MatchDetail.objects.filter(match_id = match_id, player_id = player_id).update(result = result)
