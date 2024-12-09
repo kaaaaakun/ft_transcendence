@@ -8,7 +8,7 @@ from django.db import DatabaseError
 from .models import Match, MatchDetail
 from tournament.models import Tournament
 from .serializers import MatchSerializer, MatchDetailSerializer
-from .utils import ( get_matchdetail_with_related_data, json_playerposition_from_matchdetails )
+from .utils import ( get_matchdetail_with_related_data, format_player_positions )
 from utils.decorators import admin_only
 
 END_OF_GAME_SCORE = 11
@@ -48,7 +48,7 @@ class LocalTournamentMatchView(APIView):
             
             displayable_match_id = Match.objects.get(tournament_id = cookie_tournament_id, status = 'start').id
 
-            response_data = json_playerposition_from_matchdetails(get_matchdetail_with_related_data(displayable_match_id))
+            response_data = format_player_positions(get_matchdetail_with_related_data(displayable_match_id))
             return Response(response_data, status=status.HTTP_200_OK)
 
         except Tournament.DoesNotExist:
