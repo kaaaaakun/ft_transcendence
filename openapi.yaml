@@ -72,7 +72,34 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/match_status"
+                $ref: "#/components/schemas/match_status_local"
+        default:
+          description: エラーレスポンスまたはその他のレスポンス
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+
+  /api/matches/localtournament:
+    get:
+      tags:
+        - local_tournamentplay
+      summary: 試合の開始
+      description: 次の試合の詳細を取得します。クッキーとして `tournament_id` を送信してください。
+      parameters:
+        - in: cookie
+          name: tournament_id
+          schema:
+            type: integer
+          required: true
+          description: 取得するトーナメントのID
+      responses:
+        "200":
+          description: 試合情報
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/match_status_tournament"
         default:
           description: エラーレスポンスまたはその他のレスポンス
           content:
@@ -140,7 +167,7 @@ components:
             next_player: false
         tournament_id: 12345
 
-    match_status:
+    match_status_base:
       type: object
       properties:
         left:
@@ -156,11 +183,24 @@ components:
       required:
         - left
         - right
-      example:
-        left:
-          player_name: "Alice"
-        right:
-          player_name: "Bob"
+
+    match_status_local:
+      allOf:
+        - $ref: "#/components/schemas/match_status_base"
+        - example:
+            left:
+              player_name: "L"
+            right:
+              player_name: "R"
+
+    match_status_tournament:
+      allOf:
+        - $ref: "#/components/schemas/match_status_base"
+        - example:
+            left:
+              player_name: "Alice"
+            right:
+              player_name: "Bob"
 
     player:
       type: object
