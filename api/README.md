@@ -33,21 +33,26 @@ test match # エンドポイントのテスト。manage.pyのあるディレク�
 │   ├── app_xxx # アプリ毎にディレクトリとソースファイルを作成
 │   │   ├── ~~.py
 │   │   └── ~~.py
-│   ├── app_player # example
+│   ├── app_match # example
 │   │   ├── admin.py
+│   │   ├── consumers.py # WS接続管理の親玉
+│   │   ├── routing.py # WS接続のルーティングを管理
 │   │   ├── models.py
 │   │   ├── serializers.py
 │   │   ├── tests.py
 │   │   ├── urls.py
-│   │   └── views.py
+│   │   └── views.py # HTTP接続管理の親玉
 │   ├── utils # APIへのアクセス制御デコレーターの保管場所
 │   │   ├── __init__.py # 空ファイル
-│   │   └── decorators.py
+│   │   ├── decorators.py
+│   │   └── websocket.py
 │   └── project # プロジェクトディレクトリのソースファイル
+│       ├── asgi.py
 │       ├── settings.py
 │       └── urls.py
 ├── dev # 開発フェーズ専用のファイル類
 │   ├── docker-compose.yml
+│   ├── index.html # APIエンドポイントを利用してゲーム画面をざっくり再現できるファイル。ブラウザでひらく。
 │   ├── settings.py
 │   └── .env.sample
 └── tool # ファイルが1つだけなら親ディレクトリにファイルを移動するかも

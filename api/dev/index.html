@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pong Game Client</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    canvas {
+      border: 1px solid black;
+    }
+    .info {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Pong Game</h1>
+  <canvas id="gameCanvas" width="500" height="300"></canvas>
+  <div class="info">
+    <p><b>Controls:</b> W/S for left paddle, Up/Down arrows for right paddle</p>
+    <p id="gameInfo">Game info will appear here.</p>
+  </div>
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const gameInfo = document.getElementById("gameInfo");
+
+    const ws = new WebSocket("ws://localhost:8000/api/ws/local-simple-match/");
+    
+    // Paddle positions
+    let leftPaddleY = 150;
+    let rightPaddleY = 150;
+    const paddleWidth = 10;
+    const paddleHeight = 30;
+
+    // Ball position
+    let ballX = 250;
+    let ballY = 150;
+
+    // Scores
+    let leftScore = 0;
+    let rightScore = 0;
+
+    // Draw game state
+    function draw() {
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw left paddle
+      ctx.fillRect(-7, leftPaddleY - paddleHeight / 2, paddleWidth, paddleHeight);
+
+      // Draw right paddle
+      ctx.fillRect(canvas.width - 3, rightPaddleY - paddleHeight / 2, paddleWidth, paddleHeight);
+
+      // Draw ball
+      ctx.beginPath();
+      ctx.arc(ballX, ballY, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw scores
+      ctx.font = "16px Arial";
+      ctx.fillText(`Left: ${leftScore}`, 50, 20);
+      ctx.fillText(`Right: ${rightScore}`, canvas.width - 100, 20);
+    }
+
+    // WebSocket event handlers
+    ws.onopen = () => {
+      console.log("WebSocket connection established.");
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      // Update game state
+      leftPaddleY = data.left.paddlePosition;
+      rightPaddleY = data.right.paddlePosition;
+      ballX = data.ballPosition.x;
+      ballY = data.ballPosition.y;
+      leftScore = data.left.score;
+      rightScore = data.right.score;
+
+      // Update game info
+      gameInfo.textContent = `Left Score: ${leftScore}, Right Score: ${rightScore}`;
+
+      // Redraw game
+      draw();
+    };
+
+    ws.onclose = () => {
+      console.log("WebSocket connection closed.");
+    };
+
+    // Send paddle input to server
+    function sendKeyInput(key, action, side) {
+      const payload = {};
+      payload[side] = { key: key, action: action };
+      ws.send(JSON.stringify(payload));
+    }
+
+    // Handle keyboard input
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "w") {
+        sendKeyInput("PaddleUpKey", "push", "left");
+      } else if (e.key === "s") {
+        sendKeyInput("PaddleDownKey", "push", "left");
+      } else if (e.key === "ArrowUp") {
+        sendKeyInput("PaddleUpKey", "push", "right");
+      } else if (e.key === "ArrowDown") {
+        sendKeyInput("PaddleDownKey", "push", "right");
+      }
+    });
+
+    document.addEventListener("keyup", (e) => {
+      if (e.key === "w" || e.key === "s") {
+        sendKeyInput(e.key === "w" ? "PaddleUpKey" : "PaddleDownKey", "release", "left");
+      } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+        sendKeyInput(e.key === "ArrowUp" ? "PaddleUpKey" : "PaddleDownKey", "release", "right");
+      }
+    });
+
+    // Initial draw
+    draw();
+  </script>
+</body>
+</html>
