@@ -1,15 +1,25 @@
 import '@/scss/styles.scss'
 import { DefaultButton } from '@/js/components/ui/button'
-import { api } from '@/js/infrastructures/api/fetch'
 import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { useLocation, useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 
+// TODO:ask:ボール小さいから大きく？
+// TODO:Paddleの縦横がバックエンドで逆になっているので、あとでバックエンドと同時に修正
+// バックエンドと共通の定数
+const BACKGROUND_COLOR = '#1E1E2C'
+const WALL_X_LIMIT = 500
+const WALL_Y_LIMIT = 300
+const BALL_RADIUS = 2
+const PADDLE_HEIGHT = 30
+
+// フロントのみの定数
+const PADDLE_WIDTH = 10
+
 function fetchTournament(endMatch) {
-  if (!endMatch) {
-    return
-  }
+  if (!endMatch) return
+
   const navigate = useNavigate()
   tournamentsApi
     .fetchLocalTournament()
@@ -17,14 +27,13 @@ function fetchTournament(endMatch) {
       console.log('Success:', data)
       navigate('/tournament', { data })
     })
-    .catch(error => {
-      console.error('Error:', error)
-    })
+    .catch(error => console.error('Error:', error))
 }
 
 const Pong = () => {
   const [endMatch, setEndMatch] = Teact.useState(false)
   const loc = useLocation()
+
   if (!loc.state) {
     return BaseLayout(
       Teact.createElement(
@@ -38,39 +47,33 @@ const Pong = () => {
       ),
     )
   }
-  console.log(loc.state)
+
   const data = loc.state.data
-  const matchId = data.players[0].match_details.match_id
-  let score1 = data.players[0].match_details.score
-  let score2 = data.players[1].match_details.score
-  const player1Name = data.players[0].player.name
-  const player2Name = data.players[1].player.name
-  const player1Id = data.players[0].match_details.player_id
-  const player2Id = data.players[1].match_details.player_id
+  const leftPlayerName = data.left.player_name
+  const rightPlayerName = data.right.player_name
   let winner = null
 
   Teact.useEffect(() => {
     const canvas = document.getElementById('pongCanvas')
     const context = canvas.getContext('2d')
 
-    const paddleWidth = 10
-    const paddleHeight = 100
-    const ballSize = 10
-    let paddle1Y = (canvas.height - paddleHeight) / 2
-    let paddle2Y = (canvas.height - paddleHeight) / 2
+    // バックエンドからの情報(最初は時差があるためフロントで初期値を設定)
+    let rightPaddleY = (canvas.height - PADDLE_HEIGHT) / 2
+    let leftPaddleY = (canvas.height - PADDLE_HEIGHT) / 2
     let ballX = canvas.width / 2
     let ballY = canvas.height / 2
-    let ballSpeedX = 0
-    let ballSpeedY = 0
-    let paddle1Speed = 0
-    let paddle2Speed = 0
-    let canStart = true
+    let rightScore = 0
+    let leftScore = 0
 
-    const startButton = document.createElement('button')
-    startButton.className = 'btn btn-primary btn-lg bg-darkblue'
-    startButton.textContent = 'ボール発射'
-    document.getElementById('utilButton').appendChild(startButton)
-    startButton.addEventListener('click', startPong)
+    // キーボード入力
+    let isLeftPaddleUp = false
+    let isLeftPaddleDown = false
+    let isRightPaddleUp = false
+    let isRightPaddleDown = false
+
+    function clearCanvas() {
+      context.clearRect(0, 0, canvas.width, canvas.height)
+    }
 
     function drawRect(x, y, width, height, color) {
       context.fillStyle = color
@@ -91,181 +94,115 @@ const Pong = () => {
       context.fillText(text, x, y)
     }
 
-    function movePaddle() {
-      if (
-        paddle1Y + paddle1Speed > 0 &&
-        paddle1Y + paddleHeight + paddle1Speed < canvas.height
-      ) {
-        paddle1Y += paddle1Speed
-      }
-      if (
-        paddle2Y + paddle2Speed > 0 &&
-        paddle2Y + paddleHeight + paddle2Speed < canvas.height
-      ) {
-        paddle2Y += paddle2Speed
-      }
-    }
-
-    function scoreGoal(playerId) {
-      ballSpeedX = 0
-      ballSpeedY = 0
-      api
-        .patch('/api/matches/local/score/', {
-          match_id: matchId,
-          player_id: playerId,
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok')
-          }
-          return response.json() // レスポンスをJSONとしてパース
-        })
-        .then(data => {
-          canStart = true
-          if (playerId === player1Id) {
-            score1 = data.players[0].match_details.score
-          } else {
-            score2 = data.players[1].match_details.score
-          }
-          if (data.match_end === true) {
-            winner = score1 > score2 ? data.players[0] : data.players[1]
-          }
-          console.log('Success:', data) // サーバーからのレスポンスデータを処理
-        })
-        .catch(error => {
-          console.error('Error:', error) // エラー処理
-        })
-      resetBall()
-    }
-
-    function moveBall() {
-      ballX += ballSpeedX
-      ballY += ballSpeedY
-
-      if (ballY + ballSize > canvas.height || ballY - ballSize < 0) {
-        ballSpeedY = -ballSpeedY
-      }
-
-      if (
-        ballX - ballSize < paddleWidth &&
-        ballY > paddle1Y &&
-        ballY < paddle1Y + paddleHeight
-      ) {
-        ballSpeedX = -ballSpeedX
-      }
-      if (
-        ballX + ballSize > canvas.width - paddleWidth &&
-        ballY >= paddle2Y &&
-        ballY <= paddle2Y + paddleHeight
-      ) {
-        ballSpeedX = -ballSpeedX
-      }
-
-      if (ballX - ballSize < 0) {
-        scoreGoal(player2Id)
-      } else if (ballX + ballSize > canvas.width) {
-        scoreGoal(player1Id)
-      }
-    }
-
-    function resetBall() {
-      ballX = canvas.width / 2
-      ballY = canvas.height / 2
-      ballSpeedX = -ballSpeedX
-    }
-
     function draw() {
-      drawRect(0, 0, canvas.width, canvas.height, '#1E1E2C')
-      drawRect(0, paddle1Y, paddleWidth, paddleHeight, 'white')
+      clearCanvas()
+      drawRect(0, 0, canvas.width, canvas.height, BACKGROUND_COLOR)
+      drawRect(0, rightPaddleY, PADDLE_WIDTH, PADDLE_HEIGHT, 'white')
       drawRect(
-        canvas.width - paddleWidth,
-        paddle2Y,
-        paddleWidth,
-        paddleHeight,
+        canvas.width - PADDLE_WIDTH,
+        leftPaddleY,
+        PADDLE_WIDTH,
+        PADDLE_HEIGHT,
         'white',
       )
       if (winner === null) {
-        drawBall(ballX, ballY, ballSize, '#FFD700')
+        drawBall(ballX, ballY, BALL_RADIUS, '#FFD700')
       }
-      // スコアを描画
       drawText(
-        `${score1}`,
-        canvas.width / 4,
-        50,
-        '48px sans-serif',
-        score1 === 10 ? 'yellow' : 'white',
-      )
-      drawText(
-        `${score2}`,
+        `${rightScore}`,
         (canvas.width / 4) * 3,
         50,
         '48px sans-serif',
-        score2 === 10 ? 'yellow' : 'white',
+        rightScore === 10 ? 'yellow' : 'white',
+      )
+      drawText(
+        `${leftScore}`,
+        canvas.width / 4,
+        50,
+        '48px sans-serif',
+        leftScore === 10 ? 'yellow' : 'white',
       )
     }
 
     function update() {
-      movePaddle()
-      moveBall()
-      draw()
-      if (winner !== null) {
-        clearInterval(intervalId)
-        drawText(
-          `${winner.player.name} wins!`,
-          canvas.width / 2,
-          canvas.height / 2,
-        )
+      if (leftScore === 11 || rightScore === 11) {
+        winner = leftScore === 11 ? leftPlayerName : rightPlayerName
+        drawText(`${winner} wins!`, canvas.width / 2, canvas.height / 2)
         setEndMatch(true)
+        clearInterval(intervalId)
+        socket.close()
+        return
       }
+      draw()
     }
 
     function keyDownHandler(e) {
       // 1P（W: 上、S: 下）と2P（↑: 上、↓: 下）のキー割り当て
-      if (e.key === 'ArrowUp') {
-        paddle2Speed = -6 // 2P（右側）
-      } else if (e.key === 'ArrowDown') {
-        paddle2Speed = 6 // 2P（右側）
-      } else if (e.key === 'w' || e.key === 'W') {
-        paddle1Speed = -6 // 1P（左側）
-      } else if (e.key === 's' || e.key === 'S') {
-        paddle1Speed = 6 // 1P（左側）
+      let message
+
+      if (e.key === 'ArrowUp' && !isRightPaddleUp) {
+        message = { right: { key: 'PaddleUpKey', action: 'push' } }
+        isRightPaddleUp = true
+      } else if (e.key === 'ArrowDown' && !isRightPaddleDown) {
+        message = { right: { key: 'PaddleDownKey', action: 'push' } }
+        isRightPaddleDown = true
+      } else if ((e.key === 'w' || e.key === 'W') && !isLeftPaddleUp) {
+        message = { left: { key: 'PaddleUpKey', action: 'push' } }
+        isLeftPaddleUp = true
+      } else if ((e.key === 's' || e.key === 'S') && !isLeftPaddleDown) {
+        message = { left: { key: 'PaddleDownKey', action: 'push' } }
+        isLeftPaddleDown = true
+      } else {
+        return
       }
+      if (socket.readyState !== WebSocket.CLOSED)
+        socket.send(JSON.stringify(message))
     }
 
     function keyUpHandler(e) {
-      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-        paddle2Speed = 0 // 2P（右側）
-      } else if (
-        e.key === 'w' ||
-        e.key === 'W' ||
-        e.key === 's' ||
-        e.key === 'S'
-      ) {
-        paddle1Speed = 0 // 1P（左側）
-      }
-    }
+      let message
 
-    function startPong(e) {
-      if (canStart === true) {
-        ballSpeedX =
-          (Math.random() * 0.5 + 0.5) * (Math.random() < 0.5 ? 1 : -1)
-        ballSpeedY = Math.random() - 0.5
-        const normalizer = Math.sqrt(ballSpeedX ** 2 + ballSpeedY ** 2)
-        ballSpeedX = (ballSpeedX * 7) / normalizer
-        ballSpeedY = (ballSpeedY * 7) / normalizer
-        console.log(ballSpeedX, ballSpeedY)
-        canStart = false
+      if (e.key === 'ArrowUp' && isRightPaddleUp) {
+        message = { right: { key: 'PaddleUpKey', action: 'release' } }
+        isRightPaddleUp = false
+      } else if (e.key === 'ArrowDown' && isRightPaddleDown) {
+        message = { right: { key: 'PaddleDownKey', action: 'release' } }
+        isRightPaddleDown = false
+      } else if ((e.key === 'w' || e.key === 'W') && isLeftPaddleUp) {
+        message = { left: { key: 'PaddleUpKey', action: 'release' } }
+        isLeftPaddleUp = false
+      } else if ((e.key === 's' || e.key === 'S') && isLeftPaddleDown) {
+        message = { left: { key: 'PaddleDownKey', action: 'release' } }
+        isLeftPaddleDown = false
+      } else {
+        return
       }
+      if (socket.readyState !== WebSocket.CLOSED)
+        socket.send(JSON.stringify(message))
     }
 
     document.addEventListener('keydown', keyDownHandler)
     document.addEventListener('keyup', keyUpHandler)
-    // document.addEventListener('click', startPong)
+
+    const url = 'ws://localhost:8080/api/ws/matches' // mokc-server用
+    // const url = 'ws://localhost/api/ws/local-tournament-match' // prod用
+    const socket = new WebSocket(url)
+    socket.addEventListener('message', event => {
+      const gameState = JSON.parse(event.data)
+      console.log(gameState)
+      ballX = gameState.ballPosition.x
+      ballY = gameState.ballPosition.y
+      rightPaddleY = gameState.right.paddlePosition
+      leftPaddleY = gameState.left.paddlePosition
+      rightScore = gameState.right.score
+      leftScore = gameState.left.score
+    })
 
     const intervalId = setInterval(update, 1000 / 60)
 
     return () => {
       clearInterval(intervalId)
+      socket.close()
       document.removeEventListener('keydown', keyDownHandler)
       document.removeEventListener('keyup', keyUpHandler)
     }
@@ -291,22 +228,22 @@ const Pong = () => {
               className: 'text-center fs-2 text-white me-3',
               style: { writingMode: 'vertical-rl' },
             },
-            player1Name,
+            leftPlayerName,
           ),
           Teact.createElement(
             'div',
             {
               className: 'position-relative',
               style: {
-                width: '600px',
-                height: '400px',
-                backgroundColor: '#1E1E2C',
+                width: `${WALL_X_LIMIT}px`,
+                height: `${WALL_Y_LIMIT}px`,
+                backgroundColor: BACKGROUND_COLOR,
               },
             },
             Teact.createElement('canvas', {
               id: 'pongCanvas',
-              width: '600',
-              height: '400',
+              width: WALL_X_LIMIT,
+              height: WALL_Y_LIMIT,
             }),
           ),
           Teact.createElement(
@@ -316,7 +253,7 @@ const Pong = () => {
               className: 'text-center fs-2 text-white ms-3',
               style: { writingMode: 'vertical-rl' },
             },
-            player2Name,
+            rightPlayerName,
           ),
         ),
       ),
