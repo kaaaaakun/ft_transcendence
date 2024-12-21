@@ -12,10 +12,10 @@ const BACKGROUND_COLOR = '#1E1E2C'
 const WALL_X_LIMIT = 500
 const WALL_Y_LIMIT = 300
 const BALL_RADIUS = 2
-const PADDLE_WIDTH = 30
+const PADDLE_HEIGHT = 30
 
 // フロントのみの定数
-const PADDLE_HEIGHT = 10
+const PADDLE_WIDTH = 10
 
 function fetchTournament(endMatch) {
   if (!endMatch) return
@@ -58,8 +58,8 @@ const Pong = () => {
     const context = canvas.getContext('2d')
 
     // バックエンドからの情報(最初は時差があるためフロントで初期値を設定)
-    let rightPaddleY = (canvas.height - PADDLE_WIDTH) / 2
-    let leftPaddleY = (canvas.height - PADDLE_WIDTH) / 2
+    let rightPaddleY = (canvas.height - PADDLE_HEIGHT) / 2
+    let leftPaddleY = (canvas.height - PADDLE_HEIGHT) / 2
     let ballX = canvas.width / 2
     let ballY = canvas.height / 2
     let rightScore = 0
@@ -97,12 +97,12 @@ const Pong = () => {
     function draw() {
       clearCanvas()
       drawRect(0, 0, canvas.width, canvas.height, BACKGROUND_COLOR)
-      drawRect(0, rightPaddleY, PADDLE_HEIGHT, PADDLE_WIDTH, 'white')
+      drawRect(0, rightPaddleY, PADDLE_WIDTH, PADDLE_HEIGHT, 'white')
       drawRect(
-        canvas.width - PADDLE_HEIGHT,
+        canvas.width - PADDLE_WIDTH,
         leftPaddleY,
-        PADDLE_HEIGHT,
         PADDLE_WIDTH,
+        PADDLE_HEIGHT,
         'white',
       )
       if (winner === null) {
