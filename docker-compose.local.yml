@@ -60,7 +60,7 @@ services:
   api:
     build:
       context: api/
-      target: development_djangoserver
+      target: deploy_asgi
     container_name: "api"
     restart: on-failure
     networks:
