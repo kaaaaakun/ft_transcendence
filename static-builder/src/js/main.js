@@ -5,6 +5,10 @@ import { Home } from '@/js/pages/Home'
 import { InputAlias } from '@/js/pages/InputAlias'
 import { Pong } from '@/js/pages/Pong'
 import { Tournament } from '@/js/pages/Tournament'
+import { Login } from '@/js/pages/Login'
+import { Register } from './pages/Register'
+import { passwordReset } from './pages/passwordReset'
+import { deleteAccount } from './pages/deleteAccount'
 
 function App() {
   return Router(
@@ -29,6 +33,22 @@ function App() {
       path: '/game',
       component: Pong,
     }),
+    Route ({
+      path: '/login',
+      component: Login,
+    }),
+    Route({
+      path: '/register',
+      component: Register,
+    }),
+    Route({
+      path: '/password-reset',
+      component: passwordReset,
+    }),
+    Route({
+      path: '/delete-account',
+      component: deleteAccount,
+    })
   )
 }
 

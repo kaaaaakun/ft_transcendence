@@ -1,5 +1,5 @@
 function setTournamentId(tournamentId) {
-  document.cookie = `tournament_id=${tournamentId}; path=/`
+  document.cookie = 'tournament_id=${tournamentId}; path=/'
 }
 
 function deleteTournamentId() {
@@ -18,6 +18,7 @@ function checkTournamentIdExists() {
 
   return false // tournament_idが存在しなければfalseを返す
 }
+
 
 export const cookie = {
   setTournamentId,
