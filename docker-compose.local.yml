@@ -36,7 +36,12 @@ services:
       timeout: 5s
       retries: 5
       start_period: 120s
-    entrypoint: ["sh", "-c", "pnpm config set store-dir /tmp/pnpm/store && pnpm install --frozen-lockfile && pnpm dev"]
+    entrypoint:
+      [
+        "sh",
+        "-c",
+        "pnpm config set store-dir /tmp/pnpm/store && pnpm install --frozen-lockfile && pnpm dev",
+      ]
 
   reverseproxy:
     container_name: "reverseproxy"
@@ -56,7 +61,6 @@ services:
       rdbms:
         condition: service_healthy
 
-
   api:
     build:
       context: api/
@@ -75,11 +79,24 @@ services:
     depends_on:
       rdbms:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-H", "Host: reverseproxy", "http://localhost:8000"]
       interval: 5s
       retries: 5
       start_period: 120s
+
+  redis:
+    container_name: "redis"
+    image: redis:latest
+    networks:
+      - net_pong
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
 
 networks:
   net_pong:
