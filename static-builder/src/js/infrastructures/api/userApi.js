@@ -28,8 +28,8 @@ function login(data) {
     })
 }
 
-function signup(data) {
-    return api.post('/api/users/signup/', data).then(response => {
+function register(data) {
+    return api.post('/api/users/register/', data).then(response => {
         if (!response.ok) {
             return response.json().then(errData => {
                 throw new Error(errData.error || 'Unknown error occurred')
@@ -61,6 +61,6 @@ function signup(data) {
 
 export const userApi = {
   login,
-  signup,
+  register,
 
 }

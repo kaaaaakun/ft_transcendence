@@ -20,7 +20,7 @@ function handleSubmit(event) {
     console.log('Sign up data:', data)
 
     userApi
-      .signup(data)
+      .register(data)
       .then(data => {
         console.log('Success:', data)
         cookie.setJWTCookie()
@@ -31,7 +31,7 @@ function handleSubmit(event) {
       })
   }
 
-  export const SignUp = () => {
+  export const Register = () => {
     const numPlayers = 2
     return BaseLayout(
       Teact.createElement(

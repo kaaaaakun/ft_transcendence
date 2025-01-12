@@ -26,7 +26,7 @@ const display_auth = () => {
   )
 }
 
-const display_signup = () => {
+const display_register = () => {
   if (localStorage.getItem('access_token')) {
     return null
   }
@@ -34,7 +34,7 @@ const display_signup = () => {
     'li',
     { className: 'nav-item' },
     Link({
-      to: '/signup',
+      to: '/register',
       className: 'nav-link text-white',
       children: ['Signup'],
     }),
@@ -95,7 +95,7 @@ export const Header = () => {
             }),
           ),
           display_auth(),
-          display_signup(),
+          display_register(),
         ),
       ),
     ),

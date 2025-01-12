@@ -7,7 +7,7 @@ import { Pong } from '@/js/pages/Pong'
 import { Tournament } from '@/js/pages/Tournament'
 import { Login } from '@/js/pages/Login'
 import { Logout } from '@/js/pages/Logout'
-import { SignUp } from './pages/SignUp'
+import { Register } from './pages/Register'
 
 function App() {
   return Router(
@@ -41,8 +41,8 @@ function App() {
       component: Logout,
     }),
     Route({
-      path: '/signup',
-      component: SignUp,
+      path: '/register',
+      component: Register,
     }),
   )
 }

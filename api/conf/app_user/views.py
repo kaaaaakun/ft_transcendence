@@ -119,7 +119,7 @@ class UserLoginView(APIView):
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class UserSignUpView(APIView):
+class UserRegisterView(APIView):
     def post(self, request, *args, **kwargs):
         try:
             # リクエストのボディをJSONとしてパース
