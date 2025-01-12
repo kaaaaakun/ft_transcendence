@@ -18,6 +18,7 @@ function handleSubmit(event) {
     players.push(value)
   })
   data.players = players
+  console.log(data)
   tournamentsApi
     .createLocalTournament(data)
     .then(data => {

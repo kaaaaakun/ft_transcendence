@@ -5,6 +5,9 @@ import { Home } from '@/js/pages/Home'
 import { InputAlias } from '@/js/pages/InputAlias'
 import { Pong } from '@/js/pages/Pong'
 import { Tournament } from '@/js/pages/Tournament'
+import { Login } from '@/js/pages/Login'
+import { Logout } from '@/js/pages/Logout'
+import { SignUp } from './pages/SignUp'
 
 function App() {
   return Router(
@@ -28,6 +31,18 @@ function App() {
     Route({
       path: '/game',
       component: Pong,
+    }),
+    Route ({
+      path: '/login',
+      component: Login,
+    }),
+    Route({
+      path: '/logout',
+      component: Logout,
+    }),
+    Route({
+      path: '/signup',
+      component: SignUp,
     }),
   )
 }

@@ -1,6 +1,45 @@
 import { Link } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import Icon from '/icon.png'
+import { Logout } from '../../pages/Logout'
+
+const display_auth = () => {
+  if (localStorage.getItem('access_token')) {
+    return Teact.createElement(
+      'li',
+      { className: 'nav-item' },
+      Link({
+        to: '/logout',
+        className: 'nav-link text-white',
+        children: ['Logout'],
+      }),
+    )
+  }
+  return Teact.createElement(
+    'li',
+    { className: 'nav-item' },
+    Link({
+      to: '/login',
+      className: 'nav-link text-white',
+      children: ['Login'],
+    }),
+  )
+}
+
+const display_signup = () => {
+  if (localStorage.getItem('access_token')) {
+    return null
+  }
+  return Teact.createElement(
+    'li',
+    { className: 'nav-item' },
+    Link({
+      to: '/signup',
+      className: 'nav-link text-white',
+      children: ['Signup'],
+    }),
+  )
+}
 
 export const Header = () => {
   return Teact.createElement(
@@ -55,6 +94,8 @@ export const Header = () => {
               children: ['Contact'],
             }),
           ),
+          display_auth(),
+          display_signup(),
         ),
       ),
     ),
