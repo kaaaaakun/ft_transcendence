@@ -85,7 +85,7 @@ class LocalSimpleScoreManager(ScoreManager):
 class TournamentScoreManager(ScoreManager):
     def __init__(self, position_matchdetail):
         self.position_matchdetail = position_matchdetail
-        self.redis_client = redis.StrictRedis(host = "dev-redis", port = 6379, db = 0)
+        self.redis_client = redis.StrictRedis(host = "redis", port = 6379, db = 0)
 
     def update_score(self, side, points):
         if side == "left":

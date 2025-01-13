@@ -14,7 +14,7 @@ from tournament.utils import ( update_tournamentplayer_win_to_await, is_tourname
     create_next_tournament_match )
 
 FRAME = 30 # フロントを見つつ調整
-END_GAME_SCORE = 3 # deploy時には11に変更
+END_GAME_SCORE = 11 # deploy時には11に変更
 
 # エラハンを完全無視、冗長さは少し無視してコーディングした
 

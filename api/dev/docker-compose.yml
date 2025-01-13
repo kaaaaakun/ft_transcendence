@@ -1,6 +1,6 @@
 # Djangoの開発環境用
 services:
-  # バックエンドのサービス
+  # バックエンドのサービス/Users/kaaaaakun_/Desktop/42tokyo/ft_transcendence/api/dev/index.html
   api:
     build:
       context: ../
@@ -48,7 +48,7 @@ services:
       test: ["CMD-SHELL", "redis-cli ping"]
       interval: 15s
       retries: 5
-    container_name: "dev-redis"
+    container_name: "redis"
 
 volumes:
   postgres_data:
