@@ -113,7 +113,7 @@ paths:
       tags:
         - user_management
       summary: ログイン
-      description: ユーザー名とパスワードを使用してログインします。
+      description: ログイン名とパスワードを使用してログインします。
       requestBody:
         required: true
         content:
@@ -139,7 +139,7 @@ paths:
       tags:
         - user_management
       summary: ユーザー登録
-      description: ユーザー名とパスワードを使用して新しいユーザーを登録します。
+      description: ログイン名とパスワードを使用して新しいユーザーを登録します。
       requestBody:
         required: true
         content:
@@ -156,9 +156,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/error_response"
 
-  /api/users/{username}/password-reset:
+  /api/users/{login_name}/password-reset:
     parameters:
-      - $ref: "#/components/parameters/username"
+      - $ref: "#/components/parameters/login_name"
     post:
       tags:
         - user_management
@@ -183,7 +183,7 @@ paths:
       tags:
         - user_management
       summary: 秘密の質問取得
-      description: ユーザー名に対応する秘密の質問を取得します。
+      description: ログイン名に対応する秘密の質問を取得します。
       responses:
         "200":
           description: 秘密の質問
@@ -198,14 +198,16 @@ paths:
               schema:
                 $ref: "#/components/schemas/error_response"
 
-  /api/users/{username}/friends:
+  /api/users/{display_name}/friends:
     parameters:
-      - $ref: "#/components/parameters/username"
+      - $ref: "#/components/parameters/display_name"
     get:
       tags:
         - user_management
       summary: フレンドリスト取得
-      description: ユーザー名に対応するフレンドリストを取得します。
+      security:
+        - bearerAuth: []
+      description: 表示名に対応するフレンドリストを取得します。
       responses:
         "200":
           description: フレンドリスト
@@ -220,15 +222,17 @@ paths:
               schema:
                 $ref: "#/components/schemas/error_response"
 
-  /api/users/{username}/friends/{friendname}:
+  /api/users/{display_name}/friends/{friend_name}:
     parameters:
-      - $ref: "#/components/parameters/username"
-      - $ref: "#/components/parameters/friendname"
+      - $ref: "#/components/parameters/display_name"
+      - $ref: "#/components/parameters/friend_name"
     post:
       tags:
         - user_management
       summary: フレンド追加
-      description: ユーザー名に対応するフレンドリストにフレンドを追加します。
+      security:
+        - bearerAuth: []
+      description: 表示名からフレンドに対してフレンドリクエスト・承認。
       responses:
         "200":
           description: フレンド追加成功
@@ -242,7 +246,9 @@ paths:
       tags:
         - user_management
       summary: フレンド削除
-      description: ユーザー名に対応するフレンドリストからフレンドを削除します。
+      security:
+        - bearerAuth: []
+      description: 表示名とフレンドのフレンド解消・申請拒否
       responses:
         "200":
           description: フレンド削除成功
@@ -253,14 +259,16 @@ paths:
               schema:
                 $ref: "#/components/schemas/error_response"
 
-  /api/users/{username}/friend_requests:
+  /api/users/{display_name}/friend_requests:
     parameters:
-      - $ref: "#/components/parameters/username"
+      - $ref: "#/components/parameters/display_name"
     get:
       tags:
         - user_management
       summary: フレンドリクエスト取得
-      description: ユーザー名に対応するフレンドリクエストを取得します。
+      security:
+        - bearerAuth: []
+      description: 表示名に対応するフレンドリクエストを取得します。
       responses:
         "200":
           description: フレンドリクエスト
@@ -275,14 +283,16 @@ paths:
               schema:
                 $ref: "#/components/schemas/error_response"
 
-  /api/users/{username}/update:
+  /api/users/{login_name}/update:
     parameters:
-      - $ref: "#/components/parameters/username"
+      - $ref: "#/components/parameters/login_name"
     patch:
       tags:
         - user_management
       summary: ユーザー情報更新
-      description: ユーザー名に対応するユーザー情報を更新します。
+      security:
+        - bearerAuth: []
+      description: ログイン名に対応するユーザー情報を更新します。
       requestBody:
         required: true
         content:
@@ -303,14 +313,16 @@ paths:
               schema:
                 $ref: "#/components/schemas/error_response"
 
-  /api/users/{username}/avatar:
+  /api/users/{login_name}/avatar:
     parameters:
-      - $ref: "#/components/parameters/username"
+      - $ref: "#/components/parameters/login_name"
     post:
       tags:
         - user_management
       summary: アバター更新
-      description: ユーザー名に対応するアバターを更新します。
+      security:
+        - bearerAuth: []
+      description: ログイン名に対応するアバターを更新します。
       requestBody:
         required: true
         content:
@@ -331,28 +343,16 @@ paths:
               schema:
                 $ref: "#/components/schemas/error_response"
 
-  /api/users/{username}:
+  /api/users/{display_name}:
     parameters:
-      - $ref: "#/components/parameters/username"
-    delete:
-      tags:
-        - user_management
-      summary: ユーザー削除
-      description: ユーザー名に対応するユーザーを削除します。
-      responses:
-        "200":
-          description: 削除成功
-        default:
-          description: エラーレスポンスまたその他のレスポンス
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/error_response"
+      - $ref: "#/components/parameters/display_name"
     get:
       tags:
         - user_management
       summary: ユーザー情報取得
-      description: ユーザー名に対応するユーザー情報を取得します。
+      security:
+        - bearerAuth: []
+      description: 表示名に対応するユーザー情報を取得します。
       responses:
         "200":
           description: ユーザー情報
@@ -366,23 +366,53 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/error_response"
+  /api/users/{login_name}:
+    delete:
+      tags:
+        - user_management
+      summary: ユーザー削除
+      security:
+        - bearerAuth: []
+      description: ログイン名に対応するユーザーを削除します。
+      responses:
+        "200":
+          description: 削除成功
+        default:
+          description: エラーレスポンスまたその他のレスポンス
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
 
 components:
   parameters:
-    username:
-      name: username
+    login_name:
+      name: login_name
       in: path
       required: true
-      description: ユーザーの名前
+      description: ログイン名
       schema:
         type: string
-    friendname:
-      name: friendname
+    display_name:
+      name: display_name
       in: path
       required: true
-      description: フレンドの名前
+      description: 表示名
       schema:
         type: string
+    friend_name:
+      name: friend_name
+      in: path
+      required: true
+      description: フレンドの表示名
+      schema:
+        type: string
+  
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 
   schemas:
     tournament_request:
@@ -497,15 +527,15 @@ components:
     user_login_request:
       type: object
       properties:
-        username:
+        login_name:
           type: string
         password:
           type: string
       required:
-        - username
+        - login_name
         - password
       example:
-        username: "user1"
+        login_name: "user1"
         password: "password1"
 
     user_login_response:
@@ -521,7 +551,9 @@ components:
     user_register_request:
       type: object
       properties:
-        username:
+        login_name:
+          type: string
+        display_name:
           type: string
         password:
           type: string
@@ -532,13 +564,15 @@ components:
         secret_answer:
           type: string
       required:
-        - username
+        - login_name
+        - display_name
         - password
         - password_confirmation
         - secret_question
         - secret_answer
       example:
-        username: "user1"
+        login_name: "user1"
+        display_name: "ユーザー1"
         password: "password1"
         password_confirmation: "password1"
         secret_question: "母親の旧姓は？"
@@ -632,29 +666,21 @@ components:
     user_update_request:
       type: object
       properties:
-        username:
-          type: string
         display_name:
           type: string
       anyOf: # 更新するフィールドを指定
-        - required: ["username"]
         - required: ["display_name"]
       example:
-        username: "user1"
         display_name: "ユーザー1"
 
     user_update_response:
       type: object
       properties:
-        username:
-          type: string
         display_name:
           type: string
       anyOf: # 更新されたフィールドのみ返却
-        - required: ["username"]
         - required: ["display_name"]
       example:
-        username: "user1"
         display_name: "ユーザー1"
 
     user_avatar_request:
@@ -681,7 +707,7 @@ components:
     user_response:
       type: object
       properties:
-        username:
+        login_name:
           type: string
         display_name:
           type: string
@@ -761,13 +787,12 @@ components:
             - game_records
             - statistics
       required:
-        - username
         - display_name
         - avatar_path
         - num_of_friends
         - performance
       example:
-        username: "user1"
+        login_name: "user1"
         display_name: "ユーザー1"
         avatar_path: "avatar1.jpg"
         num_of_friends: 3
@@ -812,7 +837,7 @@ components:
         - errors
       example:
         errors:
-          - field: "username"
-            message: "ユーザー名が不正です。"
+          - field: "login_name"
+            message: "ログイン名が不正です。"
           - field: "password"
             message: "パスワードが不正です。"
