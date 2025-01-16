@@ -97,10 +97,16 @@ const Pong = () => {
     function draw() {
       clearCanvas();
       drawRect(0, 0, canvas.width, canvas.height, BACKGROUND_COLOR);
-      drawRect(0, rightPaddleY, PADDLE_WIDTH, PADDLE_HEIGHT, "white");
       drawRect(
         canvas.width - PADDLE_WIDTH,
-        leftPaddleY,
+        rightPaddleY - PADDLE_HEIGHT / 2,
+        PADDLE_WIDTH,
+        PADDLE_HEIGHT,
+        "white"
+      );
+      drawRect(
+        0,
+        leftPaddleY - PADDLE_HEIGHT / 2,
         PADDLE_WIDTH,
         PADDLE_HEIGHT,
         "white"
@@ -110,14 +116,14 @@ const Pong = () => {
       }
       drawText(
         `${rightScore}`,
-        (canvas.width / 4) * 3,
+        canvas.width / 4,
         50,
         "48px sans-serif",
         rightScore === 10 ? "yellow" : "white"
       );
       drawText(
         `${leftScore}`,
-        canvas.width / 4,
+        (canvas.width / 4) * 3,
         50,
         "48px sans-serif",
         leftScore === 10 ? "yellow" : "white"
@@ -126,7 +132,7 @@ const Pong = () => {
 
     function update() {
       if (leftScore === 11 || rightScore === 11) {
-        winner = leftScore === 11 ? leftPlayerName : rightPlayerName;
+        winner = leftScore === 11 ? rightPlayerName : leftPlayerName;
         drawText(`${winner} wins!`, canvas.width / 2, canvas.height / 2);
         setEndMatch(true);
         clearInterval(intervalId);
@@ -185,8 +191,8 @@ const Pong = () => {
     document.addEventListener("keyup", keyUpHandler);
 
     // const url = 'ws://localhost:8080/api/ws/matches' // mokc-server用
-    const url = "ws://localhost:80/api/ws/local-simple-match/"; //memo
-    // const url = 'ws://localhost:8000/api/ws/local-tournament-match/'
+    //const url = "ws://localhost:80/api/ws/local-simple-match/"; //memo
+    const url = "ws://localhost:80/api/ws/local-tournament-match/";
     const socket = new WebSocket(url);
     socket.addEventListener("message", (event) => {
       const gameState = JSON.parse(event.data);

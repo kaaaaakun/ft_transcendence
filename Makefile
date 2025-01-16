@@ -20,7 +20,7 @@ build:
 	$(DOCKER_COMPOSE) build --no-cache
 
 up: cert
-	$(DOCKER_COMPOSE) up #-d
+	$(DOCKER_COMPOSE) up -d
 
 fdown:
 	$(DOCKER_COMPOSE) down -v
