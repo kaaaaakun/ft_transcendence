@@ -275,7 +275,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/friend_requests_response"
+                $ref: "#/components/schemas/friends_response"
         default:
           description: エラーレスポンスまたその他のレスポンス
           content:
@@ -367,6 +367,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/error_response"
   /api/users/{login_name}:
+    parameters:
+      - $ref: "#/components/parameters/login_name"
     delete:
       tags:
         - user_management
@@ -633,35 +635,6 @@ components:
             is_online: false
           - friend_name: "user4"
             is_online: true
-
-    friend_requests_response:
-      type: object
-      properties:
-        friend_requests:
-          type: array
-          items:
-            type: object
-            properties:
-              friend_name:
-                type: string
-                description: "友達のユーザー名"
-              request_date:
-                type: string
-                format: date-time
-                description: "リクエストの日付と時刻"
-            required:
-              - friend_name
-              - request_date
-      required:
-        - friend_requests
-      example:
-        friend_requests:
-          - friend_name: "user2"
-            request_date: "2021-01-01T12:00:00Z"
-          - friend_name: "user3"
-            request_date: "2021-01-02T12:00:00Z"
-          - friend_name: "user4"
-            request_date: "2021-01-03T12:00:00Z"
     
     user_update_request:
       type: object
