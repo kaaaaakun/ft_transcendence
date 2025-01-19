@@ -56,8 +56,8 @@ function handleSubmit(event) {
                 Teact.createElement('input', {
                   type: 'text',
                   className: 'form-control',
-                  placeholder: `Login name`,
-                  name: `login_name`,
+                  placeholder: 'Login name',
+                  name: 'login_name',
                 }),
                 Teact.createElement(
                   'label',
@@ -68,8 +68,8 @@ function handleSubmit(event) {
                 Teact.createElement('input', {
                   type: 'text',
                   className: 'form-control',
-                  placeholder: `Password`,
-                  name: `password`,
+                  placeholder: 'Password',
+                  name: 'password',
                 }),
                 Teact.createElement(
                   'label',
@@ -79,8 +79,8 @@ function handleSubmit(event) {
                 Teact.createElement('input', {
                   type: 'text',
                   className: 'form-control',
-                  placeholder: `display name`,
-                  name: `display_name`,
+                  placeholder: 'display name',
+                  name: 'display_name',
                 }),
                 Teact.createElement(
                   'label',
@@ -90,8 +90,8 @@ function handleSubmit(event) {
                 Teact.createElement('input', {
                   type: 'text',
                   className: 'form-control',
-                  placeholder: `secret question`,
-                  name: `secret_question`,
+                  placeholder: 'secret question',
+                  name: 'secret_question',
                 }),
                 Teact.createElement(
                   'label',
@@ -101,8 +101,8 @@ function handleSubmit(event) {
                 Teact.createElement('input', {
                   type: 'text',
                   className: 'form-control',
-                  placeholder: `answer to the question`,
-                  name: `secret_answer`,
+                  placeholder: 'answer to the question',
+                  name: 'secret_answer',
                 }),
             )
           }),

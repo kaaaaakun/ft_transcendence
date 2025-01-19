@@ -1,9 +1,8 @@
 import { Link } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import Icon from '/icon.png'
-import { Logout } from '../../pages/Logout'
 
-const display_auth = () => {
+const displayAuth = () => {
   if (localStorage.getItem('access_token')) {
     return Teact.createElement(
       'li',
@@ -26,7 +25,7 @@ const display_auth = () => {
   )
 }
 
-const display_register = () => {
+const displayRegister = () => {
   if (localStorage.getItem('access_token')) {
     return null
   }
@@ -94,8 +93,8 @@ export const Header = () => {
               children: ['Contact'],
             }),
           ),
-          display_auth(),
-          display_register(),
+          displayAuth(),
+          displayRegister(),
         ),
       ),
     ),

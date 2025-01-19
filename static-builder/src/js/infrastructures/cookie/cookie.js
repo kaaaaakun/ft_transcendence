@@ -1,5 +1,5 @@
 function setTournamentId(tournamentId) {
-  document.cookie = `tournament_id=${tournamentId}; path=/`
+  document.cookie = 'tournament_id=${tournamentId}; path=/'
 }
 
 function deleteTournamentId() {
@@ -19,11 +19,11 @@ function checkTournamentIdExists() {
   return false // tournament_idが存在しなければfalseを返す
 }
 
-function setJWTCookie() {
-  document.cookie = `jwt=jwt; path=/`
+function setJwtCookie() {
+  document.cookie = 'jwt=jwt; path=/'
 }
 
-function deleteJWTCookie() {
+function deleteJwtCookie() {
   document.cookie = 'jwt=; max-age=0; path=/'
 }
 
@@ -32,6 +32,6 @@ export const cookie = {
   setTournamentId,
   deleteTournamentId,
   checkTournamentIdExists,
-  setJWTCookie,
-  deleteJWTCookie,
+  setJwtCookie,
+  deleteJwtCookie,
 }

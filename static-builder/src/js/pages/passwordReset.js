@@ -1,11 +1,10 @@
 import { DefaultButton } from '@/js/components/ui/button'
-import { cookie } from '@/js/infrastructures/cookie/cookie'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import { userApi } from '@/js/infrastructures/api/userApi'
 
-let secret_question = null;
+let secretQuestion = null;
 function handleSubmit(event) {
     const navigate = useNavigate()
     event.preventDefault() // フォームのデフォルトの送信を防ぐ（ページリロード防止）
@@ -17,7 +16,6 @@ function handleSubmit(event) {
     formData.forEach((value, key) => {
       data[key] = value
     })
-    console.log(data)
     if (data.login_name && data.secret_answer && data.new_password) {
       userApi
       .passwordReset(data)
@@ -33,7 +31,7 @@ function handleSubmit(event) {
       .getsecretQuestion(data)
       .then(data => {
         console.log('Success:', data)
-        secret_question = data.secret_question
+        secretQuestion = data.secret_question
         navigate( '/password-reset' , { data })
       })
       .catch(error => {
@@ -45,19 +43,19 @@ function handleSubmit(event) {
 
 
 function displaySecretQuestion() {
-    if (secret_question) {
+    if (secretQuestion) {
       return Teact.createElement(
           'p',
           {
             className: 'mt-4 text-white bg-danger text-center font-weight-bold p-3 rounded'
           },
-          `秘密の質問: ${secret_question}`
+          `秘密の質問: ${secretQuestion}`
         )
     }
   }
 
 function resetPasswordInfo() {
-    if (secret_question) {
+    if (secretQuestion) {
     return Teact.createElement(
         'div',
         { className: '' },

@@ -1,5 +1,4 @@
 import { DefaultButton } from '@/js/components/ui/button'
-import { cookie } from '@/js/infrastructures/cookie/cookie'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
@@ -60,8 +59,8 @@ function handleSubmit(event) {
                 Teact.createElement('input', {
                   type: 'text',
                   className: 'form-control',
-                  placeholder: `Login name`,
-                  name: `login_name`,
+                  placeholder: 'Login name',
+                  name: 'login_name',
                 }),
                 Teact.createElement(
                   'label',
@@ -71,8 +70,8 @@ function handleSubmit(event) {
                 Teact.createElement('input', {
                   type: 'text',
                   className: 'form-control',
-                  placeholder: `Password`,
-                  name: `password`,
+                  placeholder: 'Password',
+                  name: 'password',
                 }),
 
             )

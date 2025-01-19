@@ -1,6 +1,4 @@
-import { DefaultButton } from '@/js/components/ui/button'
-import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
-import { cookie } from '@/js/infrastructures/cookie/cookie'
+
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
