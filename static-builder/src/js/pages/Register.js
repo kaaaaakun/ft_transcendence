@@ -79,7 +79,7 @@ function handleSubmit(event) {
                 Teact.createElement('input', {
                   type: 'text',
                   className: 'form-control',
-                  placeholder: 'display name',
+                  placeholder: 'Display name',
                   name: 'display_name',
                 }),
                 Teact.createElement(
@@ -90,7 +90,7 @@ function handleSubmit(event) {
                 Teact.createElement('input', {
                   type: 'text',
                   className: 'form-control',
-                  placeholder: 'secret question',
+                  placeholder: 'Secret question',
                   name: 'secret_question',
                 }),
                 Teact.createElement(
@@ -101,7 +101,7 @@ function handleSubmit(event) {
                 Teact.createElement('input', {
                   type: 'text',
                   className: 'form-control',
-                  placeholder: 'answer to the question',
+                  placeholder: 'Answer to the question',
                   name: 'secret_answer',
                 }),
             )
