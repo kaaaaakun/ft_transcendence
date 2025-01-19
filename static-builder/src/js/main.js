@@ -8,6 +8,7 @@ import { Tournament } from '@/js/pages/Tournament'
 import { Login } from '@/js/pages/Login'
 import { Logout } from '@/js/pages/Logout'
 import { Register } from './pages/Register'
+import { passwordReset } from './pages/passwordReset'
 
 function App() {
   return Router(
@@ -43,6 +44,10 @@ function App() {
     Route({
       path: '/register',
       component: Register,
+    }),
+    Route({
+      path: '/password-reset',
+      component: passwordReset,
     }),
   )
 }

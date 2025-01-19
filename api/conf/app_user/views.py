@@ -18,64 +18,6 @@ from rest_framework import status
 from rest_framework.views import APIView
 
 
-
-# # start: ユースケースでは本来必要ないが、データの確認のために追加
-# @method_decorator(admin_only, name = 'dispatch')
-# class TournamentViewSet(viewsets.ModelViewSet):
-#     queryset = Tournament.objects.all()
-#     serializer_class = TournamentSerializer
-
-# @method_decorator(admin_only, name = 'dispatch')
-# class TournamentPlayerViewSet(viewsets.ModelViewSet):
-#     queryset = TournamentPlayer.objects.all()
-#     serializer_class = TournamentPlayerSerializer
-# # :end
-
-# class LocalTournamentView(APIView):
-#     def get(self, request):
-#         cookie_tournament_id = request.COOKIES.get('tournament_id')
-#         # Is there a match with the start status?
-#         if cookie_tournament_id is None:
-#             return Response({"error": "tournament_id is required."}, status = status.HTTP_400_BAD_REQUEST)
-#         try:
-#             tournament = Tournament.objects.get(id=cookie_tournament_id)
-#             response_data = create_tournament_dataset(get_tournamentplayer_with_related_data(tournament.id))
-#             return Response(response_data, status=status.HTTP_200_OK)
-
-#         except Tournament.DoesNotExist:
-#             return Response({"error": "Tournament not found."}, status = status.HTTP_404_NOT_FOUND)
-#         except DatabaseError as e:
-#             return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
-#         except Exception as e:
-#             return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-#     def post(self, request):
-#         player_names = request.data.get('players', [])
-#         if not player_names:
-#             return Response("player names are required.", status = status.HTTP_400_BAD_REQUEST)
-#         # プレイヤー名をシャッフル
-#         random.shuffle(player_names)
-
-#         try:
-#             with transaction.atomic():
-#                 # PlayerをDBに登録
-#                 players = register_players(validate_players(player_names))
-#                 # Tournament, TournamentPlayerをDBに登録
-#                 tournament, tournament_players = create_tournament(players)
-#                 # Match, MatchDetailをDBに登録
-#                 create_next_tournament_match(tournament.id)
-
-#             response_data = create_tournament_dataset(get_tournamentplayer_with_related_data(tournament.id))
-#             return Response(response_data, status = status.HTTP_201_CREATED)
-
-#         except ValidationError as e:
-#             return Response(e.detail, status = status.HTTP_400_BAD_REQUEST)
-#         except DatabaseError as e:
-#             return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
-#         except Exception as e:
-#             return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 def ft_authenticate(login_name=None, password=None):
     try:
         user = User.objects.get(login_name=login_name)
@@ -144,7 +86,7 @@ class UserRegisterView(APIView):
                 password=make_password(password=password, salt='ft_transcendence'),
                 display_name=display_name,
                 secret_question=secret_question,
-                secret_answer=make_password(secret_answer),
+                secret_answer=make_password(secret_answer, salt='ft_transcendence'),
             )
 
             # JWTのアクセストークンとリフレッシュトークンを生成
@@ -161,4 +103,66 @@ class UserRegisterView(APIView):
             return JsonResponse({
                 'error': str(e),
                 'Your request': str(request.body)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class UserGetSecretQuestionView(APIView):
+    def post(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body)
+            login_name = data.get('login_name')
+
+            if not login_name:
+                return JsonResponse({
+                    'error': 'Login name is required.'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            user = User.objects.get(login_name=login_name)
+
+            return JsonResponse({
+                'secret_question': user.secret_question
+            }, status=status.HTTP_200_OK)
+
+        except User.DoesNotExist:
+            return JsonResponse({
+                'error': 'User not found.'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            return JsonResponse({
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class UserPasswordResetView(APIView):
+    def post(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body)
+            login_name = data.get('login_name')
+            secret_answer = data.get('secret_answer')
+            new_password = data.get('new_password')
+
+            if not login_name or not secret_answer or not new_password:
+                return JsonResponse({
+                    'error': 'Login name, secret answer and new password are required.'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            user = User.objects.get(login_name=login_name)
+
+            if user.secret_answer == make_password(secret_answer, salt='ft_transcendence'):
+                user.password = make_password(password=new_password, salt='ft_transcendence')
+                user.save()
+                return JsonResponse({
+                    'message': 'Password reset successful.'
+                }, status=status.HTTP_200_OK)
+            else:
+                return JsonResponse({
+                    'error': 'Incorrect secret answer.'
+                }, status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            return JsonResponse({
+                'error': 'User not found.'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return JsonResponse({
+                'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

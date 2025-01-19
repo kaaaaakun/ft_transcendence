@@ -7,7 +7,7 @@ class User(models.Model):
     display_name = models.CharField(max_length=20)
     secret_question = models.CharField(max_length=255)
     secret_answer = models.CharField(max_length=255)
-
+    deleted_at = models.DateTimeField(default=None, null=True)
 
 
     class Meta:

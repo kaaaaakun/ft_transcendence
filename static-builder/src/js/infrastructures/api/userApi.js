@@ -44,23 +44,32 @@ function register(data) {
     })
 }
 
-// function createLocalTournament(data) {
-//   // TODO statusコードによる処理など
-//   return api.post('/api/tournaments/local/', data).then(response => {
-//     if (!response.ok) {
-//       return response.json().then(errData => {
-//         throw new Error(errData.error || 'Unknown error occurred')
-//       })
-//     }
-//     return response.json()
-//   })
-// }
+function passwordReset(data) {
+    return api.post('/api/users/password_reset/', data).then(response => {
+        if (!response.ok) {
+            return response.json().then(errData => {
+                throw new Error(errData.error || 'Unknown error occurred')
+            })
+        }
+        return response.json()
+    })
+}
 
-
+function getsecretQuestion(data) {
+    return api.post('/api/users/get_secret_question/', data).then(response => {
+        if (!response.ok) {
+            return response.json().then(errData => {
+                throw new Error(errData.error || 'Unknown error occurred')
+            })
+        }
+        return response.json()
+    })
+}
 
 
 export const userApi = {
   login,
   register,
-
+  passwordReset,
+  getsecretQuestion
 }

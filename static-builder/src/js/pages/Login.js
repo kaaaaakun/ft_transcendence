@@ -47,33 +47,46 @@ function handleSubmit(event) {
             className: 'text-center mt-3 d-grid gap-2 col-3 mx-auto',
           },
           ...Array.from({ length: numPlayers / 2 }, (_, i) => {
-            const className = 'form-control mt-2'
+            const className = 'form-label mt-2 text-start text-white phont-weight-bold'
             return Teact.createElement(
               'div',
               { className: 'row form-group', key: i },
-              Teact.createElement(
-                'div',
-                { className: 'col-6' },
+
+                Teact.createElement(
+                  'label',
+                  { htmlFor: 'login_name', className: className },
+                  'Login Name'
+                ),
                 Teact.createElement('input', {
                   type: 'text',
-                  className: className,
+                  className: 'form-control',
                   placeholder: `Login name`,
                   name: `login_name`,
                 }),
-              ),
-              Teact.createElement(
-                'div',
-                { className: 'col-6' },
+                Teact.createElement(
+                  'label',
+                  { htmlFor: 'password', className: className },
+                  'Password'
+                ),
                 Teact.createElement('input', {
                   type: 'text',
-                  className: className,
+                  className: 'form-control',
                   placeholder: `Password`,
                   name: `password`,
                 }),
-              ),
+
             )
           }),
           DefaultButton({ type: 'submit', text: 'submit' }),
+          Teact.createElement(
+            'div',
+            { className: 'mt-3' },
+            Teact.createElement(
+              'a',
+              { href: '/password-reset', className: 'text-white' },
+              'Forgot password?'
+            )
+          ),
         ),
       ),
     )
