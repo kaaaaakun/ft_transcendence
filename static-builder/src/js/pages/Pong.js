@@ -11,11 +11,11 @@ import { Teact } from "@/js/libs/teact";
 const BACKGROUND_COLOR = "#1E1E2C";
 const WALL_X_LIMIT = 500;
 const WALL_Y_LIMIT = 300;
-const BALL_RADIUS = 2;
+const BALL_RADIUS = 8;
 const PADDLE_HEIGHT = 30;
 
 // フロントのみの定数
-const PADDLE_WIDTH = 10;
+const PADDLE_WIDTH = 5;
 
 function fetchTournament(endMatch) {
   if (!endMatch) return;
@@ -119,18 +119,19 @@ const Pong = () => {
         canvas.width / 4,
         50,
         "48px sans-serif",
-        rightScore === 10 ? "yellow" : "white"
+        rightScore >= 10 ? "yellow" : "white"
       );
       drawText(
         `${leftScore}`,
         (canvas.width / 4) * 3,
         50,
         "48px sans-serif",
-        leftScore === 10 ? "yellow" : "white"
+        leftScore >= 10 ? "yellow" : "white"
       );
     }
 
     function update() {
+      draw();
       if (leftScore === 11 || rightScore === 11) {
         winner = leftScore === 11 ? rightPlayerName : leftPlayerName;
         drawText(`${winner} wins!`, canvas.width / 2, canvas.height / 2);
@@ -139,7 +140,6 @@ const Pong = () => {
         // socket.close()
         return;
       }
-      draw();
     }
 
     function keyDownHandler(e) {

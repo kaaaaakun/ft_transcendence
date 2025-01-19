@@ -21,6 +21,8 @@ services:
       start_period: 120s
     networks:
       - net_pong
+    ports:
+      - "5432:5432"
 
   static-builder:
     build:
@@ -101,6 +103,8 @@ services:
       interval: 1s
       timeout: 3s
       retries: 5
+    ports:
+      - "6379:6379"
 
 networks:
   net_pong:
