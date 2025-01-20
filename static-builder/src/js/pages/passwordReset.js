@@ -66,6 +66,7 @@ function resetPasswordInfo() {
         ),
         Teact.createElement('input', {
           type: 'text',
+          id: 'secret_answer',
           className: 'form-control',
           placeholder: 'Your answer',
           name: 'secret_answer',
@@ -77,6 +78,7 @@ function resetPasswordInfo() {
         ),
         Teact.createElement('input', {
           type: 'text',
+          id: 'new_password',
           className: 'form-control',
           placeholder: 'New password',
           name: 'new_password',
@@ -111,6 +113,7 @@ function resetPasswordInfo() {
               ),
               Teact.createElement('input', {
                 type: 'text',
+                id: 'login_name',
                 className: 'form-control',
                 placeholder: 'Login name',
                 name: 'login_name',

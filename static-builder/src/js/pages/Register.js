@@ -55,6 +55,7 @@ function handleSubmit(event) {
                 ),
                 Teact.createElement('input', {
                   type: 'text',
+                  id: 'login_name',
                   className: 'form-control',
                   placeholder: 'Login name',
                   name: 'login_name',
@@ -67,17 +68,19 @@ function handleSubmit(event) {
                 { className: 'col-6' },
                 Teact.createElement('input', {
                   type: 'text',
+                  id: 'password',
                   className: 'form-control',
                   placeholder: 'Password',
                   name: 'password',
                 }),
                 Teact.createElement(
                   'label',
-                  { htmlFor: 'display name', className: className },
+                  { htmlFor: 'display_name', className: className },
                   'Display Name'
                 ),
                 Teact.createElement('input', {
                   type: 'text',
+                  id: 'display_name',
                   className: 'form-control',
                   placeholder: 'Display name',
                   name: 'display_name',
@@ -89,6 +92,7 @@ function handleSubmit(event) {
                 ),
                 Teact.createElement('input', {
                   type: 'text',
+                  id: 'secret_question',
                   className: 'form-control',
                   placeholder: 'Secret question',
                   name: 'secret_question',
@@ -100,6 +104,7 @@ function handleSubmit(event) {
                 ),
                 Teact.createElement('input', {
                   type: 'text',
+                  id: 'secret_answer',
                   className: 'form-control',
                   placeholder: 'Answer to the question',
                   name: 'secret_answer',
@@ -107,6 +112,15 @@ function handleSubmit(event) {
             )
           }),
           DefaultButton({ type: 'submit', text: 'submit' }),
+          Teact.createElement(
+            'div',
+            { className: 'mt-3' },
+            Teact.createElement(
+              'a',
+              { href: '/login', className: 'text-white' },
+              'Already have an account?'
+            )
+          ),
         ),
       ),
     )

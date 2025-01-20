@@ -24,7 +24,7 @@ def ft_authenticate(login_name=None, password=None):
     except User.DoesNotExist:
         return None
 
-    if user.password == make_password(password=password, salt="ft_transcendence"):
+    if user.password_hash == make_password(password=password, salt="ft_transcendence"):
         return user
     else:
         return None
@@ -83,10 +83,10 @@ class UserRegisterView(APIView):
             # ユーザーを作成
             user = User.objects.create(
                 login_name=login_name,
-                password=make_password(password=password, salt='ft_transcendence'),
+                password_hash=make_password(password=password, salt='ft_transcendence'),
                 display_name=display_name,
                 secret_question=secret_question,
-                secret_answer=make_password(secret_answer, salt='ft_transcendence'),
+                secret_answer_hash=make_password(secret_answer, salt='ft_transcendence'),
             )
 
             # JWTのアクセストークンとリフレッシュトークンを生成
@@ -148,8 +148,8 @@ class UserPasswordResetView(APIView):
 
             user = User.objects.get(login_name=login_name)
 
-            if user.secret_answer == make_password(secret_answer, salt='ft_transcendence'):
-                user.password = make_password(password=new_password, salt='ft_transcendence')
+            if user.secret_answer_hash == make_password(secret_answer, salt='ft_transcendence'):
+                user.password_hash = make_password(password=new_password, salt='ft_transcendence')
                 user.save()
                 return JsonResponse({
                     'message': 'Password reset successful.'

@@ -58,6 +58,7 @@ function handleSubmit(event) {
                 ),
                 Teact.createElement('input', {
                   type: 'text',
+                  id: 'login_name',
                   className: 'form-control',
                   placeholder: 'Login name',
                   name: 'login_name',
@@ -69,6 +70,7 @@ function handleSubmit(event) {
                 ),
                 Teact.createElement('input', {
                   type: 'text',
+                  id: 'password',
                   className: 'form-control',
                   placeholder: 'Password',
                   name: 'password',
