@@ -107,6 +107,15 @@ function handleSubmit(event) {
             )
           }),
           DefaultButton({ type: 'submit', text: 'submit' }),
+          Teact.createElement(
+            'div',
+            { className: 'mt-3' },
+            Teact.createElement(
+              'a',
+              { href: '/login', className: 'text-white' },
+              'Already have an account?'
+            )
+          ),
         ),
       ),
     )
