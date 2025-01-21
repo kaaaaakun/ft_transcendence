@@ -185,22 +185,6 @@ const Pong = () => {
     const keyDownHandler = e => handleKeyEvent(e, true)
     const keyUpHandler = e => handleKeyEvent(e, false)
 
-    // function keyDownHandler(e) {
-    //   const message = handleKeyPush(e.key, true)
-    //   console.log(message)
-    //   if (message && socket.readyState !== WebSocket.CLOSED) {
-    //     socket.send(JSON.stringify(message))
-    //   }
-    // }
-
-    // function keyUpHandler(e) {
-    //   const message = handleKeyPush(e.key, false);
-    //   console.log(message);
-    //   if (message && socket.readyState !== WebSocket.CLOSED) {
-    //     socket.send(JSON.stringify(message));
-    //   }
-    // }
-
     document.addEventListener('keydown', keyDownHandler)
     document.addEventListener('keyup', keyUpHandler)
 
