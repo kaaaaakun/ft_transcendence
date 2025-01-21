@@ -1,6 +1,6 @@
 # Djangoの開発環境用
 services:
-  # バックエンドのサービス/Users/kaaaaakun_/Desktop/42tokyo/ft_transcendence/api/dev/index.html
+  # バックエンドのサービス
   api:
     build:
       context: ../

@@ -26,8 +26,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'default_secret_key-for-dev')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-# 一時的に変更ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'ft_transcendence.42.com']
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'ft_transcendence.42.com']
 
 
 # Application definition
