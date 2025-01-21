@@ -24,6 +24,6 @@ WORKDIR /usr/src/vite
 COPY ./ ./
 
 RUN --mount=type=cache,target=/root/.pnpm-store \
-    pnpm install #--frozen-lockfile
+    pnpm install --frozen-lockfile
 
 RUN pnpm build
