@@ -109,12 +109,12 @@ class LocalTournamentMatchConsumer(LocalBaseMatchConsumer):
             self.sorted_matchedetails[1].score = self.game_manager.score_manager.get_score("right")
             self.sorted_matchedetails[0].save()
             self.sorted_matchedetails[1].save()
-            self.game_manager.score_manager.delete_score()
             # 勝者の判定
             if self.game_manager.score_manager.get_score("left") == END_GAME_SCORE:
                 winner_id = self.sorted_matchedetails[0].player_id
             else:
                 winner_id = self.sorted_matchedetails[1].player_id
+            self.game_manager.score_manager.delete_score()
             # 関連するRDBの更新処理
             update_when_match_end(self.match_id, winner_id, self.tournament_id)
             # トーナメントラウンドが終了した時の処理
