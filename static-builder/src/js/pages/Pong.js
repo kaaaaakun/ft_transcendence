@@ -124,6 +124,7 @@ const Pong = () => {
     }
 
     function update() {
+      console.log('leftPaddleY', leftPaddleY)
       draw()
       if (leftScore === 11 || rightScore === 11) {
         winner = leftScore === 11 ? rightPlayerName : leftPlayerName
@@ -175,21 +176,31 @@ const Pong = () => {
       return null
     }
 
-    function keyDownHandler(e) {
-      const message = handleKeyPush(e.key, true)
-      console.log(message)
-      if (message && socket.readyState !== WebSocket.CLOSED) {
+    function handleKeyEvent(e, isPushed) {
+      const message = handleKeyPush(e.key, isPushed)
+      if (message && socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify(message))
       }
     }
 
-    function keyUpHandler(e) {
-      const message = handleKeyPush(e.key, false)
-      console.log(message)
-      if (message && socket.readyState !== WebSocket.CLOSED) {
-        socket.send(JSON.stringify(message))
-      }
-    }
+    const keyDownHandler = e => handleKeyEvent(e, true)
+    const keyUpHandler = e => handleKeyEvent(e, false)
+
+    // function keyDownHandler(e) {
+    //   const message = handleKeyPush(e.key, true)
+    //   console.log(message)
+    //   if (message && socket.readyState !== WebSocket.CLOSED) {
+    //     socket.send(JSON.stringify(message))
+    //   }
+    // }
+
+    // function keyUpHandler(e) {
+    //   const message = handleKeyPush(e.key, false);
+    //   console.log(message);
+    //   if (message && socket.readyState !== WebSocket.CLOSED) {
+    //     socket.send(JSON.stringify(message));
+    //   }
+    // }
 
     document.addEventListener('keydown', keyDownHandler)
     document.addEventListener('keyup', keyUpHandler)
@@ -198,7 +209,9 @@ const Pong = () => {
     //const url = "ws://localhost:80/api/ws/local-simple-match/"; //memo
     const url = 'ws://localhost:80/api/ws/local-tournament-match/'
     const socket = new WebSocket(url)
+    console.log('socket', socket)
     socket.addEventListener('message', event => {
+      console.log('event', event)
       const gameState = JSON.parse(event.data)
       ballX = gameState.ballPosition.x
       ballY = gameState.ballPosition.y
