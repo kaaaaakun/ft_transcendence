@@ -124,7 +124,6 @@ const Pong = () => {
     }
 
     function update() {
-      console.log('leftPaddleY', leftPaddleY)
       draw()
       if (leftScore === 11 || rightScore === 11) {
         winner = leftScore === 11 ? rightPlayerName : leftPlayerName
@@ -211,8 +210,8 @@ const Pong = () => {
     const socket = new WebSocket(url)
     console.log('socket', socket)
     socket.addEventListener('message', event => {
-      console.log('event', event)
       const gameState = JSON.parse(event.data)
+      console.log(gameState)
       ballX = gameState.ballPosition.x
       ballY = gameState.ballPosition.y
       rightPaddleY = gameState.right.paddlePosition

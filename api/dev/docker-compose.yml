@@ -48,7 +48,7 @@ services:
       test: ["CMD-SHELL", "redis-cli ping"]
       interval: 15s
       retries: 5
-    container_name: "redis"
+    container_name: "in_memory_db"
 
 volumes:
   postgres_data:
