@@ -28,6 +28,7 @@ services:
       target: build
       args:
         - VITE_API_URL
+        - WEBSOKET_URL
     container_name: "static-builder"
     volumes:
       - vol_static_builder:/usr/src/vite
@@ -74,7 +75,14 @@ services:
       in_memory_db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-H", "Host: reverseproxy", "http://localhost:8000/health/"]
+      test:
+        [
+          "CMD",
+          "curl",
+          "-H",
+          "Host: reverseproxy",
+          "http://localhost:8000/health/",
+        ]
       interval: 5s
       retries: 5
 
