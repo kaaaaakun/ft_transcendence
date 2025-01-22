@@ -19,6 +19,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 120s
+    ports:
+      - "5432:5432"
     networks:
       - net_pong
     ports:
@@ -88,7 +90,7 @@ services:
       in_memory_db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-H", "Host: reverseproxy", "http://localhost:8000"]
+      test: ["CMD", "curl", "-H", "Host: reverseproxy", "http://localhost:8000/health/"]
       interval: 5s
       retries: 5
       start_period: 120s
