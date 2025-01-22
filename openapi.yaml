@@ -156,9 +156,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/error_response"
 
-  /api/users/{login_name}/password-reset:
-    parameters:
-      - $ref: "#/components/parameters/login_name"
+  /api/users/password-reset:
     post:
       tags:
         - user_management
@@ -179,11 +177,19 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/error_response"
-    get:
+
+  /api/users/password-reset/secret-question:
+    post:
       tags:
         - user_management
       summary: 秘密の質問取得
       description: ログイン名に対応する秘密の質問を取得します。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/user_secretquestion_request"
       responses:
         "200":
           description: 秘密の質問
@@ -283,29 +289,43 @@ paths:
               schema:
                 $ref: "#/components/schemas/error_response"
 
-  /api/users/{login_name}/update:
-    parameters:
-      - $ref: "#/components/parameters/login_name"
+  /api/users:
     patch:
       tags:
         - user_management
       summary: ユーザー情報更新
       security:
         - bearerAuth: []
-      description: ログイン名に対応するユーザー情報を更新します。
+      description: ログインしているユーザーの情報を更新します。
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/user_update_request"
+              $ref: "#/components/schemas/user_patch_request"
       responses:
         "200":
           description: 更新成功
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/user_update_response"
+                $ref: "#/components/schemas/user_patch_response"
+        default:
+          description: エラーレスポンスまたその他のレスポンス
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+    delete:
+      tags:
+        - user_management
+      summary: ユーザー削除
+      security:
+        - bearerAuth: []
+      description: ログインしているユーザーを削除します。
+      responses:
+        "200":
+          description: 削除成功
         default:
           description: エラーレスポンスまたその他のレスポンス
           content:
@@ -313,35 +333,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/error_response"
 
-  /api/users/{login_name}/avatar:
-    parameters:
-      - $ref: "#/components/parameters/login_name"
-    post:
-      tags:
-        - user_management
-      summary: アバター更新
-      security:
-        - bearerAuth: []
-      description: ログイン名に対応するアバターを更新します。
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              $ref: "#/components/schemas/user_avatar_request"
-      responses:
-        "200":
-          description: アバター更新成功
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/user_avatar_response"
-        default:
-          description: エラーレスポンスまたその他のレスポンス
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/error_response"
 
   /api/users/{display_name}:
     parameters:
@@ -366,35 +357,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/error_response"
-  /api/users/{login_name}:
-    parameters:
-      - $ref: "#/components/parameters/login_name"
-    delete:
-      tags:
-        - user_management
-      summary: ユーザー削除
-      security:
-        - bearerAuth: []
-      description: ログイン名に対応するユーザーを削除します。
-      responses:
-        "200":
-          description: 削除成功
-        default:
-          description: エラーレスポンスまたその他のレスポンス
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/error_response"
 
 components:
   parameters:
-    login_name:
-      name: login_name
-      in: path
-      required: true
-      description: ログイン名
-      schema:
-        type: string
     display_name:
       name: display_name
       in: path
@@ -583,6 +548,8 @@ components:
     user_passwordreset_request:
       type: object
       properties:
+        login_name:
+          type: string
         secret_answer:
           type: string
         new_password:
@@ -590,13 +557,25 @@ components:
         new_password_confirmation:
           type: string
       required:
+        - login_name
         - secret_answer
         - new_password
         - new_password_confirmation
       example:
+        login_name: "user1"
         secret_answer: "answer1"
         new_password: "password2"
         new_password_confirmation: "password2"
+
+    user_secretquestion_request:
+      type: object
+      properties:
+        login_name:
+          type: string
+      required:
+        - login_name
+      example:
+        login_name: "user1"
     
     secret_question_response:
       type: object
@@ -636,45 +615,31 @@ components:
           - friend_name: "user4"
             is_online: true
     
-    user_update_request:
+    user_patch_request:
       type: object
       properties:
         display_name:
           type: string
-      anyOf: # 更新するフィールドを指定
-        - required: ["display_name"]
-      example:
-        display_name: "ユーザー1"
-
-    user_update_response:
-      type: object
-      properties:
-        display_name:
-          type: string
-      anyOf: # 更新されたフィールドのみ返却
-        - required: ["display_name"]
-      example:
-        display_name: "ユーザー1"
-
-    user_avatar_request:
-      type: object
-      properties:
         avatar:
           type: string
           format: binary
-      required:
-        - avatar
+      anyOf: # 更新するフィールドを指定
+        - required: ["display_name", "avatar"]
       example:
+        display_name: "ユーザー1"
         avatar: (binary data)
-    
-    user_avatar_response:
+
+    user_patch_response:
       type: object
       properties:
+        display_name:
+          type: string
         avatar_path:
           type: string
-      required:
-        - avatar_path
+      anyOf: # 更新されたフィールドのみ返却
+        - required: ["display_name", "avatar_path"]
       example:
+        display_name: "ユーザー1"
         avatar_path: "avatar1.jpg"
 
     user_response:
