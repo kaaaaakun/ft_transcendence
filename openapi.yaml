@@ -108,7 +108,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/error_response"
-  /api/users/login:
+  /api/auth/login:
     post:
       tags:
         - user_management
@@ -134,29 +134,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/error_response"
 
-  /api/users/register:
-    post:
-      tags:
-        - user_management
-      summary: ユーザー登録
-      description: ログイン名とパスワードを使用して新しいユーザーを登録します。
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/user_register_request"
-      responses:
-        "201":
-          description: 登録成功
-        default:
-          description: エラーレスポンスまたはその他のレスポンス
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/error_response"
-
-  /api/users/password-reset:
+  /api/auth/password-reset:
     post:
       tags:
         - user_management
@@ -178,7 +156,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/error_response"
 
-  /api/users/password-reset/secret-question:
+  /api/auth/password-reset/secret-question:
     post:
       tags:
         - user_management
@@ -290,6 +268,27 @@ paths:
                 $ref: "#/components/schemas/error_response"
 
   /api/users:
+    post:
+      tags:
+        - user_management
+      summary: ユーザー登録
+      description: ログイン名とパスワードを使用して新しいユーザーを登録します。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/user_register_request"
+      responses:
+        "201":
+          description: 登録成功
+        default:
+          description: エラーレスポンスまたはその他のレスポンス
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+
     patch:
       tags:
         - user_management
