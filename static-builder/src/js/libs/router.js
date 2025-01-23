@@ -1,34 +1,66 @@
 import { Teact } from '@/js/libs/teact'
 
 const routes = []
-let setCurrentPath = () => {
-  return
-}
+let setCurrentPath = () => {}
 let currentState = {}
+
+function matchPath(pathPattern, currentPath) {
+  const patternSegments = pathPattern.split('/').filter(seg => seg !== '')
+  const pathSegments = currentPath.split('/').filter(seg => seg !== '')
+
+  if (patternSegments.length !== pathSegments.length) {
+    return null
+  }
+
+  const params = {}
+
+  for (let i = 0; i < patternSegments.length; i++) {
+    const patternSegment = patternSegments[i]
+    const pathSegment = pathSegments[i]
+
+    if (patternSegment.startsWith(':')) {
+      const paramName = patternSegment.slice(1)
+      params[paramName] = decodeURIComponent(pathSegment)
+    } else if (patternSegment !== pathSegment) {
+      return null
+    }
+  }
+
+  return params
+}
 
 export function Router() {
   const [currentPath, setPath] = Teact.useState(window.location.pathname)
   const [state, setState] = Teact.useState(currentState)
   setCurrentPath = (path, state = {}) => {
-    setPath(() => path)
-    setState(() => state)
+    setPath(path)
+    setState(state)
   }
 
   const pathWithoutQuery = currentPath.split('?')[0]
-  const route = routes.find(r => r.path === pathWithoutQuery)
-  if (!route) {
+
+  const matchedRoute = routes.find(route => {
+    const params = matchPath(route.path, pathWithoutQuery)
+    if (params) {
+      route.params = params
+      return true
+    }
+    return false
+  })
+
+  if (!matchedRoute) {
     return Teact.createElement('h1', null, '404 Not Found')
   }
 
-  if (route.component instanceof Function) {
-    return Teact.createElement(route.component, { state })
+  if (matchedRoute.component instanceof Function) {
+    return Teact.createElement(matchedRoute.component, { state: state, params: matchedRoute.params })
   }
 
-  return route.component
+  return matchedRoute.component
 }
 
 export function Route({ path, component }) {
-  routes.push({ path, component })
+  routes.push({ path, component, params: {} })
   return null
 }
 
