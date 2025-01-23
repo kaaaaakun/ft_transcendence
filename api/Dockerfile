@@ -4,15 +4,6 @@
 # 軽そうなbaseイメージを選択(https://hub.docker.com/_/python)
 FROM python:3.9-slim AS base
 
-# ビルド時のみ利用する変数
-## version of installed packages
-ARG PSYCOPG_VERSION=3.1.8
-ARG DJANGO_VERSION=4.2
-ARG DJANGO_REST_VERSION=3.15.2
-ARG GUNICORN_VERSION=23.0.0
-## misc
-
-
 # コンテナ起動後にも利用する環境変数(secretは.envへ)
 ENV DJANGO_PROJECT_NAME trans
 ENV DJANGO_PROJECT_DIR /${DJANGO_PROJECT_NAME}/
@@ -21,6 +12,7 @@ RUN export SECRET_KEY=$(python -c 'from django.core.management.utils import get_
 ENV SECRET_KEY=$SECRET_KEY
 ENV BIND_ADDRESS 0.0.0.0
 ENV BIND_PORT 8000
+ENV DJANGO_SETTINGS_MODULE=trans.settings
 
 # install for deploy
 RUN apt-get update
@@ -40,14 +32,10 @@ RUN apt-get -y install \
 # clean up to reduce the size of the image
 RUN rm -rf /var/lib/apt/lists/*
 
-# Djangoとpsycopg(postgreSQL操作に必要)のインストール
-## https://docs.djangoproject.com/ja/5.0/ref/databases/#postgresql-notes
-## https://docs.djangoproject.com/ja/5.0/faq/install/
+# APIサーバーおよび接続されたコンテナの操作に必要なライブラリのインストール
 RUN pip install --upgrade pip
-RUN pip install --no-cache-dir psycopg==${PSYCOPG_VERSION}
-RUN pip install --no-cache-dir Django==${DJANGO_VERSION}
-RUN pip install --no-cache-dir djangorestframework==${DJANGO_REST_VERSION}
-RUN pip install --no-cache-dir gunicorn==${GUNICORN_VERSION}
+COPY tool/requirements.txt tool/requirements.txt
+RUN pip install --no-cache-dir -r tool/requirements.txt
 
 # Create a Django project
 RUN django-admin startproject ${DJANGO_PROJECT_NAME}
@@ -75,56 +63,28 @@ RUN python ${DJANGO_PROJECT_DIR}manage.py makemigrations
 COPY tool/entrypoint.sh ${DJANGO_PROJECT_DIR}
 RUN chmod +x ${DJANGO_PROJECT_DIR}entrypoint.sh
 
-############################
-# development common stage #
-############################
-FROM base AS development_common
-
-# dev用の制限が緩いsettings.pyをコピー
-COPY dev/settings.py ${DJANGO_PROJECT_DIR}${DJANGO_PROJECT_NAME}/
-
-# コンテナ内で"test"コマンドを実行すると、Djangoのtestが実行できるようにaliasを設定
-RUN echo "alias test='python manage.py test'" >> ~/.bashrc
-
-
-##################################
-# development_djangoserver stage #
-##################################
-FROM development_common AS development_djangoserver
-
-# コンテナ内で"run"コマンドを実行すると、Djangoの開発サーバーが起動するようにaliasを設定
-RUN echo "alias run='python manage.py runserver ${BIND_ADDRESS}:${BIND_PORT}'" >> ~/.bashrc
-
-ENTRYPOINT [ "/trans/entrypoint.sh" ]
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-
-##########################
-# development_wsgi stage #
-##########################
-FROM development_common AS development_wsgi
-
-# コンテナ内で"run"コマンドを実行すると、Gunicornが起動するようにaliasを設定
-RUN echo "alias run='gunicorn ${DJANGO_PROJECT_NAME}.wsgi:application --bind ${BIND_ADDRESS}:${BIND_PORT}'" >> ~/.bashrc
-
-ENTRYPOINT [ "/trans/entrypoint.sh" ]
-CMD ["sleep", "infinity"]
 
 ##########################
 # development_asgi stage #
 ##########################
-FROM development_common AS development_asgi
+FROM base AS development_asgi
 
-
-#########################
-# deploy_wsgi stage #
-#########################
-FROM base AS deploy_wsgi
+# dev用の制限が緩いsettings.pyをコピー
+COPY dev/settings.py ${DJANGO_PROJECT_DIR}${DJANGO_PROJECT_NAME}/
+# コンテナ内で"test"コマンドを実行すると、Djangoのtestが実行できるようにaliasを設定
+RUN echo "alias test='python manage.py test'" >> ~/.bashrc
+# コンテナ内で"run"コマンドを実行すると、Djangoの開発サーバーが起動するようにaliasを設定
+RUN echo "alias run='python manage.py runserver ${BIND_ADDRESS}:${BIND_PORT}'" >> ~/.bashrc
 
 ENTRYPOINT [ "/trans/entrypoint.sh" ]
-CMD [ "sh", "-c", "gunicorn ${DJANGO_PROJECT_NAME}.wsgi:application --bind ${BIND_ADDRESS}:${BIND_PORT}" ]
+# コンテナに入ってからbashに切り替え手動でrunする。
+CMD ["sleep", "infinity"]
 
 
 #########################
 # deploy_asgi stage #
 #########################
 FROM base AS deploy_asgi
+
+ENTRYPOINT [ "/trans/entrypoint.sh" ]
+CMD ["sh", "-c", "daphne -b ${BIND_ADDRESS} -p ${BIND_PORT} ${DJANGO_PROJECT_NAME}.asgi:application"]

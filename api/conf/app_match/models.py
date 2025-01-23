@@ -9,6 +9,10 @@ class Match(models.Model):
     class Meta:
         db_table = 'matches'
 
+    @classmethod
+    def update_status(cls, match_id, status):
+        cls.objects.filter(id = match_id).update(status = status)
+
 class MatchDetail(models.Model):
     match_id = models.ForeignKey(Match, on_delete=models.CASCADE)
     player_id = models.ForeignKey(Player, on_delete=models.CASCADE)
@@ -17,3 +21,11 @@ class MatchDetail(models.Model):
 
     class Meta:
         db_table = 'match_details'
+
+    @classmethod
+    def create(cls, valid_data):
+        return cls.objects.create(**valid_data)
+    
+    @classmethod
+    def update_result(cls, matchdetail_id, player_id, result):
+        cls.objects.filter(id = matchdetail_id, player_id = player_id).update(result = result)

@@ -26,12 +26,16 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'default_secret_key-for-dev')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'ft_transcendence.42.com']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    # 3rd party apps. Install prior to 'django.contrib.staticfiles'
+    'daphne',
+
+    # django default
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -46,6 +50,7 @@ INSTALLED_APPS = [
 
     # 3rd party
     'rest_framework',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -76,8 +81,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'trans.wsgi.application'
-
+ASGI_APPLICATION = 'trans.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -94,7 +98,15 @@ DATABASES = {
     }
 }
 
-
+## Redisの設定を追加
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('dev-redis', 6379)],  # Redisのアドレスとポートを指定。コンテナ名なにになるのかで変わる
+        },
+    },
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

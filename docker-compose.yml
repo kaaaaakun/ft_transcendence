@@ -51,7 +51,7 @@ services:
   api:
     build:
       context: api/
-      target: deploy_wsgi
+      target: deploy_asgi
     container_name: "api"
     expose:
       - "8000"

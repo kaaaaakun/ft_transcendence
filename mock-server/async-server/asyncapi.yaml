@@ -1,0 +1,100 @@
+---
+asyncapi: 2.1.0
+id: 'urn:ft_transcendence'
+defaultContentType: 'application/json'
+info:
+  title: ft_transcendence
+  version: 1.0.0
+  description: This API is designed for a pong game.
+  contact:
+    name: とらせん
+    email: ft_transcendence@example.com
+    url: 'https://example.com/contact'
+  license:
+    name: MIT
+    url: 'https://opensource.org/licenses/MIT'
+tags:
+  - name: pong
+    description: API for the pong game
+
+servers:
+  localhost:
+    url: 'ws://localhost/api/ws'
+    protocol: ws
+
+channels:
+  /api/ws/matches:
+    publish:
+      operationId: sendKeyInput
+      message:
+        $ref: '#/components/messages/KeyInput'
+    subscribe:
+      operationId: onMatchStatus
+      message:
+        $ref: '#/components/messages/MatchStatus'
+
+components:
+  messages:
+    KeyInput:
+      payload:
+        type: object
+        properties:
+          left:
+            $ref: '#/components/schemas/KeyInput'
+          right:
+            $ref: '#/components/schemas/KeyInput'
+    MatchStatus:
+      payload:
+        type: object
+        required:
+          - left
+          - right
+          - ballPosition
+        properties:
+          left:
+            $ref: '#/components/schemas/PlayerStatus'
+          right:
+            $ref: '#/components/schemas/PlayerStatus'
+          ballPosition:
+            $ref: '#/components/schemas/BallPosition'
+
+  schemas:
+    KeyInput:
+      type: object
+      required:
+        - key
+        - action
+      properties:
+        key:
+          type: string
+          enum:
+            - PaddleUpKey
+            - PaddleDownKey
+        action:
+          type: string
+          enum:
+            - push
+            - release
+    BallPosition:
+      type: object
+      required:
+        - x
+        - y
+      properties:
+        x:
+          type: number
+          format: float
+        y:
+          type: number
+          format: float
+    PlayerStatus:
+      type: object
+      required:
+        - paddlePosition
+        - score
+      properties:
+        paddlePosition:
+          type: number
+          format: float
+        score:
+          type: integer
