@@ -4,6 +4,8 @@ const routes = []
 let setCurrentPath = () => {}
 let currentState = {}
 
+// パスのパターンと現在のパスが一致するかを判定する
+// パスのパターンは / で区切られた文字列で、: で始まる部分はパラメータとして扱う
 function matchPath(pathPattern, currentPath) {
   const patternSegments = pathPattern.split('/').filter(seg => seg !== '')
   const pathSegments = currentPath.split('/').filter(seg => seg !== '')
