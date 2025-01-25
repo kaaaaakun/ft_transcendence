@@ -45,12 +45,14 @@ WORKDIR ${DJANGO_PROJECT_DIR}
 RUN python manage.py startapp player
 RUN python manage.py startapp tournament
 RUN python manage.py startapp match
+RUN python manage.py startapp user
 
 # project, appsのファイルをコピー
 COPY conf/project/* ${DJANGO_PROJECT_DIR}${DJANGO_PROJECT_NAME}/
 COPY conf/app_player/* ${DJANGO_PROJECT_DIR}player/
 COPY conf/app_tournament/* ${DJANGO_PROJECT_DIR}tournament/
 COPY conf/app_match/* ${DJANGO_PROJECT_DIR}match/
+COPY conf/app_user/* ${DJANGO_PROJECT_DIR}user/
 
 # Create utils Directory and Copy files
 RUN mkdir -p ${DJANGO_PROJECT_DIR}utils
