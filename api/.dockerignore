@@ -6,3 +6,6 @@
 
 # ignore all .DS_Store file to protect sensitive data and avoid cache
 **/.DS_Store
+
+*.pyc
+__pycache__/

@@ -63,6 +63,12 @@ services:
     build:
       context: api/
       target: deploy_asgi
+    volumes:
+      - ./api/conf/project/:/trans/trans/
+      - ./api/conf/app_player/:/trans/player/
+      - ./api/conf/app_tournament/:/trans/tournament/
+      - ./api/conf/app_match/:/trans/match/
+      - ./api/conf/app_user/:/trans/user/
     container_name: "api"
     restart: on-failure
     networks:
@@ -74,6 +80,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PYTHONDONTWRITEBYTECODE: 1
     depends_on:
       rdbms:
         condition: service_healthy
