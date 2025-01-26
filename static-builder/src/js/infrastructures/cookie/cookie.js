@@ -19,19 +19,9 @@ function checkTournamentIdExists() {
   return false // tournament_idが存在しなければfalseを返す
 }
 
-function setJwtCookie() {
-  document.cookie = 'jwt=jwt; path=/'
-}
-
-function deleteJwtCookie() {
-  document.cookie = 'jwt=; max-age=0; path=/'
-}
-
 
 export const cookie = {
   setTournamentId,
   deleteTournamentId,
   checkTournamentIdExists,
-  setJwtCookie,
-  deleteJwtCookie,
 }
