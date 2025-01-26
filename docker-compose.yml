@@ -28,7 +28,7 @@ services:
       target: build
       args:
         - VITE_API_URL
-        - WEBSOKET_URL
+        - VITE_WEBSOCKET_URL
     container_name: "static-builder"
     volumes:
       - vol_static_builder:/usr/src/vite
@@ -88,7 +88,7 @@ services:
 
   in_memory_db:
     container_name: "in_memory_db"
-    image: redis:latest
+    image: redis:7.4.2
     networks:
       - net_pong
     healthcheck:

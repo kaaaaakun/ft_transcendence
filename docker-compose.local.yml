@@ -23,8 +23,6 @@ services:
       - "5432:5432"
     networks:
       - net_pong
-    ports:
-      - "5432:5432"
 
   static-builder:
     build:
@@ -34,7 +32,7 @@ services:
     restart: on-failure
     environment:
       - VITE_API_URL
-      - WEBSOKET_URL
+      - VITE_WEBSOCKET_URL
     volumes:
       - ./static-builder:/usr/src/vite
     networks:
@@ -91,14 +89,21 @@ services:
       in_memory_db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-H", "Host: reverseproxy", "http://localhost:8000/health/"]
+      test:
+        [
+          "CMD",
+          "curl",
+          "-H",
+          "Host: reverseproxy",
+          "http://localhost:8000/health/",
+        ]
       interval: 5s
       retries: 5
       start_period: 120s
 
   in_memory_db:
     container_name: "in_memory_db"
-    image: redis:latest
+    image: redis:7.4.2
     networks:
       - net_pong
     healthcheck:

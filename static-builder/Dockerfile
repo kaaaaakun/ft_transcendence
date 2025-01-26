@@ -18,7 +18,7 @@ COPY package.json pnpm-lock.yaml ./
 FROM base AS build
 
 ARG VITE_API_URL 
-ARG WEBSOKET_URL
+ARG VITE_WEBSOCKET_URL
 
 WORKDIR /usr/src/vite
 
