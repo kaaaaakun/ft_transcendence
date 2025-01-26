@@ -9,6 +9,7 @@ import { Login } from '@/js/pages/Login'
 import { Logout } from '@/js/pages/Logout'
 import { Register } from './pages/Register'
 import { passwordReset } from './pages/passwordReset'
+import { deleteAccount } from './pages/deleteAccount'
 
 function App() {
   return Router(
@@ -49,6 +50,10 @@ function App() {
       path: '/password-reset',
       component: passwordReset,
     }),
+    Route({
+      path: '/delete-account',
+      component: deleteAccount,
+    })
   )
 }
 

@@ -106,11 +106,10 @@ class UserRegisterView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class UserGetSecretQuestionView(APIView):
-    def post(self, request, *args, **kwargs):
+
+class UserPasswordResetView(APIView):
+    def get(self, request, login_name,*args, **kwargs):
         try:
-            data = json.loads(request.body)
-            login_name = data.get('login_name')
 
             if not login_name:
                 return JsonResponse({
@@ -133,8 +132,8 @@ class UserGetSecretQuestionView(APIView):
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class UserPasswordResetView(APIView):
-    def post(self, request, *args, **kwargs):
+
+    def post(self, request, login_name,*args, **kwargs):
         try:
             data = json.loads(request.body)
             login_name = data.get('login_name')
@@ -166,3 +165,22 @@ class UserPasswordResetView(APIView):
             return JsonResponse({
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class UserDeleteView(APIView):
+    def delete(self, request, login_name, *args, **kwargs):
+        try:
+            user = User.objects.get(login_name=login_name)
+            user.delete()
+            return JsonResponse({
+                'message': 'User deleted.'
+            }, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return JsonResponse({
+                'error': 'User not found.'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return JsonResponse({
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

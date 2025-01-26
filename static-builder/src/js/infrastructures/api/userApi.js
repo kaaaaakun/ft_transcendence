@@ -45,7 +45,8 @@ function register(data) {
 }
 
 function passwordReset(data) {
-    return api.post('/api/users/password_reset/', data).then(response => {
+
+    return api.post(`/api/users/${data.login_name}/password_reset/`, data).then(response => {
         if (!response.ok) {
             return response.json().then(errData => {
                 throw new Error(errData.error || 'Unknown error occurred')
@@ -56,7 +57,18 @@ function passwordReset(data) {
 }
 
 function getsecretQuestion(data) {
-    return api.post('/api/users/get_secret_question/', data).then(response => {
+    return api.get(`/api/users/${data.login_name}/password_reset/`, data).then(response => {
+        if (!response.ok) {
+            return response.json().then(errData => {
+                throw new Error(errData.error || 'Unknown error occurred')
+            })
+        }
+        return response.json()
+    })
+}
+
+function deleteAccount(data) {
+    return api.delete(`/api/users/${data.login_name}/`, data).then(response => {
         if (!response.ok) {
             return response.json().then(errData => {
                 throw new Error(errData.error || 'Unknown error occurred')
@@ -71,5 +83,6 @@ export const userApi = {
   login,
   register,
   passwordReset,
-  getsecretQuestion
+  getsecretQuestion,
+  deleteAccount,
 }
