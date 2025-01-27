@@ -2,6 +2,7 @@ import '@/scss/styles.scss'
 import { Route, Router } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import { Home } from '@/js/pages/Home'
+import { SelectTournamentType } from '@/js/pages/SelectTournamentType'
 import { InputAlias } from '@/js/pages/InputAlias'
 import { Pong } from '@/js/pages/Pong'
 import { Tournament } from '@/js/pages/Tournament'
@@ -16,6 +17,10 @@ function App() {
     Route({
       path: '/contact',
       component: Teact.createElement('h1', null, 'Contact'),
+    }),
+    Route({
+      path: '/select_tournament_type',
+      component: SelectTournamentType,
     }),
     Route({
       path: '/input_alias',
