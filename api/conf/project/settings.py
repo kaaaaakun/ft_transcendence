@@ -26,7 +26,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'default_secret_key-for-dev')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'ft_transcendence.42.com', 'reverseproxy']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'ft_transcendence.42.com','reverseproxy']
 
 
 # Application definition
@@ -110,7 +110,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('dev-redis', 6379)],  # Redisのアドレスとポートを指定。コンテナ名なにになるのかで変わる
+            "hosts": [('in_memory_db', 6379)],  # Redisのアドレスとポートを指定。コンテナ名なにになるのかで変わる
         },
     },
 }

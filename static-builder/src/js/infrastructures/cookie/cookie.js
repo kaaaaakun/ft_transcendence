@@ -9,9 +9,9 @@ function deleteTournamentId() {
 function checkTournamentIdExists() {
   const cookieArr = document.cookie.split(';')
 
-  for (let i = 0; i < cookieArr.length; i++) {
-    const cookiePair = cookieArr[i].split('=')
-    if (cookiePair[0].trim() === 'tournament_id') {
+  for (const cookie of cookieArr) {
+    const [key] = cookie.split('=')
+    if (key.trim() === 'tournament_id') {
       return true // tournament_idが存在すればtrueを返す
     }
   }

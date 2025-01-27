@@ -5,26 +5,25 @@ import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { useLocation, useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 
-// TODO:ask:ボール小さいから大きく？
-// TODO:Paddleの縦横がバックエンドで逆になっているので、あとでバックエンドと同時に修正
 // バックエンドと共通の定数
 const BACKGROUND_COLOR = '#1E1E2C'
 const WALL_X_LIMIT = 500
 const WALL_Y_LIMIT = 300
-const BALL_RADIUS = 2
+const BALL_RADIUS = 8
 const PADDLE_HEIGHT = 30
 
 // フロントのみの定数
-const PADDLE_WIDTH = 10
+const PADDLE_WIDTH = 5
 
 function fetchTournament(endMatch) {
-  if (!endMatch) return
+  if (!endMatch) {
+    return
+  }
 
   const navigate = useNavigate()
   tournamentsApi
     .fetchLocalTournament()
     .then(data => {
-      console.log('Success:', data)
       navigate('/tournament', { data })
     })
     .catch(error => console.error('Error:', error))
@@ -65,12 +64,6 @@ const Pong = () => {
     let rightScore = 0
     let leftScore = 0
 
-    // キーボード入力
-    let isLeftPaddleUp = false
-    let isLeftPaddleDown = false
-    let isRightPaddleUp = false
-    let isRightPaddleDown = false
-
     function clearCanvas() {
       context.clearRect(0, 0, canvas.width, canvas.height)
     }
@@ -97,10 +90,16 @@ const Pong = () => {
     function draw() {
       clearCanvas()
       drawRect(0, 0, canvas.width, canvas.height, BACKGROUND_COLOR)
-      drawRect(0, rightPaddleY, PADDLE_WIDTH, PADDLE_HEIGHT, 'white')
       drawRect(
         canvas.width - PADDLE_WIDTH,
-        leftPaddleY,
+        rightPaddleY - PADDLE_HEIGHT / 2,
+        PADDLE_WIDTH,
+        PADDLE_HEIGHT,
+        'white',
+      )
+      drawRect(
+        0,
+        leftPaddleY - PADDLE_HEIGHT / 2,
         PADDLE_WIDTH,
         PADDLE_HEIGHT,
         'white',
@@ -110,83 +109,92 @@ const Pong = () => {
       }
       drawText(
         `${rightScore}`,
-        (canvas.width / 4) * 3,
-        50,
-        '48px sans-serif',
-        rightScore === 10 ? 'yellow' : 'white',
-      )
-      drawText(
-        `${leftScore}`,
         canvas.width / 4,
         50,
         '48px sans-serif',
-        leftScore === 10 ? 'yellow' : 'white',
+        rightScore >= 10 ? 'yellow' : 'white',
+      )
+      drawText(
+        `${leftScore}`,
+        (canvas.width / 4) * 3,
+        50,
+        '48px sans-serif',
+        leftScore >= 10 ? 'yellow' : 'white',
       )
     }
 
     function update() {
+      draw()
       if (leftScore === 11 || rightScore === 11) {
-        winner = leftScore === 11 ? leftPlayerName : rightPlayerName
+        winner = leftScore === 11 ? rightPlayerName : leftPlayerName
         drawText(`${winner} wins!`, canvas.width / 2, canvas.height / 2)
         setEndMatch(true)
         clearInterval(intervalId)
-        socket.close()
         return
       }
-      draw()
     }
 
-    function keyDownHandler(e) {
-      // 1P（W: 上、S: 下）と2P（↑: 上、↓: 下）のキー割り当て
-      let message
+    // NOTE: キーの状態を保持する
+    const paddleStates = {
+      isRightPaddleUp: false,
+      isRightPaddleDown: false,
+      isLeftPaddleUp: false,
+      isLeftPaddleDown: false,
+    }
+    const keyMappings = {
+      ArrowUp: {
+        paddle: 'right',
+        key: 'PaddleUpKey',
+        state: 'isRightPaddleUp',
+      },
+      ArrowDown: {
+        paddle: 'right',
+        key: 'PaddleDownKey',
+        state: 'isRightPaddleDown',
+      },
+      w: { paddle: 'left', key: 'PaddleUpKey', state: 'isLeftPaddleUp' },
+      W: { paddle: 'left', key: 'PaddleUpKey', state: 'isLeftPaddleUp' },
+      s: { paddle: 'left', key: 'PaddleDownKey', state: 'isLeftPaddleDown' },
+      S: { paddle: 'left', key: 'PaddleDownKey', state: 'isLeftPaddleDown' },
+    }
 
-      if (e.key === 'ArrowUp' && !isRightPaddleUp) {
-        message = { right: { key: 'PaddleUpKey', action: 'push' } }
-        isRightPaddleUp = true
-      } else if (e.key === 'ArrowDown' && !isRightPaddleDown) {
-        message = { right: { key: 'PaddleDownKey', action: 'push' } }
-        isRightPaddleDown = true
-      } else if ((e.key === 'w' || e.key === 'W') && !isLeftPaddleUp) {
-        message = { left: { key: 'PaddleUpKey', action: 'push' } }
-        isLeftPaddleUp = true
-      } else if ((e.key === 's' || e.key === 'S') && !isLeftPaddleDown) {
-        message = { left: { key: 'PaddleDownKey', action: 'push' } }
-        isLeftPaddleDown = true
-      } else {
-        return
+    function handleKeyPush(key, isPushed) {
+      const mapping = keyMappings[key]
+      if (!mapping) return null
+
+      const { state } = mapping
+      if (isPushed !== paddleStates[state]) {
+        paddleStates[state] = isPushed
+        return {
+          [mapping.paddle]: {
+            key: mapping.key,
+            action: isPushed ? 'push' : 'release',
+          },
+        }
       }
-      if (socket.readyState !== WebSocket.CLOSED)
+      return null
+    }
+
+    function handleKeyEvent(e, isPushed) {
+      const message = handleKeyPush(e.key, isPushed)
+      if (message && socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify(message))
-    }
-
-    function keyUpHandler(e) {
-      let message
-
-      if (e.key === 'ArrowUp' && isRightPaddleUp) {
-        message = { right: { key: 'PaddleUpKey', action: 'release' } }
-        isRightPaddleUp = false
-      } else if (e.key === 'ArrowDown' && isRightPaddleDown) {
-        message = { right: { key: 'PaddleDownKey', action: 'release' } }
-        isRightPaddleDown = false
-      } else if ((e.key === 'w' || e.key === 'W') && isLeftPaddleUp) {
-        message = { left: { key: 'PaddleUpKey', action: 'release' } }
-        isLeftPaddleUp = false
-      } else if ((e.key === 's' || e.key === 'S') && isLeftPaddleDown) {
-        message = { left: { key: 'PaddleDownKey', action: 'release' } }
-        isLeftPaddleDown = false
-      } else {
-        return
       }
-      if (socket.readyState !== WebSocket.CLOSED)
-        socket.send(JSON.stringify(message))
     }
+
+    const keyDownHandler = e => handleKeyEvent(e, true)
+    const keyUpHandler = e => handleKeyEvent(e, false)
 
     document.addEventListener('keydown', keyDownHandler)
     document.addEventListener('keyup', keyUpHandler)
 
-    const url = 'ws://localhost:8080/api/ws/matches' // mokc-server用
-    // const url = 'ws://localhost/api/ws/local-tournament-match' // prod用
+    // const url = 'ws://localhost:8080/api/ws/matches' // mokc-server用
+    // const url = "ws://localhost:80/api/ws/local-simple-match/"; //memo
+    // const url = 'ws://localhost:80/api/ws/local-tournament-match/'
+    const baseWsUrl = import.meta.env.VITE_WEBSOCKET_URL ?? 'wss://localhost'
+    const url = `${baseWsUrl}/api/ws/local-tournament-match/`
     const socket = new WebSocket(url)
+    console.log('socket', socket)
     socket.addEventListener('message', event => {
       const gameState = JSON.parse(event.data)
       console.log(gameState)
@@ -202,7 +210,7 @@ const Pong = () => {
 
     return () => {
       clearInterval(intervalId)
-      socket.close()
+      // socket.close()
       document.removeEventListener('keydown', keyDownHandler)
       document.removeEventListener('keyup', keyUpHandler)
     }
