@@ -6,7 +6,6 @@ WORKDIR /usr/src/vite
 RUN apk update && apk add --no-cache curl bash libc6-compat
 RUN corepack enable && corepack prepare pnpm@9.7.0 --activate
 
-
 # development stage
 FROM base AS development
 
@@ -18,7 +17,8 @@ COPY package.json pnpm-lock.yaml ./
 # build stage
 FROM base AS build
 
-ARG VITE_API_URL
+ARG VITE_API_URL 
+ARG VITE_WEBSOCKET_URL
 
 WORKDIR /usr/src/vite
 

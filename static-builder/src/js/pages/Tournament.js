@@ -31,7 +31,6 @@ function fetchMatch(tournamentEnd) {
       return response.json() // レスポンスをJSONとしてパース
     })
     .then(data => {
-      console.log('Success:', data) // レスポンスをコンソールに出力
       navigate('/game', { data })
     })
     .catch(error => {
@@ -147,7 +146,7 @@ function TournamentTwoParticipants(participants, tournamentEnd) {
 }
 
 function TournamentFourParticipants(participants, tournamentEnd) {
-  const navigate = useNavigate()
+  const _navigate = useNavigate()
   return Teact.createElement(
     'div',
     { className: 'position-relative shift-up-200' },
@@ -260,7 +259,7 @@ function TournamentFourParticipants(participants, tournamentEnd) {
 
 // SVG要素を仮想DOM形式で作成する関数
 function TournamentEightParticipants(participants, tournamentEnd) {
-  const navigate = useNavigate()
+  const _navigate = useNavigate()
   return Teact.createElement(
     'div',
     { className: 'position-relative shift-up-200' },
@@ -510,7 +509,7 @@ function ConditionalBranch(participants) {
 
 export const Tournament = () => {
   const loc = useLocation()
-  if (!loc.state || !loc.state.data) {
+  if (!loc.state?.data) {
     return Teact.createElement('h1', null, '400 Bad Request')
   }
   const participants = loc.state.data
