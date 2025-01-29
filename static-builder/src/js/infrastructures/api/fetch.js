@@ -3,10 +3,20 @@ class FetchWrapper {
     this.baseUrl = baseUrl
   }
 
+  getAuthHeader() {
+    if (localStorage.getItem('access_token')) {
+      return {
+        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+      }
+    }
+    return {}
+  }
+
   async get(url) {
     const response = await fetch(`${this.baseUrl}${url}`, {
       method: 'GET',
       credentials: 'include',
+      ...this.getAuthHeader(),
     })
     return response
   }
@@ -17,6 +27,7 @@ class FetchWrapper {
       body: data ? JSON.stringify(data) : {},
       headers: {
         'Content-Type': 'application/json',
+        ...this.getAuthHeader(),
       },
       credentials: 'include',
     })
@@ -29,8 +40,10 @@ class FetchWrapper {
       body: data ? JSON.stringify(data) : {},
       headers: {
         'Content-Type': 'application/json',
+        ...this.getAuthHeader(),
       },
       credentials: 'include',
+
     })
     return response
   }
@@ -41,6 +54,7 @@ class FetchWrapper {
       body: data ? JSON.stringify(data) : {},
       headers: {
         'Content-Type': 'application/json',
+        ...this.getAuthHeader(),
       },
       credentials: 'include',
     })
@@ -51,6 +65,7 @@ class FetchWrapper {
     const response = await fetch(`${this.baseUrl}${url}`, {
       method: 'DELETE',
       credentials: 'include',
+      ...this.getAuthHeader(),
     })
     return response
   }
