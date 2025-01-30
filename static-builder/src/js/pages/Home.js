@@ -4,6 +4,7 @@ import { cookie } from '@/js/infrastructures/cookie/cookie'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
+import { api } from '@/js/infrastructures/api/fetch'
 
 export const Home = () => {
   const navigate = useNavigate()
@@ -18,9 +19,17 @@ export const Home = () => {
         DefaultButton({
           text: 'Play Now',
           onClick: () =>
-            navigate('/input_alias?players=2', {
-              playerNum: 2,
-            }),
+            api
+              .get('/api/matches/local')
+              .then(response => {
+                return response.json()
+              })
+              .then(data => {
+                navigate('/local_game', {state: { data }})
+              })
+              .catch(error => {
+                console.error('Error:', error)
+              }),
         }),
         DefaultButton({
           text: 'Tournament Mode',

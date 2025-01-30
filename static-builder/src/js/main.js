@@ -3,6 +3,7 @@ import { Route, Router } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import { Home } from '@/js/pages/Home'
 import { SelectTournamentType } from '@/js/pages/SelectTournamentType'
+import { LocalGame } from '@/js/pages/LocalGame'
 import { InputAlias } from '@/js/pages/InputAlias'
 import { Pong } from '@/js/pages/Pong'
 import { Tournament } from '@/js/pages/Tournament'
@@ -21,6 +22,10 @@ function App() {
     Route({
       path: '/select_tournament_type',
       component: SelectTournamentType,
+    }),
+    Route({
+      path: '/local_game',
+      component: LocalGame,
     }),
     Route({
       path: '/input_alias',
