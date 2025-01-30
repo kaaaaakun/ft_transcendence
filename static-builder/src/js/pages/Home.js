@@ -25,7 +25,7 @@ export const Home = () => {
                 return response.json()
               })
               .then(data => {
-                navigate('/local_game', {state: { data }})
+                navigate('/local_game', { data })
               })
               .catch(error => {
                 console.error('Error:', error)

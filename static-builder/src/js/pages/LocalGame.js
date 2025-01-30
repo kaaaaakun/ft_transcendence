@@ -16,7 +16,6 @@ const PADDLE_WIDTH = 5
 const LocalGame = () => {
   const [setEndMatch] = Teact.useState(false)
   const loc = useLocation()
-  console.log("Received state in LocalGame", loc.state)
 
   if (!loc.state) {
     return BaseLayout(
@@ -72,9 +71,21 @@ const LocalGame = () => {
       context.fillText(text, x, y)
     }
 
+    function drawDashedLine(x, color = 'white') {
+      context.strokeStyle = color
+      context.lineWidth = 2
+      context.setLineDash([5, 5]) // 点線のパターン
+      context.beginPath()
+      context.moveTo(x, 0)
+      context.lineTo(x, canvas.height)
+      context.stroke()
+      context.setLineDash([]) // 点線をリセット
+    }
+
     function draw() {
       clearCanvas()
       drawRect(0, 0, canvas.width, canvas.height, BACKGROUND_COLOR)
+      drawDashedLine(canvas.width / 2)
       drawRect(
         canvas.width - PADDLE_WIDTH,
         rightPaddleY - PADDLE_HEIGHT / 2,
@@ -175,7 +186,6 @@ const LocalGame = () => {
 
     // const url = 'ws://localhost:8080/api/ws/matches' // mokc-server用
     // const url = "ws://localhost:80/api/ws/local-simple-match/"; //memo
-    // const url = 'ws://localhost:80/api/ws/local-tournament-match/'
     const baseWsUrl = import.meta.env.VITE_WEBSOCKET_URL ?? 'wss://localhost'
     const url = `${baseWsUrl}/api/ws/local-simple-match/`
     const socket = new WebSocket(url)
