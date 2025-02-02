@@ -1,0 +1,7 @@
+{
+    "END_GAME_SCORE": 11,
+    "WALL_X_LIMIT": 500,
+    "WALL_Y_LIMIT": 300,
+    "PADDLE_HEIGHT": 30,
+    "BALL_RADIUS": 2
+}

@@ -55,7 +55,8 @@ services:
 
   api:
     build:
-      context: api/
+      context: .
+      dockerfile: api/Dockerfile
       target: deploy_asgi
     container_name: "api"
     expose:
