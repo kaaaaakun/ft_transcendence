@@ -18,17 +18,6 @@ from rest_framework import status
 from rest_framework.views import APIView
 
 
-def ft_authenticate(login_name=None, password=None):
-    try:
-        user = User.objects.get(login_name=login_name)
-    except User.DoesNotExist:
-        return None
-
-    if user.password_hash == make_password(password=password, salt="ft_transcendence"):
-        return user
-    else:
-        return None
-
 
 class UserLoginView(APIView):
     def post(self, request, *args, **kwargs):
@@ -42,7 +31,7 @@ class UserLoginView(APIView):
                     'error': 'Login name and password are required.'
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-            user = ft_authenticate(login_name=login_name, password=password)
+            user = User.ft_authenticate(login_name=login_name, password=password)
 
             if user is not None:
                 refresh = RefreshToken.for_user(user)
@@ -61,7 +50,7 @@ class UserLoginView(APIView):
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class UserRegisterView(APIView):
+class UserView(APIView):
     def post(self, request, *args, **kwargs):
         try:
             # リクエストのボディをJSONとしてパース
@@ -105,6 +94,25 @@ class UserRegisterView(APIView):
                 'Your request': str(request.body)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    def delete(self, request, *args, **kwargs):
+        try:
+            login_name = json.loads(request.body).get('login_name')
+            user = User.objects.get(login_name=login_name)
+            user.delete()
+            return JsonResponse({
+                'message': 'User deleted.'
+            }, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return JsonResponse({
+                'error': 'User not found.'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            with open('c.txt', 'w') as f:
+                f.write(str(e))
+            return JsonResponse({
+                'error': str(e)
+
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class UserPasswordResetView(APIView):
@@ -157,24 +165,6 @@ class UserPasswordResetView(APIView):
                 return JsonResponse({
                     'error': 'Incorrect secret answer.'
                 }, status=status.HTTP_400_BAD_REQUEST)
-        except User.DoesNotExist:
-            return JsonResponse({
-                'error': 'User not found.'
-            }, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return JsonResponse({
-                'error': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-class UserDeleteView(APIView):
-    def delete(self, request, login_name, *args, **kwargs):
-        try:
-            user = User.objects.get(login_name=login_name)
-            user.delete()
-            return JsonResponse({
-                'message': 'User deleted.'
-            }, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return JsonResponse({
                 'error': 'User not found.'

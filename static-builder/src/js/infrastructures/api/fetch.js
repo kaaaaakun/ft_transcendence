@@ -64,11 +64,15 @@ class FetchWrapper {
     return response
   }
 
-  async delete(url) {
+  async delete(url, data) {
     const response = await fetch(`${this.baseUrl}${url}`, {
       method: 'DELETE',
+      body: data ? JSON.stringify(data) : {},
+      headers: {
+        'Content-Type': 'application/json',
+        ...this.getAuthHeader(),
+      },
       credentials: 'include',
-      ...this.getAuthHeader(),
     })
     return response
   }

@@ -1,5 +1,5 @@
 function setTournamentId(tournamentId) {
-  document.cookie = 'tournament_id=${tournamentId}; path=/'
+  document.cookie = `tournament_id=${tournamentId}; path=/`
 }
 
 function deleteTournamentId() {

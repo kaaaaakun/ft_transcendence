@@ -3,9 +3,10 @@ import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import { userApi } from '@/js/infrastructures/api/userApi'
+import { useBanner } from '../hooks/useBanner'
 
 let secretQuestion = null;
-function handleSubmit(event) {
+function handleSubmit(event, showErrorBanner) {
     const navigate = useNavigate()
     event.preventDefault() // フォームのデフォルトの送信を防ぐ（ページリロード防止）
 
@@ -24,7 +25,10 @@ function handleSubmit(event) {
         navigate('/login', { data })
       })
       .catch(error => {
-        console.error('Error:', error)
+        showErrorBanner({
+          message: 'Failed to reset password',
+          onClose: () => {},
+        })
       })
     } else {
       userApi
@@ -35,7 +39,10 @@ function handleSubmit(event) {
         navigate( '/password-reset' , { data })
       })
       .catch(error => {
-        console.error('Error:', error)
+        showErrorBanner({
+          message: 'Failed to get secret question',
+          onClose: () => {},
+        })
       })
     }
 
@@ -89,6 +96,7 @@ function resetPasswordInfo() {
 
 
   export const passwordReset = () => {
+    const { showInfoBanner, showWarningBanner, showErrorBanner, banners } = useBanner()
     return BaseLayout(
       Teact.createElement(
         'div',
@@ -96,9 +104,10 @@ function resetPasswordInfo() {
         Teact.createElement(
           'form',
           {
-            onSubmit: handleSubmit,
+            onSubmit: (event) => handleSubmit(event, showErrorBanner),
             className: ' mt-3 d-grid gap-2 col-3 mx-auto',
           },
+          ...banners,
           Teact.createElement(
             'div',
             { className: '', key: 0 },
