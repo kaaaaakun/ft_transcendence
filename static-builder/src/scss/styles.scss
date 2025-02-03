@@ -56,6 +56,30 @@
   border-radius: 50%;
 }
 
+.hidden {
+  display: none;
+}
+
+.table-header {
+  position: sticky;
+  top: 0;
+  table-layout: fixed;
+}
+
+.table-body-scroll {
+  max-height: 230px;
+  display: block;
+  overflow-y: auto;
+  table-layout: fixed;
+}
+
+.table thead,
+.table tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
 @keyframes slideDown {
   from {
     transform: translateX(-50%) translateY(-100%);

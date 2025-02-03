@@ -28,6 +28,106 @@ const data = {
           "opponent": 10
         },
         "match_type": "tournament"
+      },
+      {
+        "date": "2021-01-02T12:00:00Z",
+        "result": "loss",
+        "opponent": "ユーザー3",
+        "score": {
+          "player": 5,
+          "opponent": 10
+        },
+        "match_type": "tournament"
+      },
+      {
+        "date": "2021-01-02T12:00:00Z",
+        "result": "loss",
+        "opponent": "ユーザー3",
+        "score": {
+          "player": 5,
+          "opponent": 10
+        },
+        "match_type": "tournament"
+      },
+      {
+        "date": "2021-01-02T12:00:00Z",
+        "result": "loss",
+        "opponent": "ユーザー3",
+        "score": {
+          "player": 5,
+          "opponent": 10
+        },
+        "match_type": "tournament"
+      },
+      {
+        "date": "2021-01-02T12:00:00Z",
+        "result": "loss",
+        "opponent": "ユーザー3",
+        "score": {
+          "player": 5,
+          "opponent": 10
+        },
+        "match_type": "tournament"
+      },
+      {
+        "date": "2021-01-02T12:00:00Z",
+        "result": "loss",
+        "opponent": "ユーザー3",
+        "score": {
+          "player": 5,
+          "opponent": 10
+        },
+        "match_type": "tournament"
+      },
+      {
+        "date": "2021-01-02T12:00:00Z",
+        "result": "loss",
+        "opponent": "ユーザー3",
+        "score": {
+          "player": 5,
+          "opponent": 10
+        },
+        "match_type": "tournament"
+      },
+      {
+        "date": "2021-01-02T12:00:00Z",
+        "result": "loss",
+        "opponent": "ユーザー3",
+        "score": {
+          "player": 5,
+          "opponent": 10
+        },
+        "match_type": "tournament"
+      },
+      {
+        "date": "2021-01-02T12:00:00Z",
+        "result": "loss",
+        "opponent": "ユーザー3",
+        "score": {
+          "player": 5,
+          "opponent": 10
+        },
+        "match_type": "tournament"
+      },
+      {
+        "date": "2021-01-02T12:00:00Z",
+        "result": "loss",
+        "opponent": "ユーザー3",
+        "score": {
+          "player": 5,
+          "opponent": 10
+        },
+        "match_type": "tournament"
+      },
+      {
+        "date": "2021-01-02T12:00:00Z",
+        "result": "loss",
+        "opponent": "ユーザー3",
+        "score": {
+          "player": 5,
+          "opponent": 10
+        },
+        "match_type": "tournament"
       }
     ],
     "statistics": {
@@ -39,15 +139,35 @@ const data = {
   }
 }
 
-const left = () => {
+  const handleSave = (displayName, setIsEditing) => {
+    data.display_name = displayName; // `data` を更新
+    setIsEditing(false); // 編集モードを終了
+  };
+
+const left = (isEditing, setIsEditing) => {
   return Teact.createElement(
     'div',
-    { className: 'text-center' }, // 左寄せ
-    Teact.createElement('img', {
-      src: data.avatar_path,
-      className: 'img-fluid avatar',
-      alt: 'Avatar',
-    }),
+    { className: 'text-center' }, // 縦方向中央揃え
+    Teact.createElement(
+      'div',
+      { className: 'relative w-32 h-32' }, // 左寄せ
+      Teact.createElement(
+        'label',
+        { className: '' }, // クリック可能にする
+        Teact.createElement('img', {
+          src: data.avatar_path,
+          className: 'img-fluid avatar', // 画像を丸くする
+          alt: 'Avatar',
+        }),
+        'login_name' in data
+        ? Teact.createElement('input', {
+            type: 'file',
+            accept: 'image/*',
+            className: 'hidden', // input を非表示
+            onChange: (e) => {},
+          })
+        : null
+    )),
     Teact.createElement('p', null, `フレンド${data.num_of_friends}人`)
   );
 };
@@ -62,14 +182,14 @@ const right = (isEditing, setIsEditing) => {
       Teact.createElement(
         'div',
         { className: '' },
-        isEditing
+        isEditing && 'login_name' in data
           ? Teact.createElement(
               'input',
               {
                 type: 'text',
                 className: 'form-control',
                 value: data.display_name,
-                onChange: (e) => setDisplayName(e.target.value), // 入力値を更新
+                onChange:(e) => handleSave(e.target.value, setIsEditing), // 入力値を更新
               }
             )
           : Teact.createElement(
@@ -81,34 +201,50 @@ const right = (isEditing, setIsEditing) => {
       Teact.createElement(
         'div',
         null,
-        isEditing
+        isEditing && 'login_name' in data
         ? Teact.createElement(
-            'button',
-            {
-              className: 'btn btn-success btn-sm align-items-center',
-              onClick: () => setIsEditing(false), // 編集モード終了
-            },
-            'Save'
+          'div',
+          { className: 'd-flex justify-content-center' },
+            Teact.createElement(
+              'button',
+              {
+                className: 'btn btn-success btn-sm align-items-center ms-2',
+                onClick: () => setIsEditing(false), // 編集モード終了
+              },
+              'Save'
+            ),
+            Teact.createElement(
+              'button',
+              {
+                className: 'btn btn-outline-secondary btn-sm align-items-center ms-2',
+                onClick: () => setIsEditing(false), // 編集モード終了
+              },
+              'Cancel'
+            )
           )
-        : Teact.createElement(
-            'button',
-            {
-              className: 'btn btn-outline-primary btn-sm align-items-center text-center',
-              onClick: () => setIsEditing(true), // 編集モード開始
-            },
-            'Edit'
-          )
+        : 'login_name' in data
+          ? Teact.createElement(
+              'button',
+              {
+                className: 'btn btn-outline-primary btn-sm align-items-center text-center',
+                onClick: () => setIsEditing(true), // 編集モード開始
+              },
+              'Edit'
+            )
+          : null
         )
       ),
-      Teact.createElement(
-        'div',
-        { className: '' },
-        Teact.createElement(
-          'p',
-          { className: 'fs-5 text-spacing m-auto' }, // ボーダーと少しの内側余白
-          `${data.login_name}`
+      'login_name' in data
+      ? Teact.createElement(
+          'div',
+          { className: '' },
+          Teact.createElement(
+            'p',
+            { className: 'fs-5 text-spacing m-auto' }, // ボーダーと少しの内側余白
+            `${data.login_name}`
+          )
         )
-      ),
+      : null
   );
 };
 
@@ -139,7 +275,7 @@ export const UserProfile = () => {
       Teact.createElement(
         'div',
         { className: 'd-flex align-items-center' },
-        left(),
+        left(isEditing, setIsEditing),
         right(isEditing, setIsEditing)
       ),
       Teact.createElement(
@@ -151,25 +287,29 @@ export const UserProfile = () => {
           'Game Records'
         ),
         Teact.createElement(
-          'table',
-          { className: 'table table-bordered table-striped mt-2' },
+          'div',
+          { className: 'table-header' },
           Teact.createElement(
-            'thead',
-            null,
+            'table',
+            { className: 'table table-bordered table-striped mt-2' },
             Teact.createElement(
-              'tr',
-              { className: 'text-center' }, // Bootstrap グリッドを使用
-              Teact.createElement('th', null, 'Match'),
-              Teact.createElement('th', null, 'Date'),
-              Teact.createElement('th', null, 'Result'),
-              Teact.createElement('th', null, 'Score'),
-              Teact.createElement('th', null, 'Match Type')
+              'thead',
+              null,
+              Teact.createElement(
+                'tr',
+                { className: 'text-center' }, // Bootstrap グリッドを使用
+                Teact.createElement('th', {className: 'width-35 border-end'}, 'Match'),
+                Teact.createElement('th', {className: 'width-25 border-end'}, 'Date'),
+                Teact.createElement('th', {className: 'width-10 border-end'}, 'Result'),
+                Teact.createElement('th', {className: 'width-15 border-end'}, 'Score'),
+                Teact.createElement('th', {className: 'width-15'}, 'Match Type')
+              )
+            ),
+            Teact.createElement(
+              'tbody',
+              { className: 'table-body-scroll' },
+              ...data.performance.game_records.map(gameRecord)
             )
-          ),
-          Teact.createElement(
-            'tbody',
-            null,
-            ...data.performance.game_records.map(gameRecord)
           )
         )
       )
