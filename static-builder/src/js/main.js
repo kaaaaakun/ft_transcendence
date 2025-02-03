@@ -1,13 +1,13 @@
 import '@/scss/styles.scss'
 import { Route, Router } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
-import { Home } from '@/js/pages/Home'
-import { SelectTournamentType } from '@/js/pages/SelectTournamentType'
-import { LocalGame } from '@/js/pages/LocalGame'
-import { InputAlias } from '@/js/pages/InputAlias'
-import { Pong } from '@/js/pages/Pong'
-import { Tournament } from '@/js/pages/Tournament'
 import { FriendsList } from '@/js/pages/FriendsList'
+import { Home } from '@/js/pages/Home'
+import { InputAlias } from '@/js/pages/InputAlias'
+import { LocalGame } from '@/js/pages/LocalGame'
+import { Pong } from '@/js/pages/Pong'
+import { SelectTournamentType } from '@/js/pages/SelectTournamentType'
+import { Tournament } from '@/js/pages/Tournament'
 
 function App() {
   return Router(

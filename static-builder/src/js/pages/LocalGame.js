@@ -1,5 +1,5 @@
 import '@/scss/styles.scss'
-import { BaseLayout } from '@/js/layouts/BaseLayout'
+import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { useLocation } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 
@@ -18,7 +18,7 @@ const LocalGame = () => {
   const loc = useLocation()
 
   if (!loc.state) {
-    return BaseLayout(
+    return HeaderWithTitleLayout(
       Teact.createElement(
         'div',
         { className: 'container' },
@@ -211,7 +211,7 @@ const LocalGame = () => {
     }
   }, [])
 
-  return BaseLayout(
+  return HeaderWithTitleLayout(
     Teact.createElement(
       'div',
       { className: 'container' },
