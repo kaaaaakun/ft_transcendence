@@ -24,7 +24,8 @@ services:
 
   static-builder:
     build:
-      context: static-builder/
+      context: .
+      dockerfile: static-builder/Dockerfile
       target: build
       args:
         - VITE_API_URL

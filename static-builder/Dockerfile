@@ -11,7 +11,7 @@ FROM base AS development
 
 WORKDIR /usr/src/vite
 
-COPY package.json pnpm-lock.yaml ./
+COPY ./static-builder/package.json ./static-builder/pnpm-lock.yaml ./shared-config/config.json ./
 
 
 # build stage
@@ -22,7 +22,7 @@ ARG VITE_WEBSOCKET_URL
 
 WORKDIR /usr/src/vite
 
-COPY ./ ./
+COPY ./static-builder/ ./shared-config/config.json ./
 
 RUN --mount=type=cache,target=/root/.pnpm-store \
     pnpm install --frozen-lockfile
