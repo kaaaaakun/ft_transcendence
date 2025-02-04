@@ -28,7 +28,7 @@ function handleSubmit(event) {
       })
     } else {
       userApi
-      .getsecretQuestion(data)
+      .getSecretQuestion(data)
       .then(data => {
         console.log('Success:', data)
         secretQuestion = data.secret_question

@@ -56,7 +56,7 @@ function passwordReset(data) {
     })
 }
 
-function getsecretQuestion(data) {
+function getSecretQuestion(data) {
     return api.get(`/api/users/${data.login_name}/password_reset/`, data).then(response => {
         if (!response.ok) {
             return response.json().then(errData => {
@@ -83,6 +83,6 @@ export const userApi = {
   login,
   register,
   passwordReset,
-  getsecretQuestion,
+  getSecretQuestion,
   deleteAccount,
 }

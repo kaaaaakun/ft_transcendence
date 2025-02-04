@@ -1,10 +1,10 @@
 ENV_FILE_PATH = .env.sample
-DOCKER_COMPOSE = sudo docker compose --env-file ${ENV_FILE_PATH} -f ./docker-compose.yml
+DOCKER_COMPOSE = docker compose --env-file ${ENV_FILE_PATH} -f ./docker-compose.yml
 CERT_SCRIPT_DIR = ./reverseproxy/tools
 CERT_DIR = ./reverseproxy/ssl
 
 ifdef WITH_LOCAL
-	DOCKER_COMPOSE = sudo docker compose --env-file ${ENV_FILE_PATH} -f ./docker-compose.local.yml
+	DOCKER_COMPOSE = docker compose --env-file ${ENV_FILE_PATH} -f ./docker-compose.local.yml
 endif
 
 all: run

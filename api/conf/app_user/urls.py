@@ -5,10 +5,6 @@ from .views import UserRegisterView
 from .views import UserPasswordResetView
 from .views import UserDeleteView
 router = DefaultRouter()
-# router.register(r'tournament', TournamentViewSet)
-# router.register(r'player', TournamentPlayerViewSet)
-# router.register(r'login', UserLoginView, basename='login')
-# router.register(r'register', UserRegisterView, basename='register')
 
 urlpatterns = [
     path('login/', UserLoginView.as_view(), name='login'),
