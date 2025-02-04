@@ -1,7 +1,7 @@
 import '@/scss/styles.scss'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
-import { useLocation } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
+import { api } from '@/js/infrastructures/api/fetch'
 
 // バックエンドと共通の定数
 
@@ -11,9 +11,17 @@ const PADDLE_WIDTH = 5
 
 const LocalGame = () => {
   const [endMatch, setEndMatch] = Teact.useState(false)
-  const loc = useLocation()
+  const [gameData, setGameData] = Teact.useState(null)
 
-  if (!loc.state) {
+  Teact.useEffect(() => {
+    api.get('/api/matches/local')
+      .then(response => response.json())
+      .then(data => {setGameData(data)})
+      .catch(error => {console.error('Error:', error)})
+  }, [])
+
+  // API の結果を待つ
+  if (!gameData) {
     return BaseLayout(
       Teact.createElement(
         'div',
@@ -21,15 +29,15 @@ const LocalGame = () => {
         Teact.createElement(
           'h1',
           { className: 'text-center text-light' },
-          'Error',
-        ),
-      ),
+          'Loading...'
+        )
+      )
     )
   }
 
-  const data = loc.state.data
-  const leftPlayerName = data.left.player_name
-  const rightPlayerName = data.right.player_name
+  console.log('gameData', gameData)
+  const leftPlayerName = gameData.left.player_name
+  const rightPlayerName = gameData.right.player_name
   let winner = null
 
   Teact.useEffect(() => {

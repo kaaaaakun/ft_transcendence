@@ -3,5 +3,5 @@
     "WALL_X_LIMIT": 500,
     "WALL_Y_LIMIT": 300,
     "PADDLE_HEIGHT": 30,
-    "BALL_RADIUS": 2
+    "BALL_RADIUS": 4
 }
