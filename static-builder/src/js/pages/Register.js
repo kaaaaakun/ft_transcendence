@@ -30,7 +30,6 @@ function handleSubmit(event) {
   }
 
   export const Register = () => {
-    const numPlayers = 2
     return BaseLayout(
       Teact.createElement(
         'div',
@@ -41,7 +40,7 @@ function handleSubmit(event) {
             onSubmit: handleSubmit,
             className: 'text-center mt-3 d-grid gap-2 col-3 mx-auto',
           },
-          ...Array.from({ length: numPlayers / 2 }, (_, i) => {
+          ...Array.from({ length: 1 }, (_, i) => {
             const className = 'form-label mt-2 text-start text-white phont-weight-bold'
             return Teact.createElement(
               'div',
