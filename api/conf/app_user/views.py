@@ -18,17 +18,6 @@ from rest_framework import status
 from rest_framework.views import APIView
 
 
-def ft_authenticate(login_name=None, password=None):
-    try:
-        user = User.objects.get(login_name=login_name)
-    except User.DoesNotExist:
-        return None
-
-    if user.password_hash == make_password(password=password, salt="ft_transcendence"):
-        return user
-    else:
-        return None
-
 
 class UserLoginView(APIView):
     def post(self, request, *args, **kwargs):
@@ -42,7 +31,7 @@ class UserLoginView(APIView):
                     'error': 'Login name and password are required.'
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-            user = ft_authenticate(login_name=login_name, password=password)
+            user = User.ft_authenticate(login_name=login_name, password=password)
 
             if user is not None:
                 refresh = RefreshToken.for_user(user)
