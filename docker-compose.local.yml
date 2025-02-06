@@ -10,7 +10,11 @@ services:
     volumes:
       - vol_rdbms:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} && pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} || exit 1",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -28,6 +32,7 @@ services:
     restart: on-failure
     environment:
       - VITE_API_URL
+      - VITE_WEBSOCKET_URL
     volumes:
       - ./static-builder:/usr/src/vite
     networks:
@@ -38,7 +43,12 @@ services:
       timeout: 5s
       retries: 5
       start_period: 120s
-    entrypoint: ["sh", "-c", "pnpm config set store-dir /tmp/pnpm/store && pnpm install --frozen-lockfile && pnpm dev"]
+    entrypoint:
+      [
+        "sh",
+        "-c",
+        "pnpm config set store-dir /tmp/pnpm/store && pnpm install --frozen-lockfile && pnpm dev",
+      ]
 
   reverseproxy:
     container_name: "reverseproxy"
@@ -58,7 +68,6 @@ services:
       rdbms:
         condition: service_healthy
 
-
   api:
     build:
       context: api/
@@ -77,11 +86,33 @@ services:
     depends_on:
       rdbms:
         condition: service_healthy
+      in_memory_db:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-H", "Host: reverseproxy", "http://localhost:8000"]
+      test:
+        [
+          "CMD",
+          "curl",
+          "-H",
+          "Host: reverseproxy",
+          "http://localhost:8000/health/",
+        ]
       interval: 5s
       retries: 5
       start_period: 120s
+
+  in_memory_db:
+    container_name: "in_memory_db"
+    image: redis:7.4.2
+    networks:
+      - net_pong
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+    ports:
+      - "6379:6379"
 
 networks:
   net_pong:

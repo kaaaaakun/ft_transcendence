@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
-  title: Tournament API
+  title: Pong API
   version: 1.0.0
-  description: トーナメント、試合、プレイヤーの管理用API。
+  description: PongゲームのAPI。
   contact:
     name: とらせん
     url: https://www.example.com/support
@@ -14,6 +14,8 @@ info:
 tags:
   - name: local_play
     description: localでponggameを遊ぶためのAPI
+  - name: user_management
+    description: ユーザー管理用API
 
 paths:
   /api/tournaments/local:
@@ -106,8 +108,278 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/error_response"
+  /api/auth/login:
+    post:
+      tags:
+        - user_management
+      summary: ログイン
+      description: ログイン名とパスワードを使用してログインします。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/user_login_request"
+      responses:
+        "200":
+          description: ログイン成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user_login_response"
+        default:
+          description: エラーレスポンスまたはその他のレスポンス
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+
+  /api/auth/password-reset:
+    post:
+      tags:
+        - user_management
+      summary: パスワードリセット
+      description: 秘密の質問とその答えを使用してパスワードをリセットします。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/user_passwordreset_request"
+      responses:
+        "200":
+          description: リセット成功
+        default:
+          description: エラーレスポンスまたその他のレスポンス
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+
+  /api/auth/password-reset/secret-question:
+    post:
+      tags:
+        - user_management
+      summary: 秘密の質問取得
+      description: ログイン名に対応する秘密の質問を取得します。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/user_secretquestion_request"
+      responses:
+        "200":
+          description: 秘密の質問
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/secret_question_response"
+        default:
+          description: エラーレスポンスまたその他のレスポンス
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+
+  /api/users/{display_name}/friends:
+    parameters:
+      - $ref: "#/components/parameters/display_name"
+    get:
+      tags:
+        - user_management
+      summary: フレンドリスト取得
+      security:
+        - bearerAuth: []
+      description: 表示名に対応するフレンドリストを取得します。
+      responses:
+        "200":
+          description: フレンドリスト
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/friends_response"
+        default:
+          description: エラーレスポンスまたその他のレスポンス
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+
+  /api/users/{display_name}/friends/{friend_name}:
+    parameters:
+      - $ref: "#/components/parameters/display_name"
+      - $ref: "#/components/parameters/friend_name"
+    post:
+      tags:
+        - user_management
+      summary: フレンド追加
+      security:
+        - bearerAuth: []
+      description: 表示名からフレンドに対してフレンドリクエスト・承認。
+      responses:
+        "200":
+          description: フレンド追加成功
+        default:
+          description: エラーレスポンスまたその他のレスポンス
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+    delete:
+      tags:
+        - user_management
+      summary: フレンド削除
+      security:
+        - bearerAuth: []
+      description: 表示名とフレンドのフレンド解消・申請拒否
+      responses:
+        "200":
+          description: フレンド削除成功
+        default:
+          description: エラーレスポンスまたその他のレスポンス
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+
+  /api/users/{display_name}/friend_requests:
+    parameters:
+      - $ref: "#/components/parameters/display_name"
+    get:
+      tags:
+        - user_management
+      summary: フレンドリクエスト取得
+      security:
+        - bearerAuth: []
+      description: 表示名に対応するフレンドリクエストを取得します。
+      responses:
+        "200":
+          description: フレンドリクエスト
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/friends_response"
+        default:
+          description: エラーレスポンスまたその他のレスポンス
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+
+  /api/users:
+    post:
+      tags:
+        - user_management
+      summary: ユーザー登録
+      description: ログイン名とパスワードを使用して新しいユーザーを登録します。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/user_register_request"
+      responses:
+        "201":
+          description: 登録成功
+        default:
+          description: エラーレスポンスまたはその他のレスポンス
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+
+    patch:
+      tags:
+        - user_management
+      summary: ユーザー情報更新
+      security:
+        - bearerAuth: []
+      description: ログインしているユーザーの情報を更新します。
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/user_patch_request"
+      responses:
+        "200":
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user_patch_response"
+        default:
+          description: エラーレスポンスまたその他のレスポンス
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+    delete:
+      tags:
+        - user_management
+      summary: ユーザー削除
+      security:
+        - bearerAuth: []
+      description: ログインしているユーザーを削除します。
+      responses:
+        "200":
+          description: 削除成功
+        default:
+          description: エラーレスポンスまたその他のレスポンス
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+
+
+  /api/users/{display_name}:
+    parameters:
+      - $ref: "#/components/parameters/display_name"
+    get:
+      tags:
+        - user_management
+      summary: ユーザー情報取得
+      security:
+        - bearerAuth: []
+      description: 表示名に対応するユーザー情報を取得します。
+      responses:
+        "200":
+          description: ユーザー情報
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user_response"
+        default:
+          description: エラーレスポンスまたその他のレスポンス
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
 
 components:
+  parameters:
+    display_name:
+      name: display_name
+      in: path
+      required: true
+      description: 表示名
+      schema:
+        type: string
+    friend_name:
+      name: friend_name
+      in: path
+      required: true
+      description: フレンドの表示名
+      schema:
+        type: string
+  
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     tournament_request:
       type: object
@@ -218,16 +490,291 @@ components:
       required:
         - victory_count
 
+    user_login_request:
+      type: object
+      properties:
+        login_name:
+          type: string
+        password:
+          type: string
+      required:
+        - login_name
+        - password
+      example:
+        login_name: "user1"
+        password: "password1"
+
+    user_login_response:
+      type: object
+      properties:
+        token:
+          type: string
+      required:
+        - token
+      example:
+        token: "token1"
+
+    user_register_request:
+      type: object
+      properties:
+        login_name:
+          type: string
+        display_name:
+          type: string
+        password:
+          type: string
+        password_confirmation:
+          type: string
+        secret_question:
+          type: string
+        secret_answer:
+          type: string
+      required:
+        - login_name
+        - display_name
+        - password
+        - password_confirmation
+        - secret_question
+        - secret_answer
+      example:
+        login_name: "user1"
+        display_name: "ユーザー1"
+        password: "password1"
+        password_confirmation: "password1"
+        secret_question: "母親の旧姓は？"
+        secret_answer: "石川"
+    
+    user_passwordreset_request:
+      type: object
+      properties:
+        login_name:
+          type: string
+        secret_answer:
+          type: string
+        new_password:
+          type: string
+        new_password_confirmation:
+          type: string
+      required:
+        - login_name
+        - secret_answer
+        - new_password
+        - new_password_confirmation
+      example:
+        login_name: "user1"
+        secret_answer: "answer1"
+        new_password: "password2"
+        new_password_confirmation: "password2"
+
+    user_secretquestion_request:
+      type: object
+      properties:
+        login_name:
+          type: string
+      required:
+        - login_name
+      example:
+        login_name: "user1"
+    
+    secret_question_response:
+      type: object
+      properties:
+        secret_question:
+          type: string
+      required:
+        - secret_question
+      example:
+        secret_question: "母親の旧姓は？"
+    
+    friends_response:
+      type: object
+      properties:
+        friends:
+          type: array
+          items:
+            type: object
+            properties:
+              friend_name:
+                type: string
+                description: "友達のユーザー名"
+              is_online:
+                type: boolean
+                description: "オンライン状態を表します (true: オンライン, false: オフライン)"
+            required:
+              - friend_name
+              - is_online
+      required:
+        - friends
+      example:
+        friends:
+          - friend_name: "user2"
+            is_online: true
+          - friend_name: "user3"
+            is_online: false
+          - friend_name: "user4"
+            is_online: true
+    
+    user_patch_request:
+      type: object
+      properties:
+        display_name:
+          type: string
+        avatar:
+          type: string
+          format: binary
+      anyOf: # 更新するフィールドを指定
+        - required: ["display_name", "avatar"]
+      example:
+        display_name: "ユーザー1"
+        avatar: (binary data)
+
+    user_patch_response:
+      type: object
+      properties:
+        display_name:
+          type: string
+        avatar_path:
+          type: string
+      anyOf: # 更新されたフィールドのみ返却
+        - required: ["display_name", "avatar_path"]
+      example:
+        display_name: "ユーザー1"
+        avatar_path: "avatar1.jpg"
+
+    user_response:
+      type: object
+      properties:
+        login_name:
+          type: string
+        display_name:
+          type: string
+        avatar_path:
+          type: string
+        is_friend:
+          type: boolean
+        num_of_friends:
+          type: integer
+        performance:
+          type: object
+          properties:
+            game_records:
+              type: array
+              items:
+                type: object
+                properties:
+                  date:
+                    type: string
+                    format: date-time
+                    description: ゲームの日付と時刻
+                  result:
+                    type: string
+                    enum:
+                      - win
+                      - loss
+                    description: ゲームの結果
+                  opponent:
+                    type: string
+                    description: 対戦相手の名前
+                  score:
+                    type: object
+                    properties:
+                      player:
+                        type: integer
+                        description: プレイヤーのスコア
+                      opponent:
+                        type: integer
+                        description: 対戦相手のスコア
+                    required:
+                      - player
+                      - opponent
+                  match_type:
+                    type: string
+                    enum:
+                      - simple
+                      - tournament
+                    description: マッチの種類
+                required:
+                  - date
+                  - result
+                  - opponent
+                  - score
+                  - match_type
+            statistics:
+              type: object
+              properties:
+                total_games:
+                  type: integer
+                  description: 総ゲーム数
+                wins:
+                  type: integer
+                  description: 勝利数
+                losses:
+                  type: integer
+                  description: 敗北数
+                win_rate:
+                  type: number
+                  format: float
+                  description: 勝率（パーセンテージ）
+              required:
+                - total_games
+                - wins
+                - losses
+                - win_rate
+          required:
+            - game_records
+            - statistics
+      required:
+        - display_name
+        - avatar_path
+        - num_of_friends
+        - performance
+      example:
+        login_name: "user1"
+        display_name: "ユーザー1"
+        avatar_path: "avatar1.jpg"
+        num_of_friends: 3
+        performance:
+          game_records:
+            - date: "2021-01-01T12:00:00Z"
+              result: "win"
+              opponent: "user2"
+              score:
+                player: 10
+                opponent: 5
+              match_type: "simple"
+            - date: "2021-01-02T12:00:00Z"
+              result: "loss"
+              opponent: "user3"
+              score:
+                player: 5
+                opponent: 10
+              match_type: "tournament"
+          statistics:
+            total_games: 2
+            wins: 1
+            losses: 1
+            win_rate: 50.0
+    
     error_response:
       type: object
       properties:
-        error_code:
-          type: integer
-        message:
-          type: string
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+            required:
+              - field
+              - message
       required:
-        - error_code
-        - message
+        - errors
       example:
-        error_code: 400
-        message: "無効なリクエストです。"
+        errors:
+          - field: "login_name"
+            message: "ログイン名が不正です。"
+          - field: "password"
+            message: "パスワードが不正です。"

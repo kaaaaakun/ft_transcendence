@@ -110,7 +110,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('dev-redis', 6379)],  # Redisのアドレスとポートを指定。コンテナ名なにになるのかで変わる
+            "hosts": [('in_memory_db', 6379)],  # Redisのアドレスとポートを指定。コンテナ名なにになるのかで変わる
         },
     },
 }

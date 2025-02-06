@@ -1,8 +1,6 @@
 import '@/scss/styles.scss'
-import { DefaultButton } from '@/js/components/ui/button'
-import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
-import { useLocation, useNavigate } from '@/js/libs/router'
+import { useLocation } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 
 // バックエンドと共通の定数
@@ -15,22 +13,8 @@ const PADDLE_HEIGHT = 30
 // フロントのみの定数
 const PADDLE_WIDTH = 5
 
-function fetchTournament(endMatch) {
-  if (!endMatch) {
-    return
-  }
-
-  const navigate = useNavigate()
-  tournamentsApi
-    .fetchLocalTournament()
-    .then(data => {
-      navigate('/tournament', { data })
-    })
-    .catch(error => console.error('Error:', error))
-}
-
-const Pong = () => {
-  const [endMatch, setEndMatch] = Teact.useState(false)
+const LocalGame = () => {
+  const [setEndMatch] = Teact.useState(false)
   const loc = useLocation()
 
   if (!loc.state) {
@@ -87,9 +71,21 @@ const Pong = () => {
       context.fillText(text, x, y)
     }
 
+    function drawDashedLine(x, color = 'white') {
+      context.strokeStyle = color
+      context.lineWidth = 2
+      context.setLineDash([5, 5]) // 点線のパターン
+      context.beginPath()
+      context.moveTo(x, 0)
+      context.lineTo(x, canvas.height)
+      context.stroke()
+      context.setLineDash([]) // 点線をリセット
+    }
+
     function draw() {
       clearCanvas()
       drawRect(0, 0, canvas.width, canvas.height, BACKGROUND_COLOR)
+      drawDashedLine(canvas.width / 2)
       drawRect(
         canvas.width - PADDLE_WIDTH,
         rightPaddleY - PADDLE_HEIGHT / 2,
@@ -190,9 +186,8 @@ const Pong = () => {
 
     // const url = 'ws://localhost:8080/api/ws/matches' // mokc-server用
     // const url = "ws://localhost:80/api/ws/local-simple-match/"; //memo
-    // const url = 'ws://localhost:80/api/ws/local-tournament-match/'
     const baseWsUrl = import.meta.env.VITE_WEBSOCKET_URL ?? 'wss://localhost'
-    const url = `${baseWsUrl}/api/ws/local-tournament-match/`
+    const url = `${baseWsUrl}/api/ws/local-simple-match/`
     const socket = new WebSocket(url)
     console.log('socket', socket)
     socket.addEventListener('message', event => {
@@ -265,18 +260,8 @@ const Pong = () => {
           ),
         ),
       ),
-      Teact.createElement(
-        'div',
-        { className: 'd-grid gap-2 col-3 mx-auto', id: 'utilButton' },
-        endMatch
-          ? DefaultButton({
-              text: 'トーナメント画面へ',
-              onClick: () => fetchTournament(endMatch),
-            })
-          : null,
-      ),
     ),
   )
 }
 
-export { Pong }
+export { LocalGame }

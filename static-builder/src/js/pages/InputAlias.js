@@ -14,14 +14,13 @@ function handleSubmit(event) {
 
   const data = {}
   const players = []
-  formData.forEach((value, key) => {
+  formData.forEach((value, _key) => {
     players.push(value)
   })
   data.players = players
   tournamentsApi
     .createLocalTournament(data)
     .then(data => {
-      console.log('Success:', data)
       cookie.setTournamentId(data.tournament_id)
       navigate('/tournament', { data })
     })

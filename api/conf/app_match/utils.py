@@ -58,15 +58,19 @@ def format_player_positions(matchdetails_with_related):
 def update_when_match_end(match_id, player_id, tournament_id):
     from tournament.models import TournamentPlayer
     opponent_player_id = get_opponent_player_id(match_id, player_id)
+    
     # Update MatchDetail result
-    MatchDetail.update_result(match_id, player_id, 'win')
-    MatchDetail.update_result(match_id, opponent_player_id, 'lose')
+    MatchDetail.update_result(MatchDetail.objects.filter(match_id = match_id, player_id = player_id).first().id, player_id.id, 'win')
+    MatchDetail.update_result(MatchDetail.objects.filter(match_id = match_id, player_id = opponent_player_id).first().id, opponent_player_id, 'lose')
     # Update Match status
     Match.update_status(match_id, 'end')
+    
+    # NOTE: player_idは player_id.idとしないとidが取得できないので注意
     # Update TournamentPlayer status and victory_count
-    TournamentPlayer.update_status(tournament_id, player_id, 'win')
-    TournamentPlayer.update_status(tournament_id, opponent_player_id, 'lose')
-    TournamentPlayer.increment_victory_count(tournament_id, player_id)
+    TournamentPlayer.update_status(player_id.id, player_id.id, 'win')
+    TournamentPlayer.update_status(opponent_player_id, opponent_player_id, 'lose')
+    TournamentPlayer.increment_victory_count(player_id.id, player_id.id)
+
 
 def get_opponent_player_id(match_id, player_id):
     return MatchDetail.objects.filter(match_id = match_id).exclude(player_id = player_id).first().player_id.id

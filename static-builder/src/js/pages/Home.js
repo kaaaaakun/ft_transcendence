@@ -4,6 +4,7 @@ import { cookie } from '@/js/infrastructures/cookie/cookie'
 import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
+import { api } from '@/js/infrastructures/api/fetch'
 
 export const Home = () => {
   const navigate = useNavigate()
@@ -13,37 +14,31 @@ export const Home = () => {
       'div',
       { className: 'container vh-100' },
       Teact.createElement(
-        'h3',
-        { className: 'mb-5 text-center text-light' },
-        '遊ぶモードを選んでください',
-      ),
-      Teact.createElement(
         'div',
         { className: 'd-grid gap-2 col-3 mx-auto' },
         DefaultButton({
-          text: '2人対戦',
+          text: 'Play Now',
           onClick: () =>
-            navigate('/input_alias?players=2', {
-              playerNum: 2,
-            }),
+            api
+              .get('/api/matches/local')
+              .then(response => {
+                return response.json()
+              })
+              .then(data => {
+                navigate('/local_game', { data })
+              })
+              .catch(error => {
+                console.error('Error:', error)
+              }),
         }),
         DefaultButton({
-          text: '4人対戦',
+          text: 'Tournament Mode',
           onClick: () =>
-            navigate('/input_alias?players=4', {
-              playerNum: 4,
-            }),
-        }),
-        DefaultButton({
-          text: '8人対戦',
-          onClick: () =>
-            navigate('/input_alias?players=8', {
-              playerNum: 8,
-            }),
+            navigate('/select_tournament_type')
         }),
         cookie.checkTournamentIdExists()
           ? DefaultButton({
-              text: '続きから',
+              text: 'Resume Game',
               onClick: () =>
                 tournamentsApi
                   .fetchLocalTournament()
