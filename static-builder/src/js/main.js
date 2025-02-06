@@ -6,7 +6,6 @@ import { InputAlias } from '@/js/pages/InputAlias'
 import { Pong } from '@/js/pages/Pong'
 import { Tournament } from '@/js/pages/Tournament'
 import { Login } from '@/js/pages/Login'
-import { Logout } from '@/js/pages/Logout'
 import { Register } from './pages/Register'
 import { passwordReset } from './pages/passwordReset'
 import { deleteAccount } from './pages/deleteAccount'
@@ -37,10 +36,6 @@ function App() {
     Route ({
       path: '/login',
       component: Login,
-    }),
-    Route({
-      path: '/logout',
-      component: Logout,
     }),
     Route({
       path: '/register',
