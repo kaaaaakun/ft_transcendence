@@ -3,47 +3,54 @@ import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import { userApi } from '@/js/infrastructures/api/userApi'
+import { useBanner } from '@/js/hooks/useBanner'
 
-function handleSubmit(event) {
-    const navigate = useNavigate()
-    event.preventDefault() // フォームのデフォルトの送信を防ぐ（ページリロード防止）
+function handleSubmit(event, showErrorBanner) {
 
-    const formData = new FormData(event.target)
+  const navigate = useNavigate()
+  event.preventDefault() // フォームのデフォルトの送信を防ぐ（ページリロード防止）
 
-    // FormDataからJSON形式のデータに変換
-    const data = {}
-    formData.forEach((value, key) => {
-      data[key] = value
+  const formData = new FormData(event.target)
+
+  // FormDataからJSON形式のデータに変換
+  const data = {}
+  formData.forEach((value, key) => {
+    data[key] = value
+  })
+
+  userApi
+  .login(data)
+  .then(data => {
+    console.log('Success:', data)
+    if (data.access_token) {
+      localStorage.setItem('access_token', data.access_token)
+      localStorage.setItem('refresh_token', data.refresh_token)
+    }
+    navigate('/', {data})
+  })
+  .catch(error => {
+    showErrorBanner({
+      message: "Invalid login name or password",
+      onClose: () => {},
     })
+  })
 
-    console.log('Login data:', data)
 
-    userApi
-      .login(data)
-      .then(data => {
-        console.log('Success:', data)
-        if (data.access_token) {
-          localStorage.setItem('access_token', data.access_token)
-          localStorage.setItem('refresh_token', data.refresh_token)
-        }
-        navigate('/', { data })
-      })
-      .catch(error => {
-        console.error('Error:', error)
-      })
-  }
+}
 
-  export const Login = () => {
-    return BaseLayout(
+export const Login = () => {
+  const { showInfoBanner, showWarningBanner, showErrorBanner, banners } = useBanner()
+  return BaseLayout(
+    Teact.createElement(
+      'div',
+      { className: 'container' },
       Teact.createElement(
-        'div',
-        { className: 'container' },
-        Teact.createElement(
           'form',
           {
-            onSubmit: handleSubmit,
+            onSubmit: (event) => handleSubmit(event, showErrorBanner),
             className: 'text-center mt-3 d-grid gap-2 col-3 mx-auto',
           },
+          ...banners,
           ...Array.from({ length: 1 }, (_, i) => {
             const className = 'form-label mt-2 text-start text-white phont-weight-bold'
             return Teact.createElement(
@@ -68,7 +75,7 @@ function handleSubmit(event) {
                   'Password'
                 ),
                 Teact.createElement('input', {
-                  type: 'text',
+                  type: 'password',
                   id: 'password',
                   className: 'form-control',
                   placeholder: 'Password',

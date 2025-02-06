@@ -5,12 +5,15 @@ import { BaseLayout } from '@/js/layouts/BaseLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import { api } from '@/js/infrastructures/api/fetch'
+import { useBanner } from '@/js/hooks/useBanner'
 
 export const Home = () => {
+  const { showInfoBanner, showWarningBanner, showErrorBanner, banners } = useBanner()
   const navigate = useNavigate()
 
   return BaseLayout(
     Teact.createElement(
+      ...banners,
       'div',
       { className: 'container vh-100' },
       Teact.createElement(
