@@ -17,7 +17,7 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Read the shared configuration file
-SHARED_CONFIG_PATH = os.path.join(BASE_DIR, 'shared-config', 'config.json')
+SHARED_CONFIG_PATH = os.path.join(BASE_DIR, 'config', 'game-settings.json')
 try:
     with open(SHARED_CONFIG_PATH, 'r') as f:
         import json

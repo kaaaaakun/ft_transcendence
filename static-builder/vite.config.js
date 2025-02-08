@@ -2,13 +2,13 @@ import path from "node:path";
 import { defineConfig } from "vite";
 import fs from "fs";
 
-const sharedConfigPath = path.resolve(__dirname, "./config.json");
+const sharedConfigPath = path.resolve(__dirname, "./game-settings.json");
 let sharedConfig = {};
 try {
   const rawData = fs.readFileSync(sharedConfigPath, "utf-8");
   sharedConfig = JSON.parse(rawData);
 } catch (error) {
-  console.error("config.json の読み込みに失敗しました:", error);
+  console.error("game-settings.json の読み込みに失敗しました:", error);
 }
 
 export default defineConfig({
@@ -19,11 +19,11 @@ export default defineConfig({
     },
   },
   define: {
-    __END_GAME_SCORE__: JSON.stringify(sharedConfig.END_GAME_SCORE),
-    __WALL_X_LIMIT__: JSON.stringify(sharedConfig.WALL_X_LIMIT),
-    __WALL_Y_LIMIT__: JSON.stringify(sharedConfig.WALL_Y_LIMIT),  
-    __PADDLE_HEIGHT__: JSON.stringify(sharedConfig.PADDLE_HEIGHT),
-    __BALL_RADIUS__: JSON.stringify(sharedConfig.BALL_RADIUS)
+    END_GAME_SCORE: JSON.stringify(sharedConfig.END_GAME_SCORE),
+    WALL_X_LIMIT: JSON.stringify(sharedConfig.WALL_X_LIMIT),
+    WALL_Y_LIMIT: JSON.stringify(sharedConfig.WALL_Y_LIMIT),  
+    PADDLE_HEIGHT: JSON.stringify(sharedConfig.PADDLE_HEIGHT),
+    BALL_RADIUS: JSON.stringify(sharedConfig.BALL_RADIUS)
   },
   assetsInclude: ["**/*.svg", "**/*.png", "**/*.jpg", "**/*.jpeg",],
   server: {

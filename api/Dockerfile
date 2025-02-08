@@ -59,8 +59,8 @@ RUN mkdir -p ${DJANGO_PROJECT_DIR}utils
 COPY ./api/conf/utils/* ${DJANGO_PROJECT_DIR}utils/
 
 # Create shared config Directory and Copy files
-RUN mkdir -p ${DJANGO_PROJECT_DIR}shared-config
-COPY ./shared-config/* ${DJANGO_PROJECT_DIR}shared-config/
+RUN mkdir -p ${DJANGO_PROJECT_DIR}config
+COPY ./config/* ${DJANGO_PROJECT_DIR}config/
 
 # appsで定めたモデルをDBに反映する準備
 RUN python ${DJANGO_PROJECT_DIR}manage.py makemigrations

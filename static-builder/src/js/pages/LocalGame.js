@@ -45,8 +45,8 @@ const LocalGame = () => {
     const context = canvas.getContext('2d')
 
     // バックエンドからの情報(最初は時差があるためフロントで初期値を設定)
-    let rightPaddleY = (canvas.height - __PADDLE_HEIGHT__) / 2
-    let leftPaddleY = (canvas.height - __PADDLE_HEIGHT__) / 2
+    let rightPaddleY = (canvas.height - PADDLE_HEIGHT) / 2
+    let leftPaddleY = (canvas.height - PADDLE_HEIGHT) / 2
     let ballX = canvas.width / 2
     let ballY = canvas.height / 2
     let rightScore = 0
@@ -92,41 +92,41 @@ const LocalGame = () => {
       drawDashedLine(canvas.width / 2)
       drawRect(
         canvas.width - PADDLE_WIDTH,
-        rightPaddleY - __PADDLE_HEIGHT__ / 2,
+        rightPaddleY - PADDLE_HEIGHT / 2,
         PADDLE_WIDTH,
-        __PADDLE_HEIGHT__,
+        PADDLE_HEIGHT,
         'white',
       )
       drawRect(
         0,
-        leftPaddleY - __PADDLE_HEIGHT__ / 2,
+        leftPaddleY - PADDLE_HEIGHT / 2,
         PADDLE_WIDTH,
-        __PADDLE_HEIGHT__,
+        PADDLE_HEIGHT,
         'white',
       )
       if (winner === null) {
-        drawBall(ballX, ballY, __BALL_RADIUS__, '#FFD700')
+        drawBall(ballX, ballY, BALL_RADIUS, '#FFD700')
       }
       drawText(
         `${rightScore}`,
         canvas.width / 4,
         50,
         '48px sans-serif',
-        rightScore >= (__END_GAME_SCORE__ - 1) ? 'yellow' : 'white',
+        rightScore >= (END_GAME_SCORE - 1) ? 'yellow' : 'white',
       )
       drawText(
         `${leftScore}`,
         (canvas.width / 4) * 3,
         50,
         '48px sans-serif',
-        leftScore >= (__END_GAME_SCORE__ - 1) ? 'yellow' : 'white',
+        leftScore >= (END_GAME_SCORE - 1) ? 'yellow' : 'white',
       )
     }
 
     function update() {
       draw()
-      if (leftScore === __END_GAME_SCORE__ || rightScore === __END_GAME_SCORE__) {
-        winner = leftScore === __END_GAME_SCORE__ ? rightPlayerName : leftPlayerName
+      if (leftScore === END_GAME_SCORE || rightScore === END_GAME_SCORE) {
+        winner = leftScore === END_GAME_SCORE ? rightPlayerName : leftPlayerName
         drawText(`${winner} wins!`, canvas.width / 2, canvas.height / 2)
         setEndMatch(true)
         clearInterval(intervalId)
@@ -242,15 +242,15 @@ const LocalGame = () => {
             {
               className: 'position-relative',
               style: {
-                width: `${__WALL_X_LIMIT__}px`,
-                height: `${__WALL_Y_LIMIT__}px`,
+                width: `${WALL_X_LIMIT}px`,
+                height: `${WALL_Y_LIMIT}px`,
                 backgroundColor: BACKGROUND_COLOR,
               },
             },
             Teact.createElement('canvas', {
               id: 'pongCanvas',
-              width: __WALL_X_LIMIT__,
-              height: __WALL_Y_LIMIT__,
+              width: WALL_X_LIMIT,
+              height: WALL_Y_LIMIT,
             }),
           ),
           Teact.createElement(
