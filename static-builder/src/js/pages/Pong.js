@@ -1,18 +1,14 @@
 import '@/scss/styles.scss'
 import { DefaultButton } from '@/js/components/ui/button'
 import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
-import { BaseLayout } from '@/js/layouts/BaseLayout'
+import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { useLocation, useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 
 // バックエンドと共通の定数
-const BACKGROUND_COLOR = '#1E1E2C'
-const WALL_X_LIMIT = 500
-const WALL_Y_LIMIT = 300
-const BALL_RADIUS = 8
-const PADDLE_HEIGHT = 30
 
 // フロントのみの定数
+const BACKGROUND_COLOR = '#1E1E2C'
 const PADDLE_WIDTH = 5
 
 function fetchTournament(endMatch) {
@@ -34,7 +30,7 @@ const Pong = () => {
   const loc = useLocation()
 
   if (!loc.state) {
-    return BaseLayout(
+    return HeaderWithTitleLayout(
       Teact.createElement(
         'div',
         { className: 'container' },
@@ -112,21 +108,21 @@ const Pong = () => {
         canvas.width / 4,
         50,
         '48px sans-serif',
-        rightScore >= 10 ? 'yellow' : 'white',
+        rightScore >= (END_GAME_SCORE - 1) ? 'yellow' : 'white',
       )
       drawText(
         `${leftScore}`,
         (canvas.width / 4) * 3,
         50,
         '48px sans-serif',
-        leftScore >= 10 ? 'yellow' : 'white',
+        leftScore >= (END_GAME_SCORE - 1) ? 'yellow' : 'white',
       )
     }
 
     function update() {
       draw()
-      if (leftScore === 11 || rightScore === 11) {
-        winner = leftScore === 11 ? rightPlayerName : leftPlayerName
+      if (leftScore === END_GAME_SCORE || rightScore === END_GAME_SCORE) {
+        winner = leftScore === END_GAME_SCORE ? rightPlayerName : leftPlayerName
         drawText(`${winner} wins!`, canvas.width / 2, canvas.height / 2)
         setEndMatch(true)
         clearInterval(intervalId)
@@ -216,7 +212,7 @@ const Pong = () => {
     }
   }, [])
 
-  return BaseLayout(
+  return HeaderWithTitleLayout(
     Teact.createElement(
       'div',
       { className: 'container' },

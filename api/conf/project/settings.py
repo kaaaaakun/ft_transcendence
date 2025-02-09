@@ -16,6 +16,22 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Read the shared configuration file
+SHARED_CONFIG_PATH = os.path.join(BASE_DIR, 'config', 'game-settings.json')
+try:
+    with open(SHARED_CONFIG_PATH, 'r') as f:
+        import json
+        config = json.load(f)
+except FileNotFoundError:
+    print(f"File not found: {SHARED_CONFIG_PATH}")
+    config = {}
+## 環境変数として取得できるようにjsonから取得
+END_GAME_SCORE = config.get('END_GAME_SCORE')
+WALL_X_LIMIT = config.get('WALL_X_LIMIT')
+WALL_Y_LIMIT = config.get('WALL_Y_LIMIT')
+PADDLE_HEIGHT = config.get('PADDLE_HEIGHT')
+BALL_RADIUS = config.get('BALL_RADIUS')
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 

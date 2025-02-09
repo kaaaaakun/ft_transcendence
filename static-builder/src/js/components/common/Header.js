@@ -7,7 +7,7 @@ const handleLogout = () => {
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
   }
-};
+}
 
 const displayAuth = () => {
   if (localStorage.getItem('access_token')) {
@@ -24,9 +24,9 @@ const displayAuth = () => {
           className: 'nav-link text-white',
         },
         'Logout',
+      ),
     )
-  )
-}
+  }
   return Teact.createElement(
     'li',
     { className: 'nav-item' },
