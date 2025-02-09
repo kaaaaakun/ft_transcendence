@@ -1,12 +1,17 @@
 import '@/scss/styles.scss'
 import { Route, Router } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
+import { FriendsList } from '@/js/pages/FriendsList'
 import { Home } from '@/js/pages/Home'
-import { SelectTournamentType } from '@/js/pages/SelectTournamentType'
-import { LocalGame } from '@/js/pages/LocalGame'
 import { InputAlias } from '@/js/pages/InputAlias'
+import { LocalGame } from '@/js/pages/LocalGame'
 import { Pong } from '@/js/pages/Pong'
+import { SelectTournamentType } from '@/js/pages/SelectTournamentType'
 import { Tournament } from '@/js/pages/Tournament'
+import { Login } from '@/js/pages/Login'
+import { Register } from '@/js/pages/Register'
+import { passwordReset } from '@/js/pages/passwordReset'
+import { deleteAccount } from '@/js/pages/deleteAccount'
 
 function App() {
   return Router(
@@ -38,6 +43,26 @@ function App() {
     Route({
       path: '/game',
       component: Pong,
+    }),
+    Route({
+      path: '/users/:id/friends',
+      component: FriendsList,
+    }),
+    Route({
+      path: '/login',
+      component: Login,
+    }),
+    Route({
+      path: '/register',
+      component: Register,
+    }),
+    Route({
+      path: '/password-reset',
+      component: passwordReset,
+    }),
+    Route({
+      path: '/delete-account',
+      component: deleteAccount,
     }),
   )
 }

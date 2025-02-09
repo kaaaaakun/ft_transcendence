@@ -1,14 +1,12 @@
 import { DefaultButton } from '@/js/components/ui/button'
-import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
-import { cookie } from '@/js/infrastructures/cookie/cookie'
-import { BaseLayout } from '@/js/layouts/BaseLayout'
+import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 
 export const SelectTournamentType = () => {
   const navigate = useNavigate()
 
-  return BaseLayout(
+  return HeaderWithTitleLayout(
     Teact.createElement(
       'div',
       { className: 'container vh-100' },
@@ -40,7 +38,7 @@ export const SelectTournamentType = () => {
             navigate('/input_alias?players=8', {
               playerNum: 8,
             }),
-            })
+        }),
       ),
     ),
   )

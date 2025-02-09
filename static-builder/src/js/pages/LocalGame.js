@@ -1,5 +1,5 @@
 import '@/scss/styles.scss'
-import { BaseLayout } from '@/js/layouts/BaseLayout'
+import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { Teact } from '@/js/libs/teact'
 import { api } from '@/js/infrastructures/api/fetch'
 
@@ -22,7 +22,7 @@ const LocalGame = () => {
 
   // API の結果を待つ
   if (!gameData) {
-    return BaseLayout(
+    return HeaderWithTitleLayout(
       Teact.createElement(
         'div',
         { className: 'container' },
@@ -215,7 +215,7 @@ const LocalGame = () => {
     }
   }, [])
 
-  return BaseLayout(
+  return HeaderWithTitleLayout(
     Teact.createElement(
       'div',
       { className: 'container' },

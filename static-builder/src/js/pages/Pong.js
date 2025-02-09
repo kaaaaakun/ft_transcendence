@@ -1,7 +1,7 @@
 import '@/scss/styles.scss'
 import { DefaultButton } from '@/js/components/ui/button'
 import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
-import { BaseLayout } from '@/js/layouts/BaseLayout'
+import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { useLocation, useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 
@@ -30,7 +30,7 @@ const Pong = () => {
   const loc = useLocation()
 
   if (!loc.state) {
-    return BaseLayout(
+    return HeaderWithTitleLayout(
       Teact.createElement(
         'div',
         { className: 'container' },
@@ -212,7 +212,7 @@ const Pong = () => {
     }
   }, [])
 
-  return BaseLayout(
+  return HeaderWithTitleLayout(
     Teact.createElement(
       'div',
       { className: 'container' },

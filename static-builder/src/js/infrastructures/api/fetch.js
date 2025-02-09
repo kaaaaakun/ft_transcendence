@@ -3,10 +3,23 @@ class FetchWrapper {
     this.baseUrl = baseUrl
   }
 
+  getAuthHeader() {
+    if (localStorage.getItem('access_token')) {
+      return {
+        // TODO 本当はBearerをつけるのだが、それをするとサーバー側でエラーになるので、とりあえずこのまま
+        Authorization: `${localStorage.getItem('access_token')}`,
+      }
+    }
+    return {}
+  }
+
   async get(url) {
     const response = await fetch(`${this.baseUrl}${url}`, {
       method: 'GET',
       credentials: 'include',
+      headers: {
+        ...this.getAuthHeader(),
+      },
     })
     return response
   }
@@ -17,6 +30,7 @@ class FetchWrapper {
       body: data ? JSON.stringify(data) : {},
       headers: {
         'Content-Type': 'application/json',
+        ...this.getAuthHeader(),
       },
       credentials: 'include',
     })
@@ -29,6 +43,7 @@ class FetchWrapper {
       body: data ? JSON.stringify(data) : {},
       headers: {
         'Content-Type': 'application/json',
+        ...this.getAuthHeader(),
       },
       credentials: 'include',
     })
@@ -41,6 +56,7 @@ class FetchWrapper {
       body: data ? JSON.stringify(data) : {},
       headers: {
         'Content-Type': 'application/json',
+        ...this.getAuthHeader(),
       },
       credentials: 'include',
     })
@@ -51,6 +67,7 @@ class FetchWrapper {
     const response = await fetch(`${this.baseUrl}${url}`, {
       method: 'DELETE',
       credentials: 'include',
+      ...this.getAuthHeader(),
     })
     return response
   }
