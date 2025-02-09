@@ -5,12 +5,15 @@ import { cookie } from '@/js/infrastructures/cookie/cookie'
 import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
+import { useBanner } from '@/js/hooks/useBanner'
 
 export const Home = () => {
+  const { showInfoBanner, showWarningBanner, showErrorBanner, banners } = useBanner()
   const navigate = useNavigate()
 
   return HeaderWithTitleLayout(
     Teact.createElement(
+      ...banners,
       'div',
       { className: 'container vh-100' },
       Teact.createElement(

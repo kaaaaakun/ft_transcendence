@@ -8,6 +8,10 @@ import { LocalGame } from '@/js/pages/LocalGame'
 import { Pong } from '@/js/pages/Pong'
 import { SelectTournamentType } from '@/js/pages/SelectTournamentType'
 import { Tournament } from '@/js/pages/Tournament'
+import { Login } from '@/js/pages/Login'
+import { Register } from '@/js/pages/Register'
+import { passwordReset } from '@/js/pages/passwordReset'
+import { deleteAccount } from '@/js/pages/deleteAccount'
 
 function App() {
   return Router(
@@ -44,6 +48,22 @@ function App() {
       path: '/users/:id/friends',
       component: FriendsList,
     }),
+    Route ({
+      path: '/login',
+      component: Login,
+    }),
+    Route({
+      path: '/register',
+      component: Register,
+    }),
+    Route({
+      path: '/password-reset',
+      component: passwordReset,
+    }),
+    Route({
+      path: '/delete-account',
+      component: deleteAccount,
+    })
   )
 }
 
