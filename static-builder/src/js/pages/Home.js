@@ -8,7 +8,8 @@ import { Teact } from '@/js/libs/teact'
 import { useBanner } from '@/js/hooks/useBanner'
 
 export const Home = () => {
-  const { showInfoBanner, showWarningBanner, showErrorBanner, banners } = useBanner()
+  const { showInfoBanner, showWarningBanner, showErrorBanner, banners } =
+    useBanner()
   const navigate = useNavigate()
 
   return HeaderWithTitleLayout(

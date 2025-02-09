@@ -24,9 +24,6 @@ function createLocalTournament(data) {
   })
 }
 
-
-
-
 export const tournamentsApi = {
   fetchLocalTournament,
   createLocalTournament,

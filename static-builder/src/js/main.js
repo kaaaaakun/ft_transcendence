@@ -48,7 +48,7 @@ function App() {
       path: '/users/:id/friends',
       component: FriendsList,
     }),
-    Route ({
+    Route({
       path: '/login',
       component: Login,
     }),
@@ -63,7 +63,7 @@ function App() {
     Route({
       path: '/delete-account',
       component: deleteAccount,
-    })
+    }),
   )
 }
 
