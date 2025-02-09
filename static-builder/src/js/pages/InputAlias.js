@@ -2,7 +2,7 @@ import '@/scss/styles.scss'
 import { DefaultButton } from '@/js/components/ui/button'
 import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
 import { cookie } from '@/js/infrastructures/cookie/cookie'
-import { BaseLayout } from '@/js/layouts/BaseLayout'
+import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { Teact } from '@/js/libs/teact'
 import { useNavigate, useSearchParams } from '../libs/router'
 
@@ -32,7 +32,7 @@ function handleSubmit(event) {
 export const InputAlias = () => {
   const params = useSearchParams()
   const numPlayers = params.get('players')
-  return BaseLayout(
+  return HeaderWithTitleLayout(
     Teact.createElement(
       'div',
       { className: 'container' },

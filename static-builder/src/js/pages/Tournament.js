@@ -2,7 +2,7 @@ import '@/scss/styles.scss'
 import { DefaultButton } from '@/js/components/ui/button'
 import { api } from '@/js/infrastructures/api/fetch'
 import { cookie } from '@/js/infrastructures/cookie/cookie'
-import { BaseLayout } from '@/js/layouts/BaseLayout'
+import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { useLocation, useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 
@@ -513,5 +513,5 @@ export const Tournament = () => {
     return Teact.createElement('h1', null, '400 Bad Request')
   }
   const participants = loc.state.data
-  return BaseLayout(ConditionalBranch(participants))
+  return HeaderWithTitleLayout(ConditionalBranch(participants))
 }

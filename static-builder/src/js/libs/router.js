@@ -55,7 +55,10 @@ export function Router() {
   }
 
   if (matchedRoute.component instanceof Function) {
-    return Teact.createElement(matchedRoute.component, { state: state, params: matchedRoute.params })
+    return Teact.createElement(matchedRoute.component, {
+      state: state,
+      params: matchedRoute.params,
+    })
   }
 
   return matchedRoute.component
