@@ -19,6 +19,7 @@ function checkTournamentIdExists() {
   return false // tournament_idが存在しなければfalseを返す
 }
 
+
 export const cookie = {
   setTournamentId,
   deleteTournamentId,

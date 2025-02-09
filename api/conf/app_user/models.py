@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.hashers import make_password
 
 
 class User(models.Model):
@@ -11,6 +12,19 @@ class User(models.Model):
     secret_answer_hash = models.CharField(max_length=255)
     last_online_at = models.DateTimeField(default=None, null=True)
     deleted_at = models.DateTimeField(default=None, null=True)
+
+    @classmethod
+    def ft_authenticate(cls, login_name=None, password=None):
+        try:
+            user = cls.objects.get(login_name=login_name)
+        except cls.DoesNotExist:
+            return None
+
+        if user.password_hash == make_password(password=password, salt="ft_transcendence"):
+            return user
+        else:
+            return None
+
 
 
     class Meta:
