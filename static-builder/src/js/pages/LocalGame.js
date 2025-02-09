@@ -1,23 +1,27 @@
 import '@/scss/styles.scss'
 import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
-import { useLocation } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
+import { api } from '@/js/infrastructures/api/fetch'
 
 // バックエンドと共通の定数
-const BACKGROUND_COLOR = '#1E1E2C'
-const WALL_X_LIMIT = 500
-const WALL_Y_LIMIT = 300
-const BALL_RADIUS = 8
-const PADDLE_HEIGHT = 30
 
 // フロントのみの定数
+const BACKGROUND_COLOR = '#1E1E2C'
 const PADDLE_WIDTH = 5
 
 const LocalGame = () => {
-  const [setEndMatch] = Teact.useState(false)
-  const loc = useLocation()
+  const [endMatch, setEndMatch] = Teact.useState(false)
+  const [gameData, setGameData] = Teact.useState(null)
 
-  if (!loc.state) {
+  Teact.useEffect(() => {
+    api.get('/api/matches/local')
+      .then(response => response.json())
+      .then(data => {setGameData(data)})
+      .catch(error => {console.error('Error:', error)})
+  }, [])
+
+  // API の結果を待つ
+  if (!gameData) {
     return HeaderWithTitleLayout(
       Teact.createElement(
         'div',
@@ -25,15 +29,15 @@ const LocalGame = () => {
         Teact.createElement(
           'h1',
           { className: 'text-center text-light' },
-          'Error',
-        ),
-      ),
+          'Loading...'
+        )
+      )
     )
   }
 
-  const data = loc.state.data
-  const leftPlayerName = data.left.player_name
-  const rightPlayerName = data.right.player_name
+  console.log('gameData', gameData)
+  const leftPlayerName = gameData.left.player_name
+  const rightPlayerName = gameData.right.player_name
   let winner = null
 
   Teact.useEffect(() => {
@@ -108,21 +112,21 @@ const LocalGame = () => {
         canvas.width / 4,
         50,
         '48px sans-serif',
-        rightScore >= 10 ? 'yellow' : 'white',
+        rightScore >= (END_GAME_SCORE - 1) ? 'yellow' : 'white',
       )
       drawText(
         `${leftScore}`,
         (canvas.width / 4) * 3,
         50,
         '48px sans-serif',
-        leftScore >= 10 ? 'yellow' : 'white',
+        leftScore >= (END_GAME_SCORE - 1) ? 'yellow' : 'white',
       )
     }
 
     function update() {
       draw()
-      if (leftScore === 11 || rightScore === 11) {
-        winner = leftScore === 11 ? rightPlayerName : leftPlayerName
+      if (leftScore === END_GAME_SCORE || rightScore === END_GAME_SCORE) {
+        winner = leftScore === END_GAME_SCORE ? rightPlayerName : leftPlayerName
         drawText(`${winner} wins!`, canvas.width / 2, canvas.height / 2)
         setEndMatch(true)
         clearInterval(intervalId)

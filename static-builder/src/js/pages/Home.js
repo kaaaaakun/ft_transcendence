@@ -23,17 +23,7 @@ export const Home = () => {
         DefaultButton({
           text: 'Play Now',
           onClick: () =>
-            api
-              .get('/api/matches/local')
-              .then(response => {
-                return response.json()
-              })
-              .then(data => {
-                navigate('/local_game', { data })
-              })
-              .catch(error => {
-                console.error('Error:', error)
-              }),
+            navigate('/local_game')
         }),
         DefaultButton({
           text: 'Tournament Mode',
