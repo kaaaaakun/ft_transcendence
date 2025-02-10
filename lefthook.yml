@@ -9,4 +9,4 @@ pre-push:
   commands:
     js-format:
       glob: "*.{js,ts,jsx,tsx}"
-      run: docker compose exec -it static-builder pnpm format {staged_files}
+      run: docker compose exec -it static-builder pnpm format
