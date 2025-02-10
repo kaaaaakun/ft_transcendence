@@ -4,7 +4,7 @@ on:
   push:
 
 jobs:
-  eslint:
+  js-lint:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -22,7 +22,25 @@ jobs:
       - name: Run lint check
         run: pnpm lint
 
-  build:
+  js-format:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./static-builder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Run lint check
+        run: pnpm format
+
+  js-build:
     runs-on: ubuntu-latest
     defaults:
       run:

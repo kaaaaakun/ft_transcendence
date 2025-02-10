@@ -1,0 +1,12 @@
+# EXAMPLE USAGE:
+#
+#   Refer for explanation to following link:
+#   https://github.com/evilmartians/lefthook/blob/master/docs/configuration.md
+#
+
+pre-push:
+  parallel: true
+  commands:
+    js-format:
+      glob: "*.{js,ts,jsx,tsx}"
+      run: docker compose exec -it static-builder pnpm format {staged_files}

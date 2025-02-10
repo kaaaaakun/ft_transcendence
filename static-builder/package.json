@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "biome lint --write --verbose",
-    "format": "biome format --write --verbose",
+    "format": "biome format --write --verbose --error-on-warnings",
     "fix": "biome check --write --verbose"
   },
   "devDependencies": {
