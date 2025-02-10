@@ -31,7 +31,7 @@ function fetchMatch(tournamentEnd) {
       return response.json() // レスポンスをJSONとしてパース
     })
     .then(data => {
-      navigate('/game', { data })
+      navigate('/tournaments/game', { data })
     })
     .catch(error => {
       console.error('Error:', error) // エラー処理

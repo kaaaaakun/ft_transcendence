@@ -5,13 +5,13 @@ import { FriendsList } from '@/js/pages/FriendsList'
 import { Home } from '@/js/pages/Home'
 import { InputAlias } from '@/js/pages/InputAlias'
 import { LocalGame } from '@/js/pages/LocalGame'
+import { Login } from '@/js/pages/Login'
 import { Pong } from '@/js/pages/Pong'
+import { Register } from '@/js/pages/Register'
 import { SelectTournamentType } from '@/js/pages/SelectTournamentType'
 import { Tournament } from '@/js/pages/Tournament'
-import { Login } from '@/js/pages/Login'
-import { Register } from '@/js/pages/Register'
-import { passwordReset } from '@/js/pages/passwordReset'
 import { deleteAccount } from '@/js/pages/deleteAccount'
+import { passwordReset } from '@/js/pages/passwordReset'
 
 function App() {
   return Router(
@@ -25,23 +25,23 @@ function App() {
       component: Teact.createElement('h1', null, 'Contact'),
     }),
     Route({
-      path: '/select_tournament_type',
-      component: SelectTournamentType,
-    }),
-    Route({
-      path: '/local_game',
+      path: '/simple-game/local',
       component: LocalGame,
     }),
     Route({
-      path: '/input_alias',
+      path: '/tournaments',
+      component: SelectTournamentType,
+    }),
+    Route({
+      path: '/tournaments/display-name',
       component: InputAlias,
     }),
     Route({
-      path: '/tournament',
+      path: '/tournaments/bracket',
       component: Tournament,
     }),
     Route({
-      path: '/game',
+      path: '/tournaments/game',
       component: Pong,
     }),
     Route({

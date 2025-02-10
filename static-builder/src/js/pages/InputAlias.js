@@ -22,7 +22,7 @@ function handleSubmit(event) {
     .createLocalTournament(data)
     .then(data => {
       cookie.setTournamentId(data.tournament_id)
-      navigate('/tournament', { data })
+      navigate('/tournaments/bracket', { data })
     })
     .catch(error => {
       console.error('Error:', error)

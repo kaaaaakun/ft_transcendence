@@ -21,21 +21,21 @@ export const SelectTournamentType = () => {
         DefaultButton({
           text: '2人対戦',
           onClick: () =>
-            navigate('/input_alias?players=2', {
+            navigate('/tournaments/display-name?players=2', {
               playerNum: 2,
             }),
         }), // TBD
         DefaultButton({
           text: '4人対戦',
           onClick: () =>
-            navigate('/input_alias?players=4', {
+            navigate('/tournaments/display-name?players=4', {
               playerNum: 4,
             }),
         }), // TBD
         DefaultButton({
           text: '8人対戦',
           onClick: () =>
-            navigate('/input_alias?players=8', {
+            navigate('/tournaments/display-name?players=8', {
               playerNum: 8,
             }),
         }),
