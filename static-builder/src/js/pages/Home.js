@@ -1,11 +1,10 @@
 import { DefaultButton } from '@/js/components/ui/button'
-import { api } from '@/js/infrastructures/api/fetch'
+import { useBanner } from '@/js/hooks/useBanner'
 import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
 import { cookie } from '@/js/infrastructures/cookie/cookie'
 import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
-import { useBanner } from '@/js/hooks/useBanner'
 
 export const Home = () => {
   const { showInfoBanner, showWarningBanner, showErrorBanner, banners } =
@@ -22,12 +21,11 @@ export const Home = () => {
         { className: 'd-grid gap-2 col-3 mx-auto' },
         DefaultButton({
           text: 'Play Now',
-          onClick: () =>
-            navigate('/local_game')
+          onClick: () => navigate('/simple-game/local'),
         }),
         DefaultButton({
           text: 'Tournament Mode',
-          onClick: () => navigate('/select_tournament_type'),
+          onClick: () => navigate('/tournaments'),
         }),
         cookie.checkTournamentIdExists()
           ? DefaultButton({
@@ -36,7 +34,7 @@ export const Home = () => {
                 tournamentsApi
                   .fetchLocalTournament()
                   .then(data => {
-                    navigate('/tournament', { data })
+                    navigate('/tournaments/bracket', { data })
                   })
                   .catch(error => {
                     console.error('Error:', error)

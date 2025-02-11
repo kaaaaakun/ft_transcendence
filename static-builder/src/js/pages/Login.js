@@ -1,9 +1,9 @@
 import { DefaultButton } from '@/js/components/ui/button'
+import { useBanner } from '@/js/hooks/useBanner'
+import { userApi } from '@/js/infrastructures/api/userApi'
 import { SimpleHeaderLayout } from '@/js/layouts/SimpleHeaderLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
-import { userApi } from '@/js/infrastructures/api/userApi'
-import { useBanner } from '@/js/hooks/useBanner'
 
 function handleSubmit(event, showErrorBanner) {
   const navigate = useNavigate()
