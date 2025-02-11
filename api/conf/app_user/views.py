@@ -1,22 +1,15 @@
 import random
-
-from rest_framework import viewsets
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.utils.decorators import method_decorator
-from django.db import transaction, DatabaseError
 from django.views import View
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from django.http import JsonResponse
 from .models import User
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
 import json
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.views import APIView
-
 
 
 class UserLoginView(APIView):
@@ -42,18 +35,17 @@ class UserLoginView(APIView):
                 }, status=status.HTTP_200_OK)
             else:
                 return JsonResponse({
-                    'error': f'Invalid login name or password. {login_name} {make_password(password=password, salt="ft_transcendence")}'
-                }, status=status.HTTP_401_UNAUTHORIZED)
+                    'error': str('Login failed. Check your login name and password.')
+                }, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             return JsonResponse({
-                'error': str(e)
+                'error': 'Something went wrong.'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class UserView(APIView):
     def post(self, request, *args, **kwargs):
         try:
-            # リクエストのボディをJSONとしてパース
             data = json.loads(request.body)
 
             login_name = data.get('login_name')
@@ -62,56 +54,76 @@ class UserView(APIView):
             secret_question = data.get('secret_question')
             secret_answer = data.get('secret_answer')
 
-            # フィールドがすべて入力されているか確認
             if not login_name or not password or not display_name or not secret_question or not secret_answer:
                 return JsonResponse({
                     'error': 'All fields are required.',
                     'Your request': str(data)
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-            # ユーザーを作成
-            user = User.objects.create(
+            user = User.objects.create_user(
                 login_name=login_name,
-                password_hash=make_password(password=password, salt='ft_transcendence'),
+                password=password,
                 display_name=display_name,
                 secret_question=secret_question,
-                secret_answer_hash=make_password(secret_answer, salt='ft_transcendence'),
+                secret_answer=secret_answer
             )
 
-            # JWTのアクセストークンとリフレッシュトークンを生成
-            refresh = RefreshToken.for_user(user)
 
             return JsonResponse({
                 'message': 'Sign up successful',
-                'access_token': str(refresh.access_token),
-                'refresh_token': str(refresh)
             }, status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            # エラー時は500エラーを返す
             return JsonResponse({
-                'error': str(e),
-                'Your request': str(request.body)
+                'error': 'Something went wrong.',
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def delete(self, request, *args, **kwargs):
         try:
-            login_name = json.loads(request.body).get('login_name')
+            data = json.loads(request.body)
+            login_name = data.get('login_name')
+
+            if not login_name:
+                return JsonResponse({
+                    'error': 'Login name is required.'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            auth = request.headers.get('Authorization')
+
+            if auth:
+                access_token = auth.split(' ')[1]
+            if not access_token:
+                return JsonResponse({
+                    'message': 'Login before you delete your account'
+                }, status=status.HTTP_401_UNAUTHORIZED)
+
+
+            access_id = AccessToken(access_token).get('user_id')
             user = User.objects.get(login_name=login_name)
-            user.delete()
+            if (user.deleted_at is not None):
+                raise User.DoesNotExist
+
+            if (user.id != access_id):
+                return JsonResponse({
+                    'message': 'You can only delete your own account'
+                }, status=status.HTTP_403_FORBIDDEN)
+
+
+            user.logical_delete()
+
             return JsonResponse({
                 'message': 'User deleted.'
             }, status=status.HTTP_200_OK)
+
         except User.DoesNotExist:
             return JsonResponse({
                 'error': 'User not found.'
             }, status=status.HTTP_404_NOT_FOUND)
+            
         except Exception as e:
-            with open('c.txt', 'w') as f:
-                f.write(str(e))
-            return JsonResponse({
-                'error': str(e)
 
+            return JsonResponse({
+                'error': 'Something went wrong.'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -126,6 +138,9 @@ class UserPasswordResetView(APIView):
 
             user = User.objects.get(login_name=login_name)
 
+            if (user.deleted_at is not None):
+                raise User.DoesNotExist
+
             return JsonResponse({
                 'secret_question': user.secret_question
             }, status=status.HTTP_200_OK)
@@ -137,7 +152,7 @@ class UserPasswordResetView(APIView):
 
         except Exception as e:
             return JsonResponse({
-                'error': str(e)
+                'error': 'Something went wrong.'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -155,8 +170,11 @@ class UserPasswordResetView(APIView):
 
             user = User.objects.get(login_name=login_name)
 
-            if user.secret_answer_hash == make_password(secret_answer, salt='ft_transcendence'):
-                user.password_hash = make_password(password=new_password, salt='ft_transcendence')
+            if (user.deleted_at is not None):
+                raise User.DoesNotExist
+
+            if check_password(secret_answer, user.secret_answer_hash):
+                user.password = make_password(password=new_password)
                 user.save()
                 return JsonResponse({
                     'message': 'Password reset successful.'
@@ -171,6 +189,6 @@ class UserPasswordResetView(APIView):
             }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return JsonResponse({
-                'error': str(e)
+                'error': 'Something went wrong.'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

@@ -1,7 +1,7 @@
 import '@/scss/styles.scss'
+import { api } from '@/js/infrastructures/api/fetch'
 import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { Teact } from '@/js/libs/teact'
-import { api } from '@/js/infrastructures/api/fetch'
 
 // バックエンドと共通の定数
 
@@ -9,15 +9,20 @@ import { api } from '@/js/infrastructures/api/fetch'
 const BACKGROUND_COLOR = '#1E1E2C'
 const PADDLE_WIDTH = 5
 
-const LocalGame = () => {
+const SimpleGameLocal = () => {
   const [endMatch, setEndMatch] = Teact.useState(false)
   const [gameData, setGameData] = Teact.useState(null)
 
   Teact.useEffect(() => {
-    api.get('/api/matches/local')
+    api
+      .get('/api/matches/local')
       .then(response => response.json())
-      .then(data => {setGameData(data)})
-      .catch(error => {console.error('Error:', error)})
+      .then(data => {
+        setGameData(data)
+      })
+      .catch(error => {
+        console.error('Error:', error)
+      })
   }, [])
 
   // API の結果を待つ
@@ -29,9 +34,9 @@ const LocalGame = () => {
         Teact.createElement(
           'h1',
           { className: 'text-center text-light' },
-          'Loading...'
-        )
-      )
+          'Loading...',
+        ),
+      ),
     )
   }
 
@@ -112,14 +117,14 @@ const LocalGame = () => {
         canvas.width / 4,
         50,
         '48px sans-serif',
-        rightScore >= (END_GAME_SCORE - 1) ? 'yellow' : 'white',
+        rightScore >= END_GAME_SCORE - 1 ? 'yellow' : 'white',
       )
       drawText(
         `${leftScore}`,
         (canvas.width / 4) * 3,
         50,
         '48px sans-serif',
-        leftScore >= (END_GAME_SCORE - 1) ? 'yellow' : 'white',
+        leftScore >= END_GAME_SCORE - 1 ? 'yellow' : 'white',
       )
     }
 
@@ -268,4 +273,4 @@ const LocalGame = () => {
   )
 }
 
-export { LocalGame }
+export { SimpleGameLocal }

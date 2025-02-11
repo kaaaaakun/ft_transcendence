@@ -20,12 +20,12 @@ function fetchTournament(endMatch) {
   tournamentsApi
     .fetchLocalTournament()
     .then(data => {
-      navigate('/tournament', { data })
+      navigate('/tournaments/bracket', { data })
     })
     .catch(error => console.error('Error:', error))
 }
 
-const Pong = () => {
+const TournamentsGame = () => {
   const [endMatch, setEndMatch] = Teact.useState(false)
   const loc = useLocation()
 
@@ -108,14 +108,14 @@ const Pong = () => {
         canvas.width / 4,
         50,
         '48px sans-serif',
-        rightScore >= (END_GAME_SCORE - 1) ? 'yellow' : 'white',
+        rightScore >= END_GAME_SCORE - 1 ? 'yellow' : 'white',
       )
       drawText(
         `${leftScore}`,
         (canvas.width / 4) * 3,
         50,
         '48px sans-serif',
-        leftScore >= (END_GAME_SCORE - 1) ? 'yellow' : 'white',
+        leftScore >= END_GAME_SCORE - 1 ? 'yellow' : 'white',
       )
     }
 
@@ -275,4 +275,4 @@ const Pong = () => {
   )
 }
 
-export { Pong }
+export { TournamentsGame }

@@ -1,8 +1,8 @@
 import { DefaultButton } from '@/js/components/ui/button'
+import { userApi } from '@/js/infrastructures/api/userApi'
 import { SimpleHeaderLayout } from '@/js/layouts/SimpleHeaderLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
-import { userApi } from '@/js/infrastructures/api/userApi'
 import { useBanner } from '../hooks/useBanner'
 
 let secretQuestion = null
@@ -21,7 +21,6 @@ function handleSubmit(event, showErrorBanner) {
     userApi
       .passwordReset(data)
       .then(data => {
-        console.log('Success:', data)
         navigate('/login', { data })
       })
       .catch(error => {
@@ -34,7 +33,6 @@ function handleSubmit(event, showErrorBanner) {
     userApi
       .getSecretQuestion(data)
       .then(data => {
-        console.log('Success:', data)
         secretQuestion = data.secret_question
         navigate('/password-reset', { data })
       })
@@ -99,7 +97,7 @@ function resetPasswordInfo() {
   }
 }
 
-export const passwordReset = () => {
+export const PasswordReset = () => {
   const { showInfoBanner, showWarningBanner, showErrorBanner, banners } =
     useBanner()
   return SimpleHeaderLayout(

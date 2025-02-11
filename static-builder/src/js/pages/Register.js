@@ -1,8 +1,8 @@
 import { DefaultButton } from '@/js/components/ui/button'
+import { userApi } from '@/js/infrastructures/api/userApi'
 import { SimpleHeaderLayout } from '@/js/layouts/SimpleHeaderLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
-import { userApi } from '@/js/infrastructures/api/userApi'
 import { useBanner } from '../hooks/useBanner'
 
 function handleSubmit(event, showErrorBanner, showInfoBanner) {
@@ -22,7 +22,6 @@ function handleSubmit(event, showErrorBanner, showInfoBanner) {
   userApi
     .register(data)
     .then(data => {
-      console.log('Success:', data)
       navigate('/login', { data })
     })
     .catch(error => {

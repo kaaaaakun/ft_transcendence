@@ -19,8 +19,15 @@ function handleSubmit(event, showErrorBanner) {
 
   userApi
     .login(data)
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(errData => {
+          throw new Error(errData.error || 'Unknown error occurred')
+        })
+      }
+      return response.json()
+    })
     .then(data => {
-      console.log('Success:', data)
       if (data.access_token) {
         localStorage.setItem('access_token', data.access_token)
         localStorage.setItem('refresh_token', data.refresh_token)

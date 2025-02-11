@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -70,6 +71,13 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'channels',
 ]
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=30),  # アクセストークンの有効期限（例：15分）
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=365),  # リフレッシュトークンの有効期限（例：7日）
+    'ALGORITHM': 'HS256',  # JWTアルゴリズム（通常はHS256）
+}
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
