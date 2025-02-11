@@ -10,3 +10,6 @@ pre-push:
     js-format:
       glob: "*.{js,ts,jsx,tsx}"
       run: docker compose exec -it static-builder pnpm format
+    js-lint:
+      glob: "*.{js,ts,jsx,tsx}"
+      run: docker compose exec -it static-builder pnpm lint
