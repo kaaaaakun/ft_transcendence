@@ -20,12 +20,12 @@ function fetchTournament(endMatch) {
   tournamentsApi
     .fetchLocalTournament()
     .then(data => {
-      navigate('/tournament', { data })
+      navigate('/tournaments/bracket', { data })
     })
     .catch(error => console.error('Error:', error))
 }
 
-const Pong = () => {
+const TournamentsGame = () => {
   const [endMatch, setEndMatch] = Teact.useState(false)
   const loc = useLocation()
 
@@ -275,4 +275,4 @@ const Pong = () => {
   )
 }
 
-export { Pong }
+export { TournamentsGame }
