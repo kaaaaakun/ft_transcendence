@@ -108,14 +108,14 @@ const Pong = () => {
         canvas.width / 4,
         50,
         '48px sans-serif',
-        rightScore >= (END_GAME_SCORE - 1) ? 'yellow' : 'white',
+        rightScore >= END_GAME_SCORE - 1 ? 'yellow' : 'white',
       )
       drawText(
         `${leftScore}`,
         (canvas.width / 4) * 3,
         50,
         '48px sans-serif',
-        leftScore >= (END_GAME_SCORE - 1) ? 'yellow' : 'white',
+        leftScore >= END_GAME_SCORE - 1 ? 'yellow' : 'white',
       )
     }
 
