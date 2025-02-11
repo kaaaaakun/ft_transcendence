@@ -9,7 +9,7 @@ import { Teact } from '@/js/libs/teact'
 const BACKGROUND_COLOR = '#1E1E2C'
 const PADDLE_WIDTH = 5
 
-const LocalGame = () => {
+const SimpleGameLocal = () => {
   const [endMatch, setEndMatch] = Teact.useState(false)
   const [gameData, setGameData] = Teact.useState(null)
 
@@ -273,4 +273,4 @@ const LocalGame = () => {
   )
 }
 
-export { LocalGame }
+export { SimpleGameLocal }

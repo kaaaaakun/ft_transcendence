@@ -25,7 +25,7 @@ function fetchTournament(endMatch) {
     .catch(error => console.error('Error:', error))
 }
 
-const Pong = () => {
+const TournamentsGame = () => {
   const [endMatch, setEndMatch] = Teact.useState(false)
   const loc = useLocation()
 
@@ -275,4 +275,4 @@ const Pong = () => {
   )
 }
 
-export { Pong }
+export { TournamentsGame }

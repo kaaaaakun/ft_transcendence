@@ -507,7 +507,7 @@ function ConditionalBranch(participants) {
   }
 }
 
-export const Tournament = () => {
+export const TournamentsBracket = () => {
   const loc = useLocation()
   if (!loc.state?.data) {
     return Teact.createElement('h1', null, '400 Bad Request')

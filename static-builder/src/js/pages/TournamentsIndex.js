@@ -3,7 +3,7 @@ import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 
-export const SelectTournamentType = () => {
+export const TournamentsIndex = () => {
   const navigate = useNavigate()
 
   return HeaderWithTitleLayout(

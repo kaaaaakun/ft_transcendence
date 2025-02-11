@@ -3,7 +3,7 @@ import { userApi } from '@/js/infrastructures/api/userApi'
 import { SimpleHeaderLayout } from '@/js/layouts/SimpleHeaderLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
-import { useBanner } from '../hooks/useBanner'
+import { useBanner } from '@/js/hooks/useBanner'
 
 const secretQuestion = null
 function handleSubmit(event, showErrorBanner) {
@@ -33,7 +33,7 @@ function handleSubmit(event, showErrorBanner) {
   }
 }
 
-export const deleteAccount = () => {
+export const DeleteAccount = () => {
   const { showInfoBanner, showWarningBanner, showErrorBanner, banners } =
     useBanner()
   return SimpleHeaderLayout(

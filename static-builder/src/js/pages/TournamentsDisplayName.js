@@ -29,7 +29,7 @@ function handleSubmit(event) {
     })
 }
 
-export const InputAlias = () => {
+export const TournamentsDisplayName = () => {
   const params = useSearchParams()
   const numPlayers = params.get('players')
   return HeaderWithTitleLayout(

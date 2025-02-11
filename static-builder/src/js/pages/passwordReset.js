@@ -99,7 +99,7 @@ function resetPasswordInfo() {
   }
 }
 
-export const passwordReset = () => {
+export const PasswordReset = () => {
   const { showInfoBanner, showWarningBanner, showErrorBanner, banners } =
     useBanner()
   return SimpleHeaderLayout(
