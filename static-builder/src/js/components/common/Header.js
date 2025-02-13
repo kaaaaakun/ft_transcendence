@@ -2,6 +2,57 @@ import { Link } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import Icon from '/icon.png'
 
+const handleLogout = () => {
+  if (localStorage.getItem('access_token')) {
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('refresh_token')
+  }
+}
+
+const displayAuth = () => {
+  if (localStorage.getItem('access_token')) {
+    return Teact.createElement(
+      'li',
+      { className: 'nav-item' },
+      Teact.createElement(
+        'button',
+        {
+          onClick: () => {
+            handleLogout()
+            window.location.href = '/'
+          },
+          className: 'nav-link text-white',
+        },
+        'Logout',
+      ),
+    )
+  }
+  return Teact.createElement(
+    'li',
+    { className: 'nav-item' },
+    Link({
+      to: '/login',
+      className: 'nav-link text-white',
+      children: ['Login'],
+    }),
+  )
+}
+
+const displayRegister = () => {
+  if (localStorage.getItem('access_token')) {
+    return null
+  }
+  return Teact.createElement(
+    'li',
+    { className: 'nav-item' },
+    Link({
+      to: '/register',
+      className: 'nav-link text-white',
+      children: ['Signup'],
+    }),
+  )
+}
+
 export const Header = () => {
   return Teact.createElement(
     'header',
@@ -55,6 +106,8 @@ export const Header = () => {
               children: ['Contact'],
             }),
           ),
+          displayAuth(),
+          displayRegister(),
         ),
       ),
     ),

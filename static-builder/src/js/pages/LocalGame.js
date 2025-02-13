@@ -1,9 +1,7 @@
 import '@/scss/styles.scss'
-import { DefaultButton } from '@/js/components/ui/button'
-import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
 import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
-import { useLocation, useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
+import { api } from '@/js/infrastructures/api/fetch'
 
 // バックエンドと共通の定数
 
@@ -11,25 +9,19 @@ import { Teact } from '@/js/libs/teact'
 const BACKGROUND_COLOR = '#1E1E2C'
 const PADDLE_WIDTH = 5
 
-function fetchTournament(endMatch) {
-  if (!endMatch) {
-    return
-  }
-
-  const navigate = useNavigate()
-  tournamentsApi
-    .fetchLocalTournament()
-    .then(data => {
-      navigate('/tournament', { data })
-    })
-    .catch(error => console.error('Error:', error))
-}
-
-const Pong = () => {
+const LocalGame = () => {
   const [endMatch, setEndMatch] = Teact.useState(false)
-  const loc = useLocation()
+  const [gameData, setGameData] = Teact.useState(null)
 
-  if (!loc.state) {
+  Teact.useEffect(() => {
+    api.get('/api/matches/local')
+      .then(response => response.json())
+      .then(data => {setGameData(data)})
+      .catch(error => {console.error('Error:', error)})
+  }, [])
+
+  // API の結果を待つ
+  if (!gameData) {
     return HeaderWithTitleLayout(
       Teact.createElement(
         'div',
@@ -37,15 +29,15 @@ const Pong = () => {
         Teact.createElement(
           'h1',
           { className: 'text-center text-light' },
-          'Error',
-        ),
-      ),
+          'Loading...'
+        )
+      )
     )
   }
 
-  const data = loc.state.data
-  const leftPlayerName = data.left.player_name
-  const rightPlayerName = data.right.player_name
+  console.log('gameData', gameData)
+  const leftPlayerName = gameData.left.player_name
+  const rightPlayerName = gameData.right.player_name
   let winner = null
 
   Teact.useEffect(() => {
@@ -83,9 +75,21 @@ const Pong = () => {
       context.fillText(text, x, y)
     }
 
+    function drawDashedLine(x, color = 'white') {
+      context.strokeStyle = color
+      context.lineWidth = 2
+      context.setLineDash([5, 5]) // 点線のパターン
+      context.beginPath()
+      context.moveTo(x, 0)
+      context.lineTo(x, canvas.height)
+      context.stroke()
+      context.setLineDash([]) // 点線をリセット
+    }
+
     function draw() {
       clearCanvas()
       drawRect(0, 0, canvas.width, canvas.height, BACKGROUND_COLOR)
+      drawDashedLine(canvas.width / 2)
       drawRect(
         canvas.width - PADDLE_WIDTH,
         rightPaddleY - PADDLE_HEIGHT / 2,
@@ -186,9 +190,8 @@ const Pong = () => {
 
     // const url = 'ws://localhost:8080/api/ws/matches' // mokc-server用
     // const url = "ws://localhost:80/api/ws/local-simple-match/"; //memo
-    // const url = 'ws://localhost:80/api/ws/local-tournament-match/'
     const baseWsUrl = import.meta.env.VITE_WEBSOCKET_URL ?? 'wss://localhost'
-    const url = `${baseWsUrl}/api/ws/local-tournament-match/`
+    const url = `${baseWsUrl}/api/ws/local-simple-match/`
     const socket = new WebSocket(url)
     console.log('socket', socket)
     socket.addEventListener('message', event => {
@@ -261,18 +264,8 @@ const Pong = () => {
           ),
         ),
       ),
-      Teact.createElement(
-        'div',
-        { className: 'd-grid gap-2 col-3 mx-auto', id: 'utilButton' },
-        endMatch
-          ? DefaultButton({
-              text: 'トーナメント画面へ',
-              onClick: () => fetchTournament(endMatch),
-            })
-          : null,
-      ),
     ),
   )
 }
 
-export { Pong }
+export { LocalGame }

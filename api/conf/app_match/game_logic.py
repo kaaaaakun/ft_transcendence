@@ -2,17 +2,19 @@ import math
 import random
 import redis
 
+from django.conf import settings
+
 # フィールド
-WALL_X_LIMIT = 500
-WALL_Y_LIMIT = 300
+WALL_X_LIMIT = settings.WALL_X_LIMIT
+WALL_Y_LIMIT = settings.WALL_Y_LIMIT
 # ボール
-BALL_RADIUS = 2
+BALL_RADIUS = settings.BALL_RADIUS
 BALL_INITIAL_X = WALL_X_LIMIT / 2
 BALL_INITIAL_Y = WALL_Y_LIMIT / 2
 BALL_INITIAL_SPEED = 6
 BALL_RADIAN = random.uniform(-0.25, 0.25 * math.pi) * random.choice([1, -1]) # -45°~45° or 135°~225°
 # パドル
-PADDLE_HEIGHT = 30
+PADDLE_HEIGHT = settings.PADDLE_HEIGHT
 PADDLE_CLEARANCE = 0
 PADDLE_INITIAL_Y = WALL_Y_LIMIT / 2
 PADDLE_INITIAL_X_LEFT = PADDLE_CLEARANCE

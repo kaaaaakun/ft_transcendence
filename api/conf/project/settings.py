@@ -16,6 +16,22 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Read the shared configuration file
+SHARED_CONFIG_PATH = os.path.join(BASE_DIR, 'config', 'game-settings.json')
+try:
+    with open(SHARED_CONFIG_PATH, 'r') as f:
+        import json
+        config = json.load(f)
+except FileNotFoundError:
+    print(f"File not found: {SHARED_CONFIG_PATH}")
+    config = {}
+## 環境変数として取得できるようにjsonから取得
+END_GAME_SCORE = config.get('END_GAME_SCORE')
+WALL_X_LIMIT = config.get('WALL_X_LIMIT')
+WALL_Y_LIMIT = config.get('WALL_Y_LIMIT')
+PADDLE_HEIGHT = config.get('PADDLE_HEIGHT')
+BALL_RADIUS = config.get('BALL_RADIUS')
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -26,7 +42,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'default_secret_key-for-dev')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'ft_transcendence.42.com','reverseproxy']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'ft_transcendence.42.com', 'reverseproxy']
 
 
 # Application definition
@@ -47,17 +63,24 @@ INSTALLED_APPS = [
     'player',
     'tournament',
     'match',
+    'user',
 
     # 3rd party
     'rest_framework',
+    'rest_framework_simplejwt',
     'channels',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
