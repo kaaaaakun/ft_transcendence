@@ -13,7 +13,7 @@ import { api } from '@/js/infrastructures/api/fetch'
 // }
 
 function login(data) {
-    return api.post('/api/users/login/', data).then(response => {
+    return api.post('/api/auth/login/', data).then(response => {
         if (!response.ok) {
             return response.json().then(errData => {
                 throw new Error(errData.error || 'Unknown error occurred')
@@ -29,7 +29,7 @@ function login(data) {
 }
 
 function register(data) {
-    return api.post('/api/users/register/', data).then(response => {
+    return api.post('/api/users/', data).then(response => {
         if (!response.ok) {
             return response.json().then(errData => {
                 throw new Error(errData.error || 'Unknown error occurred')
@@ -68,7 +68,7 @@ function getSecretQuestion(data) {
 }
 
 function deleteAccount(data) {
-    return api.delete(`/api/users/${data.login_name}/`, data).then(response => {
+    return api.delete(`/api/users/`, data).then(response => {
         if (!response.ok) {
             return response.json().then(errData => {
                 throw new Error(errData.error || 'Unknown error occurred')
