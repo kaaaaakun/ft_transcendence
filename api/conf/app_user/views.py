@@ -50,7 +50,7 @@ class UserLoginView(APIView):
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class UserRegisterView(APIView):
+class UserView(APIView):
     def post(self, request, *args, **kwargs):
         try:
             # リクエストのボディをJSONとしてパース
@@ -165,25 +165,6 @@ class UserPasswordResetView(APIView):
                 return JsonResponse({
                     'error': 'Incorrect secret answer.'
                 }, status=status.HTTP_400_BAD_REQUEST)
-        except User.DoesNotExist:
-            return JsonResponse({
-                'error': 'User not found.'
-            }, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return JsonResponse({
-                'error': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-class UserDeleteView(APIView):
-    def delete(self, request, login_name, *args, **kwargs):
-        try:
-            data = json.loads(request.body)
-            user = User.objects.get(login_name=data.get('login_name'))
-            user.delete()
-            return JsonResponse({
-                'message': 'User deleted.'
-            }, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return JsonResponse({
                 'error': 'User not found.'
