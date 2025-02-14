@@ -34,7 +34,7 @@ RUN rm -rf /var/lib/apt/lists/*
 
 # APIサーバーおよび接続されたコンテナの操作に必要なライブラリのインストール
 RUN pip install --upgrade pip
-COPY tool/requirements.txt tool/requirements.txt
+COPY ./api/tool/requirements.txt tool/requirements.txt
 RUN pip install --no-cache-dir -r tool/requirements.txt
 
 # Create a Django project
@@ -48,21 +48,25 @@ RUN python manage.py startapp match
 RUN python manage.py startapp user
 
 # project, appsのファイルをコピー
-COPY conf/project/* ${DJANGO_PROJECT_DIR}${DJANGO_PROJECT_NAME}/
-COPY conf/app_player/* ${DJANGO_PROJECT_DIR}player/
-COPY conf/app_tournament/* ${DJANGO_PROJECT_DIR}tournament/
-COPY conf/app_match/* ${DJANGO_PROJECT_DIR}match/
-COPY conf/app_user/* ${DJANGO_PROJECT_DIR}user/
+COPY ./api/conf/project/* ${DJANGO_PROJECT_DIR}${DJANGO_PROJECT_NAME}/
+COPY ./api/conf/app_player/* ${DJANGO_PROJECT_DIR}player/
+COPY ./api/conf/app_tournament/* ${DJANGO_PROJECT_DIR}tournament/
+COPY ./api/conf/app_match/* ${DJANGO_PROJECT_DIR}match/
+COPY ./api/conf/app_user/* ${DJANGO_PROJECT_DIR}user/
 
 # Create utils Directory and Copy files
 RUN mkdir -p ${DJANGO_PROJECT_DIR}utils
-COPY conf/utils/* ${DJANGO_PROJECT_DIR}utils/
+COPY ./api/conf/utils/* ${DJANGO_PROJECT_DIR}utils/
+
+# Create shared config Directory and Copy files
+RUN mkdir -p ${DJANGO_PROJECT_DIR}config
+COPY ./config/* ${DJANGO_PROJECT_DIR}config/
 
 # appsで定めたモデルをDBに反映する準備
 RUN python ${DJANGO_PROJECT_DIR}manage.py makemigrations
 
 # コンテナ起動後に利用するファイルをコピー
-COPY tool/entrypoint.sh ${DJANGO_PROJECT_DIR}
+COPY ./api/tool/entrypoint.sh ${DJANGO_PROJECT_DIR}
 RUN chmod +x ${DJANGO_PROJECT_DIR}entrypoint.sh
 
 
@@ -72,7 +76,7 @@ RUN chmod +x ${DJANGO_PROJECT_DIR}entrypoint.sh
 FROM base AS development_asgi
 
 # dev用の制限が緩いsettings.pyをコピー
-COPY dev/settings.py ${DJANGO_PROJECT_DIR}${DJANGO_PROJECT_NAME}/
+COPY ./api/dev/settings.py ${DJANGO_PROJECT_DIR}${DJANGO_PROJECT_NAME}/
 # コンテナ内で"test"コマンドを実行すると、Djangoのtestが実行できるようにaliasを設定
 RUN echo "alias test='python manage.py test'" >> ~/.bashrc
 # コンテナ内で"run"コマンドを実行すると、Djangoの開発サーバーが起動するようにaliasを設定

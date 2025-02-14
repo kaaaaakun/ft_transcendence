@@ -26,7 +26,8 @@ services:
 
   static-builder:
     build:
-      context: static-builder/
+      context: .
+      dockerfile: static-builder/Dockerfile
       target: development
     container_name: "static-builder"
     restart: on-failure
@@ -70,7 +71,8 @@ services:
 
   api:
     build:
-      context: api/
+      context: .
+      dockerfile: api/Dockerfile
       target: deploy_asgi
     container_name: "api"
     restart: on-failure

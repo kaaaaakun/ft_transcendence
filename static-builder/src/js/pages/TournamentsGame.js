@@ -1,24 +1,36 @@
 import '@/scss/styles.scss'
-import { BaseLayout } from '@/js/layouts/BaseLayout'
-import { useLocation } from '@/js/libs/router'
+import { DefaultButton } from '@/js/components/ui/button'
+import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
+import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
+import { useLocation, useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 
 // バックエンドと共通の定数
-const BACKGROUND_COLOR = '#1E1E2C'
-const WALL_X_LIMIT = 500
-const WALL_Y_LIMIT = 300
-const BALL_RADIUS = 8
-const PADDLE_HEIGHT = 30
 
 // フロントのみの定数
+const BACKGROUND_COLOR = '#1E1E2C'
 const PADDLE_WIDTH = 5
 
-const LocalGame = () => {
-  const [setEndMatch] = Teact.useState(false)
+function fetchTournament(endMatch) {
+  if (!endMatch) {
+    return
+  }
+
+  const navigate = useNavigate()
+  tournamentsApi
+    .fetchLocalTournament()
+    .then(data => {
+      navigate('/tournaments/bracket', { data })
+    })
+    .catch(error => console.error('Error:', error))
+}
+
+const TournamentsGame = () => {
+  const [endMatch, setEndMatch] = Teact.useState(false)
   const loc = useLocation()
 
   if (!loc.state) {
-    return BaseLayout(
+    return HeaderWithTitleLayout(
       Teact.createElement(
         'div',
         { className: 'container' },
@@ -71,21 +83,9 @@ const LocalGame = () => {
       context.fillText(text, x, y)
     }
 
-    function drawDashedLine(x, color = 'white') {
-      context.strokeStyle = color
-      context.lineWidth = 2
-      context.setLineDash([5, 5]) // 点線のパターン
-      context.beginPath()
-      context.moveTo(x, 0)
-      context.lineTo(x, canvas.height)
-      context.stroke()
-      context.setLineDash([]) // 点線をリセット
-    }
-
     function draw() {
       clearCanvas()
       drawRect(0, 0, canvas.width, canvas.height, BACKGROUND_COLOR)
-      drawDashedLine(canvas.width / 2)
       drawRect(
         canvas.width - PADDLE_WIDTH,
         rightPaddleY - PADDLE_HEIGHT / 2,
@@ -108,21 +108,21 @@ const LocalGame = () => {
         canvas.width / 4,
         50,
         '48px sans-serif',
-        rightScore >= 10 ? 'yellow' : 'white',
+        rightScore >= END_GAME_SCORE - 1 ? 'yellow' : 'white',
       )
       drawText(
         `${leftScore}`,
         (canvas.width / 4) * 3,
         50,
         '48px sans-serif',
-        leftScore >= 10 ? 'yellow' : 'white',
+        leftScore >= END_GAME_SCORE - 1 ? 'yellow' : 'white',
       )
     }
 
     function update() {
       draw()
-      if (leftScore === 11 || rightScore === 11) {
-        winner = leftScore === 11 ? rightPlayerName : leftPlayerName
+      if (leftScore === END_GAME_SCORE || rightScore === END_GAME_SCORE) {
+        winner = leftScore === END_GAME_SCORE ? rightPlayerName : leftPlayerName
         drawText(`${winner} wins!`, canvas.width / 2, canvas.height / 2)
         setEndMatch(true)
         clearInterval(intervalId)
@@ -186,8 +186,9 @@ const LocalGame = () => {
 
     // const url = 'ws://localhost:8080/api/ws/matches' // mokc-server用
     // const url = "ws://localhost:80/api/ws/local-simple-match/"; //memo
+    // const url = 'ws://localhost:80/api/ws/local-tournament-match/'
     const baseWsUrl = import.meta.env.VITE_WEBSOCKET_URL ?? 'wss://localhost'
-    const url = `${baseWsUrl}/api/ws/local-simple-match/`
+    const url = `${baseWsUrl}/api/ws/local-tournament-match/`
     const socket = new WebSocket(url)
     console.log('socket', socket)
     socket.addEventListener('message', event => {
@@ -211,7 +212,7 @@ const LocalGame = () => {
     }
   }, [])
 
-  return BaseLayout(
+  return HeaderWithTitleLayout(
     Teact.createElement(
       'div',
       { className: 'container' },
@@ -260,8 +261,18 @@ const LocalGame = () => {
           ),
         ),
       ),
+      Teact.createElement(
+        'div',
+        { className: 'd-grid gap-2 col-3 mx-auto', id: 'utilButton' },
+        endMatch
+          ? DefaultButton({
+              text: 'トーナメント画面へ',
+              onClick: () => fetchTournament(endMatch),
+            })
+          : null,
+      ),
     ),
   )
 }
 
-export { LocalGame }
+export { TournamentsGame }

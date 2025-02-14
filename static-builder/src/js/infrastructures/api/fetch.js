@@ -7,7 +7,11 @@ class FetchWrapper {
     if (localStorage.getItem('access_token')) {
       return {
         // TODO 本当はBearerをつけるのだが、それをするとサーバー側でエラーになるので、とりあえずこのまま
+<<<<<<< HEAD
         'Authorization': `${localStorage.getItem('access_token')}`,
+=======
+        Authorization: `${localStorage.getItem('access_token')}`,
+>>>>>>> main
       }
     }
     return {}
@@ -17,9 +21,15 @@ class FetchWrapper {
     const response = await fetch(`${this.baseUrl}${url}`, {
       method: 'GET',
       credentials: 'include',
+<<<<<<< HEAD
       headers:{
         ...this.getAuthHeader(),
       }
+=======
+      headers: {
+        ...this.getAuthHeader(),
+      },
+>>>>>>> main
     })
     return response
   }
@@ -73,6 +83,7 @@ class FetchWrapper {
         ...this.getAuthHeader(),
       },
       credentials: 'include',
+      ...this.getAuthHeader(),
     })
     return response
   }

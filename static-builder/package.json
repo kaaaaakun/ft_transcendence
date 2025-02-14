@@ -7,8 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "biome lint --write --verbose",
-    "format": "biome format --write --verbose",
+    "lint": "biome lint --verbose",
+    "lint:fix": "biome lint --write --verbose",
+    "format": "biome format --verbose",
+    "format:fix": "biome format --write --verbose",
     "fix": "biome check --write --verbose"
   },
   "devDependencies": {

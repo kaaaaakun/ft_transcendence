@@ -2,7 +2,7 @@ import '@/scss/styles.scss'
 import { DefaultButton } from '@/js/components/ui/button'
 import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
 import { cookie } from '@/js/infrastructures/cookie/cookie'
-import { BaseLayout } from '@/js/layouts/BaseLayout'
+import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { Teact } from '@/js/libs/teact'
 import { useNavigate, useSearchParams } from '../libs/router'
 
@@ -22,17 +22,17 @@ function handleSubmit(event) {
     .createLocalTournament(data)
     .then(data => {
       cookie.setTournamentId(data.tournament_id)
-      navigate('/tournament', { data })
+      navigate('/tournaments/bracket', { data })
     })
     .catch(error => {
       console.error('Error:', error)
     })
 }
 
-export const InputAlias = () => {
+export const TournamentsDisplayName = () => {
   const params = useSearchParams()
   const numPlayers = params.get('players')
-  return BaseLayout(
+  return HeaderWithTitleLayout(
     Teact.createElement(
       'div',
       { className: 'container' },

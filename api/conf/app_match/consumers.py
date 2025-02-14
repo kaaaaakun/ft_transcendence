@@ -4,6 +4,7 @@ from asgiref.sync import sync_to_async
 from asyncio import sleep
 import json
 
+from django.conf import settings
 from .game_logic import GameManager, LocalSimpleScoreManager, TournamentScoreManager
 from .models import Match, MatchDetail
 from .utils import ( sort_matchdetails_by_playerid, 
@@ -14,7 +15,7 @@ from tournament.utils import ( update_tournamentplayer_win_to_await, is_tourname
     create_next_tournament_match )
 
 FRAME = 30 # フロントを見つつ調整
-END_GAME_SCORE = 11 # deploy時には11に変更
+END_GAME_SCORE = settings.END_GAME_SCORE
 
 # エラハンを完全無視、冗長さは少し無視してコーディングした
 
