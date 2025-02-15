@@ -56,6 +56,10 @@ function passwordReset(data) {
     })
 }
 
+
+
+
+
 function getSecretQuestion(data) {
     return api.get(`/api/auth/${data.login_name}/password_reset/`, data).then(response => {
         if (!response.ok) {
