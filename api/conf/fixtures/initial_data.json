@@ -1,0 +1,100 @@
+[
+    {
+        "model": "user.User",
+        "pk": 1,
+        "fields": {
+            "login_name": "testuser1",
+            "display_name": "テストユーザー1",
+            "avatar_path": null,
+            "password_hash": "pbkdf2_sha256$216000$randomsalt$hashedpassword",
+            "secret_question": "好きな食べ物は？",
+            "secret_answer_hash": "pbkdf2_sha256$216000$randomsalt$hashedanswer",
+            "last_online_at": null,
+            "deleted_at": null
+        }
+    },
+    {
+        "model": "user.User",
+        "pk": 2,
+        "fields": {
+            "login_name": "testuser2",
+            "display_name": "テストユーザー2",
+            "avatar_path": null,
+            "password_hash": "pbkdf2_sha256$216000$randomsalt$hashedpassword",
+            "secret_question": "好きな映画は？",
+            "secret_answer_hash": "pbkdf2_sha256$216000$randomsalt$hashedanswer",
+            "last_online_at": null,
+            "deleted_at": null
+        }
+    },
+    {
+        "model": "player.Player",
+        "pk": 1,
+        "fields": {
+            "name" : "テストプレイヤー1"
+        }
+    },
+    {
+        "model": "player.Player",
+        "pk": 2,
+        "fields": {
+            "name" : "テストプレイヤー2"
+        }
+    },
+    {
+        "model": "tournament.Tournament",
+        "pk": 1,
+        "fields": {
+            "num_of_player": 2,
+            "status": "end"
+        }
+    },
+    {
+        "model": "tournament.TournamentPlayer",
+        "pk": 1,
+        "fields": {
+            "tournament_id": 1,
+            "player_id": 1,
+            "victory_count": 1,
+            "status": "win"
+        }
+    },
+    {
+        "model": "tournament.TournamentPlayer",
+        "pk": 2,
+        "fields": {
+            "tournament_id": 1,
+            "player_id": 2,
+            "victory_count": 0,
+            "status": "lose"
+        }
+    },
+    {
+        "model": "match.Match",
+        "pk": 1,
+        "fields": {
+            "tournament_id": 1,
+            "status": "recorded"
+        }
+    },
+    {
+        "model": "match.MatchDetail",
+        "pk": 1,
+        "fields": {
+            "match_id": 1,
+            "player_id": 1,
+            "score": 10,
+            "result": "win"
+        }
+    },
+    {
+        "model": "match.MatchDetail",
+        "pk": 2,
+        "fields": {
+            "match_id": 1,
+            "player_id": 2,
+            "score": 8,
+            "result": "lose"
+        }
+    }
+]
