@@ -3,17 +3,6 @@ import { Route, Router } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import { FriendsList } from '@/js/pages/FriendsList'
 import { Home } from '@/js/pages/Home'
-<<<<<<< HEAD
-import { SelectTournamentType } from '@/js/pages/SelectTournamentType'
-import { LocalGame } from '@/js/pages/LocalGame'
-import { InputAlias } from '@/js/pages/InputAlias'
-import { Pong } from '@/js/pages/Pong'
-import { Tournament } from '@/js/pages/Tournament'
-import { Login } from '@/js/pages/Login'
-import { Register } from './pages/Register'
-import { passwordReset } from './pages/passwordReset'
-import { deleteAccount } from './pages/deleteAccount'
-=======
 import { Login } from '@/js/pages/Login'
 import { Register } from '@/js/pages/Register'
 import '@/scss/styles.scss'
@@ -24,7 +13,6 @@ import { TournamentsIndex } from '@/js/pages/TournamentsIndex'
 import { TournamentsBracket } from '@/js/pages/TournamentsBracket'
 import { DeleteAccount } from '@/js/pages/DeleteAccount'
 import { PasswordReset } from '@/js/pages/PasswordReset'
->>>>>>> main
 
 function App() {
   return Router(
