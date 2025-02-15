@@ -65,22 +65,6 @@ function App() {
       path: '/delete-account',
       component: DeleteAccount,
     }),
-    Route ({
-      path: '/login',
-      component: Login,
-    }),
-    Route({
-      path: '/register',
-      component: Register,
-    }),
-    Route({
-      path: '/password-reset',
-      component: passwordReset,
-    }),
-    Route({
-      path: '/delete-account',
-      component: deleteAccount,
-    })
   )
 }
 

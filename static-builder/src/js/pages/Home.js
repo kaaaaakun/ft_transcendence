@@ -6,7 +6,6 @@ import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import { api } from '@/js/infrastructures/api/fetch'
-import { useBanner } from '@/js/hooks/useBanner'
 
 export const Home = () => {
   const { showInfoBanner, showWarningBanner, showErrorBanner, banners } = useBanner()
