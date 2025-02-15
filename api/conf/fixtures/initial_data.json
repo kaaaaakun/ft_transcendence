@@ -4,7 +4,7 @@
         "pk": 1,
         "fields": {
             "login_name": "testuser1",
-            "display_name": "テストユーザー1",
+            "display_name": "test_user1",
             "avatar_path": null,
             "password_hash": "pbkdf2_sha256$216000$randomsalt$hashedpassword",
             "secret_question": "好きな食べ物は？",
@@ -18,7 +18,7 @@
         "pk": 2,
         "fields": {
             "login_name": "testuser2",
-            "display_name": "テストユーザー2",
+            "display_name": "test_user2",
             "avatar_path": null,
             "password_hash": "pbkdf2_sha256$216000$randomsalt$hashedpassword",
             "secret_question": "好きな映画は？",
