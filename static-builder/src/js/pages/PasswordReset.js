@@ -1,8 +1,8 @@
 import { DefaultButton } from '@/js/components/ui/button'
+import { userApi } from '@/js/infrastructures/api/userApi'
 import { SimpleHeaderLayout } from '@/js/layouts/SimpleHeaderLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
-import { userApi } from '@/js/infrastructures/api/userApi'
 import { useBanner } from '../hooks/useBanner'
 
 let secretQuestion = null
@@ -99,7 +99,7 @@ function resetPasswordInfo() {
   }
 }
 
-export const passwordReset = () => {
+export const PasswordReset = () => {
   const { showInfoBanner, showWarningBanner, showErrorBanner, banners } =
     useBanner()
   return SimpleHeaderLayout(

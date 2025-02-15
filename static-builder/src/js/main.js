@@ -3,16 +3,17 @@ import { Route, Router } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import { FriendsList } from '@/js/pages/FriendsList'
 import { Home } from '@/js/pages/Home'
-import { InputAlias } from '@/js/pages/InputAlias'
-import { LocalGame } from '@/js/pages/LocalGame'
-import { Pong } from '@/js/pages/Pong'
-import { SelectTournamentType } from '@/js/pages/SelectTournamentType'
-import { Tournament } from '@/js/pages/Tournament'
 import { UserProfile } from '@/js/pages/UserProfile'
 import { Login } from '@/js/pages/Login'
 import { Register } from '@/js/pages/Register'
-import { passwordReset } from '@/js/pages/passwordReset'
-import { deleteAccount } from '@/js/pages/deleteAccount'
+import '@/scss/styles.scss'
+import { TournamentsDisplayName } from '@/js/pages/TournamentsDisplayName'
+import { SimpleGameLocal } from '@/js/pages/SimpleGameLocal'
+import { TournamentsGame } from '@/js/pages/TournamentsGame'
+import { TournamentsIndex } from '@/js/pages/TournamentsIndex'
+import { TournamentsBracket } from '@/js/pages/TournamentsBracket'
+import { DeleteAccount } from '@/js/pages/DeleteAccount'
+import { PasswordReset } from '@/js/pages/PasswordReset'
 
 function App() {
   return Router(
@@ -26,24 +27,24 @@ function App() {
       component: Teact.createElement('h1', null, 'Contact'),
     }),
     Route({
-      path: '/select_tournament_type',
-      component: SelectTournamentType,
+      path: '/simple-game/local',
+      component: SimpleGameLocal,
     }),
     Route({
-      path: '/local_game',
-      component: LocalGame,
+      path: '/tournaments',
+      component: TournamentsIndex,
     }),
     Route({
-      path: '/input_alias',
-      component: InputAlias,
+      path: '/tournaments/display-name',
+      component: TournamentsDisplayName,
     }),
     Route({
-      path: '/tournament',
-      component: Tournament,
+      path: '/tournaments/bracket',
+      component: TournamentsBracket,
     }),
     Route({
-      path: '/game',
-      component: Pong,
+      path: '/tournaments/game',
+      component: TournamentsGame,
     }),
     Route({
       path: '/users/',
@@ -63,11 +64,11 @@ function App() {
     }),
     Route({
       path: '/password-reset',
-      component: passwordReset,
+      component: PasswordReset,
     }),
     Route({
       path: '/delete-account',
-      component: deleteAccount,
+      component: DeleteAccount,
     }),
   )
 }

@@ -17,7 +17,7 @@ run: build up
 re: down image-prune run
 
 build:
-	$(DOCKER_COMPOSE) build --no-cache
+	$(DOCKER_COMPOSE) build
 
 up: cert
 	$(DOCKER_COMPOSE) up -d

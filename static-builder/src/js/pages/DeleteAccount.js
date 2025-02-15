@@ -1,11 +1,11 @@
 import { DefaultButton } from '@/js/components/ui/button'
+import { userApi } from '@/js/infrastructures/api/userApi'
 import { SimpleHeaderLayout } from '@/js/layouts/SimpleHeaderLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
-import { userApi } from '@/js/infrastructures/api/userApi'
-import { useBanner } from '../hooks/useBanner'
+import { useBanner } from '@/js/hooks/useBanner'
 
-let secretQuestion = null
+const secretQuestion = null
 function handleSubmit(event, showErrorBanner) {
   const navigate = useNavigate()
   event.preventDefault() // フォームのデフォルトの送信を防ぐ（ページリロード防止）
@@ -33,7 +33,7 @@ function handleSubmit(event, showErrorBanner) {
   }
 }
 
-export const deleteAccount = () => {
+export const DeleteAccount = () => {
   const { showInfoBanner, showWarningBanner, showErrorBanner, banners } =
     useBanner()
   return SimpleHeaderLayout(

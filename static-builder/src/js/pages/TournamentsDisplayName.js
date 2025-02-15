@@ -22,14 +22,14 @@ function handleSubmit(event) {
     .createLocalTournament(data)
     .then(data => {
       cookie.setTournamentId(data.tournament_id)
-      navigate('/tournament', { data })
+      navigate('/tournaments/bracket', { data })
     })
     .catch(error => {
       console.error('Error:', error)
     })
 }
 
-export const InputAlias = () => {
+export const TournamentsDisplayName = () => {
   const params = useSearchParams()
   const numPlayers = params.get('players')
   return HeaderWithTitleLayout(

@@ -1,0 +1,17 @@
+# EXAMPLE USAGE:
+#
+#   Refer for explanation to following link:
+#   https://github.com/evilmartians/lefthook/blob/master/docs/configuration.md
+#
+
+pre-commit:
+  parallel: true
+  commands:
+    js-lint:
+      glob: "*.{js,ts,jsx,tsx}"
+      run: docker compose exec -it static-builder pnpm lint
+    js-format:
+      glob: "*.{js,ts,jsx,tsx}"
+      run: >
+        docker compose exec -it static-builder pnpm format ||
+        (docker compose exec static-builder pnpm format:fix && false)
