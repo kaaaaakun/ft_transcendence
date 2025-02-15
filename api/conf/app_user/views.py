@@ -1,3 +1,7 @@
+from rest_framework import viewsets
+from .models import User
+from django.db.models import Q
+from .utils import create_response
 import random
 
 from rest_framework import viewsets
@@ -16,8 +20,23 @@ import json
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.views import APIView
-from .utils import create_response
 
+class UserView(APIView):
+    def get(self, request, display_name):
+        try:
+            user = User.objects.filter(display_name=display_name).first()
+            with open('log.txt', 'w') as f:
+                f.write(str(user))
+            data = create_response(user)
+            with open('log.txt', 'a') as f:
+                f.write(str(data))
+            return JsonResponse(data)
+        except Exception as e:
+            with open('log.txt', 'a') as f:
+                f.write(str(e))
+            return JsonResponse({
+                'error': 'User not found.'
+            }, status=status.HTTP_404_NOT_FOUND)
 
 
 class UserLoginView(APIView):

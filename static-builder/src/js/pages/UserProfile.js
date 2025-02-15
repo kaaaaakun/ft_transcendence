@@ -1,150 +1,151 @@
 import '@/scss/styles.scss'
-import { BaseLayout } from '@/js/layouts/BaseLayout'
+import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { Teact } from '@/js/libs/teact'
+import { userApi } from '@/js/infrastructures/api/userApi'
 
-const data = {
-  "login_name": "user1",
-  "display_name": "ユーザー1",
-  "avatar_path": "/superman_hero.png",
-  "num_of_friends": 3,
-  "performance": {
-    "game_records": [
-      {
-        "date": "2021-01-01T12:00:00Z",
-        "result": "win",
-        "opponent": "ユーザー2",
-        "score": {
-          "player": 10,
-          "opponent": 5
-        },
-        "match_type": "simple"
-      },
-      {
-        "date": "2021-01-02T12:00:00Z",
-        "result": "loss",
-        "opponent": "ユーザー3",
-        "score": {
-          "player": 5,
-          "opponent": 10
-        },
-        "match_type": "tournament"
-      },
-      {
-        "date": "2021-01-02T12:00:00Z",
-        "result": "loss",
-        "opponent": "ユーザー3",
-        "score": {
-          "player": 5,
-          "opponent": 10
-        },
-        "match_type": "tournament"
-      },
-      {
-        "date": "2021-01-02T12:00:00Z",
-        "result": "loss",
-        "opponent": "ユーザー3",
-        "score": {
-          "player": 5,
-          "opponent": 10
-        },
-        "match_type": "tournament"
-      },
-      {
-        "date": "2021-01-02T12:00:00Z",
-        "result": "loss",
-        "opponent": "ユーザー3",
-        "score": {
-          "player": 5,
-          "opponent": 10
-        },
-        "match_type": "tournament"
-      },
-      {
-        "date": "2021-01-02T12:00:00Z",
-        "result": "loss",
-        "opponent": "ユーザー3",
-        "score": {
-          "player": 5,
-          "opponent": 10
-        },
-        "match_type": "tournament"
-      },
-      {
-        "date": "2021-01-02T12:00:00Z",
-        "result": "loss",
-        "opponent": "ユーザー3",
-        "score": {
-          "player": 5,
-          "opponent": 10
-        },
-        "match_type": "tournament"
-      },
-      {
-        "date": "2021-01-02T12:00:00Z",
-        "result": "loss",
-        "opponent": "ユーザー3",
-        "score": {
-          "player": 5,
-          "opponent": 10
-        },
-        "match_type": "tournament"
-      },
-      {
-        "date": "2021-01-02T12:00:00Z",
-        "result": "loss",
-        "opponent": "ユーザー3",
-        "score": {
-          "player": 5,
-          "opponent": 10
-        },
-        "match_type": "tournament"
-      },
-      {
-        "date": "2021-01-02T12:00:00Z",
-        "result": "loss",
-        "opponent": "ユーザー3",
-        "score": {
-          "player": 5,
-          "opponent": 10
-        },
-        "match_type": "tournament"
-      },
-      {
-        "date": "2021-01-02T12:00:00Z",
-        "result": "loss",
-        "opponent": "ユーザー3",
-        "score": {
-          "player": 5,
-          "opponent": 10
-        },
-        "match_type": "tournament"
-      },
-      {
-        "date": "2021-01-02T12:00:00Z",
-        "result": "loss",
-        "opponent": "ユーザー3",
-        "score": {
-          "player": 5,
-          "opponent": 10
-        },
-        "match_type": "tournament"
-      }
-    ],
-    "statistics": {
-      "total_games": 2,
-      "wins": 1,
-      "losses": 1,
-      "win_rate": 50
-    }
-  }
-}
+// const data = {
+//   "login_name": "user1",
+//   "display_name": "ユーザー1",
+//   "avatar_path": "/superman_hero.png",
+//   "num_of_friends": 3,
+//   "performance": {
+//     "game_records": [
+//       {
+//         "date": "2021-01-01T12:00:00Z",
+//         "result": "win",
+//         "opponent": "ユーザー2",
+//         "score": {
+//           "player": 10,
+//           "opponent": 5
+//         },
+//         "match_type": "simple"
+//       },
+//       {
+//         "date": "2021-01-02T12:00:00Z",
+//         "result": "loss",
+//         "opponent": "ユーザー3",
+//         "score": {
+//           "player": 5,
+//           "opponent": 10
+//         },
+//         "match_type": "tournament"
+//       },
+//       {
+//         "date": "2021-01-02T12:00:00Z",
+//         "result": "loss",
+//         "opponent": "ユーザー3",
+//         "score": {
+//           "player": 5,
+//           "opponent": 10
+//         },
+//         "match_type": "tournament"
+//       },
+//       {
+//         "date": "2021-01-02T12:00:00Z",
+//         "result": "loss",
+//         "opponent": "ユーザー3",
+//         "score": {
+//           "player": 5,
+//           "opponent": 10
+//         },
+//         "match_type": "tournament"
+//       },
+//       {
+//         "date": "2021-01-02T12:00:00Z",
+//         "result": "loss",
+//         "opponent": "ユーザー3",
+//         "score": {
+//           "player": 5,
+//           "opponent": 10
+//         },
+//         "match_type": "tournament"
+//       },
+//       {
+//         "date": "2021-01-02T12:00:00Z",
+//         "result": "loss",
+//         "opponent": "ユーザー3",
+//         "score": {
+//           "player": 5,
+//           "opponent": 10
+//         },
+//         "match_type": "tournament"
+//       },
+//       {
+//         "date": "2021-01-02T12:00:00Z",
+//         "result": "loss",
+//         "opponent": "ユーザー3",
+//         "score": {
+//           "player": 5,
+//           "opponent": 10
+//         },
+//         "match_type": "tournament"
+//       },
+//       {
+//         "date": "2021-01-02T12:00:00Z",
+//         "result": "loss",
+//         "opponent": "ユーザー3",
+//         "score": {
+//           "player": 5,
+//           "opponent": 10
+//         },
+//         "match_type": "tournament"
+//       },
+//       {
+//         "date": "2021-01-02T12:00:00Z",
+//         "result": "loss",
+//         "opponent": "ユーザー3",
+//         "score": {
+//           "player": 5,
+//           "opponent": 10
+//         },
+//         "match_type": "tournament"
+//       },
+//       {
+//         "date": "2021-01-02T12:00:00Z",
+//         "result": "loss",
+//         "opponent": "ユーザー3",
+//         "score": {
+//           "player": 5,
+//           "opponent": 10
+//         },
+//         "match_type": "tournament"
+//       },
+//       {
+//         "date": "2021-01-02T12:00:00Z",
+//         "result": "loss",
+//         "opponent": "ユーザー3",
+//         "score": {
+//           "player": 5,
+//           "opponent": 10
+//         },
+//         "match_type": "tournament"
+//       },
+//       {
+//         "date": "2021-01-02T12:00:00Z",
+//         "result": "loss",
+//         "opponent": "ユーザー3",
+//         "score": {
+//           "player": 5,
+//           "opponent": 10
+//         },
+//         "match_type": "tournament"
+//       }
+//     ],
+//     "statistics": {
+//       "total_games": 2,
+//       "wins": 1,
+//       "losses": 1,
+//       "win_rate": 50
+//     }
+//   }
+// }
 
   const handleSave = (displayName, setIsEditing) => {
     data.display_name = displayName; // `data` を更新
     setIsEditing(false); // 編集モードを終了
   };
 
-const left = (isEditing, setIsEditing) => {
+const left = (isEditing, setIsEditing, data) => {
   return Teact.createElement(
     'div',
     { className: 'text-center' }, // 縦方向中央揃え
@@ -172,7 +173,7 @@ const left = (isEditing, setIsEditing) => {
   );
 };
 
-const right = (isEditing, setIsEditing) => {
+const right = (isEditing, setIsEditing, data) => {
   return Teact.createElement(
     'div',
     { className: 'ps-3' }, // 縦方向中央揃え
@@ -253,7 +254,7 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString(undefined, options);
 };
 
-const gameRecord = (record) => {
+const gameRecord = (record, data) => {
   return Teact.createElement(
     'tr',
     { className: 'text-center' }, // Bootstrap グリッドを使用
@@ -268,15 +269,28 @@ const gameRecord = (record) => {
 
 export const UserProfile = () => {
   const [isEditing, setIsEditing] = Teact.useState(false);
-  return BaseLayout(
+  const [userData, setUserData] = Teact.useState(null);
+
+  Teact.useEffect(() => {
+    userApi.getProfile()
+      .then(data => {
+        setUserData(data);
+      })
+      .catch(error => console.error("Error fetching user profile:", error));
+  }, []);
+  console.log(userData);
+  if (!userData) {
+    return Teact.createElement("p", null, "Loading...");
+  }
+  return HeaderWithTitleLayout(
     Teact.createElement(
       'div',
       { className: 'container bg-white pb-3 pt-3' },
       Teact.createElement(
         'div',
         { className: 'd-flex align-items-center' },
-        left(isEditing, setIsEditing),
-        right(isEditing, setIsEditing)
+        left(isEditing, setIsEditing, userData),
+        right(isEditing, setIsEditing, userData)
       ),
       Teact.createElement(
         'div',
@@ -308,7 +322,7 @@ export const UserProfile = () => {
             Teact.createElement(
               'tbody',
               { className: 'table-body-scroll' },
-              ...data.performance.game_records.map(gameRecord)
+              ...(userData?.performance?.game_records?.map(gameRecord, userData) || [])
             )
           )
         )

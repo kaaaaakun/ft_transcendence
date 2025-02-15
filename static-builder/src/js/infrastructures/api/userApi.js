@@ -81,10 +81,24 @@ function deleteAccount(data) {
   })
 }
 
+function getProfile() {
+  return api.get(`/api/users/user/user1/`).then(response => response.json().then(json => {
+    if (!response.ok) {
+      throw new Error(json.error || 'Unknown error occurred');
+    }
+    return json;
+  }))
+  .catch(error => {
+    console.error("Error fetching profile:", error);
+    throw error;
+  });
+}
+
 export const userApi = {
   login,
   register,
   passwordReset,
   getSecretQuestion,
   deleteAccount,
+  getProfile,
 }

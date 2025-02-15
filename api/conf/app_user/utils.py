@@ -12,7 +12,7 @@ def get_opponent_user_and_score(match_id, user_id):
   return None
 
 def create_response(user):
-  match_details = MatchDetail.objects.filter(user_id=user.id)
+  match_details = MatchDetail.objects.filter(player_id_id=user.id)
   game_records = []
   for match_detail in match_details:
     opponent_user, opponent_score = get_opponent_user_and_score(match_detail.match_id, user.id)
