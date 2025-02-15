@@ -5,7 +5,7 @@
         "fields": {
             "login_name": "testuser1",
             "display_name": "test_user1",
-            "avatar_path": null,
+            "avatar_path": "/avatars/test_user1.png",
             "password_hash": "pbkdf2_sha256$216000$randomsalt$hashedpassword",
             "secret_question": "好きな食べ物は？",
             "secret_answer_hash": "pbkdf2_sha256$216000$randomsalt$hashedanswer",

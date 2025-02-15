@@ -59,6 +59,7 @@ services:
       - "80:80"
     volumes:
       - ./reverseproxy/nginx.local.conf:/etc/nginx/nginx.conf
+      - ./reverseproxy/avatars:/var/www/data/avatars:ro
     networks:
       - net_pong
     depends_on:

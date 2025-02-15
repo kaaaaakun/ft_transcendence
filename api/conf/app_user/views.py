@@ -40,6 +40,26 @@ class UserView(APIView):
             return JsonResponse({
                 'error': 'User not found.'
             }, status=status.HTTP_404_NOT_FOUND)
+    
+    def patch(self, request):
+        try:
+            data = json.loads(request.body)
+            display_name = data.get('display_name')
+            avatar_path = data.get('avatar_path')
+            user = User.objects.get(display_name=display_name)
+            user.avatar_path = avatar_path
+            user.save()
+            return JsonResponse({
+                'message': 'Avatar updated.'
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            with open('log.txt', 'a') as f:
+                f.write(str(e))
+                f.write("\n")
+                f.write(traceback.format_exc())
+            return JsonResponse({
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class UserLoginView(APIView):
