@@ -3,6 +3,7 @@ from .models import User
 from django.db.models import Q
 from .utils import create_response
 import random
+import traceback
 
 from rest_framework import viewsets
 from rest_framework import status
@@ -34,6 +35,8 @@ class UserView(APIView):
         except Exception as e:
             with open('log.txt', 'a') as f:
                 f.write(str(e))
+                f.write("\n")
+                f.write(traceback.format_exc())
             return JsonResponse({
                 'error': 'User not found.'
             }, status=status.HTTP_404_NOT_FOUND)

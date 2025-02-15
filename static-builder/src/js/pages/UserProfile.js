@@ -249,17 +249,17 @@ const right = (isEditing, setIsEditing, data) => {
   );
 };
 
-const formatDate = (dateString) => {
-  const options = { year: 'numeric', month: 'short', day: 'numeric' };
-  return new Date(dateString).toLocaleDateString(undefined, options);
-};
+// const formatDate = (dateString) => {
+//   const options = { year: 'numeric', month: 'short', day: 'numeric' };
+//   return new Date(dateString).toLocaleDateString(undefined, options);
+// };
 
 const gameRecord = (record, data) => {
   return Teact.createElement(
     'tr',
     { className: 'text-center' }, // Bootstrap グリッドを使用
-    Teact.createElement('td', { className: 'width-35 border-end' }, `${data.display_name} vs ${record.opponent}`),
-    Teact.createElement('td', { className: 'width-25 border-end' }, formatDate(record.date)),
+    Teact.createElement('td', { className: 'width-35 border-end' }, `${data.display_name} vs ${record.opponent_name}`),
+    // Teact.createElement('td', { className: 'width-25 border-end' }, formatDate(record.date)),
     Teact.createElement('td', { className: 'width-10 border-end' }, record.result),
     Teact.createElement('td', { className: 'width-15 border-end' }, `${record.score.player} - ${record.score.opponent}`),
     Teact.createElement('td', { className: 'width-15' }, record.match_type)
@@ -272,7 +272,7 @@ export const UserProfile = () => {
   const [userData, setUserData] = Teact.useState(null);
 
   Teact.useEffect(() => {
-    userApi.getProfile()
+    userApi.getProfile("test_user1")
       .then(data => {
         setUserData(data);
       })
@@ -313,7 +313,7 @@ export const UserProfile = () => {
                 'tr',
                 { className: 'text-center' }, // Bootstrap グリッドを使用
                 Teact.createElement('th', {className: 'width-35 border-end'}, 'Match'),
-                Teact.createElement('th', {className: 'width-25 border-end'}, 'Date'),
+                // Teact.createElement('th', {className: 'width-25 border-end'}, 'Date'),
                 Teact.createElement('th', {className: 'width-10 border-end'}, 'Result'),
                 Teact.createElement('th', {className: 'width-15 border-end'}, 'Score'),
                 Teact.createElement('th', {className: 'width-15'}, 'Match Type')
@@ -322,7 +322,7 @@ export const UserProfile = () => {
             Teact.createElement(
               'tbody',
               { className: 'table-body-scroll' },
-              ...(userData?.performance?.game_records?.map(gameRecord, userData) || [])
+              ...(userData?.performance?.game_records?.map(record => gameRecord(record, userData)) || [])
             )
           )
         )

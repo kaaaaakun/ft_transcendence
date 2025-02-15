@@ -81,8 +81,8 @@ function deleteAccount(data) {
   })
 }
 
-function getProfile() {
-  return api.get(`/api/users/user/user1/`).then(response => response.json().then(json => {
+function getProfile(displayName) {
+  return api.get(`/api/users/user/${displayName}`).then(response => response.json().then(json => {
     if (!response.ok) {
       throw new Error(json.error || 'Unknown error occurred');
     }
