@@ -42,8 +42,8 @@ class UserLoginView(APIView):
                 }, status=status.HTTP_200_OK)
             else:
                 return JsonResponse({
-                    'error': f'Invalid login name or password. {login_name} {make_password(password=password, salt="ft_transcendence")}'
-                }, status=status.HTTP_401_UNAUTHORIZED)
+                    'error': str('Login failed. Check your login name and password.')
+                }, status=saltus.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             return JsonResponse({
@@ -78,13 +78,9 @@ class UserView(APIView):
                 secret_answer_hash=make_password(secret_answer, salt='ft_transcendence'),
             )
 
-            # JWTのアクセストークンとリフレッシュトークンを生成
-            refresh = RefreshToken.for_user(user)
 
             return JsonResponse({
                 'message': 'Sign up successful',
-                'access_token': str(refresh.access_token),
-                'refresh_token': str(refresh)
             }, status=status.HTTP_201_CREATED)
 
         except Exception as e:
@@ -107,8 +103,6 @@ class UserView(APIView):
                 'error': 'User not found.'
             }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            with open('c.txt', 'w') as f:
-                f.write(str(e))
             return JsonResponse({
                 'error': str(e)
 
