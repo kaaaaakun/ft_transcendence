@@ -94,6 +94,18 @@ function getProfile(displayName) {
   });
 }
 
+function changeProfile(user, data) {
+  console.log(data);
+  return api.patch(`/api/users/update/`, data).then(response => {
+    if (!response.ok) {
+      return response.json().then(errData => {
+        throw new Error(errData.error || 'Unknown error occurred')
+      })
+    }
+    return response.json()
+  })
+}
+
 export const userApi = {
   login,
   register,
@@ -101,4 +113,5 @@ export const userApi = {
   getSecretQuestion,
   deleteAccount,
   getProfile,
+  changeProfile,
 }

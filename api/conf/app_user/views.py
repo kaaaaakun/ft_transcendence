@@ -4,13 +4,13 @@ from django.db.models import Q
 from .utils import create_response
 import random
 import traceback
-
+import os
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.utils.decorators import method_decorator
 from django.db import transaction, DatabaseError
 from django.views import View
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -21,16 +21,21 @@ import json
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.views import APIView
+from django.conf import settings
+from django.core.files.storage import default_storage
+import requests
 
 class UserView(APIView):
     def get(self, request, display_name):
         try:
             user = User.objects.filter(display_name=display_name).first()
-            with open('log.txt', 'w') as f:
+            with open('log.txt', 'a') as f:
                 f.write(str(user))
+                f.write("\n")
             data = create_response(user)
             with open('log.txt', 'a') as f:
                 f.write(str(data))
+                f.write("\n")
             return JsonResponse(data)
         except Exception as e:
             with open('log.txt', 'a') as f:
@@ -40,26 +45,38 @@ class UserView(APIView):
             return JsonResponse({
                 'error': 'User not found.'
             }, status=status.HTTP_404_NOT_FOUND)
-    
+        
+UPLOAD_URL = "http://reverseproxy/avatars/"
+class UserUpdateView(APIView):
     def patch(self, request):
         try:
-            data = json.loads(request.body)
-            display_name = data.get('display_name')
-            avatar_path = data.get('avatar_path')
-            user = User.objects.get(display_name=display_name)
-            user.avatar_path = avatar_path
-            user.save()
-            return JsonResponse({
-                'message': 'Avatar updated.'
-            }, status=status.HTTP_200_OK)
+            user = User.objects.get(id=1)
+            response = {}
+
+            # display_name の更新
+            if "display_name" in request.POST:
+                user.display_name = request.POST["display_name"]
+                user.save()
+                response["display_name"] = user.display_name
+
+            # アバター画像の更新
+            if "avatar_path" in request.FILES:
+                avatar = request.FILES["avatar_path"]
+                file_name = f"{user.display_name}.png"
+                with open("path.txt", "a") as f:
+                    f.write(f"{file_name}\n")
+                with open(f"/var/www/data/avatars/test_user1.png", "wb") as f:
+                    for chunk in avatar.chunks():
+                        f.write(chunk)
+                response["avatar_path"] = "/avatars/test_user1.png"
+            return JsonResponse(response)
+
         except Exception as e:
-            with open('log.txt', 'a') as f:
+            with open('patch.txt', 'a') as f:
                 f.write(str(e))
                 f.write("\n")
                 f.write(traceback.format_exc())
-            return JsonResponse({
-                'error': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return JsonResponse({"error": "An error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class UserLoginView(APIView):

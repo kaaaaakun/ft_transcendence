@@ -51,17 +51,21 @@ class FetchWrapper {
   }
 
   async patch(url, data) {
+    const isFormData = data instanceof FormData;
+
     const response = await fetch(`${this.baseUrl}${url}`, {
-      method: 'PATCH',
-      body: data ? JSON.stringify(data) : {},
-      headers: {
-        'Content-Type': 'application/json',
-        ...this.getAuthHeader(),
-      },
-      credentials: 'include',
-    })
-    return response
-  }
+        method: 'PATCH',
+        body: isFormData ? data : JSON.stringify(data),
+        headers: {
+            ...(isFormData ? {} : { 'Content-Type': 'application/json' }), // FormData の場合は Content-Type を設定しない
+            ...this.getAuthHeader(),
+        },
+        credentials: 'include',
+    });
+
+    return response;
+}
+
 
   async delete(url) {
     const response = await fetch(`${this.baseUrl}${url}`, {

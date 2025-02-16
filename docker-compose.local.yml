@@ -59,7 +59,7 @@ services:
       - "80:80"
     volumes:
       - ./reverseproxy/nginx.local.conf:/etc/nginx/nginx.conf
-      - ./reverseproxy/avatars:/var/www/data/avatars:ro
+      - ./reverseproxy/avatars:/var/www/data/avatars
     networks:
       - net_pong
     depends_on:
@@ -79,6 +79,8 @@ services:
     restart: on-failure
     networks:
       - net_pong
+    volumes:
+      - ./reverseproxy/avatars:/var/www/data/avatars
     environment:
       DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME}
       DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL}
@@ -124,3 +126,6 @@ networks:
 volumes:
   vol_rdbms:
     name: "vol_rdbms"
+    
+  avatars_data:
+    name: "avatars_data"

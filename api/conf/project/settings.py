@@ -32,6 +32,11 @@ WALL_Y_LIMIT = config.get('WALL_Y_LIMIT')
 PADDLE_HEIGHT = config.get('PADDLE_HEIGHT')
 BALL_RADIUS = config.get('BALL_RADIUS')
 
+
+MEDIA_ROOT = "/var/www/data"
+MEDIA_URL = "/avatars/"  # Nginx 側でリバースプロキシを設定する
+AVATAR_DIR = os.path.join(MEDIA_ROOT, "avatars")  # "avatars" を直接結合
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
