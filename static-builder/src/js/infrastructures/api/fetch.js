@@ -46,7 +46,6 @@ class FetchWrapper {
         ...this.getAuthHeader(),
       },
       credentials: 'include',
-
     })
     return response
   }
