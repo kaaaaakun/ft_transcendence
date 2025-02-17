@@ -42,15 +42,17 @@ class UserLoginView(APIView):
                 }, status=status.HTTP_200_OK)
             else:
                 return JsonResponse({
-                    'error': f'Invalid login name or password. {login_name} {make_password(password=password, salt="ft_transcendence")}'
-                }, status=status.HTTP_401_UNAUTHORIZED)
+                    'error': str('Login failed. Check your login name and password.')
+                }, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
+            with open('error.log', 'a') as f:
+                f.write(str(e))
             return JsonResponse({
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class UserRegisterView(APIView):
+class UserView(APIView):
     def post(self, request, *args, **kwargs):
         try:
             # リクエストのボディをJSONとしてパース
@@ -72,28 +74,45 @@ class UserRegisterView(APIView):
             # ユーザーを作成
             user = User.objects.create(
                 login_name=login_name,
-                password_hash=make_password(password=password, salt='ft_transcendence'),
+                password=make_password(password=password, salt='ft_transcendence'),
                 display_name=display_name,
                 secret_question=secret_question,
                 secret_answer_hash=make_password(secret_answer, salt='ft_transcendence'),
             )
+            user.user_id = user.id
+            user.save()
 
-            # JWTのアクセストークンとリフレッシュトークンを生成
-            refresh = RefreshToken.for_user(user)
 
             return JsonResponse({
                 'message': 'Sign up successful',
-                'access_token': str(refresh.access_token),
-                'refresh_token': str(refresh)
             }, status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            # エラー時は500エラーを返す
+            with open('error.log', 'a') as f:
+                f.write(str(e))
             return JsonResponse({
                 'error': str(e),
                 'Your request': str(request.body)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    def delete(self, request, *args, **kwargs):
+        try:
+            login_name = json.loads(request.body).get('login_name')
+            user = User.objects.get(login_name=login_name)
+            user.delete()
+            return JsonResponse({
+                'message': 'User deleted.'
+            }, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return JsonResponse({
+                'error': 'User not found.'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+
+            return JsonResponse({
+                'error': str(e)
+
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class UserPasswordResetView(APIView):
@@ -137,7 +156,7 @@ class UserPasswordResetView(APIView):
             user = User.objects.get(login_name=login_name)
 
             if user.secret_answer_hash == make_password(secret_answer, salt='ft_transcendence'):
-                user.password_hash = make_password(password=new_password, salt='ft_transcendence')
+                user.password = make_password(password=new_password, salt='ft_transcendence')
                 user.save()
                 return JsonResponse({
                     'message': 'Password reset successful.'
@@ -146,24 +165,6 @@ class UserPasswordResetView(APIView):
                 return JsonResponse({
                     'error': 'Incorrect secret answer.'
                 }, status=status.HTTP_400_BAD_REQUEST)
-        except User.DoesNotExist:
-            return JsonResponse({
-                'error': 'User not found.'
-            }, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return JsonResponse({
-                'error': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-class UserDeleteView(APIView):
-    def delete(self, request, login_name, *args, **kwargs):
-        try:
-            user = User.objects.get(login_name=login_name)
-            user.delete()
-            return JsonResponse({
-                'message': 'User deleted.'
-            }, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return JsonResponse({
                 'error': 'User not found.'
