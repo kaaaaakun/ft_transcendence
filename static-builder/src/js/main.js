@@ -3,6 +3,7 @@ import { Route, Router } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import { FriendsList } from '@/js/pages/FriendsList'
 import { Home } from '@/js/pages/Home'
+import { UserProfile } from '@/js/pages/UserProfile'
 import { Login } from '@/js/pages/Login'
 import { Register } from '@/js/pages/Register'
 import '@/scss/styles.scss'
@@ -44,6 +45,10 @@ function App() {
     Route({
       path: '/tournaments/game',
       component: TournamentsGame,
+    }),
+    Route({
+      path: '/users/',
+      component: UserProfile,
     }),
     Route({
       path: '/users/:id/friends',
