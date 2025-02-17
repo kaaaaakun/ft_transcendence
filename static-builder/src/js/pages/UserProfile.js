@@ -171,7 +171,7 @@ export const UserProfile = () => {
           'label',
           { className: '' }, // クリック可能にする
           Teact.createElement('img', {
-            src: userData.avatar_path,
+            src: `${userData.avatar_path}?${new Date().getTime()}`, // キャッシュ対策
             className: 'img-fluid avatar', // 画像を丸くする
             alt: 'Avatar',
           }),
