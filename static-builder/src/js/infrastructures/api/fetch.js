@@ -6,8 +6,7 @@ class FetchWrapper {
   getAuthHeader() {
     if (localStorage.getItem('access_token')) {
       return {
-        // TODO 本当はBearerをつけるのだが、それをするとサーバー側でエラーになるので、とりあえずこのまま
-        Authorization: `${localStorage.getItem('access_token')}`,
+        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
       }
     }
     return {}

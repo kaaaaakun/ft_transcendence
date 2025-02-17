@@ -43,9 +43,11 @@ class UserLoginView(APIView):
             else:
                 return JsonResponse({
                     'error': str('Login failed. Check your login name and password.')
-                }, status=saltus.HTTP_400_BAD_REQUEST)
+                }, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
+            with open('error.log', 'a') as f:
+                f.write(str(e))
             return JsonResponse({
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -72,11 +74,13 @@ class UserView(APIView):
             # ユーザーを作成
             user = User.objects.create(
                 login_name=login_name,
-                password_hash=make_password(password=password, salt='ft_transcendence'),
+                password=make_password(password=password, salt='ft_transcendence'),
                 display_name=display_name,
                 secret_question=secret_question,
                 secret_answer_hash=make_password(secret_answer, salt='ft_transcendence'),
             )
+            user.user_id = user.id
+            user.save()
 
 
             return JsonResponse({
@@ -84,7 +88,8 @@ class UserView(APIView):
             }, status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            # エラー時は500エラーを返す
+            with open('error.log', 'a') as f:
+                f.write(str(e))
             return JsonResponse({
                 'error': str(e),
                 'Your request': str(request.body)
@@ -103,6 +108,7 @@ class UserView(APIView):
                 'error': 'User not found.'
             }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
+
             return JsonResponse({
                 'error': str(e)
 
@@ -150,7 +156,7 @@ class UserPasswordResetView(APIView):
             user = User.objects.get(login_name=login_name)
 
             if user.secret_answer_hash == make_password(secret_answer, salt='ft_transcendence'):
-                user.password_hash = make_password(password=new_password, salt='ft_transcendence')
+                user.password = make_password(password=new_password, salt='ft_transcendence')
                 user.save()
                 return JsonResponse({
                     'message': 'Password reset successful.'
