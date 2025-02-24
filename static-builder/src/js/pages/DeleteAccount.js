@@ -20,8 +20,23 @@ function handleSubmit(event, showErrorBanner) {
   if (data.login_name) {
     userApi
       .DeleteAccount(data)
+      .then(response => {
+        if (response.status === 401) {
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('refresh_token')
+          throw new Error('Unauthorized')
+        }
+        if (!response.ok) {
+          return response.json().then(errData => {
+            throw new Error(errData.error || 'Unknown error occurred')
+          })
+        }
+        return response.json()
+      })
       .then(data => {
         console.log('Success:', data)
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('refresh_token')
         navigate('/register', { data })
       })
       .catch(error => {
