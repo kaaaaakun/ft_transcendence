@@ -19,7 +19,7 @@ function handleSubmit(event, showErrorBanner) {
   })
   if (data.login_name) {
     userApi
-      .deleteAccount(data)
+      .DeleteAccount(data)
       .then(data => {
         console.log('Success:', data)
         navigate('/register', { data })

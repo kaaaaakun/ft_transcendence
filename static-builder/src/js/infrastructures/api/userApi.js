@@ -31,7 +31,7 @@ function register(data) {
   })
 }
 
-function passwordReset(data) {
+function PasswordReset(data) {
   return api
     .post(`/api/auth/${data.login_name}/password_reset/`, data)
     .then(response => {
@@ -57,7 +57,7 @@ function getSecretQuestion(data) {
     })
 }
 
-function deleteAccount(data) {
+function DeleteAccount(data) {
   return api.delete('/api/users/', data).then(response => {
     return response
   })
@@ -66,7 +66,7 @@ function deleteAccount(data) {
 export const userApi = {
   login,
   register,
-  passwordReset,
+  PasswordReset,
   getSecretQuestion,
-  deleteAccount,
+  DeleteAccount,
 }

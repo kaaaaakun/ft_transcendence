@@ -19,7 +19,7 @@ function handleSubmit(event, showErrorBanner) {
   })
   if (data.login_name && data.secret_answer && data.new_password) {
     userApi
-      .passwordReset(data)
+      .PasswordReset(data)
       .then(data => {
         console.log('Success:', data)
         navigate('/login', { data })
