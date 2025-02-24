@@ -5,11 +5,9 @@ import { cookie } from '@/js/infrastructures/cookie/cookie'
 import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
-import { api } from '@/js/infrastructures/api/fetch'
 
 export const Home = () => {
-  const { showInfoBanner, showWarningBanner, showErrorBanner, banners } =
-    useBanner()
+  const { banners } = useBanner()
   const navigate = useNavigate()
 
   return HeaderWithTitleLayout(

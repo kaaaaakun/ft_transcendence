@@ -22,7 +22,6 @@ function handleSubmit(event, showErrorBanner, showInfoBanner) {
   userApi
     .register(data)
     .then(data => {
-      console.log('Success:', data)
       navigate('/login', { data })
     })
     .catch(error => {

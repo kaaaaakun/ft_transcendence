@@ -21,7 +21,6 @@ function handleSubmit(event, showErrorBanner) {
     userApi
       .PasswordReset(data)
       .then(data => {
-        console.log('Success:', data)
         navigate('/login', { data })
       })
       .catch(error => {
@@ -34,7 +33,6 @@ function handleSubmit(event, showErrorBanner) {
     userApi
       .getSecretQuestion(data)
       .then(data => {
-        console.log('Success:', data)
         secretQuestion = data.secret_question
         navigate('/password-reset', { data })
       })

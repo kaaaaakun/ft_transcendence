@@ -34,7 +34,6 @@ function handleSubmit(event, showErrorBanner) {
         return response.json()
       })
       .then(data => {
-        console.log('Success:', data)
         localStorage.removeItem('access_token')
         localStorage.removeItem('refresh_token')
         navigate('/register', { data })
