@@ -1,12 +1,6 @@
 import random
-
-from rest_framework import viewsets
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.utils.decorators import method_decorator
-from django.db import transaction, DatabaseError
 from django.views import View
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from django.http import JsonResponse
@@ -54,7 +48,6 @@ class UserLoginView(APIView):
 class UserView(APIView):
     def post(self, request, *args, **kwargs):
         try:
-            # リクエストのボディをJSONとしてパース
             data = json.loads(request.body)
 
             login_name = data.get('login_name')
@@ -63,14 +56,12 @@ class UserView(APIView):
             secret_question = data.get('secret_question')
             secret_answer = data.get('secret_answer')
 
-            # フィールドがすべて入力されているか確認
             if not login_name or not password or not display_name or not secret_question or not secret_answer:
                 return JsonResponse({
                     'error': 'All fields are required.',
                     'Your request': str(data)
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-            # ユーザーを作成
             user = User.objects.create_user(
                 login_name=login_name,
                 password=password,

@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
-from django.utils import timezone
 
 
 class UserManager(BaseUserManager):
@@ -23,8 +22,6 @@ class User(AbstractBaseUser):
     secret_answer_hash = models.CharField(max_length=255)
     last_online_at = models.DateTimeField(default=None, null=True)
     deleted_at = models.DateTimeField(default=None, null=True)
-
-    is_active = models.BooleanField(default=True)
 
     objects = UserManager()
 
