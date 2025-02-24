@@ -14,17 +14,7 @@ import { api } from '@/js/infrastructures/api/fetch'
 
 function login(data) {
   return api.post('/api/auth/login/', data).then(response => {
-    if (!response.ok) {
-      return response.json().then(errData => {
-        throw new Error(errData.error || 'Unknown error occurred')
-      })
-    }
-    return response.json().then(data => {
-      if (data.token) {
-        localStorage.setItem('token', data.token)
-      }
-      return data
-    })
+    return response
   })
 }
 
@@ -36,9 +26,6 @@ function register(data) {
       })
     }
     return response.json().then(data => {
-      if (data.token) {
-        localStorage.setItem('token', data.token)
-      }
       return data
     })
   })
@@ -72,12 +59,7 @@ function getSecretQuestion(data) {
 
 function deleteAccount(data) {
   return api.delete('/api/users/', data).then(response => {
-    if (!response.ok) {
-      return response.json().then(errData => {
-        throw new Error(errData.error || 'Unknown error occurred')
-      })
-    }
-    return response.json()
+    return response
   })
 }
 
