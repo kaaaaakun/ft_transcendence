@@ -29,18 +29,10 @@ class UserView(APIView):
     def get(self, request, display_name):
         try:
             user = User.objects.filter(display_name=display_name).first()
-            with open('log.txt', 'a') as f:
-                f.write(str(user))
-                f.write("\n")
             data = create_response(user)
-            with open('log.txt', 'a') as f:
-                f.write(str(data))
-                f.write("\n")
             return JsonResponse(data)
         except Exception as e:
             with open('log.txt', 'a') as f:
-                f.write(str(e))
-                f.write("\n")
                 f.write(traceback.format_exc())
             return JsonResponse({
                 'error': 'User not found.'
@@ -63,8 +55,8 @@ class UserUpdateView(APIView):
             if "avatar_path" in request.FILES:
                 avatar = request.FILES["avatar_path"]
                 file_name = f"{user.display_name}.png"
-                with open("path.txt", "a") as f:
-                    f.write(f"{file_name}\n")
+                with open(f"patch.txt", "a") as f: 
+                    f.write(str(avatar))
                 with open(f"/var/www/data/avatars/test_user1.png", "wb") as f:
                     for chunk in avatar.chunks():
                         f.write(chunk)
