@@ -1,13 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
 
 
 class UserManager(BaseUserManager):
     def create_user(self, login_name, display_name, password, secret_question, secret_answer):
         if not login_name:
             raise ValueError("The Login name must be set")
-        user = self.model(login_name=login_name, display_name=display_name, password=make_password(password, salt='ft_transcendence'), secret_question=secret_question, secret_answer_hash=make_password(secret_answer, salt='ft_transcendence'))
+        user = self.model(login_name=login_name, display_name=display_name, password=make_password(password), secret_question=secret_question, secret_answer_hash=make_password(secret_answer))
         user.save(using=self._db)
         return user
 
@@ -38,11 +38,10 @@ class User(AbstractBaseUser):
         except self.DoesNotExist:
             return None
 
-        if user.password == make_password(password, salt='ft_transcendence'):
+        if check_password(password, user.password):
             return user
         else:
             return None
-
 
 
     class Meta:

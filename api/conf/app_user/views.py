@@ -5,7 +5,7 @@ from django.views import View
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from django.http import JsonResponse
 from .models import User
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
 import json
 from django.http import JsonResponse
 from rest_framework import status
@@ -164,8 +164,8 @@ class UserPasswordResetView(APIView):
 
             user = User.objects.get(login_name=login_name)
 
-            if user.secret_answer_hash == make_password(secret_answer, salt='ft_transcendence'):
-                user.password = make_password(password=new_password, salt='ft_transcendence')
+            if check_password(secret_answer, user.secret_answer_hash):
+                user.password = make_password(password=new_password)
                 user.save()
                 return JsonResponse({
                     'message': 'Password reset successful.'
