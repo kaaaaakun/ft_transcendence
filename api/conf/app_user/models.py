@@ -5,8 +5,8 @@ from django.contrib.auth.hashers import make_password, check_password
 
 class UserManager(BaseUserManager):
     def create_user(self, login_name, display_name, password, secret_question, secret_answer):
-        if not login_name:
-            raise ValueError("The Login name must be set")
+        if not login_name or not display_name or not password or not secret_question or not secret_answer:
+            raise ValueError("Required fields are missing")
         user = self.model(login_name=login_name, display_name=display_name, password=make_password(password), secret_question=secret_question, secret_answer_hash=make_password(secret_answer))
         user.save(using=self._db)
         return user
