@@ -19,7 +19,7 @@ function handleSubmit(event, showErrorBanner) {
   })
   if (data.login_name) {
     userApi
-      .DeleteAccount(data)
+      .deleteAccount(data)
       .then(response => {
         if (response.status === 401) {
           localStorage.removeItem('access_token')
