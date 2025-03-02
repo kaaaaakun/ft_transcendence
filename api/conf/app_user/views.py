@@ -104,7 +104,7 @@ class UserView(APIView):
             if (user.id != access_id):
                 return JsonResponse({
                     'message': 'You can only delete your own account'
-                }, status=status.HTTP_400_BAD_REQUEST)
+                }, status=status.HTTP_403_FORBIDDEN)
 
 
             user.delete()
