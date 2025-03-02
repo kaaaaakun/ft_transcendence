@@ -87,6 +87,12 @@ class UserView(APIView):
         try:
             data = json.loads(request.body)
             login_name = data.get('login_name')
+
+            if not login_name:
+                return JsonResponse({
+                    'error': 'Login name is required.'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
             auth = request.headers.get('Authorization')
 
             if auth:
