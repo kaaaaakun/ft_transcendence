@@ -39,10 +39,8 @@ class UserLoginView(APIView):
                 }, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
-            with open('error.log', 'a') as f:
-                f.write(str(e))
             return JsonResponse({
-                'error': str(e)
+                'error': 'Something went wrong.'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class UserView(APIView):
@@ -76,11 +74,8 @@ class UserView(APIView):
             }, status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            with open('error.log', 'a') as f:
-                f.write(str(e))
             return JsonResponse({
-                'error': str(e),
-                'Your request': str(request.body)
+                'error': 'Something went wrong.',
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def delete(self, request, *args, **kwargs):
@@ -125,8 +120,7 @@ class UserView(APIView):
             }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return JsonResponse({
-                'error': str(e)
-
+                'error': 'Something went wrong.'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -152,7 +146,7 @@ class UserPasswordResetView(APIView):
 
         except Exception as e:
             return JsonResponse({
-                'error': str(e)
+                'error': 'Something went wrong.'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -186,6 +180,6 @@ class UserPasswordResetView(APIView):
             }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return JsonResponse({
-                'error': str(e)
+                'error': 'Something went wrong.'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
