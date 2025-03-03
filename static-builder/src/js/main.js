@@ -47,7 +47,7 @@ function App() {
       component: TournamentsGame,
     }),
     Route({
-      path: '/users/',
+      path: '/users/:username',
       component: UserProfile,
     }),
     Route({

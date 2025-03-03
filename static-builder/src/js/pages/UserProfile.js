@@ -3,146 +3,10 @@ import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { Teact } from '@/js/libs/teact'
 import { userApi } from '@/js/infrastructures/api/userApi'
 
-// const data = {
-//   "login_name": "user1",
-//   "display_name": "ユーザー1",
-//   "avatar_path": "/superman_hero.png",
-//   "num_of_friends": 3,
-//   "performance": {
-//     "game_records": [
-//       {
-//         "date": "2021-01-01T12:00:00Z",
-//         "result": "win",
-//         "opponent": "ユーザー2",
-//         "score": {
-//           "player": 10,
-//           "opponent": 5
-//         },
-//         "match_type": "simple"
-//       },
-//       {
-//         "date": "2021-01-02T12:00:00Z",
-//         "result": "loss",
-//         "opponent": "ユーザー3",
-//         "score": {
-//           "player": 5,
-//           "opponent": 10
-//         },
-//         "match_type": "tournament"
-//       },
-//       {
-//         "date": "2021-01-02T12:00:00Z",
-//         "result": "loss",
-//         "opponent": "ユーザー3",
-//         "score": {
-//           "player": 5,
-//           "opponent": 10
-//         },
-//         "match_type": "tournament"
-//       },
-//       {
-//         "date": "2021-01-02T12:00:00Z",
-//         "result": "loss",
-//         "opponent": "ユーザー3",
-//         "score": {
-//           "player": 5,
-//           "opponent": 10
-//         },
-//         "match_type": "tournament"
-//       },
-//       {
-//         "date": "2021-01-02T12:00:00Z",
-//         "result": "loss",
-//         "opponent": "ユーザー3",
-//         "score": {
-//           "player": 5,
-//           "opponent": 10
-//         },
-//         "match_type": "tournament"
-//       },
-//       {
-//         "date": "2021-01-02T12:00:00Z",
-//         "result": "loss",
-//         "opponent": "ユーザー3",
-//         "score": {
-//           "player": 5,
-//           "opponent": 10
-//         },
-//         "match_type": "tournament"
-//       },
-//       {
-//         "date": "2021-01-02T12:00:00Z",
-//         "result": "loss",
-//         "opponent": "ユーザー3",
-//         "score": {
-//           "player": 5,
-//           "opponent": 10
-//         },
-//         "match_type": "tournament"
-//       },
-//       {
-//         "date": "2021-01-02T12:00:00Z",
-//         "result": "loss",
-//         "opponent": "ユーザー3",
-//         "score": {
-//           "player": 5,
-//           "opponent": 10
-//         },
-//         "match_type": "tournament"
-//       },
-//       {
-//         "date": "2021-01-02T12:00:00Z",
-//         "result": "loss",
-//         "opponent": "ユーザー3",
-//         "score": {
-//           "player": 5,
-//           "opponent": 10
-//         },
-//         "match_type": "tournament"
-//       },
-//       {
-//         "date": "2021-01-02T12:00:00Z",
-//         "result": "loss",
-//         "opponent": "ユーザー3",
-//         "score": {
-//           "player": 5,
-//           "opponent": 10
-//         },
-//         "match_type": "tournament"
-//       },
-//       {
-//         "date": "2021-01-02T12:00:00Z",
-//         "result": "loss",
-//         "opponent": "ユーザー3",
-//         "score": {
-//           "player": 5,
-//           "opponent": 10
-//         },
-//         "match_type": "tournament"
-//       },
-//       {
-//         "date": "2021-01-02T12:00:00Z",
-//         "result": "loss",
-//         "opponent": "ユーザー3",
-//         "score": {
-//           "player": 5,
-//           "opponent": 10
-//         },
-//         "match_type": "tournament"
-//       }
-//     ],
-//     "statistics": {
-//       "total_games": 2,
-//       "wins": 1,
-//       "losses": 1,
-//       "win_rate": 50
-//     }
-//   }
-// }
-
 export const UserProfile = () => {
   const [isEditing, setIsEditing] = Teact.useState(false);
   const [userData, setUserData] = Teact.useState(null);
+  let changeUserName = '';
 
   const handleAvatarChange = async (event) => {
     event.preventDefault();
@@ -157,6 +21,23 @@ export const UserProfile = () => {
     }));
     } catch (error) {
         console.error("アップロードエラー:", error);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!changeUserName) {
+      return;
+    }
+    try {
+      const response = await userApi.changeProfile("test_user1", { display_name: changeUserName });
+      console.log(response);
+      setUserData(prevUserData => ({
+        ...prevUserData,
+        display_name: response.display_name,
+      }));
+      setIsEditing(false);
+    } catch (error) {
+      console.error("保存エラー:", error);
     }
   };
 
@@ -205,7 +86,7 @@ export const UserProfile = () => {
                   type: 'text',
                   className: 'form-control',
                   value: userData.display_name,
-                  onChange:(e) => handleSave(e.target.value, setIsEditing), // 入力値を更新
+                  onChange:(e) => changeUserName = e.target.value, // 入力値を更新
                 }
               )
             : Teact.createElement(
@@ -225,7 +106,7 @@ export const UserProfile = () => {
                 'button',
                 {
                   className: 'btn btn-success btn-sm align-items-center ms-2',
-                  onClick: () => setIsEditing(false), // 編集モード終了
+                  onClick: () => handleSave(), // プロフィール更新
                 },
                 'Save'
               ),
@@ -233,7 +114,9 @@ export const UserProfile = () => {
                 'button',
                 {
                   className: 'btn btn-outline-secondary btn-sm align-items-center ms-2',
-                  onClick: () => setIsEditing(false), // 編集モード終了
+                  onClick: () => {setIsEditing(false);
+                                  changeUserName = '';
+                                }, // 編集モード終了
                 },
                 'Cancel'
               )
@@ -277,7 +160,8 @@ export const UserProfile = () => {
   };
 
   Teact.useEffect(() => {
-    userApi.getProfile("test_user1")
+    const userName = window.location.pathname.split('/').filter(Boolean).pop();
+    userApi.getProfile(userName)
       .then(data => {
         setUserData(data);
       })

@@ -45,11 +45,13 @@ class UserUpdateView(APIView):
             user = User.objects.get(id=1)
             response = {}
 
-            # display_name の更新
-            if "display_name" in request.POST:
-                user.display_name = request.POST["display_name"]
-                user.save()
-                response["display_name"] = user.display_name
+            if request.content_type == "application/json":
+                data = json.loads(request.body.decode('utf-8'))
+                # display_name の更新
+                if "display_name" in data:
+                    user.display_name = data["display_name"]
+                    user.save()
+                    response["display_name"] = user.display_name
 
             # アバター画像の更新
             if "avatar_path" in request.FILES:
@@ -64,10 +66,10 @@ class UserUpdateView(APIView):
             return JsonResponse(response)
 
         except Exception as e:
-            with open('patch.txt', 'a') as f:
-                f.write(str(e))
-                f.write("\n")
-                f.write(traceback.format_exc())
+            # with open('patch.txt', 'a') as f:
+            #     f.write(str(e))
+            #     f.write("\n")
+            #     f.write(traceback.format_exc())
             return JsonResponse({"error": "An error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
