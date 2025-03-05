@@ -100,7 +100,8 @@ class UserView(APIView):
 
             access_id = AccessToken(access_token).get('user_id')
             user = User.objects.get(login_name=login_name)
-
+            if (user.deleted_at is not None):
+                raise User.DoesNotExist
 
             if (user.id != access_id):
                 return JsonResponse({
@@ -108,7 +109,7 @@ class UserView(APIView):
                 }, status=status.HTTP_403_FORBIDDEN)
 
 
-            user.delete()
+            user.logical_delete()
 
             return JsonResponse({
                 'message': 'User deleted.'
@@ -118,7 +119,9 @@ class UserView(APIView):
             return JsonResponse({
                 'error': 'User not found.'
             }, status=status.HTTP_404_NOT_FOUND)
+            
         except Exception as e:
+
             return JsonResponse({
                 'error': 'Something went wrong.'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -134,6 +137,9 @@ class UserPasswordResetView(APIView):
                 }, status=status.HTTP_400_BAD_REQUEST)
 
             user = User.objects.get(login_name=login_name)
+
+            if (user.deleted_at is not None):
+                raise User.DoesNotExist
 
             return JsonResponse({
                 'secret_question': user.secret_question
@@ -163,6 +169,9 @@ class UserPasswordResetView(APIView):
                 }, status=status.HTTP_400_BAD_REQUEST)
 
             user = User.objects.get(login_name=login_name)
+
+            if (user.deleted_at is not None):
+                raise User.DoesNotExist
 
             if check_password(secret_answer, user.secret_answer_hash):
                 user.password = make_password(password=new_password)

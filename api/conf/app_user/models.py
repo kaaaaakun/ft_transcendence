@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password, check_password
-
+from django.utils import timezone
 
 class UserManager(BaseUserManager):
     def create_user(self, login_name, display_name, password, secret_question, secret_answer):
@@ -35,6 +35,8 @@ class User(AbstractBaseUser):
     def ft_authenticate(self, login_name, password):
         try:
             user = self.objects.get(login_name=login_name)
+            if (user.deleted_at is not None):
+                return None
         except self.DoesNotExist:
             return None
 
@@ -43,6 +45,9 @@ class User(AbstractBaseUser):
         else:
             return None
 
+    def logical_delete(self):
+        self.deleted_at = timezone.now()
+        self.save()
 
     class Meta:
         db_table = 'users'
