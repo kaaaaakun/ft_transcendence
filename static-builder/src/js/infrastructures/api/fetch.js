@@ -6,7 +6,7 @@ class FetchWrapper {
   getAuthHeader() {
     if (localStorage.getItem('access_token')) {
       return {
-        Authorization: `JWT ${localStorage.getItem('access_token')}`,
+        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
       }
     }
     return {}
