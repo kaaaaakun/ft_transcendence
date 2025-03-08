@@ -24,6 +24,8 @@ from rest_framework.views import APIView
 from django.conf import settings
 from django.core.files.storage import default_storage
 import requests
+from django.utils.timezone import now
+
 
 class UserView(APIView):
     def get(self, request, display_name):
@@ -38,7 +40,14 @@ class UserView(APIView):
                 'error': 'User not found.'
             }, status=status.HTTP_404_NOT_FOUND)
         
-UPLOAD_URL = "http://reverseproxy/avatars/"
+class UpdateLastLoginView(APIView):
+
+    def post(self, request):
+        user = User.objects.get(id=1)
+        user.last_online_at = now()
+        user.save(update_fields=['last_online_at'])  # DB 更新
+        return Response({"message": "last_online_at updated"}, status=status.HTTP_200_OK)
+
 class UserUpdateView(APIView):
     def patch(self, request):
         try:
