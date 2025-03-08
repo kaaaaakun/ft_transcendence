@@ -73,11 +73,14 @@ INSTALLED_APPS = [
 ]
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=30),  # アクセストークンの有効期限（例：15分）
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=365),  # リフレッシュトークンの有効期限（例：7日）
-    'ALGORITHM': 'HS256',  # JWTアルゴリズム（通常はHS256）
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=365),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
 }
 
+AUTH_USER_MODEL = 'user.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
