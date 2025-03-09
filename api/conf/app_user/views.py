@@ -31,7 +31,7 @@ class UserLoginView(APIView):
                 'access_token': str(refresh.access_token),
                 'refresh_token': str(refresh),
             }, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 class UserView(APIView):
     authentication_classes = [JWTAuthentication]
 
@@ -42,7 +42,7 @@ class UserView(APIView):
             return JsonResponse({
                 'message': 'Sign up successful',
             }, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
     def delete(self, request, *args, **kwargs):
@@ -139,4 +139,4 @@ class UserPasswordResetView(APIView):
                 return JsonResponse({
                     'error': 'Incorrect secret answer.'
                 }, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
