@@ -115,7 +115,7 @@ class UserPasswordResetView(APIView):
 
             except Exception as e:
                 return JsonResponse({
-                    'error': str(e)
+                    'error': "Something went wrong."
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
