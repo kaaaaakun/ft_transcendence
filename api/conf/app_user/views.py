@@ -119,17 +119,18 @@ class UserView(APIView):
             return JsonResponse({
                 'error': 'User not found.'
             }, status=status.HTTP_404_NOT_FOUND)
-            
+
         except Exception as e:
 
             return JsonResponse({
                 'error': 'Something went wrong.'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-class UserPasswordResetView(APIView):
-    def get(self, request, login_name,*args, **kwargs):
+class UserSecretQuestionView(APIView):
+    def post(self, request,*args, **kwargs):
         try:
+            data = json.loads(request.body)
+            login_name = data.get('login_name')
 
             if not login_name:
                 return JsonResponse({
@@ -156,7 +157,9 @@ class UserPasswordResetView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-    def post(self, request, login_name,*args, **kwargs):
+
+class UserPasswordResetView(APIView):
+    def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
             login_name = data.get('login_name')

@@ -21,7 +21,7 @@ function register(data) {
 
 function passwordReset(data) {
   return api
-    .post(`/api/auth/${data.login_name}/password_reset/`, data)
+    .post(`/api/auth/password-reset/`, data)
     .then(response => {
       if (!response.ok) {
         return response.json().then(errData => {
@@ -34,7 +34,7 @@ function passwordReset(data) {
 
 function getSecretQuestion(data) {
   return api
-    .get(`/api/auth/${data.login_name}/password_reset/`, data)
+    .post(`/api/auth/password-reset/secret-question/`, data)
     .then(response => {
       if (!response.ok) {
         return response.json().then(errData => {
