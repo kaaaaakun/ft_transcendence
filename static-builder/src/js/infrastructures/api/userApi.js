@@ -20,21 +20,19 @@ function register(data) {
 }
 
 function passwordReset(data) {
-  return api
-    .post(`/api/auth/password-reset/`, data)
-    .then(response => {
-      if (!response.ok) {
-        return response.json().then(errData => {
-          throw new Error(errData.error || 'Unknown error occurred')
-        })
-      }
-      return response.json()
-    })
+  return api.post('/api/auth/password-reset/', data).then(response => {
+    if (!response.ok) {
+      return response.json().then(errData => {
+        throw new Error(errData.error || 'Unknown error occurred')
+      })
+    }
+    return response.json()
+  })
 }
 
 function getSecretQuestion(data) {
   return api
-    .post(`/api/auth/password-reset/secret-question/`, data)
+    .post('/api/auth/password-reset/secret-question/', data)
     .then(response => {
       if (!response.ok) {
         return response.json().then(errData => {
