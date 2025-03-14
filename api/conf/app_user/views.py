@@ -19,7 +19,6 @@ from .serializers import (
 )
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-
 class UserLoginView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = UserLoginSerializer(data=request.data)
@@ -95,8 +94,10 @@ class UserView(APIView):
 
 
 
-class UserPasswordResetView(APIView):
-    def get(self, request, login_name,*args, **kwargs):
+class UserSecretQuestionView(APIView):
+    def post(self, request,*args, **kwargs):
+        data = json.loads(request.body)
+        login_name = data.get('login_name')
         serializer = PasswordResetRequestSerializer(data={'login_name': login_name})
         if serializer.is_valid():
             try:
@@ -108,23 +109,20 @@ class UserPasswordResetView(APIView):
                     'secret_question': user.secret_question
                 }, status=status.HTTP_200_OK)
 
-            except User.DoesNotExist:
-                return JsonResponse({
-                    'error': 'User not found.'
-                }, status=status.HTTP_404_NOT_FOUND)
-
             except Exception as e:
                 return JsonResponse({
                     'error': "Something went wrong."
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-    def post(self, request, login_name,*args, **kwargs):
-        data = json.loads(request.body)
-        data['login_name'] = login_name
 
+class UserPasswordResetView(APIView):
+    def post(self, request, *args, **kwargs):
+        data = json.loads(request.body)
         serializer = PasswordResetSerializer(data=data)
+
         if serializer.is_valid():
+
             user = serializer.validated_data['user']
             secret_answer = serializer.validated_data['secret_answer']
             new_password = serializer.validated_data['new_password']
