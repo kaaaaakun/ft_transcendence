@@ -40,6 +40,14 @@ class User(AbstractBaseUser):
     def __str__(self):
         return self.display_name
 
+    objects = UserManager()
+
+    USERNAME_FIELD = 'login_name'
+    REQUIRED_FIELDS = ['display_name', 'password', 'secret_question', 'secret_answer_hash']
+
+    def __str__(self):
+        return self.display_name
+
     @classmethod
     def ft_authenticate(self, login_name, password):
         try:
