@@ -23,20 +23,31 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 import requests
 from django.utils.timezone import now
+from rest_framework.response import Response
 
 
 class UserProfileView(APIView):
     def get(self, request, display_name):
         try:
             user = User.objects.filter(display_name=display_name).first()
+            if not user:
+                raise User.DoesNotExist
             data = create_response(user)
             return JsonResponse(data)
-        except Exception as e:
-            with open('log.txt', 'a') as f:
-                f.write(traceback.format_exc())
+        except User.DoesNotExist:
             return JsonResponse({
-                'error': 'User not found.'
+                'errors': [{
+                    'field': 'display_name',
+                    'message': 'User not found.'
+                }]
             }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return JsonResponse({
+                'errors': [{
+                    'field': 'unknown',
+                    'message': 'An unexpected error occurred.'
+                }]
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 class UpdateLastLoginView(APIView):
 
@@ -63,21 +74,31 @@ class UserUpdateView(APIView):
             # アバター画像の更新
             if "avatar_path" in request.FILES:
                 avatar = request.FILES["avatar_path"]
-                file_name = f"{user.display_name}.png"
+                file_name = f"{user.login_name}.png"
                 with open(f"patch.txt", "a") as f: 
                     f.write(str(avatar))
-                with open(f"/var/www/data/avatars/test_user1.png", "wb") as f:
+                with open(f"/var/www/data/avatars/{file_name}", "wb") as f:
                     for chunk in avatar.chunks():
                         f.write(chunk)
-                response["avatar_path"] = "/avatars/test_user1.png"
+                user.avatar_path = f"/avatars/{file_name}"
+                user.save()
+                response["avatar_path"] = f"/avatars/{file_name}"
             return JsonResponse(response)
 
+        except User.DoesNotExist:
+            return JsonResponse({
+                'errors': [{
+                    'field': 'user',
+                    'message': 'User not found.'
+                }]
+            }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            # with open('patch.txt', 'a') as f:
-            #     f.write(str(e))
-            #     f.write("\n")
-            #     f.write(traceback.format_exc())
-            return JsonResponse({"error": "An error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return JsonResponse({
+                'errors': [{
+                    'field': 'unknown',
+                    'message': 'An unexpected error occurred.'
+                }]
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class UserLoginView(APIView):

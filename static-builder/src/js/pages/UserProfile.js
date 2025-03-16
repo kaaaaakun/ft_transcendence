@@ -18,9 +18,9 @@ export const UserProfile = () => {
       setUserData(prevUserData => ({
         ...prevUserData,
         avatar_path: response.avatar_path,
-    }));
+      }));
     } catch (error) {
-        console.error("アップロードエラー:", error);
+      console.error("アップロードエラー:", error);
     }
   };
 
@@ -41,118 +41,108 @@ export const UserProfile = () => {
     }
   };
 
-  const left = (isEditing, setIsEditing) => {
+  const renderAvatarSection = () => {
     return Teact.createElement(
       'div',
-      { className: 'text-center' }, // 縦方向中央揃え
+      { className: 'text-center' },
       Teact.createElement(
         'div',
-        { className: 'relative w-32 h-32' }, // 左寄せ
+        { className: 'relative w-32 h-32' },
         Teact.createElement(
           'label',
-          { className: '' }, // クリック可能にする
+          null,
           Teact.createElement('img', {
-            src: `${userData.avatar_path}?${new Date().getTime()}`, // キャッシュ対策
-            className: 'img-fluid avatar', // 画像を丸くする
+            src: `${userData.avatar_path}?${new Date().getTime()}`,
+            className: 'img-fluid avatar',
             alt: 'Avatar',
           }),
           'login_name' in userData
-          ? Teact.createElement('input', {
-              type: 'file',
-              accept: 'image/*',
-              className: 'hidden', // input を非表示
-              onChange: handleAvatarChange,
-            })
-          : null
-      )),
+            ? Teact.createElement('input', {
+                type: 'file',
+                accept: 'image/*',
+                className: 'hidden',
+                onChange: handleAvatarChange,
+              })
+            : null
+        )
+      ),
       Teact.createElement('p', null, `フレンド${userData.num_of_friends}人`)
     );
   };
 
-  const right = (isEditing, setIsEditing) => {
+  const renderProfileSection = () => {
     return Teact.createElement(
       'div',
-      { className: 'ps-3' }, // 縦方向中央揃え
+      { className: 'ps-3' },
       Teact.createElement(
         'div',
-        { className: 'd-flex align-items-center' }, // 横並び
-        Teact.createElement(
-          'div',
-          { className: '' },
-          isEditing && 'login_name' in userData
-            ? Teact.createElement(
-                'input',
-                {
-                  type: 'text',
-                  className: 'form-control',
-                  value: userData.display_name,
-                  onChange:(e) => changeUserName = e.target.value, // 入力値を更新
-                }
-              )
-            : Teact.createElement(
-                'h1',
-                { className: 'text-spacing m-auto' },
-                userData.display_name
-              ),
-            ),
+        { className: 'd-flex align-items-center' },
         Teact.createElement(
           'div',
           null,
           isEditing && 'login_name' in userData
-          ? Teact.createElement(
-            'div',
-            { className: 'd-flex justify-content-center' },
-              Teact.createElement(
-                'button',
-                {
-                  className: 'btn btn-success btn-sm align-items-center ms-2',
-                  onClick: () => handleSave(), // プロフィール更新
-                },
-                'Save'
-              ),
-              Teact.createElement(
-                'button',
-                {
-                  className: 'btn btn-outline-secondary btn-sm align-items-center ms-2',
-                  onClick: () => {setIsEditing(false);
-                                  changeUserName = '';
-                                }, // 編集モード終了
-                },
-                'Cancel'
+            ? Teact.createElement('input', {
+                type: 'text',
+                className: 'form-control',
+                value: userData.display_name,
+                onChange: (e) => (changeUserName = e.target.value),
+              })
+            : Teact.createElement('h1', { className: 'text-spacing m-auto' }, userData.display_name)
+        ),
+        Teact.createElement(
+          'div',
+          null,
+          isEditing && 'login_name' in userData
+            ? Teact.createElement(
+                'div',
+                { className: 'd-flex justify-content-center' },
+                Teact.createElement(
+                  'button',
+                  {
+                    className: 'btn btn-success btn-sm align-items-center ms-2',
+                    onClick: handleSave,
+                  },
+                  'Save'
+                ),
+                Teact.createElement(
+                  'button',
+                  {
+                    className: 'btn btn-outline-secondary btn-sm align-items-center ms-2',
+                    onClick: () => {
+                      setIsEditing(false);
+                      changeUserName = '';
+                    },
+                  },
+                  'Cancel'
+                )
               )
-            )
-          : 'login_name' in userData
+            : 'login_name' in userData
             ? Teact.createElement(
                 'button',
                 {
                   className: 'btn btn-outline-primary btn-sm align-items-center text-center',
-                  onClick: () => setIsEditing(true), // 編集モード開始
+                  onClick: () => setIsEditing(true),
                 },
                 'Edit'
               )
             : null
-          )
-        ),
-        'login_name' in userData
+        )
+      ),
+      'login_name' in userData
         ? Teact.createElement(
             'div',
-            { className: '' },
-            Teact.createElement(
-              'p',
-              { className: 'fs-5 text-spacing m-auto' }, // ボーダーと少しの内側余白
-              `${userData.login_name}`
-            )
+            null,
+            Teact.createElement('p', { className: 'fs-5 text-spacing m-auto' }, `${userData.login_name}`)
           )
         : null
     );
   };
 
-  const gameRecord = (record) => {
+  const renderGameRecord = (record) => {
     return Teact.createElement(
       'tr',
-      { className: 'text-center' }, // Bootstrap グリッドを使用
+      { className: 'text-center' },
       Teact.createElement('td', { className: 'width-35 border-end' }, `${userData.display_name} vs ${record.opponent_name}`),
-      // Teact.createElement('td', { className: 'width-25 border-end' }, formatDate(record.date)),
       Teact.createElement('td', { className: 'width-10 border-end' }, record.result),
       Teact.createElement('td', { className: 'width-15 border-end' }, `${record.score.player} - ${record.score.opponent}`),
       Teact.createElement('td', { className: 'width-15' }, record.match_type)
@@ -167,10 +157,11 @@ export const UserProfile = () => {
       })
       .catch(error => console.error("Error fetching user profile:", error));
   }, []);
-  console.log(userData);
+
   if (!userData) {
     return Teact.createElement("p", null, "Loading...");
   }
+
   return HeaderWithTitleLayout(
     Teact.createElement(
       'div',
@@ -178,17 +169,13 @@ export const UserProfile = () => {
       Teact.createElement(
         'div',
         { className: 'd-flex align-items-center' },
-        left(isEditing, setIsEditing, userData),
-        right(isEditing, setIsEditing, userData)
+        renderAvatarSection(),
+        renderProfileSection()
       ),
       Teact.createElement(
         'div',
         { className: 'container mt-3' },
-        Teact.createElement(
-          'h2',
-          { className: 'text-secondary fs-6' },
-          'Game Records'
-        ),
+        Teact.createElement('h2', { className: 'text-secondary fs-6' }, 'Game Records'),
         Teact.createElement(
           'div',
           { className: 'table-header' },
@@ -200,18 +187,17 @@ export const UserProfile = () => {
               null,
               Teact.createElement(
                 'tr',
-                { className: 'text-center' }, // Bootstrap グリッドを使用
-                Teact.createElement('th', {className: 'width-35 border-end'}, 'Match'),
-                // Teact.createElement('th', {className: 'width-25 border-end'}, 'Date'),
-                Teact.createElement('th', {className: 'width-10 border-end'}, 'Result'),
-                Teact.createElement('th', {className: 'width-15 border-end'}, 'Score'),
-                Teact.createElement('th', {className: 'width-15'}, 'Match Type')
+                { className: 'text-center' },
+                Teact.createElement('th', { className: 'width-35 border-end' }, 'Match'),
+                Teact.createElement('th', { className: 'width-10 border-end' }, 'Result'),
+                Teact.createElement('th', { className: 'width-15 border-end' }, 'Score'),
+                Teact.createElement('th', { className: 'width-15' }, 'Match Type')
               )
             ),
             Teact.createElement(
               'tbody',
               { className: 'table-body-scroll' },
-              ...(userData?.performance?.game_records?.map(record => gameRecord(record)) || [])
+              ...(userData?.performance?.game_records?.map(record => renderGameRecord(record)) || [])
             )
           )
         )
