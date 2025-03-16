@@ -75,8 +75,11 @@ class UserView(APIView):
                 }, status=status.HTTP_403_FORBIDDEN)
 
 
-            user.logical_delete()
+            if (user.deleted_at is not None):
+                raise User.DoesNotExist
 
+            user.logical_delete()
+            
             return JsonResponse({
                 'message': 'User deleted.'
             }, status=status.HTTP_200_OK)
