@@ -6,8 +6,7 @@ class FetchWrapper {
   getAuthHeader() {
     if (localStorage.getItem('access_token')) {
       return {
-        // TODO 本当はBearerをつけるのだが、それをするとサーバー側でエラーになるので、とりあえずこのまま
-        Authorization: `${localStorage.getItem('access_token')}`,
+        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
       }
     }
     return {}
@@ -67,11 +66,15 @@ class FetchWrapper {
 }
 
 
-  async delete(url) {
+  async delete(url, data) {
     const response = await fetch(`${this.baseUrl}${url}`, {
       method: 'DELETE',
+      body: data ? JSON.stringify(data) : {},
+      headers: {
+        'Content-Type': 'application/json',
+        ...this.getAuthHeader(),
+      },
       credentials: 'include',
-      ...this.getAuthHeader(),
     })
     return response
   }

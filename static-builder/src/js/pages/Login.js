@@ -1,9 +1,9 @@
 import { DefaultButton } from '@/js/components/ui/button'
-import { useBanner } from '@/js/hooks/useBanner'
-import { userApi } from '@/js/infrastructures/api/userApi'
 import { SimpleHeaderLayout } from '@/js/layouts/SimpleHeaderLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
+import { userApi } from '@/js/infrastructures/api/userApi'
+import { useBanner } from '@/js/hooks/useBanner'
 
 function handleSubmit(event, showErrorBanner) {
   const navigate = useNavigate()
@@ -19,8 +19,15 @@ function handleSubmit(event, showErrorBanner) {
 
   userApi
     .login(data)
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(errData => {
+          throw new Error(errData.error || 'Unknown error occurred')
+        })
+      }
+      return response.json()
+    })
     .then(data => {
-      console.log('Success:', data)
       if (data.access_token) {
         localStorage.setItem('access_token', data.access_token)
         localStorage.setItem('refresh_token', data.refresh_token)

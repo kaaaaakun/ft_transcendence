@@ -7,8 +7,7 @@ import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 
 export const Home = () => {
-  const { showInfoBanner, showWarningBanner, showErrorBanner, banners } =
-    useBanner()
+  const { banners } = useBanner()
   const navigate = useNavigate()
 
   return HeaderWithTitleLayout(
