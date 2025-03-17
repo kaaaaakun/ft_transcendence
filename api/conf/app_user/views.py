@@ -74,6 +74,8 @@ class UserView(APIView):
                     'message': 'You can only delete your own account'
                 }, status=status.HTTP_403_FORBIDDEN)
 
+            if (user.deleted_at is not None):
+                raise User.DoesNotExist
 
             if (user.deleted_at is not None):
                 raise User.DoesNotExist
