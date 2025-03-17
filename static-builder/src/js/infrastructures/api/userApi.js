@@ -52,29 +52,14 @@ function deleteAccount(data) {
 function getProfile(displayName) {
   return api
     .get(`/api/users/user/${displayName}`)
-    .then(response =>
-      response.json().then(json => {
-        if (!response.ok) {
-          throw new Error(json.error || 'Unknown error occurred')
-        }
-        return json
-      }),
-    )
-    .catch(error => {
-      console.error('Error fetching profile:', error)
-      throw error
-    })
+    .then(response =>{
+      return response
+  })
 }
 
-function changeProfile(_user, data) {
-  console.log(data)
+function changeProfile(data) {
   return api.patch('/api/users/update/', data).then(response => {
-    if (!response.ok) {
-      return response.json().then(errData => {
-        throw new Error(errData.error || 'Unknown error occurred')
-      })
-    }
-    return response.json()
+    return response
   })
 }
 

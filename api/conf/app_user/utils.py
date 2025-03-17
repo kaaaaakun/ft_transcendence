@@ -1,6 +1,7 @@
 from .models import User
 from django.db.models import Q
 from match.models import Match, MatchDetail
+from rest_framework_simplejwt.tokens import AccessToken
 
 
 def get_opponent_user_and_score(match_id, user_id):
@@ -11,7 +12,7 @@ def get_opponent_user_and_score(match_id, user_id):
       return User.objects.get(id=match_detail.player_id.id), match_detail.score
   return None
 
-def create_response(user):
+def create_response(user, access_id):
   match_details = MatchDetail.objects.filter(player_id_id=user.id)
   game_records = []
   for match_detail in match_details:
@@ -25,18 +26,30 @@ def create_response(user):
     })
   win_count = len([game_record for game_record in game_records if game_record['result'] == 'win'])
   lose_count = len([game_record for game_record in game_records if game_record['result'] == 'lose'])
-  return {
-      'login_name': user.login_name,
+  response = {
       'display_name': user.display_name,
       'avatar_path': user.avatar_path,
       'num_of_friends': '3',
       'performance': {
-        'game_records': game_records,
-        'statistics': {
-          'total_games': len(game_records),
-          'wins': win_count,
-          'losses': lose_count,
-          'win_rate': win_count / (win_count + lose_count) if len(game_records) > 0 else 0
-        }
+          'game_records': game_records,
+          'statistics': {
+              'total_games': len(game_records),
+              'wins': win_count,
+              'losses': lose_count,
+              'win_rate': win_count / (win_count + lose_count) if len(game_records) > 0 else 0
+          }
       }
   }
+
+  if user.id == access_id:
+      response['login_name'] = user.login_name
+
+  return response
+
+def get_user_by_request(request):
+  auth = request.headers.get('Authorization')
+  if auth:
+      access_token = auth.split(' ')[1] if len(auth.split(' ')) > 1 else None
+  if access_token:
+    return AccessToken(access_token).get('user_id')
+  return None

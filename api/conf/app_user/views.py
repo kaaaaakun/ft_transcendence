@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from .models import User
 from django.db.models import Q
-from .utils import create_response
+from .utils import create_response, get_user_by_request
 import random
 import traceback
 import os
@@ -32,7 +32,8 @@ class UserProfileView(APIView):
             user = User.objects.filter(display_name=display_name).first()
             if not user:
                 raise User.DoesNotExist
-            data = create_response(user)
+            access_id = get_user_by_request(request)
+            data = create_response(user, access_id)
             return JsonResponse(data)
         except User.DoesNotExist:
             return JsonResponse({
@@ -60,7 +61,8 @@ class UpdateLastLoginView(APIView):
 class UserUpdateView(APIView):
     def patch(self, request):
         try:
-            user = User.objects.get(id=1)
+            access_id = get_user_by_request(request)
+            user = User.objects.get(id=access_id)
             response = {}
 
             if request.content_type == "application/json":

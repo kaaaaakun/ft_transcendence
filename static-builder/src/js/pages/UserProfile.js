@@ -2,8 +2,11 @@ import '@/scss/styles.scss'
 import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { Teact } from '@/js/libs/teact'
 import { userApi } from '@/js/infrastructures/api/userApi'
+import { useBanner } from '@/js/hooks/useBanner'
 
 export const UserProfile = () => {
+  const { showInfoBanner, showWarningBanner, showErrorBanner, banners } =
+  useBanner()
   const [isEditing, setIsEditing] = Teact.useState(false)
   const [userData, setUserData] = Teact.useState(null)
   let changeUserName = ''
@@ -13,12 +16,32 @@ export const UserProfile = () => {
     const formData = new FormData()
     formData.append('avatar_path', event.target.files[0])
     try {
-      const response = await userApi.changeProfile('test_user1', formData)
-      console.log(response)
-      setUserData(prevUserData => ({
-        ...prevUserData,
-        avatar_path: response.avatar_path,
-      }))
+      userApi.changeProfile(formData)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to upload avatar')
+        }
+        return response.json()
+      })
+      .then(response => {
+        if (response.status === 413) {
+          showErrorBanner({
+            message: 'Failed to upload avatar: File size too large',
+            onClose: () => {},
+          })
+          return
+        } else if (response.status === 401) {
+          showErrorBanner({
+            message: 'Failed to upload avatar: Unauthorized',
+            onClose: () => {},
+          })
+          return
+        }
+        setUserData(prevUserData => ({
+          ...prevUserData,
+          avatar_path: response.avatar_path,
+        }))
+      })
     } catch (error) {
       console.error('アップロードエラー:', error)
     }
@@ -29,15 +52,37 @@ export const UserProfile = () => {
       return
     }
     try {
-      const response = await userApi.changeProfile('test_user1', {
+      userApi.changeProfile({
         display_name: changeUserName,
       })
-      console.log(response)
-      setUserData(prevUserData => ({
-        ...prevUserData,
-        display_name: response.display_name,
-      }))
-      setIsEditing(false)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to save')
+        }
+        return response.json()
+      })
+      .then(response => {
+        if (response.status === 401) {
+          showErrorBanner({
+            message: 'Failed to save: Unauthorized',
+            onClose: () => {},
+          })
+          return
+        }
+        if (response.status === 400) {
+          showErrorBanner({
+            message: `Failed to save: ${response.message}`, //重複、文字数、文字種など
+            onClose: () => {},
+          })
+          return
+        }
+        setUserData(prevUserData => ({
+          ...prevUserData,
+          display_name: response.display_name,
+        }))
+        setIsEditing(false)
+        changeUserName = ''
+      })
     } catch (error) {
       console.error('保存エラー:', error)
     }
@@ -179,17 +224,44 @@ export const UserProfile = () => {
     const userName = window.location.pathname.split('/').filter(Boolean).pop()
     userApi
       .getProfile(userName)
-      .then(data => {
-        setUserData(data)
+      .then(response => {
+        if (response.status === 404) {
+          showErrorBanner({
+            message: 'User not found',
+            onClose: () => {},
+          })
+          return
+        } else if (response.status === 401) {
+          showErrorBanner({
+            message: 'Unauthorized',
+            onClose: () => {},
+          })
+          return
+        } else if (response.status === 200) {
+          return response.json()
+        }
+        throw new Error('Unknown error occurred')
       })
-      .catch(error => console.error('Error fetching user profile:', error))
+      .then(data => {
+        if (data) {
+          setUserData(data)
+        }
+      })
+      .catch(error => showErrorBanner({
+        message: error.message,
+        onClose: () => {},
+      }))
   }, [])
 
   if (!userData) {
-    return Teact.createElement('p', null, 'Loading...')
+    return HeaderWithTitleLayout(
+      ...banners,
+      Teact.createElement('p', null, 'Loading...'),
+    )
   }
 
   return HeaderWithTitleLayout(
+    ...banners,
     Teact.createElement(
       'div',
       { className: 'container bg-white pb-3 pt-3' },
