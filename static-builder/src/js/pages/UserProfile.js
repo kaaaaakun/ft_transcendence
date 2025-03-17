@@ -85,7 +85,7 @@ export const UserProfile = () => {
                 type: 'text',
                 className: 'form-control',
                 value: userData.display_name,
-                onChange: (e) => (changeUserName = e.target.value),
+                onChange: (e) => { changeUserName = e.target.value; },
               })
             : Teact.createElement('h1', { className: 'text-spacing m-auto' }, userData.display_name)
         ),
