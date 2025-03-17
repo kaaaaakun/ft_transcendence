@@ -17,16 +17,16 @@ import { PasswordReset } from '@/js/pages/PasswordReset'
 import { api } from '@/js/infrastructures/api/fetch'
 
 function App() {
-  console.log('App rendered');
+  console.log('App rendered')
   Teact.useEffect(() => {
-    console.log('App rendered');
+    console.log('App rendered')
     const intervalId = setInterval(() => {
-      console.log('App interval');
-      api.post('/api/users/last_login/');
-    }, 10000);
+      console.log('App interval')
+      api.post('/api/users/last_login/')
+    }, 10000)
 
-    return () => clearInterval(intervalId); // コンポーネントがアンマウントされたら停止
-  }, []);
+    return () => clearInterval(intervalId) // コンポーネントがアンマウントされたら停止
+  }, [])
   return Router(
     Route({ path: '/', component: Home }),
     Route({

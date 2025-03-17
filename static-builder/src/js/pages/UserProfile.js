@@ -4,42 +4,44 @@ import { Teact } from '@/js/libs/teact'
 import { userApi } from '@/js/infrastructures/api/userApi'
 
 export const UserProfile = () => {
-  const [isEditing, setIsEditing] = Teact.useState(false);
-  const [userData, setUserData] = Teact.useState(null);
-  let changeUserName = '';
+  const [isEditing, setIsEditing] = Teact.useState(false)
+  const [userData, setUserData] = Teact.useState(null)
+  let changeUserName = ''
 
-  const handleAvatarChange = async (event) => {
-    event.preventDefault();
-    const formData = new FormData();
-    formData.append('avatar_path', event.target.files[0]);
+  const handleAvatarChange = async event => {
+    event.preventDefault()
+    const formData = new FormData()
+    formData.append('avatar_path', event.target.files[0])
     try {
-      const response = await userApi.changeProfile("test_user1", formData);
-      console.log(response);
+      const response = await userApi.changeProfile('test_user1', formData)
+      console.log(response)
       setUserData(prevUserData => ({
         ...prevUserData,
         avatar_path: response.avatar_path,
-      }));
+      }))
     } catch (error) {
-      console.error("アップロードエラー:", error);
+      console.error('アップロードエラー:', error)
     }
-  };
+  }
 
   const handleSave = async () => {
     if (!changeUserName) {
-      return;
+      return
     }
     try {
-      const response = await userApi.changeProfile("test_user1", { display_name: changeUserName });
-      console.log(response);
+      const response = await userApi.changeProfile('test_user1', {
+        display_name: changeUserName,
+      })
+      console.log(response)
       setUserData(prevUserData => ({
         ...prevUserData,
         display_name: response.display_name,
-      }));
-      setIsEditing(false);
+      }))
+      setIsEditing(false)
     } catch (error) {
-      console.error("保存エラー:", error);
+      console.error('保存エラー:', error)
     }
-  };
+  }
 
   const renderAvatarSection = () => {
     return Teact.createElement(
@@ -63,12 +65,12 @@ export const UserProfile = () => {
                 className: 'hidden',
                 onChange: handleAvatarChange,
               })
-            : null
-        )
+            : null,
+        ),
       ),
-      Teact.createElement('p', null, `フレンド${userData.num_of_friends}人`)
-    );
-  };
+      Teact.createElement('p', null, `フレンド${userData.num_of_friends}人`),
+    )
+  }
 
   const renderProfileSection = () => {
     return Teact.createElement(
@@ -85,9 +87,15 @@ export const UserProfile = () => {
                 type: 'text',
                 className: 'form-control',
                 value: userData.display_name,
-                onChange: (e) => { changeUserName = e.target.value; },
+                onChange: e => {
+                  changeUserName = e.target.value
+                },
               })
-            : Teact.createElement('h1', { className: 'text-spacing m-auto' }, userData.display_name)
+            : Teact.createElement(
+                'h1',
+                { className: 'text-spacing m-auto' },
+                userData.display_name,
+              ),
         ),
         Teact.createElement(
           'div',
@@ -102,64 +110,83 @@ export const UserProfile = () => {
                     className: 'btn btn-success btn-sm align-items-center ms-2',
                     onClick: handleSave,
                   },
-                  'Save'
+                  'Save',
                 ),
                 Teact.createElement(
                   'button',
                   {
-                    className: 'btn btn-outline-secondary btn-sm align-items-center ms-2',
+                    className:
+                      'btn btn-outline-secondary btn-sm align-items-center ms-2',
                     onClick: () => {
-                      setIsEditing(false);
-                      changeUserName = '';
+                      setIsEditing(false)
+                      changeUserName = ''
                     },
                   },
-                  'Cancel'
-                )
+                  'Cancel',
+                ),
               )
             : 'login_name' in userData
-            ? Teact.createElement(
-                'button',
-                {
-                  className: 'btn btn-outline-primary btn-sm align-items-center text-center',
-                  onClick: () => setIsEditing(true),
-                },
-                'Edit'
-              )
-            : null
-        )
+              ? Teact.createElement(
+                  'button',
+                  {
+                    className:
+                      'btn btn-outline-primary btn-sm align-items-center text-center',
+                    onClick: () => setIsEditing(true),
+                  },
+                  'Edit',
+                )
+              : null,
+        ),
       ),
       'login_name' in userData
         ? Teact.createElement(
             'div',
             null,
-            Teact.createElement('p', { className: 'fs-5 text-spacing m-auto' }, `${userData.login_name}`)
+            Teact.createElement(
+              'p',
+              { className: 'fs-5 text-spacing m-auto' },
+              `${userData.login_name}`,
+            ),
           )
-        : null
-    );
-  };
+        : null,
+    )
+  }
 
-  const renderGameRecord = (record) => {
+  const renderGameRecord = record => {
     return Teact.createElement(
       'tr',
       { className: 'text-center' },
-      Teact.createElement('td', { className: 'width-35 border-end' }, `${userData.display_name} vs ${record.opponent_name}`),
-      Teact.createElement('td', { className: 'width-10 border-end' }, record.result),
-      Teact.createElement('td', { className: 'width-15 border-end' }, `${record.score.player} - ${record.score.opponent}`),
-      Teact.createElement('td', { className: 'width-15' }, record.match_type)
-    );
-  };
+      Teact.createElement(
+        'td',
+        { className: 'width-35 border-end' },
+        `${userData.display_name} vs ${record.opponent_name}`,
+      ),
+      Teact.createElement(
+        'td',
+        { className: 'width-10 border-end' },
+        record.result,
+      ),
+      Teact.createElement(
+        'td',
+        { className: 'width-15 border-end' },
+        `${record.score.player} - ${record.score.opponent}`,
+      ),
+      Teact.createElement('td', { className: 'width-15' }, record.match_type),
+    )
+  }
 
   Teact.useEffect(() => {
-    const userName = window.location.pathname.split('/').filter(Boolean).pop();
-    userApi.getProfile(userName)
+    const userName = window.location.pathname.split('/').filter(Boolean).pop()
+    userApi
+      .getProfile(userName)
       .then(data => {
-        setUserData(data);
+        setUserData(data)
       })
-      .catch(error => console.error("Error fetching user profile:", error));
-  }, []);
+      .catch(error => console.error('Error fetching user profile:', error))
+  }, [])
 
   if (!userData) {
-    return Teact.createElement("p", null, "Loading...");
+    return Teact.createElement('p', null, 'Loading...')
   }
 
   return HeaderWithTitleLayout(
@@ -170,12 +197,16 @@ export const UserProfile = () => {
         'div',
         { className: 'd-flex align-items-center' },
         renderAvatarSection(),
-        renderProfileSection()
+        renderProfileSection(),
       ),
       Teact.createElement(
         'div',
         { className: 'container mt-3' },
-        Teact.createElement('h2', { className: 'text-secondary fs-6' }, 'Game Records'),
+        Teact.createElement(
+          'h2',
+          { className: 'text-secondary fs-6' },
+          'Game Records',
+        ),
         Teact.createElement(
           'div',
           { className: 'table-header' },
@@ -188,21 +219,38 @@ export const UserProfile = () => {
               Teact.createElement(
                 'tr',
                 { className: 'text-center' },
-                Teact.createElement('th', { className: 'width-35 border-end' }, 'Match'),
-                Teact.createElement('th', { className: 'width-10 border-end' }, 'Result'),
-                Teact.createElement('th', { className: 'width-15 border-end' }, 'Score'),
-                Teact.createElement('th', { className: 'width-15' }, 'Match Type')
-              )
+                Teact.createElement(
+                  'th',
+                  { className: 'width-35 border-end' },
+                  'Match',
+                ),
+                Teact.createElement(
+                  'th',
+                  { className: 'width-10 border-end' },
+                  'Result',
+                ),
+                Teact.createElement(
+                  'th',
+                  { className: 'width-15 border-end' },
+                  'Score',
+                ),
+                Teact.createElement(
+                  'th',
+                  { className: 'width-15' },
+                  'Match Type',
+                ),
+              ),
             ),
             Teact.createElement(
               'tbody',
               { className: 'table-body-scroll' },
-              ...(userData?.performance?.game_records?.map(record => renderGameRecord(record)) || [])
-            )
-          )
-        )
-      )
-    )
-  );
-};
-
+              ...(userData?.performance?.game_records?.map(record =>
+                renderGameRecord(record),
+              ) || []),
+            ),
+          ),
+        ),
+      ),
+    ),
+  )
+}

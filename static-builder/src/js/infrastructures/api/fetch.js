@@ -50,21 +50,20 @@ class FetchWrapper {
   }
 
   async patch(url, data) {
-    const isFormData = data instanceof FormData;
+    const isFormData = data instanceof FormData
 
     const response = await fetch(`${this.baseUrl}${url}`, {
-        method: 'PATCH',
-        body: isFormData ? data : JSON.stringify(data),
-        headers: {
-            ...(isFormData ? {} : { 'Content-Type': 'application/json' }), // FormData の場合は Content-Type を設定しない
-            ...this.getAuthHeader(),
-        },
-        credentials: 'include',
-    });
+      method: 'PATCH',
+      body: isFormData ? data : JSON.stringify(data),
+      headers: {
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' }), // FormData の場合は Content-Type を設定しない
+        ...this.getAuthHeader(),
+      },
+      credentials: 'include',
+    })
 
-    return response;
-}
-
+    return response
+  }
 
   async delete(url, data) {
     const response = await fetch(`${this.baseUrl}${url}`, {
@@ -80,6 +79,4 @@ class FetchWrapper {
   }
 }
 
-export const api = new FetchWrapper(
-  'http://localhost',
-)
+export const api = new FetchWrapper('http://localhost')
