@@ -81,7 +81,7 @@ class UserView(APIView):
                 raise User.DoesNotExist
 
             user.logical_delete()
-            
+
             return JsonResponse({
                 'message': 'User deleted.'
             }, status=status.HTTP_200_OK)
