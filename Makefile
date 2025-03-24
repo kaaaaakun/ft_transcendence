@@ -48,21 +48,4 @@ cert:
 cert_clean:
 	rm -rf $(CERT_DIR)
 
-# -- OpenAPIを利用したコードの生成
-OPENAPI_SPEC := openapi.yaml
-OUTPUT_DIR := gen_openapi
-LANGUAGE := javascript
-DOCKER_IMAGE := openapitools/openapi-generator-cli
-
-generate:
-	docker run --rm \
-	  -v $(PWD):/local \
-	  $(DOCKER_IMAGE) generate \
-	  -i /local/$(OPENAPI_SPEC) \
-	  -g $(LANGUAGE) \
-	  -o /local/$(OUTPUT_DIR)
-
-clean:
-	rm -rf $(OUTPUT_DIR)
-
-PHONY:generate clean cert
+PHONY:generate cert
