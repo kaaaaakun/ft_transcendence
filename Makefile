@@ -5,7 +5,7 @@ all: run
 run: build up
 
 .PHONY: re
-re: down image-prune run
+re: destroy run
 
 .PHONY: build
 build:
@@ -15,17 +15,12 @@ build:
 up: cert
 	docker compose up -d
 
-.PHONY: fdown
-fdown:
-	docker compose down -v
-
 .PHONY: down
 down:
 	docker compose down
 
-.PHONY: image-prune
-image-prune:
-	docker image prune -f
+.PHONY: destroy
+	destroy: docker compose down --rmi all --remove-orphans --volumes
 
 .PHONY: ps
 ps:
