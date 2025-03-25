@@ -1,4 +1,12 @@
+# editor temp files
 *.un~
-.env
+
+# os generated files
 .DS_Store
+
+# Secrets
+.env*
+!.envrc.sample
+
+# SSL
 reverseproxy/ssl/*
