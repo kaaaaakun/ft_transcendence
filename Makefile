@@ -1,43 +1,41 @@
-ENV_FILE_PATH = .env.sample
-ENV_LOCAL_FILE_PATH = .env.sample.local
-DOCKER_COMPOSE = docker compose --env-file ${ENV_FILE_PATH} -f ./docker-compose.yml
-CERT_SCRIPT_DIR = ./reverseproxy/tools
-CERT_DIR = ./reverseproxy/ssl
-
-ifdef WITH_LOCAL
-	DOCKER_COMPOSE = docker compose --env-file ${ENV_LOCAL_FILE_PATH} -f ./docker-compose.local.yml
-endif
-
+.PHONY: all
 all: run
 
-local:
-	$(MAKE) WITH_LOCAL=1 run
-
+.PHONY: run
 run: build up
 
+.PHONY: re
 re: down image-prune run
 
+.PHONY: build
 build:
-	$(DOCKER_COMPOSE) build
+	docker compose build
 
+.PHONY: up
 up: cert
-	$(DOCKER_COMPOSE) up -d
+	docker compose up -d
 
+.PHONY: fdown
 fdown:
-	$(DOCKER_COMPOSE) down -v
+	docker compose down -v
 
+.PHONY: down
 down:
-	$(DOCKER_COMPOSE) down
+	docker compose down
 
+.PHONY: image-prune
 image-prune:
 	docker image prune -f
 
+.PHONY: ps
 ps:
 	docker ps
 
-PHONY: run re build up down fdown image-prune ps generate
-
 # -- 証明書の作成
+CERT_SCRIPT_DIR = ./reverseproxy/tools
+CERT_DIR = ./reverseproxy/ssl
+
+.PHONY: cert
 cert:
 	@if [ ! -d "$(CERT_DIR)" ]; then \
 		make -C $(CERT_SCRIPT_DIR); \
@@ -45,7 +43,6 @@ cert:
 		echo "certificates already exist"; \
 	fi
 
+.PHONY: cert_clean
 cert_clean:
 	rm -rf $(CERT_DIR)
-
-PHONY:generate cert
