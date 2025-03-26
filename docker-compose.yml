@@ -55,6 +55,7 @@ services:
         condition: service_completed_successfully
 
   api:
+    image: api
     build:
       context: .
       dockerfile: api/Dockerfile
@@ -91,6 +92,7 @@ services:
   
   elasticsearch:
     container_name: "elasticsearch"
+    image: "elasticsearch" 
     build:
       context: elasticsearch/
       args:
@@ -121,6 +123,7 @@ services:
 
   kibana:
     container_name: "kibana"
+    image: "kibana"
     build:
       context: kibana/
       args:
@@ -138,6 +141,7 @@ services:
 
   logstash:
     container_name: "logstash"
+    image: "logstash"
     build:
       context: logstash/
       args:
@@ -153,6 +157,8 @@ services:
     environment:
       LS_JAVA_OPTS: -Xms256m -Xmx256m
       LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
+      ELASTIC_USER: ${ELASTIC_USER:-}
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
     networks:
       - net_pong
     depends_on:
@@ -160,6 +166,7 @@ services:
 
   filebeat:
     container_name: "filebeat"
+    image: "filebeat"
     build:
       context: filebeat/
       args:
@@ -205,6 +212,7 @@ services:
   setup: 
     profiles:
       - setup
+    image: "elk-setup"
     build:
       context: setup/
       args:
