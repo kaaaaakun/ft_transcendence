@@ -108,11 +108,6 @@ services:
     image: redis:7.4.2
     networks:
       - net_pong
-    healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
-      interval: 1s
-      timeout: 3s
-      retries: 5
     ports:
       - "6379:6379"
 
