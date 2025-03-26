@@ -97,7 +97,7 @@ services:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
     volumes:
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,Z
-      - elasticsearch:/usr/share/elasticsearch/data:Z
+      - vol_elasticsearch:/usr/share/elasticsearch/data:Z
     ports:
       - 9200:9200
       # - 9300:9300
@@ -134,8 +134,7 @@ services:
     networks:
       - net_pong
     depends_on:
-      elasticsearch:
-        condition: service_healthy
+      - elasticsearch
 
   logstash:
     container_name: "logstash"
@@ -157,11 +156,9 @@ services:
     networks:
       - net_pong
     depends_on:
-      elasticsearch:
-        condition: service_healthy
+      - elasticsearch
 
   filebeat:
-    image: docker.elastic.co/beats/filebeat:${ELASTIC_VERSION}
     container_name: "filebeat"
     build:
       context: filebeat/
@@ -178,7 +175,7 @@ services:
       # see: https://www.elastic.co/guide/en/beats/libbeat/current/config-file-permissions.html
       - --strict.perms=false
     volumes:
-      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro,Z
+      - ./filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro,Z
       - type: bind
         source: /var/lib/docker/containers
         target: /var/lib/docker/containers
@@ -193,8 +190,7 @@ services:
     networks:
       - net_pong
     depends_on:
-      elasticsearch:
-        condition: service_healthy
+      - elasticsearch
 
   in_memory_db:
     container_name: "in_memory_db"
@@ -227,8 +223,7 @@ services:
     networks:
       - net_pong
     depends_on:
-      elasticsearch:
-        condition: service_healthy
+      - elasticsearch
 
 networks:
   net_pong:
@@ -239,3 +234,5 @@ volumes:
     name: "vol_rdbms"
   vol_static_builder:
     name: "vol_static_builder"
+  vol_elasticsearch:
+    name: "vol_elasticsearch"
