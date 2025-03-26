@@ -1,54 +1,39 @@
 import { DefaultButton } from '@/js/components/ui/button'
+import { useBanner } from '@/js/hooks/useBanner'
 import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
 import { cookie } from '@/js/infrastructures/cookie/cookie'
-import { BaseLayout } from '@/js/layouts/BaseLayout'
+import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 
 export const Home = () => {
+  const { banners } = useBanner()
   const navigate = useNavigate()
 
-  return BaseLayout(
+  return HeaderWithTitleLayout(
     Teact.createElement(
+      ...banners,
       'div',
       { className: 'container vh-100' },
-      Teact.createElement(
-        'h3',
-        { className: 'mb-5 text-center text-light' },
-        '遊ぶモードを選んでください',
-      ),
       Teact.createElement(
         'div',
         { className: 'd-grid gap-2 col-3 mx-auto' },
         DefaultButton({
-          text: '2人対戦',
-          onClick: () =>
-            navigate('/input_alias?players=2', {
-              playerNum: 2,
-            }),
-        }), // TBD
+          text: 'Play Now',
+          onClick: () => navigate('/simple-game/local'),
+        }),
         DefaultButton({
-          text: '4人対戦',
-          onClick: () =>
-            navigate('/input_alias?players=4', {
-              playerNum: 4,
-            }),
-        }), // TBD
-        DefaultButton({
-          text: '8人対戦',
-          onClick: () =>
-            navigate('/input_alias?players=8', {
-              playerNum: 8,
-            }),
-        }), // TBD
+          text: 'Tournament Mode',
+          onClick: () => navigate('/tournaments'),
+        }),
         cookie.checkTournamentIdExists()
           ? DefaultButton({
-              text: '続きから',
+              text: 'Resume Game',
               onClick: () =>
                 tournamentsApi
                   .fetchLocalTournament()
                   .then(data => {
-                    navigate('/tournament', { data })
+                    navigate('/tournaments/bracket', { data })
                   })
                   .catch(error => {
                     console.error('Error:', error)

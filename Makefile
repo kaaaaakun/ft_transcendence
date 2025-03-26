@@ -1,10 +1,11 @@
 ENV_FILE_PATH = .env.sample
+ENV_LOCAL_FILE_PATH = .env.sample.local
 DOCKER_COMPOSE = docker compose --env-file ${ENV_FILE_PATH} -f ./docker-compose.yml
 CERT_SCRIPT_DIR = ./reverseproxy/tools
 CERT_DIR = ./reverseproxy/ssl
 
 ifdef WITH_LOCAL
-	DOCKER_COMPOSE = docker compose --env-file ${ENV_FILE_PATH} -f ./docker-compose.local.yml
+	DOCKER_COMPOSE = docker compose --env-file ${ENV_LOCAL_FILE_PATH} -f ./docker-compose.local.yml
 endif
 
 all: run
@@ -17,7 +18,7 @@ run: build up
 re: down image-prune run
 
 build:
-	$(DOCKER_COMPOSE) build --no-cache
+	$(DOCKER_COMPOSE) build
 
 up: cert
 	$(DOCKER_COMPOSE) up -d
@@ -47,43 +48,4 @@ cert:
 cert_clean:
 	rm -rf $(CERT_DIR)
 
-# -- OpenAPIを利用したコードの生成
-OPENAPI_SPEC := openapi.yaml
-OUTPUT_DIR := gen_openapi
-LANGUAGE := javascript
-DOCKER_IMAGE := openapitools/openapi-generator-cli
-
-generate:
-	docker run --rm \
-	  -v $(PWD):/local \
-	  $(DOCKER_IMAGE) generate \
-	  -i /local/$(OPENAPI_SPEC) \
-	  -g $(LANGUAGE) \
-	  -o /local/$(OUTPUT_DIR)
-
-clean:
-	rm -rf $(OUTPUT_DIR)
-
-# -- OpenAPIをもとにmockサーバーを立てる
-mock:
-	prism mock openapi.yaml
-
-# -- AsyncAPIをもとにwebsoketmockサーバーを立てる
-mock-init:
-	cp -f asyncapi.yaml mock-server/
-	# async-serverディレクトリが存在しない場合にのみ実施
-	mkdir mock-server/async-server
-	docker build -t asyncapi-generator mock-server/ && \
-	docker run --name asyncapi-generator-container asyncapi-generator && \
-	docker cp asyncapi-generator-container:/async-server mock-server/ ; \
-	docker rm asyncapi-generator-container ; \
-	docker rmi asyncapi-generator
-	rm -rf mock-server/asyncapi.yaml
-
-# async-serverのコンテナを作成し、8080ポートで起動
-mock-start:
-	# imageは都度削除される
-	docker build -t async-server-image mock-server/async-server
-	docker run --rm --name async-server -p 8080:80 async-server-image
-
-PHONY:generate clean mock cert
+PHONY:generate cert

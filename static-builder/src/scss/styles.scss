@@ -26,6 +26,10 @@
   animation: slideDown 0.3s ease-out;
 }
 
+.friend-table {
+  table-layout: fixed;
+}
+
 @keyframes slideDown {
   from {
     transform: translateX(-50%) translateY(-100%);

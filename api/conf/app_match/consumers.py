@@ -4,6 +4,7 @@ from asgiref.sync import sync_to_async
 from asyncio import sleep
 import json
 
+from django.conf import settings
 from .game_logic import GameManager, LocalSimpleScoreManager, TournamentScoreManager
 from .models import Match, MatchDetail
 from .utils import ( sort_matchdetails_by_playerid, 
@@ -14,7 +15,7 @@ from tournament.utils import ( update_tournamentplayer_win_to_await, is_tourname
     create_next_tournament_match )
 
 FRAME = 30 # フロントを見つつ調整
-END_GAME_SCORE = 3 # deploy時には11に変更
+END_GAME_SCORE = settings.END_GAME_SCORE
 
 # エラハンを完全無視、冗長さは少し無視してコーディングした
 
@@ -109,12 +110,12 @@ class LocalTournamentMatchConsumer(LocalBaseMatchConsumer):
             self.sorted_matchedetails[1].score = self.game_manager.score_manager.get_score("right")
             self.sorted_matchedetails[0].save()
             self.sorted_matchedetails[1].save()
-            self.game_manager.score_manager.delete_score()
             # 勝者の判定
             if self.game_manager.score_manager.get_score("left") == END_GAME_SCORE:
                 winner_id = self.sorted_matchedetails[0].player_id
             else:
                 winner_id = self.sorted_matchedetails[1].player_id
+            self.game_manager.score_manager.delete_score()
             # 関連するRDBの更新処理
             update_when_match_end(self.match_id, winner_id, self.tournament_id)
             # トーナメントラウンドが終了した時の処理

@@ -2,7 +2,7 @@ import '@/scss/styles.scss'
 import { DefaultButton } from '@/js/components/ui/button'
 import { api } from '@/js/infrastructures/api/fetch'
 import { cookie } from '@/js/infrastructures/cookie/cookie'
-import { BaseLayout } from '@/js/layouts/BaseLayout'
+import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { useLocation, useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 
@@ -31,8 +31,7 @@ function fetchMatch(tournamentEnd) {
       return response.json() // レスポンスをJSONとしてパース
     })
     .then(data => {
-      console.log('Success:', data) // レスポンスをコンソールに出力
-      navigate('/game', { data })
+      navigate('/tournaments/game', { data })
     })
     .catch(error => {
       console.error('Error:', error) // エラー処理
@@ -147,7 +146,7 @@ function TournamentTwoParticipants(participants, tournamentEnd) {
 }
 
 function TournamentFourParticipants(participants, tournamentEnd) {
-  const navigate = useNavigate()
+  const _navigate = useNavigate()
   return Teact.createElement(
     'div',
     { className: 'position-relative shift-up-200' },
@@ -260,7 +259,7 @@ function TournamentFourParticipants(participants, tournamentEnd) {
 
 // SVG要素を仮想DOM形式で作成する関数
 function TournamentEightParticipants(participants, tournamentEnd) {
-  const navigate = useNavigate()
+  const _navigate = useNavigate()
   return Teact.createElement(
     'div',
     { className: 'position-relative shift-up-200' },
@@ -508,11 +507,11 @@ function ConditionalBranch(participants) {
   }
 }
 
-export const Tournament = () => {
+export const TournamentsBracket = () => {
   const loc = useLocation()
-  if (!loc.state || !loc.state.data) {
+  if (!loc.state?.data) {
     return Teact.createElement('h1', null, '400 Bad Request')
   }
   const participants = loc.state.data
-  return BaseLayout(ConditionalBranch(participants))
+  return HeaderWithTitleLayout(ConditionalBranch(participants))
 }

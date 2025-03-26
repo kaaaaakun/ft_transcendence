@@ -1,0 +1,12 @@
+# Files and directories to ignore when building a Docker image 
+**/.env
+**/.gitignore
+**/.DS_Store
+/reverseproxy/
+
+**/README.md
+/.github/
+/mock-server/
+asyncapi.yaml
+Makefile
+openapi.yaml

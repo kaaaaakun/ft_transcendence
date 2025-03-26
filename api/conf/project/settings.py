@@ -12,9 +12,26 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Read the shared configuration file
+SHARED_CONFIG_PATH = os.path.join(BASE_DIR, 'config', 'game-settings.json')
+try:
+    with open(SHARED_CONFIG_PATH, 'r') as f:
+        import json
+        config = json.load(f)
+except FileNotFoundError:
+    print(f"File not found: {SHARED_CONFIG_PATH}")
+    config = {}
+## 環境変数として取得できるようにjsonから取得
+END_GAME_SCORE = config.get('END_GAME_SCORE')
+WALL_X_LIMIT = config.get('WALL_X_LIMIT')
+WALL_Y_LIMIT = config.get('WALL_Y_LIMIT')
+PADDLE_HEIGHT = config.get('PADDLE_HEIGHT')
+BALL_RADIUS = config.get('BALL_RADIUS')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -26,7 +43,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'default_secret_key-for-dev')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'ft_transcendence.42.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'ft_transcendence.42.com', 'reverseproxy']
 
 
 # Application definition
@@ -47,17 +64,34 @@ INSTALLED_APPS = [
     'player',
     'tournament',
     'match',
+    'user',
 
     # 3rd party
     'rest_framework',
+    'rest_framework_simplejwt',
     'channels',
 ]
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=365),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+}
+
+AUTH_USER_MODEL = 'user.User'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -103,7 +137,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('dev-redis', 6379)],  # Redisのアドレスとポートを指定。コンテナ名なにになるのかで変わる
+            "hosts": [('in_memory_db', 6379)],  # Redisのアドレスとポートを指定。コンテナ名なにになるのかで変わる
         },
     },
 }
