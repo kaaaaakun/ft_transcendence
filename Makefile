@@ -8,14 +8,10 @@ ifdef WITH_LOCAL
 	DOCKER_COMPOSE = docker compose --env-file ${ENV_LOCAL_FILE_PATH} -f ./docker-compose.local.yml
 endif
 
-all: run
-
 local:
 	$(MAKE) WITH_LOCAL=1 run
 
 run: build up
-
-re: down image-prune run
 
 build:
 	$(DOCKER_COMPOSE) build
