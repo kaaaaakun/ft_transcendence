@@ -120,12 +120,17 @@ services:
       - net_pong
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.15.2
     container_name: "kibana"
-    environment:
-      ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
+    build:
+      context: kibana/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    volumes:
+      - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro,Z
     ports:
-      - "5601:5601"
+      - 5601:5601
+    environment:
+      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
     networks:
       - net_pong
     depends_on:
