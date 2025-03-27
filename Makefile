@@ -20,8 +20,9 @@ re: down image-prune run
 build:
 	$(DOCKER_COMPOSE) build
 
-up: cert
+up: cert setup
 	$(DOCKER_COMPOSE) up -d
+	
 
 fdown:
 	$(DOCKER_COMPOSE) down -v
@@ -34,6 +35,9 @@ image-prune:
 
 ps:
 	docker ps
+
+setup-elk:
+	$(DOCKER_COMPOSE) up setup
 
 PHONY: run re build up down fdown image-prune ps generate
 
@@ -48,4 +52,4 @@ cert:
 cert_clean:
 	rm -rf $(CERT_DIR)
 
-PHONY:generate cert
+PHONY:cert setup-elk
