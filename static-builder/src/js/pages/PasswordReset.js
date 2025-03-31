@@ -23,7 +23,7 @@ function handleSubmit(event, showErrorBanner) {
       .then(data => {
         navigate('/login', { data })
       })
-      .catch(error => {
+      .catch(_error => {
         showErrorBanner({
           message: 'Failed to reset password',
           onClose: () => {},
@@ -36,7 +36,7 @@ function handleSubmit(event, showErrorBanner) {
         secretQuestion = data.secret_question
         navigate('/password-reset', { data })
       })
-      .catch(error => {
+      .catch(_error => {
         showErrorBanner({
           message: 'Failed to get secret question',
           onClose: () => {},
