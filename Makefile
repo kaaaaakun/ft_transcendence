@@ -23,7 +23,6 @@ build:
 up: cert setup-elk
 	$(DOCKER_COMPOSE) up -d
 	
-
 fdown:
 	$(DOCKER_COMPOSE) down -v
 
