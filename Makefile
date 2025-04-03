@@ -20,7 +20,7 @@ re: down image-prune run
 build:
 	$(DOCKER_COMPOSE) build
 
-up: cert setup
+up: cert setup-elk
 	$(DOCKER_COMPOSE) up -d
 	
 

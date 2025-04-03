@@ -120,11 +120,11 @@ services:
     container_name: "elasticsearch"
     image: "elasticsearch"
     build:
-      context: elasticsearch/
+      context: elk/elasticsearch/
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
     volumes:
-      - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,Z
+      - ./elk/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,Z
       - vol_elasticsearch:/usr/share/elasticsearch/data:Z
     ports:
       - 9200:9200
@@ -151,11 +151,11 @@ services:
     container_name: "kibana"
     image: "kibana"
     build:
-      context: kibana/
+      context: elk/kibana/
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
     volumes:
-      - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro,Z
+      - ./elk/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro,Z
     ports:
       - 5601:5601
     environment:
@@ -169,12 +169,12 @@ services:
     container_name: "logstash"
     image: "logstash"
     build:
-      context: logstash/
+      context: elk/logstash/
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
     volumes:
-      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
-      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
+      - ./elk/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
+      - ./elk/logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
     ports:
       - 5044:5044
       - 50000:50000/tcp
@@ -194,7 +194,7 @@ services:
     container_name: "filebeat"
     image: "filebeat"
     build:
-      context: filebeat/
+      context: elk/filebeat/
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
     # Run as 'root' instead of 'filebeat' (uid 1000) to allow reading
@@ -208,7 +208,7 @@ services:
       # see: https://www.elastic.co/guide/en/beats/libbeat/current/config-file-permissions.html
       - --strict.perms=false
     volumes:
-      - ./filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro,Z
+      - ./elk/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro,Z
       - type: bind
         source: /var/lib/docker/containers
         target: /var/lib/docker/containers
@@ -230,14 +230,14 @@ services:
       - setup
     image: "elk-setup"
     build:
-      context: setup/
+      context: elk/setup/
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
     init: true
     volumes:
-      - ./setup/entrypoint.sh:/entrypoint.sh:ro,Z
-      - ./setup/lib.sh:/lib.sh:ro,Z
-      - ./setup/roles:/roles:ro,Z
+      - ./elk/setup/entrypoint.sh:/entrypoint.sh:ro,Z
+      - ./elk/setup/lib.sh:/lib.sh:ro,Z
+      - ./elk/setup/roles:/roles:ro,Z
     environment:
       ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
       LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
