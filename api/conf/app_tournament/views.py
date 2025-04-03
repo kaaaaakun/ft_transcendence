@@ -1,10 +1,10 @@
 import random
-
 from rest_framework import viewsets
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
 from django.utils.decorators import method_decorator
 from django.db import transaction, DatabaseError
 
@@ -43,7 +43,7 @@ class LocalTournamentView(APIView):
             return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as e:
             return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
 
     def post(self, request):
         player_names = request.data.get('players', [])
@@ -60,7 +60,7 @@ class LocalTournamentView(APIView):
                 tournament, tournament_players = create_tournament(players)
                 # Match, MatchDetailをDBに登録
                 create_next_tournament_match(tournament.id)
-            
+
             response_data = create_tournament_dataset(get_tournamentplayer_with_related_data(tournament.id))
             return Response(response_data, status = status.HTTP_201_CREATED)
 
@@ -69,4 +69,4 @@ class LocalTournamentView(APIView):
         except DatabaseError as e:
             return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as e:
-            return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)        
+            return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
