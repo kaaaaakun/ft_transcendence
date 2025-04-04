@@ -5,7 +5,16 @@ CERT_SCRIPT_DIR = ./reverseproxy/tools
 CERT_DIR = ./reverseproxy/ssl
 
 ifdef WITH_LOCAL
-	DOCKER_COMPOSE = docker compose --env-file ${ENV_LOCAL_FILE_PATH} -f ./docker-compose.local.yml
+    DOCKER_COMPOSE = docker compose --env-file ${ENV_LOCAL_FILE_PATH} -f ./docker-compose.local.yml
+    ifneq ($(wildcard $(ENV_LOCAL_FILE_PATH)),)
+        include $(ENV_LOCAL_FILE_PATH)
+        export
+    endif
+else
+    ifneq ($(wildcard $(ENV_FILE_PATH)),)
+        include $(ENV_FILE_PATH)
+        export
+    endif
 endif
 
 all: run
@@ -20,9 +29,10 @@ re: down image-prune run
 build:
 	$(DOCKER_COMPOSE) build
 
-up: cert
+up: cert setup-elk
 	$(DOCKER_COMPOSE) up -d
-
+	curl -s http://localhost:9200 -u $(ELASTIC_USER):"$(ELASTIC_PASSWORD)"
+	
 fdown:
 	$(DOCKER_COMPOSE) down -v
 
@@ -34,6 +44,9 @@ image-prune:
 
 ps:
 	docker ps
+
+setup-elk:
+	$(DOCKER_COMPOSE) up setup
 
 PHONY: run re build up down fdown image-prune ps generate
 
@@ -48,4 +61,4 @@ cert:
 cert_clean:
 	rm -rf $(CERT_DIR)
 
-PHONY:generate cert
+PHONY:cert setup-elk
