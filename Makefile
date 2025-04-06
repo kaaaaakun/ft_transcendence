@@ -34,6 +34,7 @@ up: cert setup-elk
 	curl -s http://localhost:9200 -u $(ELASTIC_USER):"$(ELASTIC_PASSWORD)"
 	
 fdown:
+	$(DOCKER_COMPOSE) rm --stop --force setup
 	$(DOCKER_COMPOSE) down -v
 
 down:

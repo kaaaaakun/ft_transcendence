@@ -140,7 +140,7 @@ services:
       # see: https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
       discovery.type: single-node
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      test: ["CMD", "curl", "-f", "-u", "${ELASTIC_USER}:${ELASTIC_PASSWORD}","http://localhost:9200"]
       interval: 30s
       timeout: 5s
       retries: 5
@@ -163,7 +163,8 @@ services:
     networks:
       - net_pong
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
 
   logstash:
     container_name: "logstash"
@@ -188,7 +189,9 @@ services:
     networks:
       - net_pong
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
+
 
   filebeat:
     container_name: "filebeat"
@@ -223,9 +226,10 @@ services:
     networks:
       - net_pong
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
 
-  setup:
+  setup: 
     profiles:
       - setup
     image: "setup-elk"
@@ -248,10 +252,12 @@ services:
     networks:
       - net_pong
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
 
 networks:
   net_pong:
+    driver: bridge
     name: "net_pong"
 
 volumes:
