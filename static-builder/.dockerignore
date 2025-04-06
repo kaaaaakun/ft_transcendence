@@ -1,8 +1,0 @@
-# ignore all .env file to protect sensitive data
-**/.env
-
-# ignore all .gitignore file to protect sensitive data
-**/.gitignore
-
-# ignore all .DS_Store file to protect sensitive data and avoid cache
-**/.DS_Store
