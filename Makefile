@@ -1,11 +1,11 @@
 ENV_FILE_PATH = .env.sample
 ENV_LOCAL_FILE_PATH = .env.sample.local
-DOCKER_COMPOSE = docker compose --env-file ${ENV_FILE_PATH} -f ./docker-compose.yml
+DOCKER_COMPOSE = docker compose --env-file ${ENV_FILE_PATH} -f ./docker-compose.yml -f elk/docker-compose.yml
 CERT_SCRIPT_DIR = ./reverseproxy/tools
 CERT_DIR = ./reverseproxy/ssl
 
 ifdef WITH_LOCAL
-    DOCKER_COMPOSE = docker compose --env-file ${ENV_LOCAL_FILE_PATH} -f ./docker-compose.local.yml
+    DOCKER_COMPOSE = docker compose --env-file ${ENV_LOCAL_FILE_PATH} -f ./docker-compose.local.yml -f elk/docker-compose.yml
     ifneq ($(wildcard $(ENV_LOCAL_FILE_PATH)),)
         include $(ENV_LOCAL_FILE_PATH)
         export
