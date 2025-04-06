@@ -110,8 +110,8 @@ services:
     volumes:
       - ./elk/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,Z
       - vol_elasticsearch:/usr/share/elasticsearch/data:Z
-    ports:
-      - 9200:9200
+    # ports:
+      # - 9200:9200
       # - 9300:9300
     environment:
       node.name: elasticsearch
@@ -160,8 +160,8 @@ services:
     volumes:
       - ./elk/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
       - ./elk/logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
-    ports:
-      - 5044:5044
+    # ports:
+      # - 5044:5044
       # - 50000:50000/tcp
       # - 50000:50000/udp
       # - 9600:9600
