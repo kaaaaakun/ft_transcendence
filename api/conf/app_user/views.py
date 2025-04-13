@@ -114,6 +114,11 @@ class UserSecretQuestionView(APIView):
                     'secret_question': user.secret_question
                 }, status=status.HTTP_200_OK)
 
+            except User.DoesNotExist:
+                return JsonResponse({
+                    'error': 'User not found.'
+                }, status=status.HTTP_404_NOT_FOUND)
+
             except Exception as e:
                 return JsonResponse({
                     'error': "Something went wrong."
