@@ -7,29 +7,31 @@ class UserManager(BaseUserManager):
     def create_user(self, login_name, display_name, password, secret_question, secret_answer):
         if not login_name or not display_name or not password or not secret_question or not secret_answer:
             raise ValueError("Required fields are missing")
-        user = self.model(login_name=login_name, display_name=display_name, password=make_password(password), secret_question=secret_question, secret_answer_hash=make_password(secret_answer))
+        user = self.model(login_name=login_name, display_name=display_name, password=make_password(password), secret_question=secret_question, secret_answer=make_password(secret_answer))
         user.save(using=self._db)
         return user
 
 
 class User(AbstractBaseUser):
-    id = models.AutoField(primary_key=True)
+    id = models.AutoField(auto_created=True,primary_key=True)
     login_name = models.CharField(unique=True, max_length=20)
     display_name = models.CharField(max_length=20)
     avatar_path = models.CharField(max_length=255, default=None, null=True)
     password = models.CharField(max_length=255)
     secret_question = models.CharField(max_length=255)
-    secret_answer_hash = models.CharField(max_length=255)
+    secret_answer = models.CharField(max_length=255)
     last_online_at = models.DateTimeField(default=None, null=True)
     deleted_at = models.DateTimeField(default=None, null=True)
+    is_active = models.BooleanField(default=True)
 
     objects = UserManager()
 
     USERNAME_FIELD = 'login_name'
-    REQUIRED_FIELDS = ['display_name', 'password', 'secret_question', 'secret_answer_hash']
+    REQUIRED_FIELDS = ['display_name', 'password', 'secret_question', 'secret_answer']
 
     def __str__(self):
         return self.display_name
+
 
     @classmethod
     def ft_authenticate(self, login_name, password):
