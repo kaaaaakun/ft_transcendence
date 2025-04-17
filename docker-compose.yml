@@ -57,6 +57,7 @@ services:
         condition: service_completed_successfully
 
   api:
+    image: api
     build:
       context: .
       dockerfile: api/Dockerfile
@@ -100,9 +101,10 @@ services:
       interval: 1s
       timeout: 3s
       retries: 5
-
+  
 networks:
   net_pong:
+    driver: bridge
     name: "net_pong"
 
 volumes:
