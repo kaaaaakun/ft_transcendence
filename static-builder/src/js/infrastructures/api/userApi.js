@@ -50,10 +50,8 @@ function deleteAccount(data) {
 }
 
 function getProfile(displayName) {
-  return api
-    .get(`/api/users/user/${displayName}`)
-    .then(response =>{
-      return response
+  return api.get(`/api/users/user/${displayName}`).then(response => {
+    return response
   })
 }
 

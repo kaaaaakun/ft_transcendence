@@ -6,7 +6,7 @@ import { useBanner } from '@/js/hooks/useBanner'
 
 export const UserProfile = () => {
   const { showInfoBanner, showWarningBanner, showErrorBanner, banners } =
-  useBanner()
+    useBanner()
   const [isEditing, setIsEditing] = Teact.useState(false)
   const [userData, setUserData] = Teact.useState(null)
   let changeUserName = ''
@@ -16,32 +16,33 @@ export const UserProfile = () => {
     const formData = new FormData()
     formData.append('avatar_path', event.target.files[0])
     try {
-      userApi.changeProfile(formData)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to upload avatar')
-        }
-        return response.json()
-      })
-      .then(response => {
-        if (response.status === 413) {
-          showErrorBanner({
-            message: 'Failed to upload avatar: File size too large',
-            onClose: () => {},
-          })
-          return
-        } else if (response.status === 401) {
-          showErrorBanner({
-            message: 'Failed to upload avatar: Unauthorized',
-            onClose: () => {},
-          })
-          return
-        }
-        setUserData(prevUserData => ({
-          ...prevUserData,
-          avatar_path: response.avatar_path,
-        }))
-      })
+      userApi
+        .changeProfile(formData)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to upload avatar')
+          }
+          return response.json()
+        })
+        .then(response => {
+          if (response.status === 413) {
+            showErrorBanner({
+              message: 'Failed to upload avatar: File size too large',
+              onClose: () => {},
+            })
+            return
+          } else if (response.status === 401) {
+            showErrorBanner({
+              message: 'Failed to upload avatar: Unauthorized',
+              onClose: () => {},
+            })
+            return
+          }
+          setUserData(prevUserData => ({
+            ...prevUserData,
+            avatar_path: response.avatar_path,
+          }))
+        })
     } catch (error) {
       console.error('アップロードエラー:', error)
     }
@@ -52,37 +53,38 @@ export const UserProfile = () => {
       return
     }
     try {
-      userApi.changeProfile({
-        display_name: changeUserName,
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to save')
-        }
-        return response.json()
-      })
-      .then(response => {
-        if (response.status === 401) {
-          showErrorBanner({
-            message: 'Failed to save: Unauthorized',
-            onClose: () => {},
-          })
-          return
-        }
-        if (response.status === 400) {
-          showErrorBanner({
-            message: `Failed to save: ${response.message}`, //重複、文字数、文字種など
-            onClose: () => {},
-          })
-          return
-        }
-        setUserData(prevUserData => ({
-          ...prevUserData,
-          display_name: response.display_name,
-        }))
-        setIsEditing(false)
-        changeUserName = ''
-      })
+      userApi
+        .changeProfile({
+          display_name: changeUserName,
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to save')
+          }
+          return response.json()
+        })
+        .then(response => {
+          if (response.status === 401) {
+            showErrorBanner({
+              message: 'Failed to save: Unauthorized',
+              onClose: () => {},
+            })
+            return
+          }
+          if (response.status === 400) {
+            showErrorBanner({
+              message: `Failed to save: ${response.message}`, //重複、文字数、文字種など
+              onClose: () => {},
+            })
+            return
+          }
+          setUserData(prevUserData => ({
+            ...prevUserData,
+            display_name: response.display_name,
+          }))
+          setIsEditing(false)
+          changeUserName = ''
+        })
     } catch (error) {
       console.error('保存エラー:', error)
     }
@@ -247,10 +249,12 @@ export const UserProfile = () => {
           setUserData(data)
         }
       })
-      .catch(error => showErrorBanner({
-        message: error.message,
-        onClose: () => {},
-      }))
+      .catch(error =>
+        showErrorBanner({
+          message: error.message,
+          onClose: () => {},
+        }),
+      )
   }, [])
 
   if (!userData) {
