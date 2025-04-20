@@ -24,6 +24,13 @@ from django.core.files.storage import default_storage
 import requests
 from django.utils.timezone import now
 from rest_framework.response import Response
+from .serializers import (
+    UserSerializer,
+    UserLoginSerializer,
+    PasswordResetRequestSerializer,
+    PasswordResetSerializer
+)
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 class UserProfileView(APIView):
@@ -100,13 +107,7 @@ class UserUpdateView(APIView):
                     'field': 'unknown',
                     'message': 'An unexpected error occurred.'
                 }]
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)from .serializers import (
-    UserSerializer,
-    UserLoginSerializer,
-    PasswordResetRequestSerializer,
-    PasswordResetSerializer
-)
-from rest_framework_simplejwt.authentication import JWTAuthentication
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class UserLoginView(APIView):
     def post(self, request, *args, **kwargs):
