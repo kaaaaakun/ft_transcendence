@@ -63,10 +63,12 @@ export const UserProfile = () => {
           })
         } else if (response.status === 400) {
           const data = await response.json()
+          console.log(data)
           showErrorBanner({
-            message: `Failed to save: ${data.message}`,
+            message: data.errors[0].message,
             onClose: () => {},
           })
+          return
         } else {
           throw new Error('Failed to save')
         }
