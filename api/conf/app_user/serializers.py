@@ -70,3 +70,35 @@ class PasswordResetSerializer(serializers.Serializer):
 
         data['user'] = user
         return data
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['display_name', 'avatar_path']
+
+    avatar_path = serializers.ImageField(required=False)
+
+    def validate(self, data):
+        if 'display_name' in data:
+            if re.search(CHARACTERS_NOT_ALLOWED, data['display_name']):
+                raise serializers.ValidationError(f"data 'display_name' contains not allowed characters: {CHARACTERS_NOT_ALLOWED}")
+        return data
+
+    def update(self, instance, validated_data):
+        if 'display_name' in validated_data:
+            instance.display_name = validated_data['display_name']
+
+        if 'avatar_path' in validated_data:
+            avatar = validated_data['avatar_path']
+            file_name = f"{instance.login_name}.png"
+            avatar_path = f"/var/www/data/avatars/{file_name}"
+
+            with open(avatar_path, "wb") as f:
+                for chunk in avatar.chunks():
+                    f.write(chunk)
+
+            instance.avatar_path = f"/avatars/{file_name}"
+
+        instance.save()
+        return instance
+    
