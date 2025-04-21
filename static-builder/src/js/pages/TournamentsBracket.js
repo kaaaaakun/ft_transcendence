@@ -196,7 +196,7 @@ function TournamentFourParticipants(participants, tournamentEnd) {
         'stroke-width': '2',
       }),
       Teact.createElement('path', {
-        d: 'M255,30 L223,30z',
+        d: 'M298,30 L266,30z',
         stroke:
           participants[2].tournament_players.victory_count >= 0
             ? 'yellow'
@@ -205,7 +205,7 @@ function TournamentFourParticipants(participants, tournamentEnd) {
       }),
       ...createParticipantBoard(participants[2], 329, 30),
       Teact.createElement('path', {
-        d: 'M224,30 L224,45z',
+        d: 'M266,30 L266,45z',
         stroke:
           participants[2].tournament_players.victory_count >= 1
             ? 'yellow'
@@ -213,7 +213,7 @@ function TournamentFourParticipants(participants, tournamentEnd) {
         'stroke-width': '2',
       }),
       Teact.createElement('path', {
-        d: 'M255,60 L223,60z',
+        d: 'M298,60 L266,60z',
         stroke:
           participants[3].tournament_players.victory_count >= 0
             ? 'yellow'
@@ -222,7 +222,7 @@ function TournamentFourParticipants(participants, tournamentEnd) {
       }),
       ...createParticipantBoard(participants[3], 329, 60),
       Teact.createElement('path', {
-        d: 'M224,60 L224,45z',
+        d: 'M266,60 L266,45z',
         stroke:
           participants[3].tournament_players.victory_count >= 1
             ? 'yellow'
@@ -230,17 +230,17 @@ function TournamentFourParticipants(participants, tournamentEnd) {
         'stroke-width': '2',
       }),
       Teact.createElement('path', {
-        d: 'M163,45 L195,45z',
+        d: 'M163,45 L215,45z',
         stroke: sumVictoryCount(participants, 0, 1) >= 2 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       Teact.createElement('path', {
-        d: 'M194,45 L194,25z',
+        d: 'M215,45 L215,25z',
         stroke: sumVictoryCount(participants, 0, 3) >= 3 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
       Teact.createElement('path', {
-        d: 'M225,45 L193,45z',
+        d: 'M266,45 L215,45z',
         stroke: sumVictoryCount(participants, 2, 3) >= 2 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
@@ -411,7 +411,7 @@ function TournamentEightParticipants(participants, tournamentEnd) {
         'stroke-width': '2',
       }),
       Teact.createElement('path', {
-        d: 'M163,45 L195,45z',
+        d: 'M163,45 L215,45z',
         stroke: sumVictoryCount(participants, 0, 1) >= 1 ? 'yellow' : 'black',
         'stroke-width': '2',
       }),
