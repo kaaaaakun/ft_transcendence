@@ -3,8 +3,8 @@ services:
   # バックエンドのサービス
   api:
     build:
-      context: ../
-      dockerfile: ./Dockerfile
+      context: ../../
+      dockerfile: ./api/Dockerfile
       target: deploy_asgi # 開発用のDockerfileのターゲット
     ports:
       - "8000:8000"

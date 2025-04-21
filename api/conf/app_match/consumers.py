@@ -6,18 +6,11 @@ import json
 
 from django.conf import settings
 from .game_logic import GameManager, LocalSimpleScoreManager, TournamentScoreManager
-from .models import Match, MatchDetail
-from .utils import ( sort_matchdetails_by_playerid, 
-    get_matchdetail_with_related_data, update_when_match_end, )
-from utils.websocket import get_tournament_id_from_scope
+from .models import Match
 from tournament.models import Tournament
-from tournament.utils import ( update_tournamentplayer_win_to_await, is_tournament_end,
-    create_next_tournament_match )
 
 FRAME = 30 # フロントを見つつ調整
 END_GAME_SCORE = settings.END_GAME_SCORE
-
-# エラハンを完全無視、冗長さは少し無視してコーディングした
 
 # Baseクラス
 class LocalBaseMatchConsumer(AsyncWebsocketConsumer):
@@ -67,63 +60,3 @@ class LocalSimpleMatchConsumer(LocalBaseMatchConsumer):
                 self.is_running = False
             await asyncio.sleep(self.frame_rate)
         await self.close()
-
-# Localでのトーナメントマッチの処理（リモートプレイヤーの導入時に削除予定）
-class LocalTournamentMatchConsumer(LocalBaseMatchConsumer):
-    async def connect(self):
-        self.tournament_id = get_tournament_id_from_scope(self.scope)
-
-        def fetch_match_and_details():
-            match = Match.objects.get(tournament_id=self.tournament_id, status='start')
-            matchdetails = list(sort_matchdetails_by_playerid(get_matchdetail_with_related_data(match.id)))
-            return match, matchdetails
-
-        match, matchdetails = await sync_to_async(fetch_match_and_details)()
-        self.match_id = match.id
-        self.sorted_matchedetails = matchdetails
-
-        position_matchdetail = {
-            "left": self.sorted_matchedetails[0].id,
-            "right": self.sorted_matchedetails[1].id
-        }
-
-        await super().connect()
-        self.game_manager = GameManager(score_manager=TournamentScoreManager(position_matchdetail))
-
-    async def game_loop(self):
-        while self.is_running:
-            self.game_manager.update_game_state()
-            await self.send(text_data=json.dumps(self.game_manager.get_game_state()))
-            if (
-                self.game_manager.score_manager.get_score("left") == END_GAME_SCORE or
-                self.game_manager.score_manager.get_score("right") == END_GAME_SCORE
-            ):
-                self.is_running = False
-                asyncio.create_task(self.finalize_game_state())
-            await asyncio.sleep(self.frame_rate)
-        await self.close()
-
-    async def finalize_game_state(self):
-        def sync_finalize():
-            # RDBのMatchDetailのスコアを更新して、Redisのスコアを削除
-            self.sorted_matchedetails[0].score = self.game_manager.score_manager.get_score("left")
-            self.sorted_matchedetails[1].score = self.game_manager.score_manager.get_score("right")
-            self.sorted_matchedetails[0].save()
-            self.sorted_matchedetails[1].save()
-            # 勝者の判定
-            if self.game_manager.score_manager.get_score("left") == END_GAME_SCORE:
-                winner_id = self.sorted_matchedetails[0].player_id
-            else:
-                winner_id = self.sorted_matchedetails[1].player_id
-            self.game_manager.score_manager.delete_score()
-            # 関連するRDBの更新処理
-            update_when_match_end(self.match_id, winner_id, self.tournament_id)
-            # トーナメントラウンドが終了した時の処理
-            if Tournament.is_round_end(self.tournament_id):
-                update_tournamentplayer_win_to_await(self.tournament_id)
-            # トーナメントが終了した時の処理
-            if is_tournament_end(self.tournament_id):
-                Tournament.update_status(self.tournament_id, 'end')
-            else:
-                create_next_tournament_match(self.tournament_id)            
-        await sync_to_async(sync_finalize)()

@@ -1,8 +1,6 @@
 from django.db import models
 from django.db.models import F
 
-from player.models import Player
-
 class Tournament(models.Model):
     num_of_player = models.IntegerField()
     status = models.CharField(max_length=10)
@@ -31,7 +29,6 @@ class Tournament(models.Model):
 # Ref: https://qiita.com/taiyaki/items/a2bed64395c7af530dfb (別のアプリからの参照)
 class TournamentPlayer(models.Model):
     tournament_id = models.ForeignKey(Tournament, on_delete=models.CASCADE)
-    player_id = models.ForeignKey(Player, on_delete=models.CASCADE)
     victory_count = models.IntegerField()
     status = models.CharField(max_length=10)
 

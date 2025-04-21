@@ -44,10 +44,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # apps made for this project
-    'player',
     'tournament',
     'match',
     'user',
+    'room',
 
     # 3rd party apps
     'rest_framework',
