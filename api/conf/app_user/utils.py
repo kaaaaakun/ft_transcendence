@@ -46,10 +46,16 @@ def create_response(user, access_id):
 
   return response
 
-def get_user_by_request(request):
-  auth = request.headers.get('Authorization')
-  if auth:
-      access_token = auth.split(' ')[1] if len(auth.split(' ')) > 1 else None
-  if access_token:
-    return AccessToken(access_token).get('user_id')
+def get_user_by_auth(auth):
+  try:
+      if auth:
+          access_token = auth.split(' ')[1] if len(auth.split(' ')) > 1 else None
+          if access_token:
+              return AccessToken(access_token).get('user_id')
+  except IndexError:
+      # トークンが不正な形式の場合
+      return None
+  except Exception as e:
+      # その他の予期しないエラーの場合
+      return None
   return None
