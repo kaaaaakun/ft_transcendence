@@ -265,64 +265,68 @@ export const UserProfile = () => {
   }
 
   return HeaderWithTitleLayout(
-    ...banners,
     Teact.createElement(
       'div',
-      { className: 'container bg-white pb-3 pt-3' },
+      { className: 'container bg-white' },
+      ...banners,
       Teact.createElement(
         'div',
-        { className: 'd-flex align-items-center' },
-        renderAvatarSection(),
-        renderProfileSection(),
-      ),
-      Teact.createElement(
-        'div',
-        { className: 'container mt-3' },
+        { className: 'container bg-white pb-3 pt-3' },
         Teact.createElement(
-          'h2',
-          { className: 'text-secondary fs-6' },
-          'Game Records',
+          'div',
+          { className: 'd-flex align-items-center' },
+          renderAvatarSection(),
+          renderProfileSection(),
         ),
         Teact.createElement(
           'div',
-          { className: 'table-header' },
+          { className: 'container mt-3' },
           Teact.createElement(
-            'table',
-            { className: 'table table-bordered table-striped mt-2' },
+            'h2',
+            { className: 'text-secondary fs-6' },
+            'Game Records',
+          ),
+          Teact.createElement(
+            'div',
+            { className: 'table-header' },
             Teact.createElement(
-              'thead',
-              null,
+              'table',
+              { className: 'table table-bordered table-striped mt-2' },
               Teact.createElement(
-                'tr',
-                { className: 'text-center' },
+                'thead',
+                null,
                 Teact.createElement(
-                  'th',
-                  { className: 'width-35 border-end' },
-                  'Match',
-                ),
-                Teact.createElement(
-                  'th',
-                  { className: 'width-10 border-end' },
-                  'Result',
-                ),
-                Teact.createElement(
-                  'th',
-                  { className: 'width-15 border-end' },
-                  'Score',
-                ),
-                Teact.createElement(
-                  'th',
-                  { className: 'width-15' },
-                  'Match Type',
+                  'tr',
+                  { className: 'text-center' },
+                  Teact.createElement(
+                    'th',
+                    { className: 'width-35 border-end' },
+                    'Match',
+                  ),
+                  Teact.createElement(
+                    'th',
+                    { className: 'width-10 border-end' },
+                    'Result',
+                  ),
+                  Teact.createElement(
+                    'th',
+                    { className: 'width-15 border-end' },
+                    'Score',
+                  ),
+                  Teact.createElement(
+                    'th',
+                    { className: 'width-15' },
+                    'Match Type',
+                  ),
                 ),
               ),
-            ),
-            Teact.createElement(
-              'tbody',
-              { className: 'table-body-scroll' },
-              ...(userData?.performance?.game_records?.map(record =>
-                renderGameRecord(record),
-              ) || []),
+              Teact.createElement(
+                'tbody',
+                { className: 'table-body-scroll' },
+                ...(userData?.performance?.game_records?.map(record =>
+                  renderGameRecord(record),
+                ) || []),
+              ),
             ),
           ),
         ),

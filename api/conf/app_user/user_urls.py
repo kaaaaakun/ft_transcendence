@@ -8,7 +8,7 @@ router = DefaultRouter()
 
 urlpatterns = [
     path('', UserView.as_view(), name='user'),
-    path('last_login/', UpdateLastLoginView.as_view(), name='last_login'),
+    path('last_login/', UpdateLastLoginView.as_view(), name='update_last_login'),
     path('update/', UserUpdateView.as_view(), name='user_update'),
-    path('user/<str:display_name>/', UserProfileView.as_view(), name='user'),
+    path('user/<str:display_name>/', UserProfileView.as_view(), name='profile'),
 ]
