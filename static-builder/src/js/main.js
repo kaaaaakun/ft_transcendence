@@ -22,7 +22,9 @@ function App() {
     console.log('App rendered')
     const intervalId = setInterval(() => {
       console.log('App interval')
-      api.post('/api/users/last_login/')
+      if (localStorage.getItem('access_token')) {
+        api.post('/api/users/last_login/')
+      }
     }, 10000)
 
     return () => clearInterval(intervalId) // コンポーネントがアンマウントされたら停止
