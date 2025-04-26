@@ -31,12 +31,12 @@ export const UserProfile = () => {
         } else {
           throw new Error('Failed to upload avatar')
         }
-        return
       }
       const data = await response.json()
+      console.log('Avatar uploaded successfully:', data)
       setUserData(prevUserData => ({
         ...prevUserData,
-        avatar_path: data.avatar_path,
+        avatar_path: data.avatar_url,
       }))
     } catch (error) {
       console.error('Upload error:', error)

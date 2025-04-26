@@ -74,9 +74,10 @@ class PasswordResetSerializer(serializers.Serializer):
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['display_name', 'avatar_path']
+        fields = ['display_name', 'avatar_path', 'avatar_url']
 
-    avatar_path = serializers.ImageField(required=False)
+    avatar_path = serializers.ImageField(required=False, write_only=True)
+    avatar_url = serializers.CharField(source='avatar_path', read_only=True)
 
     def validate(self, data):
         if 'display_name' in data:
