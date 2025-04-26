@@ -1,8 +1,8 @@
 import '@/scss/styles.scss'
+import { useBanner } from '@/js/hooks/useBanner'
+import { userApi } from '@/js/infrastructures/api/userApi'
 import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { Teact } from '@/js/libs/teact'
-import { userApi } from '@/js/infrastructures/api/userApi'
-import { useBanner } from '@/js/hooks/useBanner'
 
 export const UserProfile = () => {
   const { showInfoBanner, showWarningBanner, showErrorBanner, banners } =
@@ -233,13 +233,15 @@ export const UserProfile = () => {
             onClose: () => {},
           })
           return
-        } else if (response.status === 401) {
+        }
+        if (response.status === 401) {
           showErrorBanner({
             message: 'Unauthorized',
             onClose: () => {},
           })
           return
-        } else if (response.status === 200) {
+        }
+        if (response.status === 200) {
           return response.json()
         }
         throw new Error('Unknown error occurred')
