@@ -74,7 +74,7 @@ export const FriendsTable = ({
         'button',
         {
           className: 'btn btn-success btn-sm me-2',
-          onClick: () => onAccept(friend.id),
+          onClick: () => onAccept(friend.requester_name),
         },
         '承認',
       ),
@@ -82,7 +82,7 @@ export const FriendsTable = ({
         'button',
         {
           className: 'btn btn-danger btn-sm',
-          onClick: () => onReject(friend.id),
+          onClick: () => onReject(friend.requester_name),
         },
         '拒否',
       ),
