@@ -92,3 +92,15 @@
     transform: translateX(-50%) translateY(0);
   }
 }
+
+.empty-row td{
+  height: 0px; /* 通常の行と同じ高さに設定 */
+  background-color: transparent !important;
+  border-bottom-color: transparent !important; /* 罫線を透明に */
+  box-shadow: none !important; /* box-shadowを削除 */
+  padding: 0.0rem 0.5rem !important; /* paddingを0に設定 */
+}
+
+.empty-row:hover {
+  background-color: transparent !important;
+}
