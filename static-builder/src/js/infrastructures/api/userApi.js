@@ -61,12 +61,68 @@ function changeProfile(data) {
   })
 }
 
+function getFriendsList(data) {
+  return api.get('/api/users/${data.display_name}/friends').then(response => {
+    return response
+  })
+}
+
+function getFriendRequests(data) {
+  return api
+    .get('/api/users/${data.display_name}/friend_requests')
+    .then(response => {
+      return response
+    })
+}
+
+function friendRequest(data) {
+  return api
+    .post('/api/users/${data.user_name}/friends/${data.friend_name}')
+    .then(response => {
+      return response
+    })
+}
+
+function acceptFriendRequest(data) {
+  return api
+    .post('/api/users/${data.user_name}/friends/${data.friend_name}')
+    .then(response => {
+      return response
+    })
+}
+
+function rejectFriendRequest(data) {
+  return api
+    .delete('/api/users/${data.user_name}/friends/${data.friend_name}')
+    .then(response => {
+      return response
+    })
+}
+
+function deleteFriend(data) {
+  return api
+    .delete('/api/users/${data.user_name}/friends/${data.friend_name}')
+    .then(response => {
+      return response
+    })
+}
+
+
 export const userApi = {
   login,
   register,
   passwordReset,
   getSecretQuestion,
   deleteAccount,
+
   getProfile,
   changeProfile,
+
+  getFriendsList,
+  getFriendRequests,
+
+  friendRequest,
+  acceptFriendRequest,
+  rejectFriendRequest,
+  deleteFriend,
 }
