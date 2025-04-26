@@ -62,14 +62,14 @@ function changeProfile(data) {
 }
 
 function getFriendsList(data) {
-  return api.get('/api/users/${data.display_name}/friends').then(response => {
+  return api.get(`/api/users/${data.display_name}/friends`).then(response => {
     return response
   })
 }
 
 function getFriendRequests(data) {
   return api
-    .get('/api/users/${data.display_name}/friend_requests')
+    .get(`/api/users/${data.display_name}/friend_requests`)
     .then(response => {
       return response
     })
@@ -77,7 +77,7 @@ function getFriendRequests(data) {
 
 function friendRequest(data) {
   return api
-    .post('/api/users/${data.user_name}/friends/${data.friend_name}')
+    .post(`/api/users/${data.user_name}/friends/${data.friend_name}`)
     .then(response => {
       return response
     })
@@ -85,7 +85,7 @@ function friendRequest(data) {
 
 function acceptFriendRequest(data) {
   return api
-    .post('/api/users/${data.user_name}/friends/${data.friend_name}')
+    .post(`/api/users/${data.user_name}/friends/${data.friend_name}`)
     .then(response => {
       return response
     })
@@ -93,7 +93,7 @@ function acceptFriendRequest(data) {
 
 function rejectFriendRequest(data) {
   return api
-    .delete('/api/users/${data.user_name}/friends/${data.friend_name}')
+    .delete(`/api/users/${data.user_name}/friends/${data.friend_name}`)
     .then(response => {
       return response
     })
@@ -101,7 +101,7 @@ function rejectFriendRequest(data) {
 
 function deleteFriend(data) {
   return api
-    .delete('/api/users/${data.user_name}/friends/${data.friend_name}')
+    .delete(`/api/users/${data.user_name}/friends/${data.friend_name}`)
     .then(response => {
       return response
     })
