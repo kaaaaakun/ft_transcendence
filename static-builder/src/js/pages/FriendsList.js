@@ -21,7 +21,7 @@ export const FriendsList = props => {
     requests(props.params.id).then(data => {
       setFriendRequests(data)
     })
-  }, [props.params.id]) // propsのidが変わったら再度実行
+  }, [props.params.id, setFriendsList, setFriendRequests]) // propsのidが変わったら再度実行
 
   // APIデータ取得関数
   const friends = id =>
@@ -63,9 +63,7 @@ export const FriendsList = props => {
         user_name: props.params.id,
         friend_name: friendId,
       })
-      .then(response => {
-        console.log(response)
-        // 友達リクエストリストを更新
+      .then(() => {
         setFriendRequests(prev => prev.filter(req => req.id !== friendId))
       })
   }
@@ -76,9 +74,7 @@ export const FriendsList = props => {
         user_name: props.params.id,
         friend_name: friendId,
       })
-      .then(response => {
-        console.log(response)
-        // 友達リクエストリストを更新
+      .then(() => {
         setFriendRequests(prev => prev.filter(req => req.id !== friendId))
       })
   }
