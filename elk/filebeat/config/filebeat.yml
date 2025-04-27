@@ -19,6 +19,8 @@ filebeat.autodiscover:
         type: container
         paths:
           - /var/lib/docker/containers/${data.container.id}/*-json.log
+        processors:
+          - add_docker_metadata: ~ # Dockerメタデータ(コンテナ名など)を追加
       templates:
         - condition:
             contains:
@@ -37,6 +39,7 @@ processors:
 monitoring:
   enabled: true
   elasticsearch:
+    hosts: ["http://elasticsearch:9200"]
     username: beats_system
     password: ${BEATS_SYSTEM_PASSWORD}
 
