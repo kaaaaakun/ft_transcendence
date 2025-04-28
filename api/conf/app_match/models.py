@@ -9,7 +9,7 @@ MATCH_TX_STATUS_CHOICES = [
 ]
 
 class Match(models.Model):
-    tournament_id = models.ForeignKey(
+    tournament = models.ForeignKey(
         Tournament, 
         on_delete = models.CASCADE, 
         null = True
@@ -38,39 +38,39 @@ class Match(models.Model):
         return cls.objects.create(tournament_id = tournament)
 
     @classmethod
-    def update_is_finished(cls, match_id, boolean):
-        updated = cls.objects.filter(pk = match_id).update(is_finished = boolean)
+    def update_is_finished(cls, match, boolean):
+        updated = cls.objects.filter(pk = match.id).update(is_finished = boolean)
         if updated == 0:
-            raise cls.DoesNotExist(f"Match with id {match_id} does not exist.")
+            raise cls.DoesNotExist(f"Match with id {match.id} does not exist.")
         return updated
 
     @classmethod
-    def update_tx_status(cls, match_id, status):
-        updated = cls.objects.filter(pk = match_id).update(tx_status = status)
+    def update_tx_status(cls, match, status):
+        updated = cls.objects.filter(pk = match.id).update(tx_status = status)
         if updated == 0:
-            raise cls.DoesNotExist(f"Match with id {match_id} does not exist.")
+            raise cls.DoesNotExist(f"Match with id {match.id} does not exist.")
         return updated
 
     @classmethod
-    def update_tx_address(cls, match_id, address):
-        updated = cls.objects.filter(pk = match_id).update(tx_address = address)
+    def update_tx_address(cls, match, address):
+        updated = cls.objects.filter(pk = match.id).update(tx_address = address)
         if updated == 0:
-            raise cls.DoesNotExist(f"Match with id {match_id} does not exist.")
+            raise cls.DoesNotExist(f"Match with id {match.id} does not exist.")
         return updated
 
 class MatchDetail(models.Model):
-    match_id = models.ForeignKey(Match, on_delete = models.CASCADE)
-    user_id = models.ForeignKey(User, on_delete = models.CASCADE)
+    match = models.ForeignKey(Match, on_delete = models.CASCADE)
+    user = models.ForeignKey(User, on_delete = models.CASCADE)
     score = models.IntegerField(default = 0)
 
     class Meta:
         db_table = 'match_details'
 
     @classmethod
-    def create(cls, match_id, user_id):
-        if match_id.is_finished:
+    def create(cls, match, user):
+        if match.is_finished:
             raise ValueError("Cannot create a match detail for a finished match.")
         return cls.objects.create(
-            match_id = match_id,
-            user_id = user_id,
+            match_id = match,
+            user_id = user,
         )
