@@ -22,7 +22,10 @@ class Tournament(models.Model):
 
     @classmethod
     def update_status(cls, tournament):
-        cls.objects.filter(id = tournament.id).update(is_finished = True)
+        if tournament.is_finished:
+            raise ValueError("Cannot update status for a finished tournament.")
+        tournament.is_finished = True
+        tournament.save()
 
 class TournamentPlayer(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete = models.CASCADE)
