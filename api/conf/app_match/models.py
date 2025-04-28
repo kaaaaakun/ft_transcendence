@@ -35,28 +35,26 @@ class Match(models.Model):
     def create_for_tournament(cls, tournament):
         if tournament.is_finished:
             raise ValueError("Cannot create a match for a finished tournament.")
-        return cls.objects.create(tournament_id = tournament)
+        return cls.objects.create(tournament = tournament)
 
     @classmethod
-    def update_is_finished(cls, match, boolean):
-        updated = cls.objects.filter(pk = match.id).update(is_finished = boolean)
-        if updated == 0:
-            raise cls.DoesNotExist(f"Match with id {match.id} does not exist.")
-        return updated
+    def update_is_finished(cls, match):
+        match.is_finished = True
+        match.save()
+        return match
 
     @classmethod
     def update_tx_status(cls, match, status):
-        updated = cls.objects.filter(pk = match.id).update(tx_status = status)
-        if updated == 0:
-            raise cls.DoesNotExist(f"Match with id {match.id} does not exist.")
-        return updated
+        match.tx_status = status
+        match.full_clean()
+        match.save()
+        return match
 
     @classmethod
     def update_tx_address(cls, match, address):
-        updated = cls.objects.filter(pk = match.id).update(tx_address = address)
-        if updated == 0:
-            raise cls.DoesNotExist(f"Match with id {match.id} does not exist.")
-        return updated
+        match.tx_address = address
+        match.save()
+        return match
 
 class MatchDetail(models.Model):
     match = models.ForeignKey(Match, on_delete = models.CASCADE)
