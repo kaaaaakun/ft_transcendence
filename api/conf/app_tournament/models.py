@@ -32,6 +32,9 @@ class TournamentPlayer(models.Model):
 
     class Meta:
         db_table = 'tournament_players'
+        constraints = [
+            models.UniqueConstraint(fields = ['tournament', 'user'], name = 'unique_tournament_user')
+        ]
 
     @classmethod
     def create_tournament_players(cls, tournament, users):
@@ -41,8 +44,6 @@ class TournamentPlayer(models.Model):
             raise ValueError("Number of users must match the tournament type.")
         for i, user in enumerate(users):
             entry_number = i
-            if cls.objects.filter(tournament = tournament, user = user).exists():
-                raise ValueError("User is already registered for this tournament.")
             cls.objects.create(tournament = tournament, user = user, entry_number = entry_number)
         return cls.objects.filter(tournament = tournament)
 
