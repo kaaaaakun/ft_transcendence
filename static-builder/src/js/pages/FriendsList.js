@@ -2,13 +2,16 @@ import { FriendsTable } from '@/js/features/friends/FriendsTable'
 import { SimpleHeaderLayout } from '@/js/layouts/SimpleHeaderLayout'
 import { Teact } from '@/js/libs/teact'
 import { userApi } from '@/js/infrastructures/api/userApi'
+import { useBanner } from '../hooks/useBanner'
+import { useNavigate } from '@/js/libs/router'
 
 export const FriendsList = props => {
+  const { showErrorBanner, banners } = useBanner()
   // ステートを定義
   const [friendsList, setFriendsList] = Teact.useState([])
   const [friendRequests, setFriendRequests] = Teact.useState([])
   const [loading, setLoading] = Teact.useState(true)
-
+  const navigate = useNavigate()
   // コンポーネントがマウントされたときにデータを取得
   Teact.useEffect(() => {
     // 友達リストの取得
@@ -21,7 +24,7 @@ export const FriendsList = props => {
     requests(props.params.id).then(data => {
       setFriendRequests(data)
     })
-  }, [props.params.id, setFriendsList, setFriendRequests]) // propsのidが変わったら再度実行
+  }, [props.params.id]) // propsのidが変わったら再度実行
 
   // APIデータ取得関数
   const friends = id =>
@@ -36,8 +39,10 @@ export const FriendsList = props => {
         return response.json()
       })
       .catch(error => {
-        console.error(error)
-        return []
+        showErrorBanner({
+          message: 'Failed to load friends list',
+          onClose: () => {},
+        })
       })
 
   const requests = id =>
@@ -52,8 +57,10 @@ export const FriendsList = props => {
         return response.json()
       })
       .catch(error => {
-        console.error(error)
-        return []
+        showErrorBanner({
+          message: 'Failed to load friend requests',
+          onClose: () => {},
+        })
       })
 
   // ハンドラー関数をコンポーネント内に移動
@@ -66,6 +73,9 @@ export const FriendsList = props => {
       .then(() => {
         setFriendRequests(prev => prev.filter(req => req.id !== friendId))
       })
+      .then(data => {
+        navigate(`users/${id}/friends`)
+      })
   }
 
   const handleReject = friendId => {
@@ -77,27 +87,43 @@ export const FriendsList = props => {
       .then(() => {
         setFriendRequests(prev => prev.filter(req => req.id !== friendId))
       })
+      .then(data => {
+        navigate(`users/${id}/friends`)
+      })
   }
 
   // ローディング中の表示
   if (loading) {
     return SimpleHeaderLayout(
+      ...banners,
       Teact.createElement(
         'div',
         { className: 'container bg-white p-4 rounded shadow text-center' },
-        'データを読み込み中...',
+        'Data loading...',
+      ),
+    )
+  }
+
+  if (!friendsList && !friendRequests) {
+    return SimpleHeaderLayout(
+      ...banners,
+      Teact.createElement(
+        'div',
+        { className: 'container bg-white p-4 rounded shadow text-center' },
+        'User not found',
       ),
     )
   }
 
   return SimpleHeaderLayout(
+    ...banners,
     Teact.createElement(
       'div',
       { className: 'container bg-white p-4 rounded shadow' },
       Teact.createElement(FriendsTable, {
-        friends: friendsList, // ステートから値を渡す
+        friends: friendsList,
         userName: props.params.id,
-        friendRequests: friendRequests, // ステートから値を渡す
+        friendRequests: friendRequests,
         onAccept: handleAccept,
         onReject: handleReject,
       }),
