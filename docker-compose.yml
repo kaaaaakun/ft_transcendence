@@ -46,7 +46,7 @@ services:
       - ./reverseproxy/ssl/:/etc/ssl/
       - ./reverseproxy/nginx.conf:/etc/nginx/nginx.conf
       - vol_static_builder:/usr/share/nginx/html # vol_static_builderをマウント
-      - avatars_data:/var/www/data/avatars
+      - vol_avatars_data:/var/www/data/avatars
     networks:
       - net_pong
     depends_on:
@@ -68,7 +68,7 @@ services:
     networks:
       - net_pong
     volumes:
-      - avatars_data:/var/www/data/avatars
+      - vol_avatars_data:/var/www/data/avatars
     environment:
       DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME}
       DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL}
