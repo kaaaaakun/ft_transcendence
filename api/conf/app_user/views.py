@@ -1,7 +1,15 @@
+from rest_framework import viewsets
+from .models import User
+from django.db.models import Q
+from .utils import create_response, get_user_by_auth
 import random
+import traceback
+import os
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets
 from rest_framework import status
 from rest_framework.views import APIView
+from django.db import transaction, DatabaseError
 from django.views import View
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from django.http import JsonResponse
@@ -11,13 +19,21 @@ import json
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.views import APIView
+from django.conf import settings
+from django.core.files.storage import default_storage
+import requests
+from django.utils.timezone import now
+from rest_framework.response import Response
 from .serializers import (
     UserSerializer,
     UserLoginSerializer,
     PasswordResetRequestSerializer,
-    PasswordResetSerializer
+    PasswordResetSerializer,
+    UserUpdateSerializer,
 )
+from .exceptions import AuthError
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.views import exception_handler as drf_exception_handler
 
 class UserLoginView(APIView):
     def post(self, request, *args, **kwargs):
@@ -54,17 +70,11 @@ class UserView(APIView):
                     'error': 'Login name is required.'
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-            auth = request.headers.get('Authorization')
-
-            if auth:
-                access_token = auth.split(' ')[1]
-            if not access_token:
+            access_id = get_user_by_auth(request.headers.get('Authorization'))
+            if not access_id:
                 return JsonResponse({
                     'message': 'Login before you delete your account'
                 }, status=status.HTTP_401_UNAUTHORIZED)
-
-
-            access_id = AccessToken(access_token).get('user_id')
             user = User.objects.get(login_name=login_name)
             if (user.deleted_at is not None):
                 raise User.DoesNotExist
@@ -148,3 +158,122 @@ class UserPasswordResetView(APIView):
                     'error': 'Incorrect secret answer.'
                 }, status=status.HTTP_400_BAD_REQUEST)
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserProfileView(APIView):
+    def get_user_by_display_name(self, display_name):
+        user = User.objects.filter(display_name=display_name, deleted_at=None).first()
+        if not user:
+            raise User.DoesNotExist
+        return user
+
+    def get(self, request, display_name):
+        try:
+            access_id = get_user_by_auth(request.headers.get('Authorization'))
+            if not access_id:
+                raise AuthError('Authorization header is required.')
+
+            user = self.get_user_by_display_name(display_name)
+            data = create_response(user, access_id)
+            return JsonResponse(data)
+
+        except AuthError as auth_error:
+            return JsonResponse({
+                'errors': [{
+                    'field': 'Authorization',
+                    'message': str(auth_error)
+                }]
+            }, status=auth_error.status_code)
+
+        except User.DoesNotExist:
+            return JsonResponse({
+                'errors': [{
+                    'field': 'display_name',
+                    'message': 'User not found.'
+                }]
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception:
+            return JsonResponse({
+                'errors': [{
+                    'field': 'unknown',
+                    'message': 'An unexpected error occurred.'
+                }]
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class UpdateLastLoginView(APIView):
+
+    def post(self, request):
+        try:
+            access_id = get_user_by_auth(request.headers.get('Authorization'))
+            if not access_id:
+                raise AuthError('Authorization header is incorrect.')
+
+            user = User.objects.get(id=access_id)
+            if user.deleted_at is not None:
+                raise User.DoesNotExist
+            user.last_online_at = now()
+            user.save(update_fields=['last_online_at'])  # DB 更新
+            return Response({"message": "last_online_at updated"}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return JsonResponse({
+                'errors': [{
+                    'field': 'user',
+                    'message': 'User not found.'
+                }]
+            }, status=status.HTTP_404_NOT_FOUND)
+        except AuthError as auth_error:
+            return JsonResponse({
+                'errors': 'auth',
+                'message': str(auth_error)
+            }, status=auth_error.status_code)
+        except Exception as e:
+            return JsonResponse({
+                'errors': [{
+                    'field': 'unknown',
+                    'message': str(e)
+                }]
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class UserUpdateView(APIView):
+    def patch(self, request):
+        try:
+            access_id = get_user_by_auth(request.headers.get('Authorization'))
+            if not access_id:
+                raise AuthError('Authorization header is incorrect.')
+            user = User.objects.get(id=access_id)
+
+            serializer = UserUpdateSerializer(user, data=request.data, partial=True)
+
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            errors = [
+                {'field': field, 'message': msg[0]}
+                for field, msg in serializer.errors.items()
+            ]
+            return JsonResponse({
+                'errors': errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        except User.DoesNotExist:
+            return Response({
+                'errors': [{
+                    'field': 'user',
+                    'message': 'User not found.'
+                }]
+            }, status=status.HTTP_404_NOT_FOUND)
+        except AuthError as auth_error:
+            return Response({
+                'errors': [{
+                    'field': 'auth',
+                    'message': str(auth_error)
+                }]
+            }, status=auth_error.status_code)
+        except Exception as e:
+            return Response({
+                'errors': [{
+                    'field': 'unknown',
+                    'message': str(e)
+                }]
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
