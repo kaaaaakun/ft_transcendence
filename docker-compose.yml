@@ -113,5 +113,5 @@ volumes:
     name: "vol_rdbms"
   vol_static_builder:
     name: "vol_static_builder"
-  avatars_data:
-    name: "avatars_data"
+  vol_avatars_data:
+    name: "vol_avatars_data"

@@ -127,5 +127,5 @@ volumes:
   vol_rdbms:
     name: "vol_rdbms"
     
-  avatars_data:
-    name: "avatars_data"
+  vol_avatars_data:
+    name: "vol_avatars_data"
