@@ -116,11 +116,16 @@ export const FriendsTable = ({
     )
   }
   // 最大の長さを見つける
-  const maxLength = Math.max(friends.length, friendRequests.length)
+  const maxLength = Math.max(
+    Array.isArray(friends) ? friends.length : 0,
+    Array.isArray(friendRequests) ? friendRequests.length : 0,
+  )
 
   // 必要な数だけ空の要素で埋める配列を作成
-  const paddedFriends = [...friends]
-  const paddedRequests = [...friendRequests]
+  const paddedFriends = Array.isArray(friends) ? [...friends] : []
+  const paddedRequests = Array.isArray(friendRequests)
+    ? [...friendRequests]
+    : []
 
   // 足りない分を空の要素（null や空のオブジェクト）で埋める
   while (paddedFriends.length < maxLength) {
@@ -139,6 +144,20 @@ export const FriendsTable = ({
     })
   }
 
+  const friendRequestsTab = () => {
+    if (friendRequests === undefined) {
+      return null
+    }
+    return Teact.createElement(
+      'button',
+      {
+        className: `nav-link ${activeTab === 'requests' ? 'active' : ''}`,
+        onClick: () => setActiveTab('requests'),
+      },
+      'フレンド申請',
+    )
+  }
+
   return Teact.createElement(
     'div',
     { className: 'container mt-4' },
@@ -153,14 +172,7 @@ export const FriendsTable = ({
         },
         'フレンド一覧',
       ),
-      Teact.createElement(
-        'button',
-        {
-          className: `nav-link ${activeTab === 'requests' ? 'active' : ''}`,
-          onClick: () => setActiveTab('requests'),
-        },
-        'フレンド申請',
-      ),
+      friendRequestsTab(),
     ),
 
     Teact.createElement(

@@ -23,8 +23,9 @@ export const FriendsList = props => {
     // 友達リクエストの取得
     requests(props.params.id).then(data => {
       setFriendRequests(data)
+      setLoading(false)
     })
-  }, [props.params.id]) // propsのidが変わったら再度実行
+  }, [props.params.id, loading]) // propsのidが変わったら再度実行
 
   // APIデータ取得関数
   const friends = id =>
@@ -50,9 +51,12 @@ export const FriendsList = props => {
       .getFriendRequests({ display_name: id })
       .then(response => {
         if (!response.ok) {
-          return response.json().then(errData => {
-            throw new Error(errData.error || 'Unknown error occurred')
-          })
+          if (response.status !== 403) {
+            return response.json().then(errData => {
+              throw new Error(errData.error || 'Unknown error occurred')
+            })
+          }
+          return undefined
         }
         return response.json()
       })
@@ -76,6 +80,8 @@ export const FriendsList = props => {
       .then(data => {
         navigate(`users/${id}/friends`)
       })
+
+    setLoading(true)
   }
 
   const handleReject = friendId => {
@@ -90,6 +96,8 @@ export const FriendsList = props => {
       .then(data => {
         navigate(`users/${id}/friends`)
       })
+
+    setLoading(true)
   }
 
   // ローディング中の表示
@@ -116,17 +124,21 @@ export const FriendsList = props => {
   }
 
   return SimpleHeaderLayout(
-    ...banners,
     Teact.createElement(
       'div',
-      { className: 'container bg-white p-4 rounded shadow' },
-      Teact.createElement(FriendsTable, {
-        friends: friendsList,
-        userName: props.params.id,
-        friendRequests: friendRequests,
-        onAccept: handleAccept,
-        onReject: handleReject,
-      }),
+      { className: 'container' },
+      ...banners,
+      Teact.createElement(
+        'div',
+        { className: 'container bg-white p-4 rounded shadow' },
+        Teact.createElement(FriendsTable, {
+          friends: friendsList,
+          userName: props.params.id,
+          friendRequests: friendRequests,
+          onAccept: handleAccept,
+          onReject: handleReject,
+        }),
+      ),
     ),
   )
 }

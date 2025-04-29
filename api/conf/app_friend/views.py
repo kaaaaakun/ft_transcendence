@@ -24,8 +24,8 @@ class FriendRequestByNameView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, display_name, friend_name):
-        # if request.user.display_name != display_name:
-        #     return Response({'error': 'You are not authorized to access this resource.'}, status=status.HTTP_403_FORBIDDEN)
+        if request.user.display_name != display_name:
+            return Response({'error': 'You are not authorized to access this resource.'}, status=status.HTTP_403_FORBIDDEN)
         user = User.objects.filter(display_name=display_name).first()
         friend = User.objects.filter(display_name=friend_name).first()
         if not user or not friend:
@@ -48,8 +48,8 @@ class FriendRequestByNameView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, display_name, friend_name):
-        # if request.user.display_name != display_name:
-        #     return Response({'error': 'You are not authorized to access this resource.'}, status=status.HTTP_403_FORBIDDEN)
+        if request.user.display_name != display_name:
+            return Response({'error': 'You are not authorized to access this resource.'}, status=status.HTTP_403_FORBIDDEN)
         user = User.objects.filter(display_name=display_name).first()
         friend = User.objects.filter(display_name=friend_name).first()
         if not user or not friend:
@@ -63,6 +63,7 @@ class FriendRequestByNameView(APIView):
 
 
 class FriendRequestsListByNameView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, display_name):
         if request.user.display_name != display_name:
