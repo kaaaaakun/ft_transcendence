@@ -115,7 +115,7 @@ export const UserProfile = () => {
             : null,
         ),
       ),
-      Teact.createElement('p', null, `フレンド${userData.num_of_friends}人`),
+      Teact.createElement('p', null, `Friends: ${userData.num_of_friends}`),
     )
   }
 
