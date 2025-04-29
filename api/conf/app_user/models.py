@@ -15,7 +15,7 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser):
     id = models.AutoField(auto_created=True,primary_key=True)
     login_name = models.CharField(unique=True, max_length=20)
-    display_name = models.CharField(max_length=20)
+    display_name = models.CharField(unique=True, max_length=20)
     avatar_path = models.CharField(max_length=255, default=None, null=True)
     password = models.CharField(max_length=255)
     secret_question = models.CharField(max_length=255)
