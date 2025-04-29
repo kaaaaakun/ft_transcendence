@@ -115,7 +115,16 @@ export const UserProfile = () => {
             : null,
         ),
       ),
-      Teact.createElement('p', null, `Friends: ${userData.num_of_friends}`),
+      userData.display_name
+        ? Teact.createElement(
+            'a',
+            {
+              href: `/users/${userData.display_name}/friends`,
+              className: 'text-blue-500 hover:underline',
+            },
+            `Friends: ${userData.num_of_friends}`,
+          )
+        : Teact.createElement('p', null, `Friends: ${userData.num_of_friends}`),
     )
   }
 

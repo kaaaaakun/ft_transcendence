@@ -107,7 +107,6 @@ function deleteFriend(data) {
     })
 }
 
-
 export const userApi = {
   login,
   register,
