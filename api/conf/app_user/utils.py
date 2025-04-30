@@ -1,4 +1,5 @@
 from .models import User
+from friend.models import Friend
 from django.db.models import Q
 from match.models import Match, MatchDetail
 from rest_framework_simplejwt.tokens import AccessToken
@@ -29,7 +30,7 @@ def create_response(user, access_id):
   response = {
       'display_name': user.display_name,
       'avatar_path': user.avatar_path,
-      'num_of_friends': '3',
+      'num_of_friends': Friend.objects.filter(user_id=user.id, status='accepted').count(),
       'performance': {
           'game_records': game_records,
           'statistics': {
