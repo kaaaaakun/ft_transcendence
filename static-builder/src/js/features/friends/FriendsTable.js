@@ -15,7 +15,7 @@ export const FriendsTable = ({
       {
         className: `badge ${isOnline ? 'bg-success' : 'bg-secondary'} rounded-pill`,
       },
-      isOnline ? 'オンライン' : 'オフライン',
+      isOnline ? 'Online' : 'Offline',
     )
   }
 
@@ -30,12 +30,12 @@ export const FriendsTable = ({
       Teact.createElement(
         'tr',
         null,
-        Teact.createElement('th', null, '名前'),
+        Teact.createElement('th', null, 'Name'),
         activeTab === 'requests'
-          ? Teact.createElement('th', null, '申請日時')
-          : Teact.createElement('th', null, 'ステータス'),
+          ? Teact.createElement('th', null, 'Requested At')
+          : Teact.createElement('th', null, 'Status'),
         activeTab === 'requests'
-          ? Teact.createElement('th', null, 'アクション')
+          ? Teact.createElement('th', null, 'Action')
           : Teact.createElement('th', null, ''),
       ),
     )
@@ -63,7 +63,7 @@ export const FriendsTable = ({
           {
             className: 'badge bg-dark-subtle rounded-pill',
           },
-          'フレンド申請中',
+          'Waiting for Response',
         ),
       )
     }
@@ -76,7 +76,7 @@ export const FriendsTable = ({
           className: 'btn btn-success btn-sm me-2',
           onClick: () => onAccept(friend.requester_name),
         },
-        '承認',
+        'Accept',
       ),
       Teact.createElement(
         'button',
@@ -84,7 +84,7 @@ export const FriendsTable = ({
           className: 'btn btn-danger btn-sm',
           onClick: () => onReject(friend.requester_name),
         },
-        '拒否',
+        'Reject',
       ),
     )
   }
@@ -154,7 +154,7 @@ export const FriendsTable = ({
         className: `nav-link ${activeTab === 'requests' ? 'active' : ''}`,
         onClick: () => setActiveTab('requests'),
       },
-      'フレンド申請',
+      'Friend Request',
     )
   }
 
@@ -170,7 +170,7 @@ export const FriendsTable = ({
           className: `nav-link ${activeTab === 'list' ? 'active' : ''}`,
           onClick: () => setActiveTab('list'),
         },
-        'フレンド一覧',
+        'Friends List',
       ),
       friendRequestsTab(),
     ),
