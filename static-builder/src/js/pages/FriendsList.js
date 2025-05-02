@@ -17,6 +17,7 @@ export const FriendsList = props => {
     // 友達リストの取得
     friends(props.params.id).then(data => {
       setFriendsList(data)
+      setLoading(false)
     })
 
     // 友達リクエストの取得
