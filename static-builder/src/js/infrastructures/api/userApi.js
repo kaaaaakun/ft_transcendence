@@ -49,10 +49,24 @@ function deleteAccount(data) {
   })
 }
 
+function getProfile(displayName) {
+  return api.get(`/api/users/user/${displayName}`).then(response => {
+    return response
+  })
+}
+
+function changeProfile(data) {
+  return api.patch('/api/users/update/', data).then(response => {
+    return response
+  })
+}
+
 export const userApi = {
   login,
   register,
   passwordReset,
   getSecretQuestion,
   deleteAccount,
+  getProfile,
+  changeProfile,
 }

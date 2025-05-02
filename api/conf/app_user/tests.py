@@ -4,6 +4,7 @@ from django.contrib.auth.hashers import check_password
 from django.utils import timezone
 from datetime import timedelta
 from rest_framework import status
+import json
 from rest_framework.test import APIClient
 
 from .models import User
@@ -51,6 +52,14 @@ class UserAPITest(TestCase):
         self.user_data = {
             'login_name': 'apiuser',
             'display_name': 'API User',
+            'password': 'password123',
+            'secret_question': 'What is your pet name?',
+            'secret_answer': 'fluffy'
+        }
+
+        self.sub_user_data = {
+            'login_name': 'subuser',
+            'display_name': 'Sub User',
             'password': 'password123',
             'secret_question': 'What is your pet name?',
             'secret_answer': 'fluffy'
@@ -106,3 +115,89 @@ class UserAPITest(TestCase):
 
         user.refresh_from_db()
         self.assertIsNotNone(user.deleted_at)
+
+    def test_get_profile(self):
+        """ユーザープロフィール取得APIが正しく機能することをテスト"""
+
+        user = User.objects.create_user(**self.user_data)
+        sub_user = User.objects.create_user(**self.sub_user_data)
+
+
+        response = self.client.post(
+            reverse('login'),
+            {'login_name': 'apiuser', 'password': 'password123'},
+            format='json'
+        )
+        token = response.json()['access_token']
+
+
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        response = self.client.get(
+            reverse('profile', kwargs={'display_name': 'API User'}),
+            format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = json.loads(response.content)
+        self.assertEqual(data['display_name'], 'API User')
+        self.assertEqual(data['login_name'], 'apiuser')
+        response = self.client.get(
+            reverse('profile', kwargs={'display_name': 'Sub User'}),
+            format='json'
+        )
+        data = json.loads(response.content)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(data['display_name'], 'Sub User')
+        self.assertNotIn('login_name', data)
+
+    def test_update_profile(self):
+        """ユーザープロフィール更新APIが正しく機能することをテスト"""
+
+        user = User.objects.create_user(**self.user_data)
+
+
+        response = self.client.post(
+            reverse('login'),
+            {'login_name': 'apiuser', 'password': 'password123'},
+            format='json'
+        )
+        token = response.json()['access_token']
+
+
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        response = self.client.patch(
+            reverse('user_update'),
+            {'display_name': 'Updated User'},
+            format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        user.refresh_from_db()
+        self.assertEqual(user.display_name, 'Updated User')
+
+def test_update_last_online_at(self):
+    """last_online_at を更新するAPIが正しく動作することをテスト"""
+
+    user = User.objects.create_user(**self.user_data)
+
+    # ログインしてトークンを取得
+    response = self.client.post(
+        reverse('login'),
+        {'login_name': 'apiuser', 'password': 'password123'},
+        format='json'
+    )
+    token = response.json()['access_token']
+
+    # トークン付きでlast_online_at更新APIを呼び出す
+    self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+    response = self.client.post(
+        reverse('update_last_login'),
+        format='json'
+    )
+
+    self.assertEqual(response.status_code, status.HTTP_200_OK)
+    data = json.loads(response.content)
+    self.assertEqual(data['message'], 'last_online_at updated')
+
+    user.refresh_from_db()
+    self.assertIsNotNone(user.last_online_at)
