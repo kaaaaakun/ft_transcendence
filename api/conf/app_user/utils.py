@@ -16,12 +16,12 @@ def get_opponent_user_and_score(match_id, user_id):
 def get_relation_to_current_user(user_id, access_id):
   if user_id == access_id:
     return 'self'
-  if Friend.objects.filter(user_id=user_id, status='accepted').exists():
+  if Friend.objects.filter(user_id=user_id, friend_id=access_id, status='accepted').exists():
     return 'friend'
-  if Friend.objects.filter(user_id=user_id, status='pending').exists():
-    return 'request_received'
-  if Friend.objects.filter( friend_id=user_id, status='pending').exists():
+  if Friend.objects.filter(user_id=access_id, friend_id=user_id, status='pending').exists():
     return 'requesting'
+  if Friend.objects.filter(user_id=user_id, friend_id=access_id, status='pending').exists():
+    return 'request_received'
   return 'stranger'
 
 def create_response(user, access_id):

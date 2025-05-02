@@ -17,7 +17,6 @@ export const FriendsList = props => {
     // 友達リストの取得
     friends(props.params.id).then(data => {
       setFriendsList(data)
-      setLoading(false)
     })
 
     // 友達リクエストの取得
@@ -71,7 +70,6 @@ export const FriendsList = props => {
   const handleAccept = friendId => {
     userApi
       .acceptFriendRequest({
-        user_name: props.params.id,
         friend_name: friendId,
       })
       .then(() => {
@@ -87,7 +85,6 @@ export const FriendsList = props => {
   const handleReject = friendId => {
     userApi
       .deleteFriend({
-        user_name: props.params.id,
         friend_name: friendId,
       })
       .then(() => {

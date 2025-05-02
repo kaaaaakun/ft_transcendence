@@ -3,13 +3,132 @@ import { useBanner } from '@/js/hooks/useBanner'
 import { userApi } from '@/js/infrastructures/api/userApi'
 import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { Teact } from '@/js/libs/teact'
+import { useNavigate } from '@/js/libs/router'
 
 export const UserProfile = () => {
-  const { showInfoBanner, showWarningBanner, showErrorBanner, banners } =
-    useBanner()
+  const { showInfoBanner, showErrorBanner, banners } = useBanner()
+  const navigate = useNavigate()
   const [isEditing, setIsEditing] = Teact.useState(false)
   const [userData, setUserData] = Teact.useState(null)
   let changeUserName = ''
+
+  const onAccept = friendId => {
+    userApi
+      .acceptFriendRequest({
+        friend_name: friendId,
+      })
+      .then(response => {
+        if (!response.ok) {
+          if (response.status === 401) {
+            showErrorBanner({
+              message: 'Failed to accept request: Unauthorized',
+              onClose: () => {},
+            })
+          } else {
+            throw new Error('Failed to accept request')
+          }
+        }
+      })
+      .then(data => {
+        showInfoBanner({
+          message: 'Successfully updated',
+          onClose: () => {},
+        })
+        setUserData(prevUserData => ({
+          ...prevUserData,
+          relation_to_current_user: 'friend',
+          num_of_friends: prevUserData.num_of_friends + 1,
+        }))
+      })
+  }
+
+  const onRequest = friendId => {
+    userApi
+      .friendRequest({
+        friend_name: friendId,
+      })
+      .then(response => {
+        if (!response.ok) {
+          if (response.status === 401) {
+            showErrorBanner({
+              message: 'Failed to send request: Unauthorized',
+              onClose: () => {},
+            })
+          } else {
+            throw new Error('Failed to send friend request')
+          }
+        }
+      })
+      .then(data => {
+        showInfoBanner({
+          message: 'Successfully updated',
+          onClose: () => {},
+        })
+        setUserData(prevUserData => ({
+          ...prevUserData,
+          relation_to_current_user: 'requesting',
+        }))
+      })
+  }
+
+  const onReject = friendId => {
+    userApi
+      .rejectFriendRequest({
+        friend_name: friendId,
+      })
+      .then(response => {
+        if (!response.ok) {
+          if (response.status === 401) {
+            showErrorBanner({
+              message: 'Failed to reject request: Unauthorized',
+              onClose: () => {},
+            })
+          } else {
+            throw new Error('Failed to reject request')
+          }
+        }
+      })
+      .then(data => {
+        showInfoBanner({
+          message: 'Successfully updated',
+          onClose: () => {},
+        })
+        setUserData(prevUserData => ({
+          ...prevUserData,
+          relation_to_current_user: 'stranger',
+        }))
+      })
+  }
+
+  const onDelete = friendId => {
+    userApi
+      .deleteFriend({
+        friend_name: friendId,
+      })
+      .then(response => {
+        if (!response.ok) {
+          if (response.status === 401) {
+            showErrorBanner({
+              message: 'Failed to reject request: Unauthorized',
+              onClose: () => {},
+            })
+          } else {
+            throw new Error('Failed to reject request')
+          }
+        }
+      })
+      .then(data => {
+        showInfoBanner({
+          message: 'Successfully updated',
+          onClose: () => {},
+        })
+        setUserData(prevUserData => ({
+          ...prevUserData,
+          relation_to_current_user: 'stranger',
+          num_of_friends: prevUserData.num_of_friends - 1,
+        }))
+      })
+  }
 
   const handleAvatarChange = async event => {
     event.preventDefault()
@@ -282,21 +401,52 @@ export const UserProfile = () => {
     if (relation === 'friend')
       return Teact.createElement(
         'button',
-        { className: 'btn btn-danger btn-sm ms-3' },
+        {
+          className: 'btn btn-danger btn-sm ms-3',
+          onClick: () => onDelete(userData.display_name),
+        },
         'Unfriend',
       )
     if (relation === 'requesting')
       return Teact.createElement(
         'button',
-        { className: 'btn btn-info btn-sm ms-3' },
+        {
+          className: 'btn btn-info btn-sm ms-3',
+          onClick: () => onReject(userData.display_name),
+        },
         'Cancel Request Friend',
       )
     if (relation === 'request_received')
       return Teact.createElement(
-        'button',
-        { className: 'btn btn-success btn-sm ms-3' },
-        'Accept',
+        'div',
+        null,
+        Teact.createElement(
+          'button',
+          {
+            className: 'btn btn-success btn-sm ms-3',
+            onClick: () => onAccept(userData.display_name),
+          },
+          'Accept Request',
+        ),
+        Teact.createElement(
+          'button',
+          {
+            className: 'btn btn-danger btn-sm ms-3',
+            onClick: () => onReject(userData.display_name),
+          },
+          'Reject Request',
+        ),
       )
+    if (relation === 'stranger')
+      return Teact.createElement(
+        'button',
+        {
+          className: 'btn btn-primary btn-sm ms-3',
+          onClick: () => onRequest(userData.display_name),
+        },
+        'Request Friend',
+      )
+    return null
   }
 
   return HeaderWithTitleLayout(

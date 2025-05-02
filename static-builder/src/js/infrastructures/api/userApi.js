@@ -76,35 +76,27 @@ function getFriendRequests(data) {
 }
 
 function friendRequest(data) {
-  return api
-    .post(`/api/users/${data.user_name}/friends/${data.friend_name}`)
-    .then(response => {
-      return response
-    })
+  return api.post(`/api/users/friends/${data.friend_name}`).then(response => {
+    return response
+  })
 }
 
 function acceptFriendRequest(data) {
-  return api
-    .post(`/api/users/${data.user_name}/friends/${data.friend_name}`)
-    .then(response => {
-      return response
-    })
+  return api.post(`/api/users/friends/${data.friend_name}`).then(response => {
+    return response
+  })
 }
 
 function rejectFriendRequest(data) {
-  return api
-    .delete(`/api/users/${data.user_name}/friends/${data.friend_name}`)
-    .then(response => {
-      return response
-    })
+  return api.delete(`/api/users/friends/${data.friend_name}`).then(response => {
+    return response
+  })
 }
 
 function deleteFriend(data) {
-  return api
-    .delete(`/api/users/${data.user_name}/friends/${data.friend_name}`)
-    .then(response => {
-      return response
-    })
+  return api.delete(`/api/users/friends/${data.friend_name}`).then(response => {
+    return response
+  })
 }
 
 export const userApi = {
