@@ -11,7 +11,6 @@ export const UserProfile = props => {
   const [isEditing, setIsEditing] = Teact.useState(false)
   const [userData, setUserData] = Teact.useState(null)
   let changeUserName = ''
-  console.log(props.params.username)
   const onAccept = friendId => {
     userApi
       .acceptFriendRequest({
@@ -152,7 +151,6 @@ export const UserProfile = props => {
         }
       }
       const data = await response.json()
-      console.log('Avatar uploaded successfully:', data)
       setUserData(prevUserData => ({
         ...prevUserData,
         avatar_path: data.avatar_url,
@@ -182,7 +180,6 @@ export const UserProfile = props => {
           })
         } else if (response.status === 400) {
           const data = await response.json()
-          console.log(data)
           showErrorBanner({
             message: data.errors[0].message,
             onClose: () => {},
@@ -375,7 +372,6 @@ export const UserProfile = props => {
         throw new Error('Unknown error occurred')
       })
       .then(data => {
-        console.log(data)
         if (data) {
           setUserData(data)
         }

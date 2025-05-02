@@ -92,7 +92,6 @@ export const Header = () => {
         return response.json()
       })
       .then(data => {
-        console.log(data)
         setUser(data)
       })
       .catch(error => {
