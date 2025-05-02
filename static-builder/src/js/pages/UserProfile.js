@@ -5,13 +5,13 @@ import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { Teact } from '@/js/libs/teact'
 import { useNavigate } from '@/js/libs/router'
 
-export const UserProfile = () => {
+export const UserProfile = props => {
   const { showInfoBanner, showErrorBanner, banners } = useBanner()
   const navigate = useNavigate()
   const [isEditing, setIsEditing] = Teact.useState(false)
   const [userData, setUserData] = Teact.useState(null)
   let changeUserName = ''
-
+  console.log(props.params.username)
   const onAccept = friendId => {
     userApi
       .acceptFriendRequest({
@@ -351,7 +351,7 @@ export const UserProfile = () => {
   }
 
   Teact.useEffect(() => {
-    const userName = window.location.pathname.split('/').filter(Boolean).pop()
+    const userName = props.params.username
     userApi
       .getProfile(userName)
       .then(response => {
@@ -386,7 +386,7 @@ export const UserProfile = () => {
           onClose: () => {},
         }),
       )
-  }, [])
+  }, [props.params.username])
 
   if (!userData) {
     return HeaderWithTitleLayout(

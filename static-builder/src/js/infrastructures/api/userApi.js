@@ -99,12 +99,19 @@ function deleteFriend(data) {
   })
 }
 
+function getCurrentUser() {
+  return api.get('/api/auth/current-user/').then(response => {
+    return response
+  })
+}
+
 export const userApi = {
   login,
   register,
   passwordReset,
   getSecretQuestion,
   deleteAccount,
+  getCurrentUser,
 
   getProfile,
   changeProfile,
