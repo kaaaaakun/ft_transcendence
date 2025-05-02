@@ -206,9 +206,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/error_response"
 
-  /api/users/{display_name}/friends/{friend_name}:
+  /api/users/friends/{friend_name}:
     parameters:
-      - $ref: "#/components/parameters/display_name"
       - $ref: "#/components/parameters/friend_name"
     post:
       tags:
