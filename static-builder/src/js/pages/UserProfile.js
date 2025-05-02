@@ -256,6 +256,7 @@ export const UserProfile = () => {
         throw new Error('Unknown error occurred')
       })
       .then(data => {
+        console.log(data)
         if (data) {
           setUserData(data)
         }
@@ -275,6 +276,29 @@ export const UserProfile = () => {
     )
   }
 
+  const friendButton = () => {
+    const relation = userData.relation_to_current_user
+    if (relation === 'self') return null
+    if (relation === 'friend')
+      return Teact.createElement(
+        'button',
+        { className: 'btn btn-danger btn-sm ms-3' },
+        'Unfriend',
+      )
+    if (relation === 'requesting')
+      return Teact.createElement(
+        'button',
+        { className: 'btn btn-info btn-sm ms-3' },
+        'Cancel Request Friend',
+      )
+    if (relation === 'request_received')
+      return Teact.createElement(
+        'button',
+        { className: 'btn btn-success btn-sm ms-3' },
+        'Accept',
+      )
+  }
+
   return HeaderWithTitleLayout(
     Teact.createElement(
       'div',
@@ -288,6 +312,7 @@ export const UserProfile = () => {
           { className: 'd-flex align-items-center' },
           renderAvatarSection(),
           renderProfileSection(),
+          friendButton(),
         ),
         Teact.createElement(
           'div',

@@ -13,6 +13,17 @@ def get_opponent_user_and_score(match_id, user_id):
       return User.objects.get(id=match_detail.player_id.id), match_detail.score
   return None
 
+def get_relation_to_current_user(user_id, access_id):
+  if user_id == access_id:
+    return 'self'
+  if Friend.objects.filter(user_id=user_id, status='accepted').exists():
+    return 'friend'
+  if Friend.objects.filter(user_id=user_id, status='pending').exists():
+    return 'request_received'
+  if Friend.objects.filter( friend_id=user_id, status='pending').exists():
+    return 'requesting'
+  return 'stranger'
+
 def create_response(user, access_id):
   match_details = MatchDetail.objects.filter(player_id_id=user.id)
   game_records = []
@@ -31,6 +42,7 @@ def create_response(user, access_id):
       'display_name': user.display_name,
       'avatar_path': user.avatar_path,
       'num_of_friends': Friend.objects.filter(user_id=user.id, status='accepted').count(),
+      'relation_to_current_user': get_relation_to_current_user(user.id, access_id),
       'performance': {
           'game_records': game_records,
           'statistics': {

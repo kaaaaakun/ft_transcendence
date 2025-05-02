@@ -41,13 +41,25 @@ export const FriendsTable = ({
     )
   }
   const name = friend => {
-    if (activeTab === 'list') {
-      return friend.friend_name
+    const displayName =
+      activeTab === 'list'
+        ? friend.friend_name
+        : friend.requester_name === userName
+          ? friend.requestee_name
+          : friend.requester_name
+
+    if (!displayName) {
+      return ''
     }
-    if (friend.requester_name === userName) {
-      return friend.requestee_name
-    }
-    return friend.requester_name
+
+    return Teact.createElement(
+      'a',
+      {
+        href: `/users/${displayName}`,
+        className: 'text-decoration-none',
+      },
+      displayName,
+    )
   }
 
   const requestAction = friend => {
