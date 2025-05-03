@@ -24,7 +24,6 @@ class RoomKey:
     @staticmethod
     def increment_entry_count(redis_client: redis.Redis, room_type: str, table_id: int) -> int:
         key = RoomKey.generate_key(room_type, table_id)
-        # Check if the increment is acceptale
         type_bytes = redis_client.hget(key, "type")
         entry_count_bytes = redis_client.hget(key, "entry_count")
         if type_bytes is None or entry_count_bytes is None:
