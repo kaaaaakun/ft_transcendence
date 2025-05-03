@@ -1,4 +1,5 @@
 from .models import User
+from friend.models import Friend
 from django.db.models import Q
 from match.models import Match, MatchDetail
 from rest_framework_simplejwt.tokens import AccessToken
@@ -11,6 +12,17 @@ def get_opponent_user_and_score(match_id, user_id):
     if match_detail.player_id.id != user_id:
       return User.objects.get(id=match_detail.player_id.id), match_detail.score
   return None
+
+def get_relation_to_current_user(user_id, access_id):
+  if user_id == access_id:
+    return 'self'
+  if Friend.objects.filter(user_id=user_id, friend_id=access_id, status='accepted').exists():
+    return 'friend'
+  if Friend.objects.filter(user_id=access_id, friend_id=user_id, status='pending').exists():
+    return 'requesting'
+  if Friend.objects.filter(user_id=user_id, friend_id=access_id, status='pending').exists():
+    return 'request_received'
+  return 'stranger'
 
 def create_response(user, access_id):
   match_details = MatchDetail.objects.filter(player_id_id=user.id)
@@ -29,7 +41,8 @@ def create_response(user, access_id):
   response = {
       'display_name': user.display_name,
       'avatar_path': user.avatar_path,
-      'num_of_friends': '3',
+      'num_of_friends': Friend.objects.filter(user_id=user.id, status='accepted').count(),
+      'relation_to_current_user': get_relation_to_current_user(user.id, access_id),
       'performance': {
           'game_records': game_records,
           'statistics': {

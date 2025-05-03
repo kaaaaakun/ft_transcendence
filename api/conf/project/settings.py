@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'tournament',
     'match',
     'user',
+    'friend',
 
     # 3rd party
     'rest_framework',
