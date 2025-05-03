@@ -30,9 +30,15 @@ class User(AbstractBaseUser):
     password = models.CharField(max_length=255)
     secret_question = models.CharField(max_length=255)
     secret_answer = models.CharField(max_length=255)
-    last_online_at = models.DateTimeField(default=None, null=True)
+    last_online_at = models.DateTimeField(default=timezone.now, null=True)
     deleted_at = models.DateTimeField(default=None, null=True)
     is_active = models.BooleanField(default=True)
+    friends = models.ManyToManyField(
+        'self',
+        through='friend.Friend',
+        symmetrical=False,
+        related_name='friend_of',
+    )
 
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)

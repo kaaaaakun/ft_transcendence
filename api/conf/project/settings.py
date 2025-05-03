@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'match',
     'user',
     'room',
+    'friend',
 
     # 3rd party
     'rest_framework',
