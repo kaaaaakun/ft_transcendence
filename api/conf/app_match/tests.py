@@ -1,8 +1,10 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
-from user.models import User
 from .models import Match, MatchDetail
+from user.models import User
+from user.tests import create_test_user_4, create_test_user_8
+from tournament.models import Tournament, TournamentPlayer
 from tournament.tests import create_test_tournament_4, create_test_tournament_8
 
 from django.urls import reverse
@@ -22,6 +24,14 @@ def create_test_match_tournament_8():
 
 def create_test_match_simple():
     return Match.objects.create()
+
+def create_test_match_detail_simple():
+    match = create_test_match_simple()
+    users = create_test_user_4()
+    match_details = []
+    match_details.append(MatchDetail.create(match, users[0]))
+    match_details.append(MatchDetail.create(match, users[1]))
+    return match_details
 
 #--------------
 # Test cases for Match model
@@ -54,3 +64,13 @@ class MatchTestCase(TestCase):
         match = create_test_match_tournament_4()
         match = Match.update_tx_status(match, 'success')
         self.assertEqual(match.tx_status, 'success')
+
+class MatchDetailTestCase(TestCase):
+    def test_create_match_detail(self):
+        matchDetails = create_test_match_detail_simple()
+        self.assertEqual(len(matchDetails), 2)
+        self.assertIsInstance(matchDetails[0], MatchDetail)
+        self.assertEqual(matchDetails[0].match.id, matchDetails[1].match.id)
+        self.assertEqual(matchDetails[0].user.id, 1)
+        self.assertEqual(matchDetails[1].user.id, 2)
+        self.assertEqual(matchDetails[0].score, 0)

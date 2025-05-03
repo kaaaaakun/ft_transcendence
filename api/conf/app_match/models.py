@@ -69,6 +69,6 @@ class MatchDetail(models.Model):
         if match.is_finished:
             raise ValueError("Cannot create a match detail for a finished match.")
         return cls.objects.create(
-            match_id = match,
-            user_id = user,
+            match = match,
+            user = user,
         )
