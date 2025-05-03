@@ -53,7 +53,7 @@ const renderAvatarSection = avatar_path => {
         Teact.createElement('img', {
           src: `${avatar_path}?${new Date().getTime()}`,
           className: 'img-fluid profile-icon',
-          alt: 'Avator',
+          alt: 'Avatar',
           width: '10',
           height: '10',
         }),
