@@ -58,6 +58,7 @@ services:
         condition: service_completed_successfully
 
   api:
+    image: api
     build:
       context: .
       dockerfile: api/Dockerfile
@@ -106,6 +107,7 @@ services:
 
 networks:
   net_pong:
+    driver: bridge
     name: "net_pong"
 
 volumes:

@@ -121,6 +121,7 @@ services:
 
 networks:
   net_pong:
+    driver: bridge
     name: "net_pong"
 
 volumes:
