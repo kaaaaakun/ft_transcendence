@@ -277,3 +277,35 @@ class UserUpdateView(APIView):
                     'message': str(e)
                 }]
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class UserCurrentView(APIView):
+    def get(self, request):
+        try:
+            access_id = get_user_by_auth(request.headers.get('Authorization'))
+            if not access_id:
+                raise AuthError('Authorization header is incorrect.')
+            user = User.objects.get(id=access_id)
+            data = create_response(user, access_id)
+            return JsonResponse(data)
+        except AuthError as auth_error:
+            return JsonResponse({
+                'errors': [{
+                    'field': 'auth',
+                    'message': str(auth_error)
+                }]
+            }, status=auth_error.status_code)
+        except User.DoesNotExist:
+            return JsonResponse({
+                'errors': [{
+                    'field': 'user',
+                    'message': 'User not found.'
+                }]
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return JsonResponse({
+                'errors': [{
+                    'field': 'unknown',
+                    'message': str(e)
+                }]
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

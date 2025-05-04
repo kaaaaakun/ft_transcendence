@@ -3,13 +3,131 @@ import { useBanner } from '@/js/hooks/useBanner'
 import { userApi } from '@/js/infrastructures/api/userApi'
 import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { Teact } from '@/js/libs/teact'
+import { useNavigate } from '@/js/libs/router'
 
-export const UserProfile = () => {
-  const { showInfoBanner, showWarningBanner, showErrorBanner, banners } =
-    useBanner()
+export const UserProfile = props => {
+  const { showInfoBanner, showErrorBanner, banners } = useBanner()
+  const navigate = useNavigate()
   const [isEditing, setIsEditing] = Teact.useState(false)
   const [userData, setUserData] = Teact.useState(null)
   let changeUserName = ''
+  const onAccept = friendId => {
+    userApi
+      .acceptFriendRequest({
+        friend_name: friendId,
+      })
+      .then(response => {
+        if (!response.ok) {
+          if (response.status === 401) {
+            showErrorBanner({
+              message: 'Failed to accept request: Unauthorized',
+              onClose: () => {},
+            })
+          } else {
+            throw new Error('Failed to accept request')
+          }
+        }
+      })
+      .then(data => {
+        showInfoBanner({
+          message: 'Successfully updated',
+          onClose: () => {},
+        })
+        setUserData(prevUserData => ({
+          ...prevUserData,
+          relation_to_current_user: 'friend',
+          num_of_friends: prevUserData.num_of_friends + 1,
+        }))
+      })
+  }
+
+  const onRequest = friendId => {
+    userApi
+      .friendRequest({
+        friend_name: friendId,
+      })
+      .then(response => {
+        if (!response.ok) {
+          if (response.status === 401) {
+            showErrorBanner({
+              message: 'Failed to send request: Unauthorized',
+              onClose: () => {},
+            })
+          } else {
+            throw new Error('Failed to send friend request')
+          }
+        }
+      })
+      .then(data => {
+        showInfoBanner({
+          message: 'Successfully updated',
+          onClose: () => {},
+        })
+        setUserData(prevUserData => ({
+          ...prevUserData,
+          relation_to_current_user: 'requesting',
+        }))
+      })
+  }
+
+  const onReject = friendId => {
+    userApi
+      .rejectFriendRequest({
+        friend_name: friendId,
+      })
+      .then(response => {
+        if (!response.ok) {
+          if (response.status === 401) {
+            showErrorBanner({
+              message: 'Failed to reject request: Unauthorized',
+              onClose: () => {},
+            })
+          } else {
+            throw new Error('Failed to reject request')
+          }
+        }
+      })
+      .then(data => {
+        showInfoBanner({
+          message: 'Successfully updated',
+          onClose: () => {},
+        })
+        setUserData(prevUserData => ({
+          ...prevUserData,
+          relation_to_current_user: 'stranger',
+        }))
+      })
+  }
+
+  const onDelete = friendId => {
+    userApi
+      .deleteFriend({
+        friend_name: friendId,
+      })
+      .then(response => {
+        if (!response.ok) {
+          if (response.status === 401) {
+            showErrorBanner({
+              message: 'Failed to reject request: Unauthorized',
+              onClose: () => {},
+            })
+          } else {
+            throw new Error('Failed to reject request')
+          }
+        }
+      })
+      .then(data => {
+        showInfoBanner({
+          message: 'Successfully updated',
+          onClose: () => {},
+        })
+        setUserData(prevUserData => ({
+          ...prevUserData,
+          relation_to_current_user: 'stranger',
+          num_of_friends: prevUserData.num_of_friends - 1,
+        }))
+      })
+  }
 
   const handleAvatarChange = async event => {
     event.preventDefault()
@@ -33,7 +151,6 @@ export const UserProfile = () => {
         }
       }
       const data = await response.json()
-      console.log('Avatar uploaded successfully:', data)
       setUserData(prevUserData => ({
         ...prevUserData,
         avatar_path: data.avatar_url,
@@ -63,7 +180,6 @@ export const UserProfile = () => {
           })
         } else if (response.status === 400) {
           const data = await response.json()
-          console.log(data)
           showErrorBanner({
             message: data.errors[0].message,
             onClose: () => {},
@@ -115,7 +231,16 @@ export const UserProfile = () => {
             : null,
         ),
       ),
-      Teact.createElement('p', null, `Friends: ${userData.num_of_friends}`),
+      userData.display_name
+        ? Teact.createElement(
+            'a',
+            {
+              href: `/users/${userData.display_name}/friends`,
+              className: 'text-blue-500 hover:underline',
+            },
+            `Friends: ${userData.num_of_friends}`,
+          )
+        : Teact.createElement('p', null, `Friends: ${userData.num_of_friends}`),
     )
   }
 
@@ -223,7 +348,7 @@ export const UserProfile = () => {
   }
 
   Teact.useEffect(() => {
-    const userName = window.location.pathname.split('/').filter(Boolean).pop()
+    const userName = props.params.username
     userApi
       .getProfile(userName)
       .then(response => {
@@ -257,13 +382,67 @@ export const UserProfile = () => {
           onClose: () => {},
         }),
       )
-  }, [])
+  }, [props.params.username])
 
   if (!userData) {
     return HeaderWithTitleLayout(
       ...banners,
       Teact.createElement('p', null, 'Loading...'),
     )
+  }
+
+  const friendButton = () => {
+    const relation = userData.relation_to_current_user
+    if (relation === 'self') return null
+    if (relation === 'friend')
+      return Teact.createElement(
+        'button',
+        {
+          className: 'btn btn-danger btn-sm ms-3',
+          onClick: () => onDelete(userData.display_name),
+        },
+        'Unfriend',
+      )
+    if (relation === 'requesting')
+      return Teact.createElement(
+        'button',
+        {
+          className: 'btn btn-info btn-sm ms-3',
+          onClick: () => onReject(userData.display_name),
+        },
+        'Cancel Request Friend',
+      )
+    if (relation === 'request_received')
+      return Teact.createElement(
+        'div',
+        null,
+        Teact.createElement(
+          'button',
+          {
+            className: 'btn btn-success btn-sm ms-3',
+            onClick: () => onAccept(userData.display_name),
+          },
+          'Accept Request',
+        ),
+        Teact.createElement(
+          'button',
+          {
+            className: 'btn btn-danger btn-sm ms-3',
+            onClick: () => onReject(userData.display_name),
+          },
+          'Reject Request',
+        ),
+      )
+    if (relation === 'stranger')
+      return Teact.createElement(
+        'button',
+        {
+          className: 'btn btn-primary btn-sm ms-3',
+          onClick: () => onRequest(userData.display_name),
+        },
+        'Request Friend',
+      )
+    return null
   }
 
   return HeaderWithTitleLayout(
@@ -279,6 +458,7 @@ export const UserProfile = () => {
           { className: 'd-flex align-items-center' },
           renderAvatarSection(),
           renderProfileSection(),
+          friendButton(),
         ),
         Teact.createElement(
           'div',
