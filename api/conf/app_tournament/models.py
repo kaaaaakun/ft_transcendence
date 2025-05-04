@@ -1,59 +1,55 @@
 from django.db import models
 from django.db.models import F
+from user.models import User
 
-from player.models import Player
+TOURNAMENT_TYPE_CHOICES = [
+    (4, 4),
+    (8, 8),
+]
 
 class Tournament(models.Model):
-    num_of_player = models.IntegerField()
-    status = models.CharField(max_length=10)
+    type = models.IntegerField(
+        choices = TOURNAMENT_TYPE_CHOICES
+    )
+    is_finished = models.BooleanField(default = False)
 
     class Meta:
         db_table = 'tournaments'
 
     @classmethod
-    def create(cls, data):
-        return cls.objects.create(num_of_player = data['num_of_player'], status = data['status'])
+    def create(cls, type):
+        return cls.objects.create(type = type)
 
     @classmethod
-    def update_status(cls, tournament_id, status):
-        cls.objects.filter(id=tournament_id).update(status=status)
+    def update_status(cls, tournament):
+        if tournament.is_finished:
+            raise ValueError("Cannot update status for a finished tournament.")
+        tournament.is_finished = True
+        tournament.save()
 
-    @classmethod
-    def is_round_end(cls, tournament_id):
-        tournament_players = TournamentPlayer.objects.filter(tournament_id = tournament_id)
-        if tournament_players.filter(status = 'await').exists():
-            return False
-        return True
-
-
-# 外部キーを利用する。
-# Ref: https://blog.css-net.co.jp/entry/2023/05/24/105218 (基本, 引数の意味)
-# Ref: https://qiita.com/taiyaki/items/a2bed64395c7af530dfb (別のアプリからの参照)
 class TournamentPlayer(models.Model):
-    tournament_id = models.ForeignKey(Tournament, on_delete=models.CASCADE)
-    player_id = models.ForeignKey(Player, on_delete=models.CASCADE)
-    victory_count = models.IntegerField()
-    status = models.CharField(max_length=10)
+    tournament = models.ForeignKey(Tournament, on_delete = models.CASCADE)
+    user = models.ForeignKey(User, on_delete = models.CASCADE)
+    entry_number = models.IntegerField()
+    round = models.IntegerField(default = 1)
 
     class Meta:
         db_table = 'tournament_players'
+        constraints = [
+            models.UniqueConstraint(fields = ['tournament', 'user'], name = 'unique_tournament_user')
+        ]
 
     @classmethod
-    def create_players(cls, valid_data):
-        players = []
-        for data in valid_data:
-            players.append(cls.objects.create(
-                tournament_id = data['tournament_id'], 
-                player_id = data['player_id'],
-                victory_count = data['victory_count'],
-                status = data['status'])
-            )
-        return players
-    
-    @classmethod
-    def update_status(cls, tournamentplayer_id, player_id, status):
-        cls.objects.filter(id = tournamentplayer_id, player_id = player_id).update(status = status)
+    def create_tournament_players(cls, tournament, users):
+        if tournament.is_finished:
+            raise ValueError("Cannot create a tournament player for a finished tournament.")
+        if len(users) != tournament.type:
+            raise ValueError("Number of users must match the tournament type.")
+        for i, user in enumerate(users):
+            entry_number = i
+            cls.objects.create(tournament = tournament, user = user, entry_number = entry_number)
+        return cls.objects.filter(tournament = tournament)
 
     @classmethod
-    def increment_victory_count(cls, tournamentplayer_id, player_id):
-        cls.objects.filter(id = tournamentplayer_id, player_id = player_id).update(victory_count = F('victory_count') + 1)
+    def increment_round(cls, tournament, user):
+        cls.objects.filter(tournament = tournament, user = user).update(round = F('round') + 1)

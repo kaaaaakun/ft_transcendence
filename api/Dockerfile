@@ -42,18 +42,18 @@ RUN django-admin startproject ${DJANGO_PROJECT_NAME}
 
 # Create Django apps
 WORKDIR ${DJANGO_PROJECT_DIR}
-RUN python manage.py startapp player
 RUN python manage.py startapp tournament
 RUN python manage.py startapp match
 RUN python manage.py startapp user
+RUN python manage.py startapp room
 RUN python manage.py startapp friend
 
 # project, appsのファイルをコピー
 COPY ./api/conf/project/* ${DJANGO_PROJECT_DIR}${DJANGO_PROJECT_NAME}/
-COPY ./api/conf/app_player/* ${DJANGO_PROJECT_DIR}player/
 COPY ./api/conf/app_tournament/* ${DJANGO_PROJECT_DIR}tournament/
 COPY ./api/conf/app_match/* ${DJANGO_PROJECT_DIR}match/
-COPY ./api/conf/app_user/* ${DJANGO_PROJECT_DIR}user/
+COPY ./api/conf/app_user/ ${DJANGO_PROJECT_DIR}user/
+COPY ./api/conf/app_room/* ${DJANGO_PROJECT_DIR}room/
 COPY ./api/conf/app_friend/* ${DJANGO_PROJECT_DIR}friend/
 
 # Create utils Directory and Copy files
