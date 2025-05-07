@@ -1,12 +1,15 @@
-ENV_FILE_PATH = .env.sample
-ENV_LOCAL_FILE_PATH = .env.sample.local
-DOCKER_COMPOSE = docker compose --env-file ${ENV_FILE_PATH} -f ./docker-compose.yml
 CERT_SCRIPT_DIR = ./reverseproxy/tools
 CERT_DIR = ./reverseproxy/ssl
 
 ifdef WITH_LOCAL
-	DOCKER_COMPOSE = docker compose --env-file ${ENV_LOCAL_FILE_PATH} -f ./docker-compose.local.yml
+  ENV_PATH        = ./.env.sample.local
+  COMPOSE_YML     = ./docker-compose.local.yml
+else
+  ENV_PATH        = ./.env.sample
+  COMPOSE_YML     = ./docker-compose.yml
 endif
+
+DOCKER_COMPOSE = docker compose --env-file $(ENV_PATH) -f $(COMPOSE_YML) -f ./elk/docker-compose.yml
 
 all: run
 
@@ -20,10 +23,11 @@ re: down image-prune run
 build:
 	$(DOCKER_COMPOSE) build
 
-up: cert
+up: cert setup-elk
 	$(DOCKER_COMPOSE) up -d
 
 fdown:
+	$(DOCKER_COMPOSE) rm --stop --force setup
 	$(DOCKER_COMPOSE) down -v
 
 down:
@@ -35,7 +39,10 @@ image-prune:
 ps:
 	docker ps
 
-PHONY: run re build up down fdown image-prune ps generate
+setup-elk:
+	$(DOCKER_COMPOSE) up setup
+
+PHONY: run re build up down fdown image-prune ps generate setup-elk
 
 # -- 証明書の作成
 cert:
@@ -48,4 +55,4 @@ cert:
 cert_clean:
 	rm -rf $(CERT_DIR)
 
-PHONY:generate cert
+PHONY:cert
