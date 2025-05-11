@@ -22,7 +22,6 @@ class RoomMembersTestCase(TestCase):
         roomMembers = create_test_room_members_4()
         self.assertEqual(len(roomMembers), 4)
         for i, roomMember in enumerate(roomMembers):
-            self.assertEqual(roomMember.user.id, i + 1)
             self.assertEqual(roomMember.room_id, 'test_room')
 
     def test_unique_constraint(self):

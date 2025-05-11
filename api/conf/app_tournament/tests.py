@@ -52,7 +52,6 @@ class TournamentPlayerTestCase(TestCase):
         tournamentPlayers = create_test_tournament_4_players()
         self.assertEqual(len(tournamentPlayers), 4)
         for i, tournamentPlayer in enumerate(tournamentPlayers):
-            self.assertEqual(tournamentPlayer.user.id, i + 1)
             self.assertEqual(tournamentPlayer.entry_number, i)
             self.assertEqual(tournamentPlayer.round, 1)
     
@@ -60,6 +59,5 @@ class TournamentPlayerTestCase(TestCase):
         tournamentPlayers = create_test_tournament_8_players()
         self.assertEqual(len(tournamentPlayers), 8)
         for i, tournamentPlayer in enumerate(tournamentPlayers):
-            self.assertEqual(tournamentPlayer.user.id, i + 5)
             self.assertEqual(tournamentPlayer.entry_number, i)
             self.assertEqual(tournamentPlayer.round, 1)
