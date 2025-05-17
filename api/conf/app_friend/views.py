@@ -25,11 +25,9 @@ class FriendRequestByNameView(APIView):
 
     def post(self, request, friend_name):
         try:
-            access_id = get_user_by_auth(request.headers.get('Authorization'))
-            if not access_id:
+            user = get_user_by_auth(request.headers.get('Authorization'))
+            if not user:
                 raise AuthError('Authorization header is incorrect.')
-
-            user = User.objects.get(id=access_id)
 
             friend = User.objects.filter(display_name=friend_name).first()
             if not user or not friend or friend.deleted_at is not None:
@@ -57,11 +55,10 @@ class FriendRequestByNameView(APIView):
             return Response({'error': 'An unexpected error occurred'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def delete(self, request, friend_name):
-        access_id = get_user_by_auth(request.headers.get('Authorization'))
-        if not access_id:
+        user = get_user_by_auth(request.headers.get('Authorization'))
+        if not user:
             raise AuthError('Authorization header is incorrect.')
 
-        user = User.objects.get(id=access_id)
         friend = User.objects.filter(display_name=friend_name).first()
         if not user or not friend or friend.deleted_at is not None:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)

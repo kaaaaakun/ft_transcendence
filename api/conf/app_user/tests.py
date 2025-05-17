@@ -47,6 +47,9 @@ def create_test_user_8():
         users.append(user)
     return users
 
+#--------------
+# Test cases for User model
+#--------------
 class UserModelTest(TestCase):
     def setUp(self):
 
@@ -83,7 +86,9 @@ class UserModelTest(TestCase):
 
         self.assertIsNone(User.ft_authenticate(login_name='testuser', password='password123'))
 
-
+#--------------
+# Test cases for User API's model
+#--------------
 class UserAPITest(TestCase):
     def setUp(self):
         self.client = APIClient()
