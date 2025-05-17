@@ -64,7 +64,7 @@ def get_user_by_auth(auth):
       if auth:
           access_token = auth.split(' ')[1] if len(auth.split(' ')) > 1 else None
           if access_token:
-              user = User.objects.get(id=AccessToken(access_token).get('user_id'))
+              user = User.objects.filter(id=AccessToken(access_token).get('user_id')).first()
               if not user:
                   return None
               return user

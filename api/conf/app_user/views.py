@@ -75,22 +75,22 @@ class UserView(APIView):
                 return JsonResponse({
                     'message': 'Login before you delete your account'
                 }, status=status.HTTP_401_UNAUTHORIZED)
-            user_by_reqeust_body = User.objects.get(login_name=login_name)
+            user_by_request_body = User.objects.get(login_name=login_name)
             if (user_by_auth.deleted_at is not None):
                 raise User.DoesNotExist
 
-            if (user_by_reqeust_body.id != user_by_auth.id):
+            if (user_by_request_body.id != user_by_auth.id):
                 return JsonResponse({
                     'message': 'You can only delete your own account'
                 }, status=status.HTTP_403_FORBIDDEN)
 
-            if (user_by_auth.deleted_at is not None):
+            if (user_by_request_body.deleted_at is not None):
                 raise User.DoesNotExist
 
-            if (user_by_auth.deleted_at is not None):
+            if (user_by_request_body.deleted_at is not None):
                 raise User.DoesNotExist
 
-            user_by_auth.logical_delete()
+            user_by_request_body.logical_delete()
 
             return JsonResponse({
                 'message': 'User deleted.'
