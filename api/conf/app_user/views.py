@@ -70,27 +70,27 @@ class UserView(APIView):
                     'error': 'Login name is required.'
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-            access_id = get_user_by_auth(request.headers.get('Authorization'))
-            if not access_id:
+            user_by_auth = get_user_by_auth(request.headers.get('Authorization'))
+            if not user_by_auth:
                 return JsonResponse({
                     'message': 'Login before you delete your account'
                 }, status=status.HTTP_401_UNAUTHORIZED)
-            user = User.objects.get(login_name=login_name)
-            if (user.deleted_at is not None):
+            user_by_reqeust_body = User.objects.get(login_name=login_name)
+            if (user_by_auth.deleted_at is not None):
                 raise User.DoesNotExist
 
-            if (user.id != access_id):
+            if (user_by_reqeust_body.id != user_by_auth.id):
                 return JsonResponse({
                     'message': 'You can only delete your own account'
                 }, status=status.HTTP_403_FORBIDDEN)
 
-            if (user.deleted_at is not None):
+            if (user_by_auth.deleted_at is not None):
                 raise User.DoesNotExist
 
-            if (user.deleted_at is not None):
+            if (user_by_auth.deleted_at is not None):
                 raise User.DoesNotExist
 
-            user.logical_delete()
+            user_by_auth.logical_delete()
 
             return JsonResponse({
                 'message': 'User deleted.'
@@ -168,12 +168,12 @@ class UserProfileView(APIView):
 
     def get(self, request, display_name):
         try:
-            access_id = get_user_by_auth(request.headers.get('Authorization'))
-            if not access_id:
+            user_by_auth = get_user_by_auth(request.headers.get('Authorization'))
+            if not user_by_auth:
                 raise AuthError('Authorization header is required.')
 
             user = self.get_user_by_display_name(display_name)
-            data = create_response(user, access_id)
+            data = create_response(user, user_by_auth.id)
             return JsonResponse(data)
 
         except AuthError as auth_error:
@@ -204,11 +204,9 @@ class UpdateLastLoginView(APIView):
 
     def post(self, request):
         try:
-            access_id = get_user_by_auth(request.headers.get('Authorization'))
-            if not access_id:
+            user = get_user_by_auth(request.headers.get('Authorization'))
+            if not user:
                 raise AuthError('Authorization header is incorrect.')
-
-            user = User.objects.get(id=access_id)
             if user.deleted_at is not None:
                 raise User.DoesNotExist
             user.last_online_at = now()
@@ -238,11 +236,9 @@ class UpdateLastLoginView(APIView):
 class UserUpdateView(APIView):
     def patch(self, request):
         try:
-            access_id = get_user_by_auth(request.headers.get('Authorization'))
-            if not access_id:
+            user = get_user_by_auth(request.headers.get('Authorization'))
+            if not user:
                 raise AuthError('Authorization header is incorrect.')
-            user = User.objects.get(id=access_id)
-
             serializer = UserUpdateSerializer(user, data=request.data, partial=True)
 
             if serializer.is_valid():
@@ -282,11 +278,10 @@ class UserUpdateView(APIView):
 class UserCurrentView(APIView):
     def get(self, request):
         try:
-            access_id = get_user_by_auth(request.headers.get('Authorization'))
-            if not access_id:
+            user = get_user_by_auth(request.headers.get('Authorization'))
+            if not user:
                 raise AuthError('Authorization header is incorrect.')
-            user = User.objects.get(id=access_id)
-            data = create_response(user, access_id)
+            data = create_response(user, user.id)
             return JsonResponse(data)
         except AuthError as auth_error:
             return JsonResponse({
