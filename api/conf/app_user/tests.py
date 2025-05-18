@@ -9,6 +9,44 @@ from rest_framework.test import APIClient
 
 from .models import User
 
+#---------------
+# Helper function to create Data
+#---------------
+def create_test_user(login_name, display_name, password, secret_question, secret_answer):
+    return User.objects.create_user(
+        login_name = login_name,
+        display_name = display_name,
+        password = password,
+        secret_question = secret_question,
+        secret_answer = secret_answer
+    )
+
+def create_test_user_4():
+    users = []
+    for i in range(4):
+        user = create_test_user(
+            login_name = chr(97 + i),  # 'a', 'b', 'c', ...
+            display_name = chr(97 + i),
+            password = chr(97 + i),
+            secret_question = chr(97 + i),
+            secret_answer = chr(97 + i)
+        )
+        users.append(user)
+    return users
+
+def create_test_user_8():
+    users = []
+    for i in range(8):
+        user = create_test_user(
+            login_name = chr(101 + i),  # 'a', 'b', 'c', ...
+            display_name = chr(101 + i),
+            password = chr(101 + i),
+            secret_question = chr(101 + i),
+            secret_answer = chr(101 + i)
+        )
+        users.append(user)
+    return users
+
 class UserModelTest(TestCase):
     def setUp(self):
 

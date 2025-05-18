@@ -3,17 +3,19 @@ services:
   # バックエンドのサービス
   api:
     build:
-      context: ../
-      dockerfile: ./Dockerfile
-      target: deploy_asgi # 開発用のDockerfileのターゲット
+      context: ../../
+      dockerfile: ./api/Dockerfile
+      target: development_asgi # 開発用のDockerfileのターゲット
     ports:
       - "8000:8000"
     networks:
       - pong_network
     environment:
-      DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME}
-      DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL}
+      DJANGO_SUPERUSER_LOGIN_NAME: ${DJANGO_SUPERUSER_LOGIN_NAME}
+      DJANGO_SUPERUSER_DISPLAY_NAME: ${DJANGO_SUPERUSER_DISPLAY_NAME}
       DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD}
+      DJANGO_SUPERUSER_SECRET_QUESTION: ${DJANGO_SUPERUSER_SECRET_QUESTION}
+      DJANGO_SUPERUSER_SECRET_ANSWER: ${DJANGO_SUPERUSER_SECRET_ANSWER}
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}

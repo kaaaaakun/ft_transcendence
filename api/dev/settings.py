@@ -16,6 +16,22 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Read the shared configuration file
+SHARED_CONFIG_PATH = os.path.join(BASE_DIR, 'config', 'game-settings.json')
+try:
+    with open(SHARED_CONFIG_PATH, 'r') as f:
+        import json
+        config = json.load(f)
+except FileNotFoundError:
+    print(f"File not found: {SHARED_CONFIG_PATH}")
+    config = {}
+## 環境変数として取得できるようにjsonから取得
+END_GAME_SCORE = config.get('END_GAME_SCORE')
+WALL_X_LIMIT = config.get('WALL_X_LIMIT')
+WALL_Y_LIMIT = config.get('WALL_Y_LIMIT')
+PADDLE_HEIGHT = config.get('PADDLE_HEIGHT')
+BALL_RADIUS = config.get('BALL_RADIUS')
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -44,10 +60,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # apps made for this project
-    'player',
     'tournament',
     'match',
     'user',
+    'room',
     'friend',
 
     # 3rd party apps
@@ -64,10 +80,18 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ALGORITHM': 'HS256',
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),  # アクセストークンの有効期限
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # リフレッシュトークンの有効期限
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=365),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
 }
+
+AUTH_USER_MODEL = 'user.User'
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
 
 
 MIDDLEWARE = [
@@ -97,7 +121,6 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'trans.wsgi.application'
 ASGI_APPLICATION = 'trans.asgi.application'
 
 # Database
@@ -160,6 +183,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
