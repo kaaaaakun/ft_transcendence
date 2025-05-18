@@ -59,7 +59,7 @@ test match # エンドポイントのテスト。manage.pyのあるディレク�
     └── entrypoint.sh # コンテナ起動後に実行するコマンド集
 ```
 
-## 新たなappを追加するとき
+## 新たなappを追加する時は下記のコマンドを実行
 ```sh
 cd conf
 python3 manage.py startapp new_app
