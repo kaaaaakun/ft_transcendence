@@ -33,8 +33,7 @@ function handleSubmit(event, showErrorBanner, navigate) {
 
 export const Register = () => {
   const navigate = useNavigate()
-  const { showErrorBanner, banners } =
-    useBanner()
+  const { showErrorBanner, banners } = useBanner()
   return SimpleHeaderLayout(
     Teact.createElement(
       'div',
@@ -42,8 +41,7 @@ export const Register = () => {
       Teact.createElement(
         'form',
         {
-          onSubmit: event =>
-            handleSubmit(event, showErrorBanner, navigate),
+          onSubmit: event => handleSubmit(event, showErrorBanner, navigate),
           className: 'text-center mt-3 d-grid gap-2 col-3 mx-auto',
         },
         ...banners,

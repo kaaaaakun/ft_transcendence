@@ -44,7 +44,9 @@ const TournamentsGame = () => {
     let rightScore = 0
     let leftScore = 0
 
-    if (!loc.state) { return }
+    if (!loc.state) {
+      return
+    }
 
     function clearCanvas() {
       context.clearRect(0, 0, canvas.width, canvas.height)
@@ -146,7 +148,9 @@ const TournamentsGame = () => {
 
     function handleKeyPush(key, isPushed) {
       const mapping = keyMappings[key]
-      if (!mapping) { return null }
+      if (!mapping) {
+        return null
+      }
 
       const { state } = mapping
       if (isPushed !== paddleStates[state]) {

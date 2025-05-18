@@ -400,7 +400,9 @@ export const UserProfile = props => {
 
   const friendButton = () => {
     const relation = userData.relation_to_current_user
-    if (relation === 'self') { return null }
+    if (relation === 'self') {
+      return null
+    }
     if (relation === 'friend') {
       return Teact.createElement(
         'button',

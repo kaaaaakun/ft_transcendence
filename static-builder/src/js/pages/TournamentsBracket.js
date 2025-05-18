@@ -13,11 +13,12 @@ export const TournamentsBracket = () => {
     return participants
       .slice(start, end + 1)
       .reduce(
-        (sum, participant) => sum + participant.tournament_players.victory_count,
+        (sum, participant) =>
+          sum + participant.tournament_players.victory_count,
         0,
       )
   }
-  
+
   function fetchMatch(tournamentEnd) {
     if (tournamentEnd) {
       cookie.deleteTournamentId()
@@ -39,7 +40,7 @@ export const TournamentsBracket = () => {
         console.error('Error:', error) // エラー処理
       })
   }
-  
+
   function getMostVictoriesParticipants(participants) {
     return participants.reduce((prev, current) =>
       prev.tournament_players.victory_count >
@@ -48,7 +49,7 @@ export const TournamentsBracket = () => {
         : current,
     )
   }
-  
+
   function createParticipantBoard(participant, x, y) {
     const xAdjustment = 5
     const yAdjustment = 12
@@ -80,7 +81,7 @@ export const TournamentsBracket = () => {
       ),
     ]
   }
-  
+
   function createChampionParticipantBoard(participants, tournamentEnd) {
     if (tournamentEnd) {
       const ret = createParticipantBoard(
@@ -92,7 +93,7 @@ export const TournamentsBracket = () => {
     }
     return []
   }
-  
+
   function TournamentTwoParticipants(participants, tournamentEnd) {
     return Teact.createElement(
       'div',
@@ -117,7 +118,7 @@ export const TournamentsBracket = () => {
           'stroke-width': '2',
         }),
         ...createParticipantBoard(participants[0], 2, 30),
-  
+
         // 右プレイヤー
         Teact.createElement('path', {
           d: 'M315,30 L224,30z',
@@ -256,7 +257,7 @@ export const TournamentsBracket = () => {
       ),
     )
   }
-  
+
   // SVG要素を仮想DOM形式で作成する関数
   // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO fix
   function TournamentEightParticipants(participants, tournamentEnd) {
@@ -501,7 +502,10 @@ export const TournamentsBracket = () => {
           tournamentEnd,
         )
       case 2:
-        return TournamentTwoParticipants(participants.participants, tournamentEnd)
+        return TournamentTwoParticipants(
+          participants.participants,
+          tournamentEnd,
+        )
       default:
         return Teact.createElement('h1', null, '400 Bad Request')
     }

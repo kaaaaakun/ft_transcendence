@@ -68,11 +68,9 @@ function getFriendsList(id) {
 }
 
 function getFriendRequests(id) {
-  return api
-    .get(`/api/users/${id}/friend_requests`)
-    .then(response => {
-      return response
-    })
+  return api.get(`/api/users/${id}/friend_requests`).then(response => {
+    return response
+  })
 }
 
 function friendRequest(friendId) {

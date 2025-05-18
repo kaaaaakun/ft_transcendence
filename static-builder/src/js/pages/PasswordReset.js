@@ -8,15 +8,14 @@ import { useBanner } from '../hooks/useBanner'
 let secretQuestion = null
 
 export const PasswordReset = () => {
-  const { showErrorBanner, banners } =
-    useBanner()
+  const { showErrorBanner, banners } = useBanner()
   const navigate = useNavigate()
 
   function handleSubmit(event, showErrorBanner) {
     event.preventDefault() // フォームのデフォルトの送信を防ぐ（ページリロード防止）
-  
+
     const formData = new FormData(event.target)
-  
+
     // FormDataからJSON形式のデータに変換
     const data = {}
     formData.forEach((value, key) => {
@@ -49,7 +48,7 @@ export const PasswordReset = () => {
         })
     }
   }
-  
+
   function displaySecretQuestion() {
     if (secretQuestion) {
       return Teact.createElement(
@@ -62,7 +61,7 @@ export const PasswordReset = () => {
       )
     }
   }
-  
+
   function resetPasswordInfo() {
     if (secretQuestion) {
       return Teact.createElement(

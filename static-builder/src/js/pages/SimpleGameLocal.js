@@ -25,13 +25,14 @@ const SimpleGameLocal = () => {
       })
   }, [])
 
-  
   let leftPlayerName = null
   let rightPlayerName = null
   let winner = null
 
   Teact.useEffect(() => {
-    if (!gameData) { return }
+    if (!gameData) {
+      return
+    }
     console.log('gameData', gameData)
     leftPlayerName = gameData.left.player_name
     rightPlayerName = gameData.right.player_name
@@ -158,7 +159,9 @@ const SimpleGameLocal = () => {
 
     function handleKeyPush(key, isPushed) {
       const mapping = keyMappings[key]
-      if (!mapping) { return null }
+      if (!mapping) {
+        return null
+      }
 
       const { state } = mapping
       if (isPushed !== paddleStates[state]) {

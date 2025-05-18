@@ -6,15 +6,14 @@ import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 
 export const DeleteAccount = () => {
-  const { showErrorBanner, banners } =
-    useBanner()
+  const { showErrorBanner, banners } = useBanner()
   const navigate = useNavigate()
-  
+
   function handleSubmit(event, showErrorBanner) {
     event.preventDefault() // フォームのデフォルトの送信を防ぐ（ページリロード防止）
-  
+
     const formData = new FormData(event.target)
-  
+
     // FormDataからJSON形式のデータに変換
     const data = {}
     formData.forEach((value, key) => {
