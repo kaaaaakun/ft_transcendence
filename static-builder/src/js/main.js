@@ -32,7 +32,7 @@ function App() {
   return Router(
     Route({ 
       path: '/',
-      component: Home 
+      component: Home,
     }),
     Route({
       path: '/about',
