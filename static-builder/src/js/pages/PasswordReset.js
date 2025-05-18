@@ -6,100 +6,102 @@ import { Teact } from '@/js/libs/teact'
 import { useBanner } from '../hooks/useBanner'
 
 let secretQuestion = null
-function handleSubmit(event, showErrorBanner) {
-  const navigate = useNavigate()
-  event.preventDefault() // フォームのデフォルトの送信を防ぐ（ページリロード防止）
-
-  const formData = new FormData(event.target)
-
-  // FormDataからJSON形式のデータに変換
-  const data = {}
-  formData.forEach((value, key) => {
-    data[key] = value
-  })
-  if (data.login_name && data.secret_answer && data.new_password) {
-    userApi
-      .passwordReset(data)
-      .then(data => {
-        navigate('/login', { data })
-      })
-      .catch(_error => {
-        showErrorBanner({
-          message: 'Failed to reset password',
-          onClose: () => {},
-        })
-      })
-  } else {
-    userApi
-      .getSecretQuestion(data)
-      .then(data => {
-        secretQuestion = data.secret_question
-        navigate('/password-reset', { data })
-      })
-      .catch(_error => {
-        showErrorBanner({
-          message: 'Failed to get secret question',
-          onClose: () => {},
-        })
-      })
-  }
-}
-
-function displaySecretQuestion() {
-  if (secretQuestion) {
-    return Teact.createElement(
-      'p',
-      {
-        className:
-          'mt-4 text-white bg-danger text-center font-weight-bold p-3 rounded',
-      },
-      `秘密の質問: ${secretQuestion}`,
-    )
-  }
-}
-
-function resetPasswordInfo() {
-  if (secretQuestion) {
-    return Teact.createElement(
-      'div',
-      { className: '' },
-      Teact.createElement(
-        'label',
-        {
-          htmlFor: 'secret_answer',
-          className: 'form-label mt-2 text-start text-white font-weight-bold',
-        },
-        'Secret Answer',
-      ),
-      Teact.createElement('input', {
-        type: 'text',
-        id: 'secret_answer',
-        className: 'form-control',
-        placeholder: 'Your answer',
-        name: 'secret_answer',
-      }),
-      Teact.createElement(
-        'label',
-        {
-          htmlFor: 'new_password',
-          className: 'form-label mt-2 text-start text-white font-weight-bold',
-        },
-        'New Password',
-      ),
-      Teact.createElement('input', {
-        type: 'text',
-        id: 'new_password',
-        className: 'form-control',
-        placeholder: 'New password',
-        name: 'new_password',
-      }),
-    )
-  }
-}
 
 export const PasswordReset = () => {
-  const { showInfoBanner, showWarningBanner, showErrorBanner, banners } =
+  const { showErrorBanner, banners } =
     useBanner()
+  const navigate = useNavigate()
+
+  function handleSubmit(event, showErrorBanner) {
+    event.preventDefault() // フォームのデフォルトの送信を防ぐ（ページリロード防止）
+  
+    const formData = new FormData(event.target)
+  
+    // FormDataからJSON形式のデータに変換
+    const data = {}
+    formData.forEach((value, key) => {
+      data[key] = value
+    })
+    if (data.login_name && data.secret_answer && data.new_password) {
+      userApi
+        .passwordReset(data)
+        .then(data => {
+          navigate('/login', { data })
+        })
+        .catch(_error => {
+          showErrorBanner({
+            message: 'Failed to reset password',
+            onClose: () => {},
+          })
+        })
+    } else {
+      userApi
+        .getSecretQuestion(data)
+        .then(data => {
+          secretQuestion = data.secret_question
+          navigate('/password-reset', { data })
+        })
+        .catch(_error => {
+          showErrorBanner({
+            message: 'Failed to get secret question',
+            onClose: () => {},
+          })
+        })
+    }
+  }
+  
+  function displaySecretQuestion() {
+    if (secretQuestion) {
+      return Teact.createElement(
+        'p',
+        {
+          className:
+            'mt-4 text-white bg-danger text-center font-weight-bold p-3 rounded',
+        },
+        `秘密の質問: ${secretQuestion}`,
+      )
+    }
+  }
+  
+  function resetPasswordInfo() {
+    if (secretQuestion) {
+      return Teact.createElement(
+        'div',
+        { className: '' },
+        Teact.createElement(
+          'label',
+          {
+            htmlFor: 'secret_answer',
+            className: 'form-label mt-2 text-start text-white font-weight-bold',
+          },
+          'Secret Answer',
+        ),
+        Teact.createElement('input', {
+          type: 'text',
+          id: 'secret_answer',
+          className: 'form-control',
+          placeholder: 'Your answer',
+          name: 'secret_answer',
+        }),
+        Teact.createElement(
+          'label',
+          {
+            htmlFor: 'new_password',
+            className: 'form-label mt-2 text-start text-white font-weight-bold',
+          },
+          'New Password',
+        ),
+        Teact.createElement('input', {
+          type: 'text',
+          id: 'new_password',
+          className: 'form-control',
+          placeholder: 'New password',
+          name: 'new_password',
+        }),
+      )
+    }
+  }
+
   return SimpleHeaderLayout(
     Teact.createElement(
       'div',

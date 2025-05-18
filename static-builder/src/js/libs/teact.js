@@ -40,6 +40,7 @@ const isEvent = key => key.startsWith('on')
 const isProperty = key =>
   key !== 'children' && key !== 'className' && !isEvent(key)
 const isNew = (prev, next) => key => prev[key] !== next[key]
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO fix
 function updateDom(dom, prevProps = {}, nextProps = {}) {
   const isSvg = dom instanceof SVGElement
 

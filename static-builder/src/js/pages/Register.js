@@ -5,8 +5,7 @@ import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import { useBanner } from '../hooks/useBanner'
 
-function handleSubmit(event, showErrorBanner, showInfoBanner) {
-  const navigate = useNavigate()
+function handleSubmit(event, showErrorBanner, navigate) {
   event.preventDefault() // フォームのデフォルトの送信を防ぐ（ページリロード防止）
 
   const formData = new FormData(event.target)
@@ -24,7 +23,7 @@ function handleSubmit(event, showErrorBanner, showInfoBanner) {
     .then(data => {
       navigate('/login', { data })
     })
-    .catch(error => {
+    .catch(_error => {
       showErrorBanner({
         message: 'Registration failed',
         onClose: () => {},
@@ -33,7 +32,8 @@ function handleSubmit(event, showErrorBanner, showInfoBanner) {
 }
 
 export const Register = () => {
-  const { showInfoBanner, showWarningBanner, showErrorBanner, banners } =
+  const navigate = useNavigate()
+  const { showErrorBanner, banners } =
     useBanner()
   return SimpleHeaderLayout(
     Teact.createElement(
@@ -43,7 +43,7 @@ export const Register = () => {
         'form',
         {
           onSubmit: event =>
-            handleSubmit(event, showErrorBanner, showInfoBanner),
+            handleSubmit(event, showErrorBanner, navigate),
           className: 'text-center mt-3 d-grid gap-2 col-3 mx-auto',
         },
         ...banners,

@@ -12,7 +12,8 @@
     "rules": {
       "all": true,
       "suspicious": {
-        "noEmptyBlockStatements": "off"
+        "noEmptyBlockStatements": "off",
+        "noConsoleLog": "off"
       }
     }
   },
@@ -27,6 +28,7 @@
     "parser": {
       "unsafeParameterDecoratorsEnabled": true
     },
+    "globals": ["WALL_X_LIMIT", "WALL_Y_LIMIT", "BACKGROUND_COLOR", "PADDLE_HEIGHT", "END_GAME_SCORE", "BALL_RADIUS"],
     "formatter": {
       "enabled": true,
       "quoteStyle": "single",

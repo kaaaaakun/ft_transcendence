@@ -11,42 +11,26 @@ import { Teact } from '@/js/libs/teact'
 const BACKGROUND_COLOR = '#1E1E2C'
 const PADDLE_WIDTH = 5
 
-function fetchTournament(endMatch) {
-  if (!endMatch) {
-    return
-  }
-
-  const navigate = useNavigate()
-  tournamentsApi
-    .fetchLocalTournament()
-    .then(data => {
-      navigate('/tournaments/bracket', { data })
-    })
-    .catch(error => console.error('Error:', error))
-}
-
 const TournamentsGame = () => {
   const [endMatch, setEndMatch] = Teact.useState(false)
   const loc = useLocation()
-
-  if (!loc.state) {
-    return HeaderWithTitleLayout(
-      Teact.createElement(
-        'div',
-        { className: 'container' },
-        Teact.createElement(
-          'h1',
-          { className: 'text-center text-light' },
-          'Error',
-        ),
-      ),
-    )
-  }
-
+  const navigate = useNavigate()
   const data = loc.state.data
   const leftPlayerName = data.left.player_name
   const rightPlayerName = data.right.player_name
   let winner = null
+
+  function fetchTournament(endMatch) {
+    if (!endMatch) {
+      return
+    }
+    tournamentsApi
+      .fetchLocalTournament()
+      .then(data => {
+        navigate('/tournaments/bracket', { data })
+      })
+      .catch(error => console.error('Error:', error))
+  }
 
   Teact.useEffect(() => {
     const canvas = document.getElementById('pongCanvas')
@@ -59,6 +43,8 @@ const TournamentsGame = () => {
     let ballY = canvas.height / 2
     let rightScore = 0
     let leftScore = 0
+
+    if (!loc.state) { return }
 
     function clearCanvas() {
       context.clearRect(0, 0, canvas.width, canvas.height)
@@ -138,25 +124,29 @@ const TournamentsGame = () => {
       isLeftPaddleDown: false,
     }
     const keyMappings = {
+      /* biome-ignore lint/style/useNamingConvention: 実際のキー入力（'ArrowUp'）をそのまま使用しているため */
       ArrowUp: {
         paddle: 'right',
         key: 'PaddleUpKey',
         state: 'isRightPaddleUp',
       },
+      /* biome-ignore lint/style/useNamingConvention: 実際のキー入力（'ArrowDown'）をそのまま使用しているため */
       ArrowDown: {
         paddle: 'right',
         key: 'PaddleDownKey',
         state: 'isRightPaddleDown',
       },
       w: { paddle: 'left', key: 'PaddleUpKey', state: 'isLeftPaddleUp' },
+      /* biome-ignore lint/style/useNamingConvention: 実際のキー入力（'W'）をそのまま使用しているため */
       W: { paddle: 'left', key: 'PaddleUpKey', state: 'isLeftPaddleUp' },
       s: { paddle: 'left', key: 'PaddleDownKey', state: 'isLeftPaddleDown' },
+      /* biome-ignore lint/style/useNamingConvention: 実際のキー入力（'S'）をそのまま使用しているため */
       S: { paddle: 'left', key: 'PaddleDownKey', state: 'isLeftPaddleDown' },
     }
 
     function handleKeyPush(key, isPushed) {
       const mapping = keyMappings[key]
-      if (!mapping) return null
+      if (!mapping) { return null }
 
       const { state } = mapping
       if (isPushed !== paddleStates[state]) {
@@ -211,6 +201,20 @@ const TournamentsGame = () => {
       document.removeEventListener('keyup', keyUpHandler)
     }
   }, [])
+
+  if (!loc.state) {
+    return HeaderWithTitleLayout(
+      Teact.createElement(
+        'div',
+        { className: 'container' },
+        Teact.createElement(
+          'h1',
+          { className: 'text-center text-light' },
+          'Error',
+        ),
+      ),
+    )
+  }
 
   return HeaderWithTitleLayout(
     Teact.createElement(
