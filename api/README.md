@@ -64,3 +64,10 @@ test match # エンドポイントのテスト。manage.pyのあるディレク�
 cd conf
 python3 manage.py startapp new_app
 ```
+
+## モデルを変更した時は下記のコマンドを実行
+```sh
+python3 -m pip install -r tool/requirements.txt
+cd conf
+python3 manage.py makemigrations
+```

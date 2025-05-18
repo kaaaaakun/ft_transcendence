@@ -45,9 +45,6 @@ COPY ./api/conf/ ${DJANGO_PROJECT_DIR}
 # configディレクトリのファイルをコンテナ内にコピー
 COPY ./config/* ${DJANGO_PROJECT_DIR}config/
 
-# appsで定めたモデルをDBに反映する準備
-RUN python ${DJANGO_PROJECT_DIR}manage.py makemigrations
-
 # コンテナ起動後に利用するファイルをコピー
 COPY ./api/tool/entrypoint.sh ${DJANGO_PROJECT_DIR}
 RUN chmod +x ${DJANGO_PROJECT_DIR}entrypoint.sh
