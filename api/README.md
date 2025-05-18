@@ -58,3 +58,9 @@ test match # エンドポイントのテスト。manage.pyのあるディレク�
 └── tool # ファイルが1つだけなら親ディレクトリにファイルを移動するかも
     └── entrypoint.sh # コンテナ起動後に実行するコマンド集
 ```
+
+## 新たなappを追加するとき
+```sh
+cd conf
+python3 manage.py startapp new_app
+```
