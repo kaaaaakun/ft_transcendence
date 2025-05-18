@@ -30,7 +30,7 @@ function App() {
     return () => clearInterval(intervalId) // コンポーネントがアンマウントされたら停止
   }, [])
   return Router(
-    Route({ 
+    Route({
       path: '/',
       component: Home,
     }),
