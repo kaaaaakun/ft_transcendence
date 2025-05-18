@@ -30,7 +30,10 @@ function App() {
     return () => clearInterval(intervalId) // コンポーネントがアンマウントされたら停止
   }, [])
   return Router(
-    Route({ path: '/', component: Home }),
+    Route({ 
+      path: '/',
+      component: Home 
+    }),
     Route({
       path: '/about',
       component: Teact.createElement('h1', null, 'About'),
@@ -40,12 +43,16 @@ function App() {
       component: Teact.createElement('h1', null, 'Contact'),
     }),
     Route({
-      path: '/simple-game/local',
+      path: '/local/game',
       component: SimpleGameLocal,
     }),
     Route({
-      path: '/tournaments',
-      component: TournamentsIndex,
+      path: '/remote/simple',
+      component: Home, //遷移先のページは仮置き
+    }),
+    Route({
+      path: '/remote/tournament',
+      component: Home, //遷移先のページは仮置き
     }),
     Route({
       path: '/tournaments/display-name',
@@ -54,10 +61,6 @@ function App() {
     Route({
       path: '/tournaments/bracket',
       component: TournamentsBracket,
-    }),
-    Route({
-      path: '/tournaments/game',
-      component: TournamentsGame,
     }),
     Route({
       path: '/users/:username',
