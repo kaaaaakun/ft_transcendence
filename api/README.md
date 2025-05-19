@@ -71,3 +71,8 @@ python3 -m pip install -r tool/requirements.txt
 cd conf
 python3 manage.py makemigrations
 ```
+
+## SECRET_KEY の作成方法
+```sh
+python3 -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
+```

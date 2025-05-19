@@ -7,9 +7,6 @@ FROM python:3.9-slim AS base
 # コンテナ起動後にも利用する環境変数(secretは.envへ)
 ENV DJANGO_PROJECT_NAME trans
 ENV DJANGO_PROJECT_DIR /${DJANGO_PROJECT_NAME}/
-RUN export SECRET_KEY=$(python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())') && \
-    echo "SECRET_KEY=${SECRET_KEY}" >> /etc/environment
-ENV SECRET_KEY=$SECRET_KEY
 ENV BIND_ADDRESS 0.0.0.0
 ENV BIND_PORT 8000
 ENV DJANGO_SETTINGS_MODULE=trans.settings
