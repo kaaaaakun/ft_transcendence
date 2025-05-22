@@ -19,27 +19,17 @@ export const Home = () => {
         'div',
         { className: 'd-grid gap-2 col-3 mx-auto' },
         DefaultButton({
-          text: 'Play Now',
-          onClick: () => navigate('/simple-game/local'),
+          text: 'Play Local',
+          onClick: () => navigate('/local/game'),
         }),
         DefaultButton({
-          text: 'Tournament Mode',
-          onClick: () => navigate('/tournaments'),
+          text: 'Play Remote',
+          onClick: () => navigate('/remote/simple'),
         }),
-        cookie.checkTournamentIdExists()
-          ? DefaultButton({
-              text: 'Resume Game',
-              onClick: () =>
-                tournamentsApi
-                  .fetchLocalTournament()
-                  .then(data => {
-                    navigate('/tournaments/bracket', { data })
-                  })
-                  .catch(error => {
-                    console.error('Error:', error)
-                  }),
-            })
-          : null,
+        DefaultButton({
+          text: 'Play Tournament',
+          onClick: () => navigate('/remote/tournament'),
+        }),
       ),
     ),
   )

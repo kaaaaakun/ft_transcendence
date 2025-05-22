@@ -9,7 +9,7 @@ else
   COMPOSE_YML     = ./docker-compose.yml
 endif
 
-DOCKER_COMPOSE = docker compose --env-file $(ENV_PATH) -f $(COMPOSE_YML) -f ./elk/docker-compose.yml
+DOCKER_COMPOSE = docker compose --env-file $(ENV_PATH) -f $(COMPOSE_YML) #-f ./elk/docker-compose.yml
 
 all: run
 
@@ -23,11 +23,11 @@ re: down image-prune run
 build:
 	$(DOCKER_COMPOSE) build
 
-up: cert setup-elk
+up: cert # setup-elk
 	$(DOCKER_COMPOSE) up -d
 
 fdown:
-	$(DOCKER_COMPOSE) rm --stop --force setup
+	$(DOCKER_COMPOSE) rm --stop --force # setup
 	$(DOCKER_COMPOSE) down -v
 
 down:
