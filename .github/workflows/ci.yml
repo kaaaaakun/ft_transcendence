@@ -20,7 +20,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Run lint check
-        run: pnpm lint
+        run: |
+          pnpm lint | tee lint_output.txt
+          if grep -q 'warning' lint_output.txt; then
+            echo "❌ Lint warning found, treating as error."
+            exit 1
+          fi
 
   js-format:
     runs-on: ubuntu-latest
