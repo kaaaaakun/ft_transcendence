@@ -60,15 +60,20 @@ test match # エンドポイントのテスト。manage.pyのあるディレク�
 ```
 
 ## 新たなappを追加する時は下記のコマンドを実行
+configの内容が必要なので、コピーして使用する。
+
 ```sh
-cd conf
-python3 manage.py startapp new_app
+cd api/conf
+mkdir config
+cp ../../config/* config/
+python3 manage.py startapp {new_app}
+rm -rf config 
 ```
 
 ## モデルを変更した時は下記のコマンドを実行
 ```sh
 python3 -m pip install -r tool/requirements.txt
-cd conf
+cd api/conf
 python3 manage.py makemigrations
 ```
 
