@@ -1,0 +1,10 @@
+name: Test Docker Pull with Act
+on: [push]
+jobs:
+  pull_image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Try pulling a public image
+        run: docker pull alpine:latest
+      - name: Try pulling an image that might require auth (if you have one)
+        run: docker pull moby/buildkit:buildx-stable-1 # Buildxが使おうとするイメージ

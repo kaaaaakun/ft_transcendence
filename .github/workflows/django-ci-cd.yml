@@ -1,0 +1,106 @@
+name: Django CI/CD
+
+on:
+  push:
+    branches: [ main ] # mainブランチへのpush時に実行
+  pull_request:
+    branches: [ main ] # mainブランチへのプルリクエスト時に実行
+
+jobs:
+  test:
+    runs-on: ubuntu-latest # CIを実行する仮想環境
+
+    env:
+      # docker-compose.ymlで定義されているapiサービス名
+      API_SERVICE_NAME: api
+      # CI/CDプロセスで使用する.envファイルのパス (リポジトリルートに作成)
+      CI_ENV_FILE: ./.env.ci
+      # 使用するdocker-composeファイルのパス (リポジトリルート)
+      DOCKER_COMPOSE_FILE: ./docker-compose.yml
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4 # リポジトリのコードをチェックアウト
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3 # Dockerイメージのビルドを高速化・効率化
+
+    - name: Create .env file for CI
+      run: |
+        echo "Creating .env file for CI at ${{ env.CI_ENV_FILE }}"
+        touch ${{ env.CI_ENV_FILE }}
+
+        # === 重要 ===
+        # 以下の値は実際のプロジェクトに合わせて調整してください。
+        # GitHub Secrets (https://docs.github.com/en/actions/security-guides/encrypted-secrets) の使用を強く推奨します。
+        # 例: echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD_CI }}" >> ${{ env.CI_ENV_FILE }}
+
+        # Django Superuser (docker-compose.ymlのapiサービスで使用)
+        echo "DJANGO_SUPERUSER_LOGIN_NAME=${{ secrets.DJANGO_SUPERUSER_LOGIN_NAME_CI || 'ci_admin' }}" >> ${{ env.CI_ENV_FILE }}
+        echo "DJANGO_SUPERUSER_DISPLAY_NAME=${{ secrets.DJANGO_SUPERUSER_DISPLAY_NAME_CI || 'CI Admin User' }}" >> ${{ env.CI_ENV_FILE }}
+        echo "DJANGO_SUPERUSER_PASSWORD=${{ secrets.DJANGO_SUPERUSER_PASSWORD_CI || 'ci_super_password_123' }}" >> ${{ env.CI_ENV_FILE }}
+        echo "DJANGO_SUPERUSER_SECRET_QUESTION=${{ secrets.DJANGO_SUPERUSER_SECRET_QUESTION_CI || 'CI Favorite Color?' }}" >> ${{ env.CI_ENV_FILE }}
+        echo "DJANGO_SUPERUSER_SECRET_ANSWER=${{ secrets.DJANGO_SUPERUSER_SECRET_ANSWER_CI || 'CI Blue' }}" >> ${{ env.CI_ENV_FILE }}
+
+        # PostgreSQL (docker-compose.ymlのapiおよびrdbmsサービスで使用)
+        echo "POSTGRES_DB=${{ secrets.POSTGRES_DB_CI || 'ci_pong_db' }}" >> ${{ env.CI_ENV_FILE }}
+        echo "POSTGRES_USER=${{ secrets.POSTGRES_USER_CI || 'ci_pong_user' }}" >> ${{ env.CI_ENV_FILE }}
+        echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD_CI || 'ci_db_password_456' }}" >> ${{ env.CI_ENV_FILE }}
+
+        # Django SECRET_KEY (Dockerfile内で動的生成されるが、CI用に固定値を設定することも可能)
+        # 必要であれば以下のコメントを解除し、GitHub Secretを設定してください。
+        # echo "SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY_CI || 'ci_dummy_secret_key_for_testing_only_needs_to_be_long_enough_1234567890_abcdef' }}" >> ${{ env.CI_ENV_FILE }}
+        
+        # Django Settings Module (Dockerfileで設定されているが、CI用に上書き可能)
+        # echo "DJANGO_SETTINGS_MODULE=trans.settings_ci" >> ${{ env.CI_ENV_FILE }}
+
+        echo ".env file for CI created successfully:"
+        cat ${{ env.CI_ENV_FILE }}
+
+    - name: Build Docker images
+      run: |
+        # apiサービスをビルド (docker-compose.ymlのbuild設定を使用)
+        # 他のサービス(postgres, redis)はイメージをpullします。
+        # --no-cache オプションはDockerfileやプロジェクトのビルド戦略に応じて調整してください。
+        # CIではキャッシュを利用してビルド時間を短縮することが一般的です。
+        docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} --env-file ${{ env.CI_ENV_FILE }} build --no-cache ${{ env.API_SERVICE_NAME }}
+
+    - name: Start services
+      run: |
+        docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} --env-file ${{ env.CI_ENV_FILE }} up -d
+
+    - name: Wait for services to be ready
+      run: |
+        echo "Waiting for services to initialize..."
+        # docker-compose.ymlのhealthcheck設定に依存しますが、念のため追加の待機時間を設けます。
+        # データベースの初期化やマイグレーションに時間がかかる場合があるため、
+        # 実際のプロジェクトに合わせて調整してください。
+        # より堅牢な方法としては、特定のポートが開くまで待つ、
+        # ログに特定のメッセージ（例: "PostgreSQL init process complete"）が出るまで待つなどがあります。
+        sleep 45 # 待機時間はプロジェクトに応じて調整
+
+    - name: Display Docker container status
+      run: docker ps -a
+
+    - name: Display service logs (optional debugging)
+      run: |
+        docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} --env-file ${{ env.CI_ENV_FILE }} logs ${{ env.API_SERVICE_NAME }}
+        docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} --env-file ${{ env.CI_ENV_FILE }} logs rdbms
+        docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} --env-file ${{ env.CI_ENV_FILE }} logs in_memory_db
+      continue-on-error: true # ログ取得でエラーになってもワークフローを続行
+
+    - name: Run Django tests
+      run: |
+        echo "Running Django tests in service: ${{ env.API_SERVICE_NAME }}"
+        # docker-compose.ymlのapiサービス内でテストを実行
+        # Dockerfileのdevelopment_asgiステージで `alias test='python manage.py test'` が設定されている想定。
+        # もしエイリアスがうまく機能しない場合は、直接コマンドを指定します:
+        # docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} --env-file ${{ env.CI_ENV_FILE }} exec -T ${{ env.API_SERVICE_NAME }} python manage.py test
+        docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} --env-file ${{ env.CI_ENV_FILE }} exec -T ${{ env.API_SERVICE_NAME }} test
+
+    - name: Stop services
+      if: always() # テストが成功しても失敗しても必ず実行
+      run: |
+        echo "Stopping services..."
+        # -v オプションでボリュームも削除し、クリーンな状態にします。
+        docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} --env-file ${{ env.CI_ENV_FILE }} down -v
