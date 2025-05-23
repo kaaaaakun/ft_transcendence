@@ -18,50 +18,6 @@ tags:
     description: ユーザー管理用API
 
 paths:
-  /api/tournaments/local:
-    post:
-      tags:
-        - local_play
-      summary: トーナメントの作成
-      description: プレイヤーのリストを使用して新しいトーナメントを作成します。プレイヤーの数は2の累乗（例：2、4、8、16）でなければなりません。
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/tournament_request"
-      responses:
-        "200":
-          description: トーナメントの待機情報
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/tournament_response"
-        default:
-          description: エラーレスポンスまたはその他のレスポンス
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/error_response"
-    get:
-      tags:
-        - local_play
-      summary: トーナメントの表示
-      description: 試合からトーナメントに戻るためのAPI。
-      responses:
-        "200":
-          description: トーナメント表
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/tournament_response"
-        default:
-          description: エラーレスポンスまたはその他のレスポンス
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/error_response"
-
   /api/matches/local:
     get:
       tags:
@@ -82,32 +38,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/error_response"
 
-  /api/matches/localtournament:
-    get:
-      tags:
-        - local_tournamentplay
-      summary: 試合の開始
-      description: 次の試合の詳細を取得します。クッキーとして `tournament_id` を送信してください。
-      parameters:
-        - in: cookie
-          name: tournament_id
-          schema:
-            type: integer
-          required: true
-          description: 取得するトーナメントのID
-      responses:
-        "200":
-          description: 試合情報
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/match_status_tournament"
-        default:
-          description: エラーレスポンスまたはその他のレスポンス
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/error_response"
   /api/auth/login:
     post:
       tags:
