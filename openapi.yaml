@@ -12,16 +12,18 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 
 tags:
-  - name: local_play
-    description: localでponggameを遊ぶためのAPI
+  - name: local_simple
+    description: ローカルでシンプル対戦を遊ぶためのAPI
   - name: user_management
     description: ユーザー管理用API
+  - name: remote_simple
+    description: リモートでシンプル対戦を遊ぶためのAPI
 
 paths:
   /api/matches/local:
     get:
       tags:
-        - local_play
+        - local_simple
       summary: 試合の開始
       description: 次の試合の詳細を取得します。
       responses:
@@ -33,6 +35,47 @@ paths:
                 $ref: "#/components/schemas/match_status_local"
         default:
           description: エラーレスポンスまたはその他のレスポンス
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+
+  /api/simple-matches/:
+    get:
+      tags:
+        - simple_play
+      summary: 参加待ち対戦リストの取得
+      description: |
+        クエリパラメータ `type=remote` を指定して、参加待ちの対戦（リモート）情報を取得します。
+        JWT認証が必要です。レスポンスにはユーザーの表示名と、参加用に必要な `matches.id` を含みます。
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [remote]
+          description: 対戦タイプ（現在は remote のみ対応）
+      responses:
+        "200":
+          description: 参加待ち対戦の一覧
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    display_name:
+                      type: string
+                      description: 対戦ルームを保持するユーザーの名前
+                    match_id:
+                      type: integer
+                      description: 参加用のマッチID
+        "401":
+          description: 認証エラー(JWTトークンが無効または未提供)
           content:
             application/json:
               schema:
