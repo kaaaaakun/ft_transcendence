@@ -58,3 +58,26 @@ test match # エンドポイントのテスト。manage.pyのあるディレク�
 └── tool # ファイルが1つだけなら親ディレクトリにファイルを移動するかも
     └── entrypoint.sh # コンテナ起動後に実行するコマンド集
 ```
+
+## 新たなappを追加する時は下記のコマンドを実行
+configの内容が必要なので、コピーして使用する。
+
+```sh
+cd api/conf
+mkdir config
+cp ../../config/* config/
+python3 manage.py startapp {new_app}
+rm -rf config 
+```
+
+## モデルを変更した時は下記のコマンドを実行
+```sh
+python3 -m pip install -r tool/requirements.txt
+cd api/conf
+python3 manage.py makemigrations
+```
+
+## SECRET_KEY の作成方法
+```sh
+python3 -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
+```
