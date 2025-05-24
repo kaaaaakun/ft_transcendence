@@ -12,9 +12,7 @@ export const UserProfile = props => {
   let changeUserName = ''
   const onAccept = friendId => {
     userApi
-      .acceptFriendRequest({
-        friendId,
-      })
+      .acceptFriendRequest(friendId)
       .then(response => {
         if (!response.ok) {
           if (response.status === 401) {
@@ -44,9 +42,7 @@ export const UserProfile = props => {
 
   const onRequest = friendId => {
     userApi
-      .friendRequest({
-        friendId,
-      })
+      .friendRequest(friendId)
       .then(response => {
         if (!response.ok) {
           if (response.status === 401) {
@@ -74,9 +70,7 @@ export const UserProfile = props => {
 
   const onReject = friendId => {
     userApi
-      .rejectFriendRequest({
-        friendId,
-      })
+      .rejectFriendRequest(friendId)
       .then(response => {
         if (!response.ok) {
           if (response.status === 401) {
@@ -104,9 +98,7 @@ export const UserProfile = props => {
 
   const onDelete = friendId => {
     userApi
-      .deleteFriend({
-        friendId,
-      })
+      .deleteFriend(friendId)
       .then(response => {
         if (!response.ok) {
           if (response.status === 401) {
@@ -443,6 +435,7 @@ export const UserProfile = props => {
       )
     }
     if (relation === 'stranger') {
+      console.log('userData', userData)
       return Teact.createElement(
         'button',
         {
