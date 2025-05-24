@@ -1,4 +1,4 @@
-.PHONY: up down ps build re cre
+.PHONY: up down ps build re cre test
 
 # docker-compose.ymlがあるディレクトリのパス
 DOCKER_COMPOSE_DIR = ./dev/
@@ -29,3 +29,6 @@ re:	down image-prune up
 
 # DBごと削除する
 cre: vdown image-prune up
+
+test: up
+	docker exec dev-api python manage.py test --noinput

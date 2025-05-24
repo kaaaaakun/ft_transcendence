@@ -30,8 +30,8 @@ jobs:
         fi
 
         # レビュワー選択用配列
-        words=("@soma0822" "@kaaaaakun" "@tkuramot" "@soragogo" "@jizots")
-        count=5
+        words=("@soma0822" "@kaaaaakun" "@soragogo" "@jizots")
+        count=4
 
         # ランダムに2人選択
         index1=$(( RANDOM % count ))
