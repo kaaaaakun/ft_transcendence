@@ -61,40 +61,38 @@ function changeProfile(data) {
   })
 }
 
-function getFriendsList(data) {
-  return api.get(`/api/users/${data.display_name}/friends`).then(response => {
+function getFriendsList(id) {
+  return api.get(`/api/users/${id}/friends`).then(response => {
     return response
   })
 }
 
-function getFriendRequests(data) {
-  return api
-    .get(`/api/users/${data.display_name}/friend_requests`)
-    .then(response => {
-      return response
-    })
-}
-
-function friendRequest(data) {
-  return api.post(`/api/users/friends/${data.friend_name}`).then(response => {
+function getFriendRequests(id) {
+  return api.get(`/api/users/${id}/friend_requests`).then(response => {
     return response
   })
 }
 
-function acceptFriendRequest(data) {
-  return api.post(`/api/users/friends/${data.friend_name}`).then(response => {
+function friendRequest(friendId) {
+  return api.post(`/api/users/friends/${friendId}`).then(response => {
     return response
   })
 }
 
-function rejectFriendRequest(data) {
-  return api.delete(`/api/users/friends/${data.friend_name}`).then(response => {
+function acceptFriendRequest(friendId) {
+  return api.post(`/api/users/friends/${friendId}`).then(response => {
     return response
   })
 }
 
-function deleteFriend(data) {
-  return api.delete(`/api/users/friends/${data.friend_name}`).then(response => {
+function rejectFriendRequest(friendId) {
+  return api.delete(`/api/users/friends/${friendId}`).then(response => {
+    return response
+  })
+}
+
+function deleteFriend(friendId) {
+  return api.delete(`/api/users/friends/${friendId}`).then(response => {
     return response
   })
 }

@@ -2,7 +2,6 @@ import { Link } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import Icon from '/icon.png'
 import { userApi } from '@/js/infrastructures/api/userApi'
-import { useNavigate } from '@/js/libs/router'
 
 const handleLogout = () => {
   if (localStorage.getItem('access_token')) {
@@ -40,7 +39,7 @@ const displayAuth = () => {
   )
 }
 
-const renderAvatarSection = avatar_path => {
+const renderAvatarSection = avatarPath => {
   return Teact.createElement(
     'div',
     { className: 'text-center' },
@@ -51,7 +50,7 @@ const renderAvatarSection = avatar_path => {
         'label',
         null,
         Teact.createElement('img', {
-          src: `${avatar_path}?${new Date().getTime()}`,
+          src: `${avatarPath}?${new Date().getTime()}`,
           className: 'img-fluid profile-icon',
           alt: 'Avatar',
           width: '10',
@@ -79,7 +78,6 @@ const displayRegister = () => {
 
 export const Header = () => {
   const [user, setUser] = Teact.useState(null)
-  const navigate = useNavigate()
   Teact.useEffect(() => {
     userApi
       .getCurrentUser()
@@ -94,7 +92,7 @@ export const Header = () => {
       .then(data => {
         setUser(data)
       })
-      .catch(error => {
+      .catch(_error => {
         return null
       })
   }, [])

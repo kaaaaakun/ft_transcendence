@@ -3,18 +3,16 @@ import { useBanner } from '@/js/hooks/useBanner'
 import { userApi } from '@/js/infrastructures/api/userApi'
 import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { Teact } from '@/js/libs/teact'
-import { useNavigate } from '@/js/libs/router'
 
 export const UserProfile = props => {
   const { showInfoBanner, showErrorBanner, banners } = useBanner()
-  const navigate = useNavigate()
   const [isEditing, setIsEditing] = Teact.useState(false)
   const [userData, setUserData] = Teact.useState(null)
   let changeUserName = ''
   const onAccept = friendId => {
     userApi
       .acceptFriendRequest({
-        friend_name: friendId,
+        friendId,
       })
       .then(response => {
         if (!response.ok) {
@@ -28,14 +26,16 @@ export const UserProfile = props => {
           }
         }
       })
-      .then(data => {
+      .then(_data => {
         showInfoBanner({
           message: 'Successfully updated',
           onClose: () => {},
         })
         setUserData(prevUserData => ({
           ...prevUserData,
+          /* biome-ignore lint/style/useNamingConvention: API responseのjson dataをそのまま使用しているため */
           relation_to_current_user: 'friend',
+          /* biome-ignore lint/style/useNamingConvention: API responseのjson dataをそのまま使用しているため */
           num_of_friends: prevUserData.num_of_friends + 1,
         }))
       })
@@ -44,7 +44,7 @@ export const UserProfile = props => {
   const onRequest = friendId => {
     userApi
       .friendRequest({
-        friend_name: friendId,
+        friendId,
       })
       .then(response => {
         if (!response.ok) {
@@ -58,13 +58,14 @@ export const UserProfile = props => {
           }
         }
       })
-      .then(data => {
+      .then(_data => {
         showInfoBanner({
           message: 'Successfully updated',
           onClose: () => {},
         })
         setUserData(prevUserData => ({
           ...prevUserData,
+          /* biome-ignore lint/style/useNamingConvention: API responseのjson dataをそのまま使用しているため */
           relation_to_current_user: 'requesting',
         }))
       })
@@ -73,7 +74,7 @@ export const UserProfile = props => {
   const onReject = friendId => {
     userApi
       .rejectFriendRequest({
-        friend_name: friendId,
+        friendId,
       })
       .then(response => {
         if (!response.ok) {
@@ -87,13 +88,14 @@ export const UserProfile = props => {
           }
         }
       })
-      .then(data => {
+      .then(_data => {
         showInfoBanner({
           message: 'Successfully updated',
           onClose: () => {},
         })
         setUserData(prevUserData => ({
           ...prevUserData,
+          /* biome-ignore lint/style/useNamingConvention: API responseのjson dataをそのまま使用しているため */
           relation_to_current_user: 'stranger',
         }))
       })
@@ -102,7 +104,7 @@ export const UserProfile = props => {
   const onDelete = friendId => {
     userApi
       .deleteFriend({
-        friend_name: friendId,
+        friendId,
       })
       .then(response => {
         if (!response.ok) {
@@ -116,14 +118,16 @@ export const UserProfile = props => {
           }
         }
       })
-      .then(data => {
+      .then(_data => {
         showInfoBanner({
           message: 'Successfully updated',
           onClose: () => {},
         })
         setUserData(prevUserData => ({
           ...prevUserData,
+          /* biome-ignore lint/style/useNamingConvention: API responseのjson dataをそのまま使用しているため */
           relation_to_current_user: 'stranger',
+          /* biome-ignore lint/style/useNamingConvention: API responseのjson dataをそのまま使用しているため */
           num_of_friends: prevUserData.num_of_friends - 1,
         }))
       })
@@ -153,6 +157,7 @@ export const UserProfile = props => {
       const data = await response.json()
       setUserData(prevUserData => ({
         ...prevUserData,
+        /* biome-ignore lint/style/useNamingConvention: API responseのjson dataをそのまま使用しているため */
         avatar_path: data.avatar_url,
       }))
     } catch (error) {
@@ -170,6 +175,7 @@ export const UserProfile = props => {
     }
     try {
       const response = await userApi.changeProfile({
+        /* biome-ignore lint/style/useNamingConvention: APIが期待するjsonのkeyをそのまま使用しているため */
         display_name: changeUserName,
       })
       if (!response.ok) {
@@ -193,6 +199,7 @@ export const UserProfile = props => {
       const data = await response.json()
       setUserData(prevUserData => ({
         ...prevUserData,
+        /* biome-ignore lint/style/useNamingConvention: API responseのjson dataをそのまま使用しているため */
         display_name: data.display_name,
       }))
       setIsEditing(false)
@@ -393,8 +400,10 @@ export const UserProfile = props => {
 
   const friendButton = () => {
     const relation = userData.relation_to_current_user
-    if (relation === 'self') return null
-    if (relation === 'friend')
+    if (relation === 'self') {
+      return null
+    }
+    if (relation === 'friend') {
       return Teact.createElement(
         'button',
         {
@@ -403,7 +412,8 @@ export const UserProfile = props => {
         },
         'Unfriend',
       )
-    if (relation === 'requesting')
+    }
+    if (relation === 'requesting') {
       return Teact.createElement(
         'button',
         {
@@ -412,7 +422,8 @@ export const UserProfile = props => {
         },
         'Cancel Request Friend',
       )
-    if (relation === 'request_received')
+    }
+    if (relation === 'request_received') {
       return Teact.createElement(
         'div',
         null,
@@ -433,7 +444,8 @@ export const UserProfile = props => {
           'Reject Request',
         ),
       )
-    if (relation === 'stranger')
+    }
+    if (relation === 'stranger') {
       return Teact.createElement(
         'button',
         {
@@ -442,6 +454,7 @@ export const UserProfile = props => {
         },
         'Request Friend',
       )
+    }
     return null
   }
 

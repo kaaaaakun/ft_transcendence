@@ -13,8 +13,6 @@ import { PasswordReset } from '@/js/pages/PasswordReset'
 import { SimpleGameLocal } from '@/js/pages/SimpleGameLocal'
 import { TournamentsBracket } from '@/js/pages/TournamentsBracket'
 import { TournamentsDisplayName } from '@/js/pages/TournamentsDisplayName'
-import { TournamentsGame } from '@/js/pages/TournamentsGame'
-import { TournamentsIndex } from '@/js/pages/TournamentsIndex'
 
 function App() {
   console.log('App rendered')
