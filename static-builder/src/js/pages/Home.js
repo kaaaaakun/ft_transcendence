@@ -1,7 +1,5 @@
 import { DefaultButton } from '@/js/components/ui/button'
 import { useBanner } from '@/js/hooks/useBanner'
-import { tournamentsApi } from '@/js/infrastructures/api/tournamentApi'
-import { cookie } from '@/js/infrastructures/cookie/cookie'
 import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'

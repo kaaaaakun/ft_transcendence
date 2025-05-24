@@ -5,13 +5,10 @@
 FROM python:3.9-slim AS base
 
 # コンテナ起動後にも利用する環境変数(secretは.envへ)
-ENV DJANGO_PROJECT_NAME trans
-ENV DJANGO_PROJECT_DIR /${DJANGO_PROJECT_NAME}/
-RUN export SECRET_KEY=$(python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())') && \
-    echo "SECRET_KEY=${SECRET_KEY}" >> /etc/environment
-ENV SECRET_KEY=$SECRET_KEY
-ENV BIND_ADDRESS 0.0.0.0
-ENV BIND_PORT 8000
+ENV DJANGO_PROJECT_NAME=trans
+ENV DJANGO_PROJECT_DIR=/${DJANGO_PROJECT_NAME}/
+ENV BIND_ADDRESS=0.0.0.0
+ENV BIND_PORT=8000
 ENV DJANGO_SETTINGS_MODULE=trans.settings
 
 # install for deploy
@@ -37,35 +34,13 @@ RUN pip install --upgrade pip
 COPY ./api/tool/requirements.txt tool/requirements.txt
 RUN pip install --no-cache-dir -r tool/requirements.txt
 
-# Create a Django project
-RUN django-admin startproject ${DJANGO_PROJECT_NAME}
-
-# Create Django apps
 WORKDIR ${DJANGO_PROJECT_DIR}
-RUN python manage.py startapp tournament
-RUN python manage.py startapp match
-RUN python manage.py startapp user
-RUN python manage.py startapp room
-RUN python manage.py startapp friend
 
-# project, appsのファイルをコピー
-COPY ./api/conf/project/* ${DJANGO_PROJECT_DIR}${DJANGO_PROJECT_NAME}/
-COPY ./api/conf/app_tournament/* ${DJANGO_PROJECT_DIR}tournament/
-COPY ./api/conf/app_match/* ${DJANGO_PROJECT_DIR}match/
-COPY ./api/conf/app_user/ ${DJANGO_PROJECT_DIR}user/
-COPY ./api/conf/app_room/* ${DJANGO_PROJECT_DIR}room/
-COPY ./api/conf/app_friend/* ${DJANGO_PROJECT_DIR}friend/
+# confディレクトリのファイルをコンテナ内にコピー
+COPY ./api/conf/ ${DJANGO_PROJECT_DIR}
 
-# Create utils Directory and Copy files
-RUN mkdir -p ${DJANGO_PROJECT_DIR}utils
-COPY ./api/conf/utils/* ${DJANGO_PROJECT_DIR}utils/
-
-# Create shared config Directory and Copy files
-RUN mkdir -p ${DJANGO_PROJECT_DIR}config
+# configディレクトリのファイルをコンテナ内にコピー
 COPY ./config/* ${DJANGO_PROJECT_DIR}config/
-
-# appsで定めたモデルをDBに反映する準備
-RUN python ${DJANGO_PROJECT_DIR}manage.py makemigrations
 
 # コンテナ起動後に利用するファイルをコピー
 COPY ./api/tool/entrypoint.sh ${DJANGO_PROJECT_DIR}
