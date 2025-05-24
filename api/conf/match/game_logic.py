@@ -1,8 +1,9 @@
 import math
 import random
-import redis
-
 from django.conf import settings
+
+import utils.redis_client as get_redis
+
 
 # フィールド
 WALL_X_LIMIT = settings.WALL_X_LIMIT
@@ -87,7 +88,7 @@ class LocalSimpleScoreManager(ScoreManager):
 class TournamentScoreManager(ScoreManager):
     def __init__(self, position_matchdetail):
         self.position_matchdetail = position_matchdetail
-        self.redis_client = redis.StrictRedis(host = "in_memory_db", port = 6379, db = 0) #NOTE: in_memory_dbはdocker-compose.ymlで定義したRedisのサービス名
+        self.redis_client = get_redis()
 
     def update_score(self, side, points):
         if side == "left":
