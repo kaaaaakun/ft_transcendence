@@ -15,16 +15,18 @@ function getBackgroundColorFromInitial(initial) {
   return colors[index]
 }
 
-export const avatarSection = (user, extraClassName) => {
+export const Avatar = (user, extraClassName) => {
   const avatarPath = user.avatar_path
   if (!avatarPath) {
     const initial = user.display_name?.charAt(0).toUpperCase() || '?'
     const bgClass = getBackgroundColorFromInitial(initial)
     return Teact.createElement(
-        'div',
-        { className: `${bgClass} ${extraClassName} img-fluid text-center d-flex align-items-center justify-content-center` },
-        initial
-      )
+      'div',
+      {
+        className: `${bgClass} ${extraClassName} img-fluid text-center d-flex align-items-center justify-content-center`,
+      },
+      initial,
+    )
   }
   return Teact.createElement(
     'div',

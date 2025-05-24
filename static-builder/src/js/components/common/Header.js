@@ -2,7 +2,7 @@ import { Link } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import Icon from '/icon.png'
 import { userApi } from '@/js/infrastructures/api/userApi'
-import { avatarSection } from '@/js/components/common/Avatar'
+import { Avatar } from '@/js/components/common/Avatar'
 
 const handleLogout = () => {
   if (localStorage.getItem('access_token')) {
@@ -48,7 +48,7 @@ const userLink = user => {
         Link({
           to: `/users/${user.display_name}`,
           className: 'nav-link text-white p-0 ms-3',
-          children: [avatarSection(user, 'header-profile-icon')],
+          children: [Avatar(user, 'header-profile-icon')],
         }),
       )
     : Teact.createElement(
