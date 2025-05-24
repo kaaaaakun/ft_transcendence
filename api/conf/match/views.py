@@ -21,7 +21,7 @@ class MatchDetailViewSet(viewsets.ModelViewSet):
 # end
 
 class LocalSimpleMatchView(APIView):
-    def get(self, request, *args, **kwargs):
+    def get(self):
         try:
             response_data = {'left': {'player_name': 'L'},
                             'right': {'player_name': 'R'}
@@ -29,3 +29,7 @@ class LocalSimpleMatchView(APIView):
             return Response(response_data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class SimpleMatchView(APIView):
+    def get(self, request):
+        return Response({"message": "GET request received"}, status = status.HTTP_200_OK) # TBD
