@@ -121,25 +121,16 @@ class JoinTournamentView(APIView):
                 return Response(response_data, status=status.HTTP_201_CREATED)
 
         except AuthError as e:
-            with open('error.log', 'a') as f:
-                f.write(f" AuthError: {str(e)}\n")
-                f.write(f"Stacktrace: {traceback.format_exc()}\n\n")
             return Response(
                 {'error': str(e)},
                 status=status.HTTP_401_UNAUTHORIZED
             )
         except ValidationError as e:
-            with open('error.log', 'a') as f:
-                f.write(f" ValidationError: {str(e)}\n")
-                f.write(f"Stacktrace: {traceback.format_exc()}\n\n")
             return Response(
                 {'error': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:
-            with open('error.log', 'a') as f:
-                f.write(f" Exception: {str(e)}\n")
-                f.write(f"Stacktrace: {traceback.format_exc()}\n\n")
             return Response(
                 {'error': 'Internal server error'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
