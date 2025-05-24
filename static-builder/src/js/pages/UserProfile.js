@@ -3,6 +3,7 @@ import { useBanner } from '@/js/hooks/useBanner'
 import { userApi } from '@/js/infrastructures/api/userApi'
 import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { Teact } from '@/js/libs/teact'
+import { Avatar } from '@/js/components/common/Avatar'
 
 export const UserProfile = props => {
   const { showInfoBanner, showErrorBanner, banners } = useBanner()
@@ -11,9 +12,7 @@ export const UserProfile = props => {
   let changeUserName = ''
   const onAccept = friendId => {
     userApi
-      .acceptFriendRequest({
-        friendId,
-      })
+      .acceptFriendRequest(friendId)
       .then(response => {
         if (!response.ok) {
           if (response.status === 401) {
@@ -43,9 +42,7 @@ export const UserProfile = props => {
 
   const onRequest = friendId => {
     userApi
-      .friendRequest({
-        friendId,
-      })
+      .friendRequest(friendId)
       .then(response => {
         if (!response.ok) {
           if (response.status === 401) {
@@ -73,9 +70,7 @@ export const UserProfile = props => {
 
   const onReject = friendId => {
     userApi
-      .rejectFriendRequest({
-        friendId,
-      })
+      .rejectFriendRequest(friendId)
       .then(response => {
         if (!response.ok) {
           if (response.status === 401) {
@@ -103,9 +98,7 @@ export const UserProfile = props => {
 
   const onDelete = friendId => {
     userApi
-      .deleteFriend({
-        friendId,
-      })
+      .deleteFriend(friendId)
       .then(response => {
         if (!response.ok) {
           if (response.status === 401) {
@@ -223,11 +216,7 @@ export const UserProfile = props => {
         Teact.createElement(
           'label',
           null,
-          Teact.createElement('img', {
-            src: `${userData.avatar_path}?${new Date().getTime()}`,
-            className: 'img-fluid avatar',
-            alt: 'Avatar',
-          }),
+          Avatar(userData, 'profile-icon'),
           'login_name' in userData
             ? Teact.createElement('input', {
                 type: 'file',
@@ -446,6 +435,7 @@ export const UserProfile = props => {
       )
     }
     if (relation === 'stranger') {
+      console.log('userData', userData)
       return Teact.createElement(
         'button',
         {
