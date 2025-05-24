@@ -8,5 +8,5 @@ router.register(r'player', TournamentPlayerViewSet)
 
 urlpatterns = [
     path('dev/', include(router.urls)),
-    path('/', JoinTournamentView.as_view(), name='join_tournament')
+    path('', JoinTournamentView.as_view(), name='join_tournament')
 ]
