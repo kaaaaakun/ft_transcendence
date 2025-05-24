@@ -9,8 +9,8 @@ def get_opponent_user_and_score(match_id, user_id):
   match = Match.objects.get(id=match_id)
   match_details = MatchDetail.objects.filter(match_id=match_id)
   for match_detail in match_details:
-    if match_detail.player_id.id != user_id:
-      return User.objects.get(id=match_detail.player_id.id), match_detail.score
+    if match_detail.user_id != user_id:
+      return User.objects.get(id=match_detail.user_id), match_detail.score
   return None
 
 def get_relation_to_current_user(user_id, access_id):
@@ -25,16 +25,17 @@ def get_relation_to_current_user(user_id, access_id):
   return 'stranger'
 
 def create_response(user, access_id):
-  match_details = MatchDetail.objects.filter(player_id_id=user.id)
+  match_details = MatchDetail.objects.filter(user_id=user.id)
   game_records = []
   for match_detail in match_details:
-    opponent_user, opponent_score = get_opponent_user_and_score(match_detail.match_id.id, user.id)
+    opponent_user, opponent_score = get_opponent_user_and_score(match_detail.match_id, user.id)
+    
     game_records.append({
       # 'date': match_detail.match_id.created_at,
-      'result': match_detail.result,
+      'result': "win" if match_detail.score == 10 else "lose",
       'opponent_name': opponent_user.display_name,
       'score': {'player': match_detail.score, 'opponent': opponent_score},
-      'match_type': 'tournament' if match_detail.match_id.tournament_id else 'local'
+      'match_type': 'tournament' if Match.objects.get(id=match_detail.match_id).tournament_id else 'local'
     })
   win_count = len([game_record for game_record in game_records if game_record['result'] == 'win'])
   lose_count = len([game_record for game_record in game_records if game_record['result'] == 'lose'])

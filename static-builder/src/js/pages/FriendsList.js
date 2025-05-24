@@ -30,7 +30,7 @@ export const FriendsList = props => {
   // APIデータ取得関数
   const friends = id =>
     userApi
-      .getFriendsList({ id })
+      .getFriendsList(id)
       .then(response => {
         if (!response.ok) {
           return response.json().then(errData => {
@@ -48,7 +48,7 @@ export const FriendsList = props => {
 
   const requests = id =>
     userApi
-      .getFriendRequests({ id })
+      .getFriendRequests(id)
       .then(response => {
         if (!response.ok) {
           if (response.status !== 403) {
@@ -70,9 +70,7 @@ export const FriendsList = props => {
   // ハンドラー関数をコンポーネント内に移動
   const handleAccept = friendId => {
     userApi
-      .acceptFriendRequest({
-        friendId,
-      })
+      .acceptFriendRequest(friendId)
       .then(() => {
         setFriendRequests(prev => prev.filter(req => req.id !== friendId))
       })
@@ -85,9 +83,7 @@ export const FriendsList = props => {
 
   const handleReject = friendId => {
     userApi
-      .deleteFriend({
-        friendId,
-      })
+      .deleteFriend(friendId)
       .then(() => {
         setFriendRequests(prev => prev.filter(req => req.id !== friendId))
       })
