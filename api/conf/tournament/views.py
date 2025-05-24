@@ -55,8 +55,8 @@ class JoinTournamentView(APIView):
 
                 existing_participation = TournamentPlayer.objects.filter(
                 user=user,
-                tournament__is_finished=False,
-                tournament__type=tournament_type
+                is_finished=False,
+                type=tournament_type
                 ).select_related('tournament').first()
 
                 if existing_participation:
