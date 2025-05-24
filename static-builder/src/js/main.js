@@ -13,7 +13,7 @@ import { PasswordReset } from '@/js/pages/PasswordReset'
 import { SimpleGameLocal } from '@/js/pages/SimpleGameLocal'
 import { TournamentsBracket } from '@/js/pages/TournamentsBracket'
 import { TournamentsDisplayName } from '@/js/pages/TournamentsDisplayName'
-
+import { RemoteSimpleList } from './pages/RemoteSimpleList'
 function App() {
   console.log('App rendered')
   Teact.useEffect(() => {
@@ -46,10 +46,14 @@ function App() {
     }),
     Route({
       path: '/remote/simple',
-      component: Home, //遷移先のページは仮置き
+      component: RemoteSimpleList,
     }),
     Route({
       path: '/remote/tournament',
+      component: Home, //遷移先のページは仮置き
+    }),
+    Route({
+      path: '/remote/tournament/:id',
       component: Home, //遷移先のページは仮置き
     }),
     Route({
