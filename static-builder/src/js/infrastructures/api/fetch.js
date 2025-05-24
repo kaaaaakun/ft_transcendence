@@ -6,6 +6,7 @@ class FetchWrapper {
   getAuthHeader() {
     if (localStorage.getItem('access_token')) {
       return {
+        /* biome-ignore lint/style/useNamingConvention: 実際のヘッダーキー（'Authorization'）をそのまま使用しているため */
         Authorization: `Bearer ${localStorage.getItem('access_token')}`,
       }
     }

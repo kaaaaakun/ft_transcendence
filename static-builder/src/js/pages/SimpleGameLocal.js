@@ -10,8 +10,11 @@ const BACKGROUND_COLOR = '#1E1E2C'
 const PADDLE_WIDTH = 5
 
 const SimpleGameLocal = () => {
-  const [endMatch, setEndMatch] = Teact.useState(false)
+  const [_endMatch, setEndMatch] = Teact.useState(false)
   const [gameData, setGameData] = Teact.useState(null)
+  const [leftPlayerName, setLeftPlayerName] = Teact.useState(null)
+  const [rightPlayerName, setRightPlayerName] = Teact.useState(null)
+  const [playersReady, setPlayersReady] = Teact.useState(false)
 
   Teact.useEffect(() => {
     api
@@ -25,27 +28,23 @@ const SimpleGameLocal = () => {
       })
   }, [])
 
-  // API の結果を待つ
-  if (!gameData) {
-    return HeaderWithTitleLayout(
-      Teact.createElement(
-        'div',
-        { className: 'container' },
-        Teact.createElement(
-          'h1',
-          { className: 'text-center text-light' },
-          'Loading...',
-        ),
-      ),
-    )
-  }
-
-  console.log('gameData', gameData)
-  const leftPlayerName = gameData.left.player_name
-  const rightPlayerName = gameData.right.player_name
   let winner = null
 
   Teact.useEffect(() => {
+    if (!gameData) {
+      return
+    }
+    console.log('gameData', gameData)
+    setLeftPlayerName(gameData.left.player_name)
+    setRightPlayerName(gameData.right.player_name)
+    setPlayersReady(false)
+    setTimeout(() => setPlayersReady(true), 0)
+  }, [gameData])
+
+  Teact.useEffect(() => {
+    if (!playersReady) {
+      return
+    }
     const canvas = document.getElementById('pongCanvas')
     const context = canvas.getContext('2d')
 
@@ -147,25 +146,31 @@ const SimpleGameLocal = () => {
       isLeftPaddleDown: false,
     }
     const keyMappings = {
+      /* biome-ignore lint/style/useNamingConvention: 実際のキー入力（'ArrowUp'）をそのまま使用しているため */
       ArrowUp: {
         paddle: 'right',
         key: 'PaddleUpKey',
         state: 'isRightPaddleUp',
       },
+      /* biome-ignore lint/style/useNamingConvention: 実際のキー入力（'ArrowDown'）をそのまま使用しているため */
       ArrowDown: {
         paddle: 'right',
         key: 'PaddleDownKey',
         state: 'isRightPaddleDown',
       },
       w: { paddle: 'left', key: 'PaddleUpKey', state: 'isLeftPaddleUp' },
+      /* biome-ignore lint/style/useNamingConvention: 実際のキー入力（'W'）をそのまま使用しているため */
       W: { paddle: 'left', key: 'PaddleUpKey', state: 'isLeftPaddleUp' },
       s: { paddle: 'left', key: 'PaddleDownKey', state: 'isLeftPaddleDown' },
+      /* biome-ignore lint/style/useNamingConvention: 実際のキー入力（'S'）をそのまま使用しているため */
       S: { paddle: 'left', key: 'PaddleDownKey', state: 'isLeftPaddleDown' },
     }
 
     function handleKeyPush(key, isPushed) {
       const mapping = keyMappings[key]
-      if (!mapping) return null
+      if (!mapping) {
+        return null
+      }
 
       const { state } = mapping
       if (isPushed !== paddleStates[state]) {
@@ -218,59 +223,71 @@ const SimpleGameLocal = () => {
       document.removeEventListener('keydown', keyDownHandler)
       document.removeEventListener('keyup', keyUpHandler)
     }
-  }, [])
+  }, [playersReady])
 
-  return HeaderWithTitleLayout(
-    Teact.createElement(
-      'div',
-      { className: 'container' },
-      Teact.createElement(
-        'div',
-        {
-          id: 'pong',
-          className: 'd-flex justify-content-center align-items-center',
-        },
+  return gameData
+    ? HeaderWithTitleLayout(
         Teact.createElement(
           'div',
-          { className: 'd-flex align-items-center justify-content-center' },
+          { className: 'container' },
           Teact.createElement(
             'div',
             {
-              id: 'leftPlayer',
-              className: 'text-center fs-2 text-white me-3',
-              style: { writingMode: 'vertical-rl' },
+              id: 'pong',
+              className: 'd-flex justify-content-center align-items-center',
             },
-            leftPlayerName,
-          ),
-          Teact.createElement(
-            'div',
-            {
-              className: 'position-relative',
-              style: {
-                width: `${WALL_X_LIMIT}px`,
-                height: `${WALL_Y_LIMIT}px`,
-                backgroundColor: BACKGROUND_COLOR,
-              },
-            },
-            Teact.createElement('canvas', {
-              id: 'pongCanvas',
-              width: WALL_X_LIMIT,
-              height: WALL_Y_LIMIT,
-            }),
-          ),
-          Teact.createElement(
-            'div',
-            {
-              id: 'rightPlayer',
-              className: 'text-center fs-2 text-white ms-3',
-              style: { writingMode: 'vertical-rl' },
-            },
-            rightPlayerName,
+            Teact.createElement(
+              'div',
+              { className: 'd-flex align-items-center justify-content-center' },
+              Teact.createElement(
+                'div',
+                {
+                  id: 'leftPlayer',
+                  className: 'text-center fs-2 text-white me-3',
+                  style: { writingMode: 'vertical-rl' },
+                },
+                leftPlayerName,
+              ),
+              Teact.createElement(
+                'div',
+                {
+                  className: 'position-relative',
+                  style: {
+                    width: `${WALL_X_LIMIT}px`,
+                    height: `${WALL_Y_LIMIT}px`,
+                    backgroundColor: BACKGROUND_COLOR,
+                  },
+                },
+                Teact.createElement('canvas', {
+                  id: 'pongCanvas',
+                  width: WALL_X_LIMIT,
+                  height: WALL_Y_LIMIT,
+                }),
+              ),
+              Teact.createElement(
+                'div',
+                {
+                  id: 'rightPlayer',
+                  className: 'text-center fs-2 text-white ms-3',
+                  style: { writingMode: 'vertical-rl' },
+                },
+                rightPlayerName,
+              ),
+            ),
           ),
         ),
-      ),
-    ),
-  )
+      )
+    : HeaderWithTitleLayout(
+        Teact.createElement(
+          'div',
+          { className: 'container' },
+          Teact.createElement(
+            'h1',
+            { className: 'text-center text-light' },
+            'Loading...',
+          ),
+        ),
+      )
 }
 
 export { SimpleGameLocal }
