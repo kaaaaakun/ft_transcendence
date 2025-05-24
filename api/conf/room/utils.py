@@ -1,5 +1,7 @@
 from utils.redis_client import get_redis
 
+VALID_ROOM_TYPES = ["SIMPLE", "TOURNAMENT_MATCH", "WAITING_4P", "WAITING_8P"]
+
 class RoomKey:
     @staticmethod
     def generate_key(room_type: str, table_id: int) -> str:
@@ -8,8 +10,8 @@ class RoomKey:
     @staticmethod
     def create_room(room_type: str, table_id: int, match_id: int = None, tournament_id: int = None):
         redis_client = get_redis()
-        if room_type not in ["SIMPLE", "TOURNAMENT_MATCH", "WAITING_4P", "WAITING_8P"]:
-            raise ValueError("Invalid room type")
+        if room_type not in VALID_ROOM_TYPES:
+            raise ValueError(f"Invalid room type: {room_type}")
         key = RoomKey.generate_key(room_type, table_id)
         room_data = {
             "type": room_type,
@@ -36,7 +38,6 @@ class RoomKey:
         if type_bytes is None or entry_count_bytes is None:
             return -1
 
-        type = type_bytes.decode()
         entry_count = int(entry_count_bytes)
 
         if type == "SIMPLE" and entry_count >= 2:
