@@ -2,6 +2,7 @@ import { Link } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import Icon from '/icon.png'
 import { userApi } from '@/js/infrastructures/api/userApi'
+import { renderAvatarSection } from '@/js/components/common/Avatar'
 
 const handleLogout = () => {
   if (localStorage.getItem('access_token')) {
@@ -39,26 +40,22 @@ const displayAuth = () => {
   )
 }
 
-const renderAvatarSection = avatarPath => {
-  return Teact.createElement(
-    'div',
-    { className: 'text-center' },
-    Teact.createElement(
-      'div',
-      { className: '' },
-      Teact.createElement(
-        'label',
-        null,
-        Teact.createElement('img', {
-          src: `${avatarPath}?${new Date().getTime()}`,
-          className: 'img-fluid profile-icon',
-          alt: 'Avatar',
-          width: '10',
-          height: '10',
+const userLink = user => {
+  return user
+    ? Teact.createElement(
+        'li',
+        { className: 'nav-link text-info ms-1 d-flex align-items-center' },
+        Link({
+          to: `/users/${user.display_name}`,
+          className: 'nav-link text-white p-0 ms-3',
+          children: [renderAvatarSection(user, 'profile-icon')],
         }),
-      ),
-    ),
-  )
+      )
+    : Teact.createElement(
+        'li',
+        { className: 'nav-link text-white no-pointer-events ms-3' },
+        'Hello, guest',
+      )
 }
 
 const displayRegister = () => {
@@ -126,32 +123,7 @@ export const Header = () => {
         Teact.createElement(
           'ul',
           { className: 'nav' },
-          Teact.createElement(
-            'div',
-            { className: 'd-flex align-items-center' },
-            renderAvatarSection(user?.avatar_path),
-            user
-              ? Teact.createElement(
-                  'li',
-                  {
-                    className: 'nav-link text-info ms-1',
-                  },
-                  Teact.createElement(
-                    'span',
-                    { className: 'nav-item d-flex' },
-                    Link({
-                      to: `/users/${user.display_name}`,
-                      className: 'nav-link text-white p-0 ms-3',
-                      children: [user.display_name],
-                    }),
-                  ),
-                )
-              : Teact.createElement(
-                  'span',
-                  { className: 'nav-link text-white no-pointer-events ms-3' },
-                  'Hello, guest',
-                ),
-          ),
+          userLink(user),
           Teact.createElement(
             'li',
             { className: 'nav-item' },
