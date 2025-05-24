@@ -15,7 +15,7 @@ function getBackgroundColorFromInitial(initial) {
   return colors[index]
 }
 
-export const renderAvatarSection = (user, extraClassName) => {
+export const avatarSection = (user, extraClassName) => {
   const avatarPath = user.avatar_path
   if (!avatarPath) {
     const initial = user.display_name?.charAt(0).toUpperCase() || '?'

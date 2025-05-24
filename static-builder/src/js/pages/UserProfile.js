@@ -3,6 +3,7 @@ import { useBanner } from '@/js/hooks/useBanner'
 import { userApi } from '@/js/infrastructures/api/userApi'
 import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { Teact } from '@/js/libs/teact'
+import { avatarSection } from '@/js/components/common/Avatar'
 
 export const UserProfile = props => {
   const { showInfoBanner, showErrorBanner, banners } = useBanner()
@@ -223,11 +224,7 @@ export const UserProfile = props => {
         Teact.createElement(
           'label',
           null,
-          Teact.createElement('img', {
-            src: `${userData.avatar_path}?${new Date().getTime()}`,
-            className: 'img-fluid avatar',
-            alt: 'Avatar',
-          }),
+          avatarSection(userData, 'profile-icon'),
           'login_name' in userData
             ? Teact.createElement('input', {
                 type: 'file',
