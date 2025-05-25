@@ -33,20 +33,20 @@ class RoomKey:
     def increment_entry_count(room_type: str, table_id: int) -> int:
         redis_client = get_redis()
         key = RoomKey.generate_key(room_type, table_id)
-        type_bytes = redis_client.hget(key, "type")
-        entry_count_bytes = redis_client.hget(key, "entry_count")
-        if type_bytes is None or entry_count_bytes is None:
+        type_str = redis_client.hget(key, "type")
+        entry_count_str = redis_client.hget(key, "entry_count")
+        if type_str is None or entry_count_str is None:
             return -1
 
-        entry_count = int(entry_count_bytes)
+        entry_count = int(entry_count_str)
 
-        if type == "SIMPLE" and entry_count >= 2:
+        if type_str == "SIMPLE" and entry_count >= 2:
             return -1
-        elif type == "TOURNAMENT_MATCH" and entry_count >= 2:
+        elif type_str == "TOURNAMENT_MATCH" and entry_count >= 2:
             return -1
-        elif type == "WAITING_4P" and entry_count >= 4:
+        elif type_str == "WAITING_4P" and entry_count >= 4:
             return -1
-        elif type == "WAITING_8P" and entry_count >= 8:
+        elif type_str == "WAITING_8P" and entry_count >= 8:
             return -1
         return redis_client.hincrby(key, "entry_count", 1)
 

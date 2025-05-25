@@ -36,8 +36,8 @@ class LocalSimpleMatchView(APIView):
 
 class SimpleMatchView(APIView):
     def get(self, request):
-        type = request.query_params.get('type')
-        if type == 'remote':
+        match_type = request.query_params.get('type')
+        if match_type == 'remote':
             try:
                 user = get_user_by_auth(request.headers.get('Authorization'))
                 if not user:
