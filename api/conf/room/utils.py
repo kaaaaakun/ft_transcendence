@@ -49,3 +49,21 @@ class RoomKey:
         elif type == "WAITING_8P" and entry_count >= 8:
             return -1
         return redis_client.hincrby(key, "entry_count", 1)
+
+    @staticmethod
+    def get_keys_by_type_and_entry_count(room_type: str, entry_count: int) -> list:
+        redis_client = get_redis()
+        keys_by_room = redis_client.keys(f"room:{room_type}:*")
+        keys_by_entry = []
+        for key in keys_by_room:
+            room_data = redis_client.hgetall(key)
+            if int(room_data["entry_count"]) < entry_count:
+                keys_by_entry.append(key)
+        return keys_by_entry
+
+    @staticmethod
+    def get_table_id_from_key(key: str) -> int:
+        parts = key.split(":")
+        if len(parts) != 3 or parts[0] != "room":
+            raise ValueError(f"Invalid room key format: {key}")
+        return int(parts[2])

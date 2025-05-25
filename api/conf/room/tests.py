@@ -3,18 +3,11 @@ from django.db import IntegrityError
 
 from .models import RoomMembers
 from .utils import RoomKey
-from user.tests import create_test_user_4
+from user.tests import create_test_user, create_test_user_4
 
 #---------------
 # Helper function to create Data
 #---------------
-def create_test_room_members_4():
-    users = create_test_user_4()
-    roomMembers = []
-    for user in users:
-        roomMembers.append(RoomMembers.objects.create(room_id = 'test_room', user = user))
-    return roomMembers
-
 def create_room_simple():
     room_type = "SIMPLE"
     table_id = 1
@@ -42,6 +35,19 @@ def create_room_waiting_8p():
     match_id = None
     tournament_id = 4
     return RoomKey.create_room(room_type, table_id, match_id, tournament_id)
+
+def create_test_room_members_simple():
+    user = create_test_user('a', 'a', 'a', 'a', 'a')
+    create_room_simple()
+    return RoomMembers.objects.create(room_id = 'room:SIMPLE:1', user = user)
+
+def create_test_room_members_4():
+    users = create_test_user_4()
+    roomMembers = []
+    for user in users:
+        roomMembers.append(RoomMembers.objects.create(room_id = 'test_room', user = user))
+    return roomMembers
+
 
 #--------------
 # Test cases for RoomMembers model
