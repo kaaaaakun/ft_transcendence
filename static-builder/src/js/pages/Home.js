@@ -14,16 +14,18 @@ export const Home = () => {
       text: 'Play Local',
       onClick: () => navigate('/local/game'),
     }),
-    ...(isLoggedIn ? [
-      DefaultButton({
-        text: 'Play Remote',
-        onClick: () => navigate('/remote/simple'),
-      }),
-      DefaultButton({
-        text: 'Play Tournament',
-        onClick: () => navigate('/remote/tournament'),
-      }),
-    ] : []),
+    ...(isLoggedIn
+      ? [
+          DefaultButton({
+            text: 'Play Remote',
+            onClick: () => navigate('/remote/simple'),
+          }),
+          DefaultButton({
+            text: 'Play Tournament',
+            onClick: () => navigate('/remote/tournament'),
+          }),
+      ]
+    : []),
   ]
 
   return HeaderWithTitleLayout(
