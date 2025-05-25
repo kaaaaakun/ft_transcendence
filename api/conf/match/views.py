@@ -25,7 +25,7 @@ class MatchDetailViewSet(viewsets.ModelViewSet):
 # end
 
 class LocalSimpleMatchView(APIView):
-    def get(self):
+    def get(self, request): # request is not used in this case, but it is required by the APIView
         try:
             response_data = {'left': {'player_name': 'L'},
                             'right': {'player_name': 'R'}
