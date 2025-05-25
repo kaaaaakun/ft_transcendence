@@ -1,27 +1,15 @@
-from rest_framework import viewsets
 from .models import User
-from django.db.models import Q
 from .utils import create_response, get_user_by_auth
-import random
-import traceback
-import os
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import viewsets
 from rest_framework import status
 from rest_framework.views import APIView
-from django.db import transaction, DatabaseError
 from django.views import View
-from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.http import JsonResponse
-from .models import User
 from django.contrib.auth.hashers import make_password, check_password
 import json
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.views import APIView
-from django.conf import settings
-from django.core.files.storage import default_storage
-import requests
 from django.utils.timezone import now
 from rest_framework.response import Response
 from .serializers import (
@@ -33,7 +21,6 @@ from .serializers import (
 )
 from .exceptions import AuthError
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.views import exception_handler as drf_exception_handler
 
 class UserLoginView(APIView):
     def post(self, request, *args, **kwargs):

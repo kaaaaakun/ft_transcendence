@@ -30,7 +30,7 @@ export const FriendsList = props => {
   // APIデータ取得関数
   const friends = id =>
     userApi
-      .getFriendsList({ display_name: id })
+      .getFriendsList(id)
       .then(response => {
         if (!response.ok) {
           return response.json().then(errData => {
@@ -39,7 +39,7 @@ export const FriendsList = props => {
         }
         return response.json()
       })
-      .catch(error => {
+      .catch(_error => {
         showErrorBanner({
           message: 'Failed to load friends list',
           onClose: () => {},
@@ -48,7 +48,7 @@ export const FriendsList = props => {
 
   const requests = id =>
     userApi
-      .getFriendRequests({ display_name: id })
+      .getFriendRequests(id)
       .then(response => {
         if (!response.ok) {
           if (response.status !== 403) {
@@ -60,7 +60,7 @@ export const FriendsList = props => {
         }
         return response.json()
       })
-      .catch(error => {
+      .catch(_error => {
         showErrorBanner({
           message: 'Failed to load friend requests',
           onClose: () => {},
@@ -70,14 +70,12 @@ export const FriendsList = props => {
   // ハンドラー関数をコンポーネント内に移動
   const handleAccept = friendId => {
     userApi
-      .acceptFriendRequest({
-        friend_name: friendId,
-      })
+      .acceptFriendRequest(friendId)
       .then(() => {
         setFriendRequests(prev => prev.filter(req => req.id !== friendId))
       })
-      .then(data => {
-        navigate(`users/${id}/friends`)
+      .then(_data => {
+        navigate(`users/${props.params.id}/friends`)
       })
 
     setLoading(true)
@@ -85,14 +83,12 @@ export const FriendsList = props => {
 
   const handleReject = friendId => {
     userApi
-      .deleteFriend({
-        friend_name: friendId,
-      })
+      .deleteFriend(friendId)
       .then(() => {
         setFriendRequests(prev => prev.filter(req => req.id !== friendId))
       })
-      .then(data => {
-        navigate(`users/${id}/friends`)
+      .then(_data => {
+        navigate(`users/${props.params.id}/friends`)
       })
 
     setLoading(true)
@@ -110,7 +106,7 @@ export const FriendsList = props => {
     )
   }
 
-  if (!friendsList && !friendRequests) {
+  if (!(friendsList || friendRequests)) {
     return SimpleHeaderLayout(
       ...banners,
       Teact.createElement(

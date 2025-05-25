@@ -5,8 +5,7 @@ import { SimpleHeaderLayout } from '@/js/layouts/SimpleHeaderLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 
-function handleSubmit(event, showErrorBanner) {
-  const navigate = useNavigate()
+function handleSubmit(event, showErrorBanner, navigate) {
   event.preventDefault() // フォームのデフォルトの送信を防ぐ（ページリロード防止）
 
   const formData = new FormData(event.target)
@@ -34,7 +33,7 @@ function handleSubmit(event, showErrorBanner) {
       }
       navigate('/', { data })
     })
-    .catch(error => {
+    .catch(_error => {
       showErrorBanner({
         message: 'Invalid login name or password',
         onClose: () => {},
@@ -43,8 +42,8 @@ function handleSubmit(event, showErrorBanner) {
 }
 
 export const Login = () => {
-  const { showInfoBanner, showWarningBanner, showErrorBanner, banners } =
-    useBanner()
+  const navigate = useNavigate()
+  const { showErrorBanner, banners } = useBanner()
   return SimpleHeaderLayout(
     Teact.createElement(
       'div',
@@ -52,7 +51,7 @@ export const Login = () => {
       Teact.createElement(
         'form',
         {
-          onSubmit: event => handleSubmit(event, showErrorBanner),
+          onSubmit: event => handleSubmit(event, showErrorBanner, navigate),
           className: 'text-center mt-3 d-grid gap-2 col-3 mx-auto',
         },
         ...banners,

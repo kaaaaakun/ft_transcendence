@@ -2,9 +2,8 @@ from django.test import TestCase
 from django.core.exceptions import ValidationError
 
 from .models import Match, MatchDetail
-from user.models import User
-from user.tests import create_test_user_4, create_test_user_8
-from tournament.models import Tournament, TournamentPlayer
+from room.tests import create_test_room_members_simple
+from user.tests import create_test_user, create_test_user_4, create_test_user_8
 from tournament.tests import create_test_tournament_4, create_test_tournament_8
 
 from django.urls import reverse
@@ -71,6 +70,34 @@ class MatchDetailTestCase(TestCase):
         self.assertEqual(len(matchDetails), 2)
         self.assertIsInstance(matchDetails[0], MatchDetail)
         self.assertEqual(matchDetails[0].match.id, matchDetails[1].match.id)
-        self.assertEqual(matchDetails[0].user.id, 1)
-        self.assertEqual(matchDetails[1].user.id, 2)
+        self.assertNotEqual(matchDetails[0].user, matchDetails[1].user)
         self.assertEqual(matchDetails[0].score, 0)
+
+#--------------
+# Test cases for Match API
+#--------------
+class MatchAPITestCase(APITestCase):
+    def test_get_simple_match(self):
+        create_test_user('a', 'a', 'a', 'a', 'a')
+        access_response = self.client.post(
+            reverse('login'),
+            {'login_name': 'a', 'password': 'a'},
+            format='json'
+        )
+        token = access_response.json()['access_token']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        url = reverse('simple-match')
+        # 参加待ちのシンプル対戦ルームがない時
+        response = self.client.get(url, {'type': 'remote'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, [])
+        # 参加待ちのシンプル対戦ルームが1つの時
+        create_test_room_members_simple()
+        response = self.client.get(url, {'type': 'remote'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response.data, list)
+        self.assertGreaterEqual(len(response.data), 1)
+        for item in response.data:
+            self.assertIsInstance(item['match_id'], int)
+            self.assertIsInstance(item['display_name'], str)
+            print(item)

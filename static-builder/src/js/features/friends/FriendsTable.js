@@ -143,7 +143,9 @@ export const FriendsTable = ({
   while (paddedFriends.length < maxLength) {
     paddedFriends.push({
       id: `empty-${paddedFriends.length}`,
+      /* biome-ignore lint/style/useNamingConvention: API responseのjson dataと合わせる必要があるため*/
       friend_name: '',
+      /* biome-ignore lint/style/useNamingConvention: API responseのjson dataと合わせる必要があるため*/
       is_online: false,
     })
   }
@@ -151,7 +153,9 @@ export const FriendsTable = ({
   while (paddedRequests.length < maxLength) {
     paddedRequests.push({
       id: `empty-${paddedRequests.length}`,
+      /* biome-ignore lint/style/useNamingConvention: API responseのjson dataと合わせる必要があるため*/
       friend_name: '',
+      /* biome-ignore lint/style/useNamingConvention: API responseのjson dataと合わせる必要があるため*/
       is_online: false,
     })
   }

@@ -5,51 +5,50 @@ import { SimpleHeaderLayout } from '@/js/layouts/SimpleHeaderLayout'
 import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 
-const secretQuestion = null
-function handleSubmit(event, showErrorBanner) {
+export const DeleteAccount = () => {
+  const { showErrorBanner, banners } = useBanner()
   const navigate = useNavigate()
-  event.preventDefault() // フォームのデフォルトの送信を防ぐ（ページリロード防止）
 
-  const formData = new FormData(event.target)
+  function handleSubmit(event, showErrorBanner) {
+    event.preventDefault() // フォームのデフォルトの送信を防ぐ（ページリロード防止）
 
-  // FormDataからJSON形式のデータに変換
-  const data = {}
-  formData.forEach((value, key) => {
-    data[key] = value
-  })
-  if (data.login_name) {
-    userApi
-      .deleteAccount(data)
-      .then(response => {
-        if (response.status === 401) {
+    const formData = new FormData(event.target)
+
+    // FormDataからJSON形式のデータに変換
+    const data = {}
+    formData.forEach((value, key) => {
+      data[key] = value
+    })
+    if (data.login_name) {
+      userApi
+        .deleteAccount(data)
+        .then(response => {
+          if (response.status === 401) {
+            localStorage.removeItem('access_token')
+            localStorage.removeItem('refresh_token')
+            throw new Error('Unauthorized')
+          }
+          if (!response.ok) {
+            return response.json().then(errData => {
+              throw new Error(errData.error || 'Unknown error occurred')
+            })
+          }
+          return response.json()
+        })
+        .then(data => {
           localStorage.removeItem('access_token')
           localStorage.removeItem('refresh_token')
-          throw new Error('Unauthorized')
-        }
-        if (!response.ok) {
-          return response.json().then(errData => {
-            throw new Error(errData.error || 'Unknown error occurred')
-          })
-        }
-        return response.json()
-      })
-      .then(data => {
-        localStorage.removeItem('access_token')
-        localStorage.removeItem('refresh_token')
-        navigate('/register', { data })
-      })
-      .catch(error => {
-        showErrorBanner({
-          message: 'Failed to delete account',
-          onClose: () => {},
+          navigate('/register', { data })
         })
-      })
+        .catch(_error => {
+          showErrorBanner({
+            message: 'Failed to delete account',
+            onClose: () => {},
+          })
+        })
+    }
   }
-}
 
-export const DeleteAccount = () => {
-  const { showInfoBanner, showWarningBanner, showErrorBanner, banners } =
-    useBanner()
   return SimpleHeaderLayout(
     Teact.createElement(
       'div',
