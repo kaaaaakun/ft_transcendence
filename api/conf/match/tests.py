@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 
 from .models import Match, MatchDetail
 from room.tests import create_test_room_members_simple
-from user.tests import create_test_user_4, create_test_user_8
+from user.tests import create_test_user, create_test_user_4, create_test_user_8
 from tournament.tests import create_test_tournament_4, create_test_tournament_8
 
 from django.urls import reverse
@@ -78,7 +78,7 @@ class MatchDetailTestCase(TestCase):
 #--------------
 class MatchAPITestCase(APITestCase):
     def test_get_simple_match(self):
-        create_test_room_members_simple()
+        create_test_user('a', 'a', 'a', 'a', 'a')
         access_response = self.client.post(
             reverse('login'),
             {'login_name': 'a', 'password': 'a'},
@@ -87,6 +87,12 @@ class MatchAPITestCase(APITestCase):
         token = access_response.json()['access_token']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
         url = reverse('simple-match')
+        # 参加待ちのシンプル対戦ルームがない時
+        response = self.client.get(url, {'type': 'remote'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, [])
+        # 参加待ちのシンプル対戦ルームが1つの時
+        create_test_room_members_simple()
         response = self.client.get(url, {'type': 'remote'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response.data, list)

@@ -37,7 +37,7 @@ def create_room_waiting_8p():
     return RoomKey.create_room(room_type, table_id, match_id, tournament_id)
 
 def create_test_room_members_simple():
-    user = create_test_user('a', 'a', 'a', 'a', 'a')
+    user = create_test_user('z', 'z', 'z', 'z', 'z')
     create_room_simple()
     return RoomMembers.objects.create(room_id = 'room:SIMPLE:1', user = user)
 
