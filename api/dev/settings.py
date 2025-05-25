@@ -139,11 +139,13 @@ DATABASES = {
 }
 
 ## Redisの設定を追加
+REDIS_HOST = 'in_memory_db'
+REDIS_PORT = 6379
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('in_memory_db', 6379)],  # in_memory_dbのアドレスとポートを指定
+            "hosts": [(REDIS_HOST, REDIS_PORT)],
         },
     },
 }

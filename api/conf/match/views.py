@@ -6,6 +6,10 @@ from django.utils.decorators import method_decorator
 from django.db import DatabaseError
 
 from .models import Match, MatchDetail
+from .utils import create_simple_match_response
+from user.utils import get_user_by_auth
+from user.exceptions import AuthError
+from room.utils import RoomKey
 from utils.decorators import admin_only
 
 END_OF_GAME_SCORE = 11
@@ -21,7 +25,7 @@ class MatchDetailViewSet(viewsets.ModelViewSet):
 # end
 
 class LocalSimpleMatchView(APIView):
-    def get(self, request, *args, **kwargs):
+    def get(self, request): # request is not used in this case, but it is required by the APIView
         try:
             response_data = {'left': {'player_name': 'L'},
                             'right': {'player_name': 'R'}
@@ -29,3 +33,18 @@ class LocalSimpleMatchView(APIView):
             return Response(response_data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class SimpleMatchView(APIView):
+    def get(self, request):
+        match_type = request.query_params.get('type')
+        if match_type == 'remote':
+            try:
+                user = get_user_by_auth(request.headers.get('Authorization'))
+                if not user:
+                    raise AuthError('Authorization header is incorrect.')
+                waiting_simple_room_keys = RoomKey.get_keys_by_type_and_entry_count("SIMPLE", 2)
+                if not waiting_simple_room_keys:
+                    return Response([], status = status.HTTP_200_OK)
+                return Response(create_simple_match_response(waiting_simple_room_keys), status = status.HTTP_200_OK)
+            except AuthError as e:
+                return Response({"error": str(e)}, status = status.HTTP_401_UNAUTHORIZED)
