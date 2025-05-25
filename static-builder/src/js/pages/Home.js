@@ -7,7 +7,7 @@ import { Teact } from '@/js/libs/teact'
 export const Home = () => {
   const { banners } = useBanner()
   const navigate = useNavigate()
-  const isLoggedIn = !!(localStorage.getItem('access_token'))
+  const isLoggedIn = !!localStorage.getItem('access_token')
 
   const bottons = [
     DefaultButton({
@@ -24,8 +24,8 @@ export const Home = () => {
             text: 'Play Tournament',
             onClick: () => navigate('/remote/tournament'),
           }),
-      ]
-    : []),
+        ]
+      : []),
   ]
 
   return HeaderWithTitleLayout(
