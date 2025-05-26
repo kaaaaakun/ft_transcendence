@@ -81,6 +81,49 @@ paths:
               schema:
                 $ref: "#/components/schemas/error_response"
 
+    post:
+      tags:
+        - simple_play
+      summary: 待機中の対戦に参加
+      description: |
+        参加待ちの対戦（リモート）情報を取得します。クエリパラメーターは不要ですが、bodyに``type: remote``を含みます。
+        JWT認証が必要です。レスポンスには、参加用に必要な `ROOM.id` を含みます。
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum: [remote]
+              required:
+                - type
+            example:
+              type: remote
+      responses:
+        "200":
+          description: ROOMの情報
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  room_id:
+                    type: string
+                    description: 参加用のルームID
+              example:
+                room_id: "room:SIMPLE:1"
+        "401":
+          description: 認証エラー(JWTトークンが無効または未提供)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+
   /api/auth/login:
     post:
       tags:
