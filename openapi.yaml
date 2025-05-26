@@ -6,7 +6,7 @@ info:
   contact:
     name: とらせん
     url: https://www.example.com/support
-    email: support@example.com    
+    email: support@example.com
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -392,7 +392,7 @@ components:
       description: フレンドの表示名
       schema:
         type: string
-  
+
   securitySchemes:
     bearerAuth:
       type: http
@@ -562,7 +562,7 @@ components:
         password_confirmation: "password1"
         secret_question: "母親の旧姓は？"
         secret_answer: "石川"
-    
+
     user_passwordreset_request:
       type: object
       properties:
@@ -594,7 +594,7 @@ components:
         - login_name
       example:
         login_name: "user1"
-    
+
     secret_question_response:
       type: object
       properties:
@@ -604,7 +604,7 @@ components:
         - secret_question
       example:
         secret_question: "母親の旧姓は？"
-    
+
     friends_response:
       type: object
       properties:
@@ -632,7 +632,7 @@ components:
             is_online: false
           - friend_name: "user4"
             is_online: true
-    
+
     user_patch_request:
       type: object
       properties:
@@ -773,7 +773,7 @@ components:
             wins: 1
             losses: 1
             win_rate: 50.0
-    
+
     error_response:
       type: object
       properties:
