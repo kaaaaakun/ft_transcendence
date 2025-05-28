@@ -11,6 +11,8 @@ from user.tests import create_test_user, create_test_user_4
 def create_room_simple(table_id):
     room_type = "SIMPLE"
     table_id = table_id
+    # The match_id is set to the same value as table_id because, for SIMPLE rooms, 
+    # the table_id uniquely identifies both the table and the match.
     match_id = table_id
     tournament_id = None
     return RoomKey.create_room(room_type, table_id, match_id, tournament_id)
