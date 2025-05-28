@@ -7,6 +7,26 @@ import { Teact } from '@/js/libs/teact'
 export const Home = () => {
   const { banners } = useBanner()
   const navigate = useNavigate()
+  const isLoggedIn = !!localStorage.getItem('access_token')
+
+  const bottons = [
+    DefaultButton({
+      text: 'Play Local',
+      onClick: () => navigate('/local/game'),
+    }),
+    ...(isLoggedIn
+      ? [
+          DefaultButton({
+            text: 'Play Remote',
+            onClick: () => navigate('/remote/simple'),
+          }),
+          DefaultButton({
+            text: 'Play Tournament',
+            onClick: () => navigate('/remote/tournament'),
+          }),
+        ]
+      : []),
+  ]
 
   return HeaderWithTitleLayout(
     Teact.createElement(
@@ -16,18 +36,7 @@ export const Home = () => {
       Teact.createElement(
         'div',
         { className: 'd-grid gap-2 col-3 mx-auto' },
-        DefaultButton({
-          text: 'Play Local',
-          onClick: () => navigate('/local/game'),
-        }),
-        DefaultButton({
-          text: 'Play Remote',
-          onClick: () => navigate('/remote/simple'),
-        }),
-        DefaultButton({
-          text: 'Play Tournament',
-          onClick: () => navigate('/remote/tournament'),
-        }),
+        ...bottons,
       ),
     ),
   )

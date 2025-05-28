@@ -12,60 +12,18 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 
 tags:
-  - name: local_play
-    description: localでponggameを遊ぶためのAPI
+  - name: local_simple
+    description: ローカルでシンプル対戦を遊ぶためのAPI
   - name: user_management
     description: ユーザー管理用API
+  - name: remote_simple
+    description: リモートでシンプル対戦を遊ぶためのAPI
 
 paths:
-  /api/tournaments/local:
-    post:
-      tags:
-        - local_play
-      summary: トーナメントの作成
-      description: プレイヤーのリストを使用して新しいトーナメントを作成します。プレイヤーの数は2の累乗（例：2、4、8、16）でなければなりません。
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/tournament_request"
-      responses:
-        "200":
-          description: トーナメントの待機情報
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/tournament_response"
-        default:
-          description: エラーレスポンスまたはその他のレスポンス
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/error_response"
-    get:
-      tags:
-        - local_play
-      summary: トーナメントの表示
-      description: 試合からトーナメントに戻るためのAPI。
-      responses:
-        "200":
-          description: トーナメント表
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/tournament_response"
-        default:
-          description: エラーレスポンスまたはその他のレスポンス
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/error_response"
-
   /api/matches/local:
     get:
       tags:
-        - local_play
+        - local_simple
       summary: 試合の開始
       description: 次の試合の詳細を取得します。
       responses:
@@ -82,32 +40,47 @@ paths:
               schema:
                 $ref: "#/components/schemas/error_response"
 
-  /api/matches/localtournament:
+  /api/simple-matches/:
     get:
       tags:
-        - local_tournamentplay
-      summary: 試合の開始
-      description: 次の試合の詳細を取得します。クッキーとして `tournament_id` を送信してください。
+        - simple_play
+      summary: 参加待ち対戦リストの取得
+      description: |
+        クエリパラメータ `type=remote` を指定して、参加待ちの対戦（リモート）情報を取得します。
+        JWT認証が必要です。レスポンスにはユーザーの表示名と、参加用に必要な `matches.id` を含みます。
+      security:
+        - bearerAuth: []
       parameters:
-        - in: cookie
-          name: tournament_id
-          schema:
-            type: integer
+        - name: type
+          in: query
           required: true
-          description: 取得するトーナメントのID
+          schema:
+            type: string
+            enum: [remote]
+          description: 対戦タイプ（現在は remote のみ対応）
       responses:
         "200":
-          description: 試合情報
+          description: 参加待ち対戦の一覧
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/match_status_tournament"
-        default:
-          description: エラーレスポンスまたはその他のレスポンス
+                type: array
+                items:
+                  type: object
+                  properties:
+                    display_name:
+                      type: string
+                      description: 対戦ルームを保持するユーザーの名前
+                    match_id:
+                      type: integer
+                      description: 参加用のマッチID
+        "401":
+          description: 認証エラー(JWTトークンが無効または未提供)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/error_response"
+
   /api/auth/login:
     post:
       tags:

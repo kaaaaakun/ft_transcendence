@@ -139,11 +139,13 @@ DATABASES = {
 }
 
 ## Redisの設定を追加
+REDIS_HOST = 'in_memory_db' #Dockerのサービス名と同じにする
+REDIS_PORT = 6379
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('in_memory_db', 6379)],  # Redisのアドレスとポートを指定。コンテナ名なにになるのかで変わる
+            "hosts": [(REDIS_HOST, REDIS_PORT)],
         },
     },
 }
