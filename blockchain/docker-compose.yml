@@ -1,0 +1,8 @@
+services:
+  hardhat:
+    build: .
+    environment:
+      RPC_URL: ${PRIVATE_KEY}
+      PRIVATE_KEY: ${PRIVATE_KEY}
+    container_name: hardhat-deployer
+
