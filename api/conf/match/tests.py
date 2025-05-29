@@ -2,7 +2,8 @@ from django.test import TestCase
 from django.core.exceptions import ValidationError
 
 from .models import Match, MatchDetail
-from room.tests import create_test_room_members_simple
+from utils.redis_client import get_redis
+from room.tests import create_room_simple, create_test_room_members_simple
 from user.tests import create_test_user, create_test_user_4, create_test_user_8
 from tournament.tests import create_test_tournament_4, create_test_tournament_8
 
@@ -100,4 +101,30 @@ class MatchAPITestCase(APITestCase):
         for item in response.data:
             self.assertIsInstance(item['match_id'], int)
             self.assertIsInstance(item['display_name'], str)
-            print(item)
+            # print(item) # for debugging purposes
+
+    def test_post_simple_match_create(self):
+        # Redisの初期化
+        get_redis().flushdb()
+
+        create_test_user('a', 'a', 'a', 'a', 'a')
+        access_response = self.client.post(
+            reverse('login'),
+            {'login_name': 'a', 'password': 'a'},
+            format='json'
+        )
+        token = access_response.json()['access_token']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        url = reverse('simple-match-create')
+        # 参加待ちのシンプル対戦ルームが5つ未満の時
+        create_room_simple(2)
+        response = self.client.post(url, {'type': 'remote'})
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIsInstance(response.data, dict)
+        self.assertIn('match_id', response.data)
+        # print(response.data) # for debugging purposes
+        # 参加待ちのシンプル対戦ルームが5つ以上の時
+        for i in range(5):
+            create_room_simple(i + 3)
+        response = self.client.post(url, {'type': 'remote'})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
