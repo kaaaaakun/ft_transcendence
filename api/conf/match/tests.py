@@ -101,9 +101,9 @@ class MatchAPITestCase(APITestCase):
         for item in response.data:
             self.assertIsInstance(item['match_id'], int)
             self.assertIsInstance(item['display_name'], str)
-            print(item)
+            # print(item) # for debugging purposes
 
-    def test_post_simple_match(self):
+    def test_post_simple_match_create(self):
         # Redisの初期化
         get_redis().flushdb()
 
@@ -115,13 +115,13 @@ class MatchAPITestCase(APITestCase):
         )
         token = access_response.json()['access_token']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
-        url = reverse('simple-match')
+        url = reverse('simple-match-create')
         # 参加待ちのシンプル対戦ルームが5つ未満の時
         create_room_simple(2)
         response = self.client.post(url, {'type': 'remote'})
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertIsInstance(response.data, dict)
-        self.assertIn('room_id', response.data)
+        self.assertIn('match_id', response.data)
         # print(response.data) # for debugging purposes
         # 参加待ちのシンプル対戦ルームが5つ以上の時
         for i in range(5):
