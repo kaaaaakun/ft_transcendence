@@ -19,21 +19,21 @@ export const TournamentsIndex = () => {
         'div',
         { className: 'd-grid gap-2 col-3 mx-auto' },
         DefaultButton({
-          text: '2人対戦',
+          text: '2-Player Match',
           onClick: () =>
             navigate('/tournaments/display-name?players=2', {
               playerNum: 2,
             }),
         }), // TBD
         DefaultButton({
-          text: '4人対戦',
+          text: '4-Player Match',
           onClick: () =>
             navigate('/tournaments/display-name?players=4', {
               playerNum: 4,
             }),
         }), // TBD
         DefaultButton({
-          text: '8人対戦',
+          text: '8-Player Match',
           onClick: () =>
             navigate('/tournaments/display-name?players=8', {
               playerNum: 8,
