@@ -52,6 +52,7 @@ class SimpleMatchView(APIView):
         else:
             return Response({"error": "Invalid match type."}, status = status.HTTP_400_BAD_REQUEST)
 
+class SimpleMatchCreateView(APIView):
     def post(self, request):
         match_type = request.data.get('type')
         if match_type != 'remote':
@@ -65,7 +66,7 @@ class SimpleMatchView(APIView):
                 match = Match.objects.create()
                 room_key = RoomKey.create_room(room_type = "SIMPLE", table_id = match.id, match_id = match.id)
                 RoomMembers.objects.create(room_id = room_key, user = user)
-                return Response({"room_id": room_key}, status = status.HTTP_201_CREATED)
+                return Response({"match_id": match.id}, status = status.HTTP_201_CREATED)
             else:
                 return Response({"error": "Waiting room limit reached."}, status = status.HTTP_400_BAD_REQUEST)
 
