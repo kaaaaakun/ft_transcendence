@@ -85,7 +85,7 @@ paths:
     post:
       tags:
         - simple_play
-      summary: 待機中の対戦に参加
+      summary: 対戦待ちルームの作成
       description: |
         自分の対戦待ちルームを作成します。クエリパラメーターは不要ですが、bodyに``type: remote``を含みます。
         JWT認証が必要です。レスポンスには、ゲーム画面への遷移に必要な `match_id` を含みます。
