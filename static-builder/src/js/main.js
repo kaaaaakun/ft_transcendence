@@ -46,6 +46,10 @@ function App() {
     }),
     Route({
       path: '/remote/simple',
+      component: SimpleGameRemote,
+    }),
+    Route({
+      path: '/remote/matches/:id',
       component: Home, //遷移先のページは仮置き
     }),
     Route({
