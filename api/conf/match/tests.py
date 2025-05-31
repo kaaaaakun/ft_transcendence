@@ -93,7 +93,7 @@ class MatchAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, [])
         # 参加待ちのシンプル対戦ルームが1つの時
-        create_test_room_members_simple()
+        create_test_room_members_simple(1)
         response = self.client.get(url, {'type': 'remote'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response.data, list)
@@ -128,3 +128,29 @@ class MatchAPITestCase(APITestCase):
             create_room_simple(i + 3)
         response = self.client.post(url, {'type': 'remote'})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_post_simple_match_join(self):
+        # Redisの初期化
+        get_redis().flushdb()
+
+        create_test_user('a', 'a', 'a', 'a', 'a')
+        access_response = self.client.post(
+            reverse('login'),
+            {'login_name': 'a', 'password': 'a'},
+            format='json'
+        )
+        token = access_response.json()['access_token']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        url = reverse('simple-match-join')
+
+        # 参加待ちのシンプル対戦ルームがない時
+        response = self.client.post(url, {'match_id': 1})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # 参加待ちのシンプル対戦ルームがある時
+        match = create_test_match_simple()
+        create_test_room_members_simple(match.id)
+        response = self.client.post(url, {'match_id': match.id})
+        # print(response.data) # for debugging purposes
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIn('match_id', response.data)
