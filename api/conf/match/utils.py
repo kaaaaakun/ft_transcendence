@@ -38,7 +38,7 @@ def try_join_match(match_id, user):
         RoomMembers.objects.create(room_id = room_id, user = user)
         room_members = RoomMembers.objects.filter(room_id = room_id)
         if len(room_members) != 2:
-            return {"error": "RoomMembers count does not expected."}, False
+            return {"error": "RoomMembers count is not as expected."}, False
         for member in room_members:
             MatchDetail.objects.create(match = match, user = member.user)
         return {"match_id": match_id}, True     
