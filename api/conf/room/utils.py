@@ -51,6 +51,12 @@ class RoomKey:
         return redis_client.hincrby(key, "entry_count", 1)
 
     @staticmethod
+    def decrement_entry_count(room_type: str, table_id: int) -> int:
+        redis_client = get_redis()
+        key = RoomKey.generate_key(room_type, table_id)
+        return redis_client.hincrby(key, "entry_count", -1)
+
+    @staticmethod
     def get_keys_by_type_and_entry_count(room_type: str, entry_count: int) -> list:
         redis_client = get_redis()
         keys_by_room = redis_client.keys(f"room:{room_type}:*")

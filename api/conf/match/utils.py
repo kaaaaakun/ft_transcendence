@@ -1,3 +1,5 @@
+from django.db import DatabaseError
+
 from .models import Match, MatchDetail
 from room.models import RoomMembers
 from room.utils import RoomKey
@@ -44,3 +46,6 @@ def try_join_match(match_id, user):
         return {"match_id": match_id}, True     
     except Match.DoesNotExist:
         return {"error": "Match does not exist."}, False
+    except DatabaseError:
+        RoomKey.decrement_entry_count(room_type = room_data["type"], table_id = match_id)
+        return {"error": "Database error occurred."}, False
