@@ -38,10 +38,10 @@ def create_room_waiting_8p():
     tournament_id = 4
     return RoomKey.create_room(room_type, table_id, match_id, tournament_id)
 
-def create_test_room_members_simple():
+def create_test_room_members_simple(room_table_id):
     user = create_test_user('z', 'z', 'z', 'z', 'z')
-    create_room_simple(1)
-    return RoomMembers.objects.create(room_id = 'room:SIMPLE:1', user = user)
+    room_id = create_room_simple(room_table_id)
+    return RoomMembers.objects.create(room_id = room_id, user = user)
 
 def create_test_room_members_4():
     users = create_test_user_4()
