@@ -1,9 +1,6 @@
 # API
-
 ## セットアップ
-
-以下のコマンドを実行したのち、http://localhost:8000/api + /endpoint にアクセスすると利用できる
-
+以下のコマンドを実行したのち、http://localhost:8000/api + /endpointにアクセスすると利用できる  
 ```
 $ > cd api
 $ > make
@@ -11,26 +8,22 @@ $ > docker exec -it dev-backend-1 bash
 $container > run
 ```
 
-## API エンドポイントの一覧
+## APIエンドポイントの一覧
+openapi.yamlを参照
 
-openapi.yaml を参照
-
-DB のテーブルにアクセスする uri は、25％では admin にのみ公開している。(ex. tournaments/tournaments)  
+DBのテーブルにアクセスするuriは、25％ではadminにのみ公開している。(ex. tournaments/tournaments)  
 /api/admin/でログインしたら利用できる。
 
 ## よく使いそうなコマンド
-
 ```
 test match # エンドポイントのテスト。manage.pyのあるディレクトリで 'match'はアプリ名に置き換える
 ```
 
 ## フレームワーク
-
-- Django
-- DjangoREST
+* Django
+* DjangoREST
 
 ## ディレクトリ構成
-
 ```
 ├── Dockerfile
 ├── Makefile # 開発フェーズのコンテナ作成用
@@ -66,20 +59,18 @@ test match # エンドポイントのテスト。manage.pyのあるディレク�
     └── entrypoint.sh # コンテナ起動後に実行するコマンド集
 ```
 
-## 新たな app を追加する時は下記のコマンドを実行
-
-config の内容が必要なので、コピーして使用する。
+## 新たなappを追加する時は下記のコマンドを実行
+configの内容が必要なので、コピーして使用する。
 
 ```sh
 cd api/conf
 mkdir config
 cp ../../config/* config/
 python3 manage.py startapp {new_app}
-rm -rf config
+rm -rf config 
 ```
 
 ## モデルを変更した時は下記のコマンドを実行
-
 ```sh
 python3 -m pip install -r tool/requirements.txt
 cd api/conf
@@ -87,7 +78,6 @@ python3 manage.py makemigrations
 ```
 
 ## SECRET_KEY の作成方法
-
 ```sh
 python3 -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
 ```
