@@ -131,6 +131,9 @@ class JoinTournamentView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:
+            with open('error_log.txt', 'a') as f:
+                f.write(f"Error: {str(e)}\n")
+                f.write(traceback.format_exc() + "\n")
             return Response(
                 {'error': 'Internal server error'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
