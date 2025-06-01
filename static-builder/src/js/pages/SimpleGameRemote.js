@@ -31,8 +31,8 @@ export function SimpleGameRemote() {
   /* biome-disable lint/style/useNamingConvention */
   const handleJoin = async match => {
     try {
+      // biome-ignore lint/style/useNamingConvention
       const response = await api.post('/api/simple-matches/join/', {
-        // biome-ignore lint/style/useNamingConvention
         match_id: match.match_id,
       })
       if (response.status === 201) {
