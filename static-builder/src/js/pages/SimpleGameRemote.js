@@ -53,7 +53,9 @@ export function SimpleGameRemote() {
       if (err.response && typeof err.response.json === 'function') {
         try {
           const errorData = await err.response.json()
-          if (errorData?.error) { errorMsg = errorData.error }
+          if (errorData?.error) {
+            errorMsg = errorData.error
+          }
         } catch {}
       }
       showErrorBanner({
@@ -137,8 +139,9 @@ export function SimpleGameRemote() {
       error
         ? Teact.createElement('div', { className: 'error text-center' }, error)
         : null,
-      (loading || error)
-        ? null : Teact.createElement(
+      loading || error
+        ? null
+        : Teact.createElement(
             'div',
             { className: 'room-list d-flex flex-column align-items-center' },
             ...roomListChildren,
