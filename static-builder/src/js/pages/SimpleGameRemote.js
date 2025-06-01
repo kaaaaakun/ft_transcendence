@@ -14,7 +14,6 @@ export function SimpleGameRemote() {
   const navigate = useNavigate()
   const { banners, showErrorBanner } = useBanner()
 
-
   Teact.useEffect(() => {
     api
       .get('/api/simple-matches/?type=remote')
