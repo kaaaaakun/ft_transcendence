@@ -148,9 +148,8 @@ class JoinTournamentView(APIView):
             # ROOMSデータを作成（Redis）
             room_type = self._get_room_type(tournament_type)
             RoomKey.create_room(
-                self.redis_client,
-                room_type,
-                tournament.id,
+                room_type=room_type,
+                table_id=tournament.id,
                 tournament_id=tournament.id
             )
 
@@ -186,7 +185,7 @@ class JoinTournamentView(APIView):
     def _get_room_data(self, tournament):
         """Redisからルームデータを取得"""
         room_type = self._get_room_type(tournament.type)
-        return RoomKey.get_room(self.redis_client, room_type, tournament.id)
+        return RoomKey.get_room(room_type, tournament.id)
 
     def _get_user_entry_number(self, tournament, user):
         """ユーザーのエントリー番号を取得"""
