@@ -72,8 +72,7 @@ export function SimpleGameRemote() {
         navigate(`/remote/matches/${data.match_id}`)
       } else {
         showErrorBanner({
-          message:
-            'Failed to create a room. Please try again later.',
+          message: 'Failed to create a room. Please try again later.',
           onclose: () => {},
         })
       }
