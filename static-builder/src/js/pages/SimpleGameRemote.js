@@ -32,6 +32,7 @@ export function SimpleGameRemote() {
   const handleJoin = async match => {
     try {
       const response = await api.post('/api/simple-matches/join/', {
+        // biome-ignore lint/style/useNamingConvention
         match_id: match.match_id,
       })
       if (response.status === 201) {
@@ -52,7 +53,7 @@ export function SimpleGameRemote() {
       if (err.response && typeof err.response.json === 'function') {
         try {
           const errorData = await err.response.json()
-          if (errorData?.error) errorMsg = errorData.error
+          if (errorData?.error) { errorMsg = errorData.error }
         } catch {}
       }
       showErrorBanner({
@@ -76,7 +77,7 @@ export function SimpleGameRemote() {
           onclose: () => {},
         })
       }
-    } catch (err) {
+    } catch (_err) {
       showErrorBanner({
         message:
           'An error occurred while creating your room. Please try again later.',
@@ -135,13 +136,12 @@ export function SimpleGameRemote() {
       error
         ? Teact.createElement('div', { className: 'error text-center' }, error)
         : null,
-      !(loading || error)
-        ? Teact.createElement(
+      (loading || error)
+        ? null : Teact.createElement(
             'div',
             { className: 'room-list d-flex flex-column align-items-center' },
             ...roomListChildren,
-          )
-        : null,
+          ),
     ),
   )
 }
