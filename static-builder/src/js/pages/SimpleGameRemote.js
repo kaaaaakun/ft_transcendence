@@ -31,13 +31,13 @@ export function SimpleGameRemote() {
   const handleJoin = async match => {
     try {
       const response = await api.post('/api/simple-matches/join/', {
-        match_id: match.match_id
-      });
+        match_id: match.match_id,
+      })
       if (response.status === 201) {
         const data = await response.json()
         navigate(`/remote/matches/${data.match_id}`)
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json()
         showErrorBanner({
           message:
             errorData.error ||
@@ -64,8 +64,8 @@ export function SimpleGameRemote() {
   const handleCreate = async () => {
     try {
       const response = await api.post('/api/simple-matches/create/', {
-        type: 'remote'
-      });
+        type: 'remote',
+      })
       if (response.status === 201) {
         const data = await response.json()
         navigate(`/remote/matches/${data.match_id}`)
@@ -80,7 +80,7 @@ export function SimpleGameRemote() {
         message:
           'An error occurred while creating your room. Please try again later.',
         onclose: () => {},
-    })
+      })
     }
   }
 
@@ -129,15 +129,18 @@ export function SimpleGameRemote() {
         'Please select a room to join.',
       ),
       loading
-        ? Teact.createElement('div', { className: 'text-center' }, 'Loading...') : null,
-      error ? Teact.createElement('div', { className: 'error text-center' }, error) : null,
+        ? Teact.createElement('div', { className: 'text-center' }, 'Loading...')
+        : null,
+      error
+        ? Teact.createElement('div', { className: 'error text-center' }, error)
+        : null,
       !loading && !error
         ? Teact.createElement(
             'div',
             { className: 'room-list d-flex flex-column align-items-center' },
-            ...roomListChildren
+            ...roomListChildren,
           )
-        : null
-    )
-  );
+        : null,
+    ),
+  )
 }
