@@ -4,7 +4,7 @@ import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import { tournamentsApi } from '../infrastructures/api/tournamentApi'
 
-export const RemoteSimpleList = () => {
+export const RemoteTournamentsIndex = () => {
   const navigate = useNavigate()
 
   return HeaderWithTitleLayout(
