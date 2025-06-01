@@ -6,7 +6,7 @@ from django.utils.decorators import method_decorator
 from django.db import DatabaseError
 
 from .models import Match, MatchDetail
-from .utils import create_simple_match_response
+from .utils import create_simple_match_response, try_join_match
 from user.utils import get_user_by_auth
 from user.exceptions import AuthError
 from room.models import RoomMembers
@@ -70,6 +70,24 @@ class SimpleMatchCreateView(APIView):
             else:
                 return Response({"error": "Waiting room limit reached."}, status = status.HTTP_400_BAD_REQUEST)
 
+        except AuthError as e:
+            return Response({"error": str(e)}, status = status.HTTP_401_UNAUTHORIZED)
+        except DatabaseError as e:
+            return Response({"error": "Database error occurred."}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class SimpleMatchJoinView(APIView):
+    def post(self, request):
+        match_id = request.data.get('match_id')
+        if not match_id:
+            return Response({"error": "Match ID is required."}, status = status.HTTP_400_BAD_REQUEST)
+        try:
+            user = get_user_by_auth(request.headers.get('Authorization'))
+            if not user:
+                raise AuthError('Authorization header is incorrect.')
+            response, success = try_join_match(match_id, user)
+            if not success:
+                return Response(response, status = status.HTTP_400_BAD_REQUEST)
+            return Response(response, status = status.HTTP_201_CREATED)
         except AuthError as e:
             return Response({"error": str(e)}, status = status.HTTP_401_UNAUTHORIZED)
         except DatabaseError as e:
