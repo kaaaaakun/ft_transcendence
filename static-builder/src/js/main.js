@@ -11,6 +11,7 @@ import { api } from '@/js/infrastructures/api/fetch'
 import { DeleteAccount } from '@/js/pages/DeleteAccount'
 import { PasswordReset } from '@/js/pages/PasswordReset'
 import { SimpleGameLocal } from '@/js/pages/SimpleGameLocal'
+import { SimpleGameRemote } from '@/js/pages/SimpleGameRemote'
 import { TournamentsBracket } from '@/js/pages/TournamentsBracket'
 import { TournamentsDisplayName } from '@/js/pages/TournamentsDisplayName'
 
