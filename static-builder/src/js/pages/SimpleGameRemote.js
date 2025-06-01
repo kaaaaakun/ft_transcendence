@@ -99,6 +99,7 @@ export function SimpleGameRemote() {
           DefaultButton({
             onClick: handleCreate,
             text: 'Make my room',
+            className: 'btn-warning',
           }),
         )
       : null,
@@ -110,7 +111,8 @@ export function SimpleGameRemote() {
               { key: match.match_id, className: 'room-item' },
               DefaultButton({
                 onClick: () => handleJoin(match),
-                text: match.display_name,
+                text: `vs ${match.display_name}`,
+                className: 'btn-outline-primary ft-bold',
               }),
             )
           : null,
@@ -124,7 +126,7 @@ export function SimpleGameRemote() {
       'div',
       {
         className:
-          'container d-flex justify-content-center align-items-center flex-column min-vh-100',
+          'container d-flex justify-content-center align-items-center flex-column mt-5 pt-5',
       },
       Teact.createElement('h1', { className: 'text-center' }, 'Waiting Rooms'),
       Teact.createElement(
