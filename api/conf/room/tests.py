@@ -8,10 +8,12 @@ from user.tests import create_test_user, create_test_user_4
 #---------------
 # Helper function to create Data
 #---------------
-def create_room_simple():
+def create_room_simple(table_id):
     room_type = "SIMPLE"
-    table_id = 1
-    match_id = 1
+    table_id = table_id
+    # The match_id is set to the same value as table_id because, for SIMPLE rooms, 
+    # the table_id uniquely identifies both the table and the match.
+    match_id = table_id
     tournament_id = None
     return RoomKey.create_room(room_type, table_id, match_id, tournament_id)
 
@@ -36,10 +38,10 @@ def create_room_waiting_8p():
     tournament_id = 4
     return RoomKey.create_room(room_type, table_id, match_id, tournament_id)
 
-def create_test_room_members_simple():
+def create_test_room_members_simple(room_table_id):
     user = create_test_user('z', 'z', 'z', 'z', 'z')
-    create_room_simple()
-    return RoomMembers.objects.create(room_id = 'room:SIMPLE:1', user = user)
+    room_id = create_room_simple(room_table_id)
+    return RoomMembers.objects.create(room_id = room_id, user = user)
 
 def create_test_room_members_4():
     users = create_test_user_4()

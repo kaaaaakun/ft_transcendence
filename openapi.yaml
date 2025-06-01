@@ -81,6 +81,101 @@ paths:
               schema:
                 $ref: "#/components/schemas/error_response"
 
+  /api/simple-matches/create:
+    post:
+      tags:
+        - simple_play
+      summary: 対戦待ちルームの作成
+      description: |
+        自分の対戦待ちルームを作成します。クエリパラメーターは不要ですが、bodyに``type: remote``を含みます。
+        JWT認証が必要です。レスポンスには、ゲーム画面への遷移に必要な `match_id` を含みます。
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum: [remote]
+              required:
+                - type
+            example:
+              type: remote
+      responses:
+        "201":
+          description: ルーム作成成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  match_id:
+                    type: integer
+                    description: ゲーム画面のURIの一部として使用されるマッチID
+              example:
+                match_id: 12345
+        "401":
+          description: 認証エラー(JWTトークンが無効または未提供)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+
+  /api/simple-matches/join:
+    post:
+      tags:
+        - simple_play
+      summary: 対戦待ちルームへの参加
+      description: |
+        リクエストのbodyに、`match_id` を含めて、指定された対戦待ちルームに参加します。
+        JWT認証が必要です。レスポンスには、ゲーム画面への遷移に必要な `match_id` を含みます。
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                match_id:
+                  type: integer
+                  description: 参加する対戦待ちのMatchID
+              required:
+                - match_id
+            example:
+              match_id: 12345
+      responses:
+        "201":
+          description: 参加成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  match_id:
+                    type: integer
+                    description: ゲーム画面のURIの一部として使用されるマッチID
+              example:
+                match_id: 12345
+        "401":
+          description: 認証エラー(JWTトークンが無効または未提供)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+        "400":
+          description: リクエストエラー(無効なmatch_id)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+
+
   /api/auth/login:
     post:
       tags:
