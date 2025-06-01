@@ -40,9 +40,22 @@ function joinRemoteTournament(data) {
   })
 }
 
+function getTournamentDetails(tournamentId) {
+  return api.get(`/api/tournaments/${tournamentId}/`).then(async response => {
+    if (!response.ok) {
+      const errData = await response.json()
+      throw new Error(errData.error || 'Unknown error occurred')
+    }
+    const responseData = await response.json()
+    console.log('getTournamentDetails responseData:', responseData)
+    return responseData
+  })
+}
+
 export const tournamentsApi = {
   fetchLocalTournament,
   createLocalTournament,
 
   joinRemoteTournament,
+  getTournamentDetails,
 }

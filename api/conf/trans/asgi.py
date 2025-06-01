@@ -15,11 +15,15 @@ django.setup()
 
 from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
-from match.routing import websocket_urlpatterns
+from match.routing import websocket_urlpatterns as match_websocket_urlpatterns
+from room.routing import websocket_urlpatterns as room_websocket_urlpatterns
 
 django_asgi_app = get_asgi_application()
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
-    "websocket": URLRouter(websocket_urlpatterns),
+    "websocket": URLRouter([
+        *match_websocket_urlpatterns,
+        *room_websocket_urlpatterns,
+        ]),
 })

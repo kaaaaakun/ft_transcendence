@@ -14,6 +14,8 @@ import { SimpleGameLocal } from '@/js/pages/SimpleGameLocal'
 import { TournamentsBracket } from '@/js/pages/TournamentsBracket'
 import { TournamentsDisplayName } from '@/js/pages/TournamentsDisplayName'
 import { RemoteSimpleList } from './pages/RemoteSimpleList'
+import { TournamentWaitBegin } from '@/js/pages/TournamentWaitBegin'
+
 function App() {
   console.log('App rendered')
   Teact.useEffect(() => {
@@ -54,7 +56,7 @@ function App() {
     }),
     Route({
       path: '/remote/tournament/:id',
-      component: Home, //遷移先のページは仮置き
+      component: TournamentWaitBegin,
     }),
     Route({
       path: '/tournaments/display-name',
