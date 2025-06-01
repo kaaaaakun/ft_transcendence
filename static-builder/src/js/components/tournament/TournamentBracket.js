@@ -41,7 +41,9 @@ const TournamentFourParticipants = ({ participants }) => {
   const paddedParticipants = [...participants]
   while (paddedParticipants.length < 4) {
     paddedParticipants.push({
+      /* biome-ignore lint/style/useNamingConvention: API responseのjson dataと合わせる必要があるため*/
       display_name: 'Waiting...',
+      /* biome-ignore lint/style/useNamingConvention: API responseのjson dataと合わせる必要があるため*/
       user_id: `waiting_${paddedParticipants.length}`,
     })
   }
