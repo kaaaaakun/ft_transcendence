@@ -217,6 +217,7 @@ function reconcileChildren(wipFiber, elements) {
 
   const isSvg = wipFiber.isSvg
 
+  elements = elements.filter(Boolean)
   while (index < elements.length || oldFiber != null) {
     const element = elements[index]
     let newFiber = null
