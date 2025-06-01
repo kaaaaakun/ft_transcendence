@@ -32,6 +32,7 @@ export function SimpleGameRemote() {
   const handleJoin = async match => {
     try {
       const response = await api.post('/api/simple-matches/join/', {
+        /* biome-ignore lint/style/useNamingConvention: API responseのjson dataと合わせる必要があるため */
         match_id: match.match_id,
       })
       if (response.status === 201) {
