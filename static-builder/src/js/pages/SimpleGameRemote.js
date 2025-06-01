@@ -5,6 +5,8 @@ import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import { useBanner } from '@/js/hooks/useBanner'
 
+const waitingRoomLimit = 5
+
 export function SimpleGameRemote() {
   const [rooms, setRooms] = Teact.useState([])
   const [loading, setLoading] = Teact.useState(true)
@@ -12,7 +14,6 @@ export function SimpleGameRemote() {
   const navigate = useNavigate()
   const { banners, showErrorBanner } = useBanner()
 
-  const WAITING_ROOM_LIMIT = 5
 
   Teact.useEffect(() => {
     api
@@ -51,7 +52,7 @@ export function SimpleGameRemote() {
       if (err.response && typeof err.response.json === 'function') {
         try {
           const errorData = await err.response.json()
-          if (errorData && errorData.error) errorMsg = errorData.error
+          if (errorData?.error) errorMsg = errorData.error
         } catch {}
       }
       showErrorBanner({
@@ -70,10 +71,11 @@ export function SimpleGameRemote() {
         const data = await response.json()
         navigate(`/remote/matches/${data.match_id}`)
       } else {
-        showErrorBanner(
-          'Failed to create your room. Please try again.',
-          'error',
-        )
+        showErrorBanner({
+          message:
+            'Failed to create a room. Please try again later.',
+          onclose: () => {},
+        })
       }
     } catch (err) {
       showErrorBanner({
@@ -88,7 +90,7 @@ export function SimpleGameRemote() {
     rooms.length === 0
       ? Teact.createElement('div', null, 'No waiting rooms available now')
       : null,
-    rooms.length < WAITING_ROOM_LIMIT
+    rooms.length < waitingRoomLimit
       ? Teact.createElement(
           'div',
           { style: { marginBottom: '1em' } },
@@ -134,7 +136,7 @@ export function SimpleGameRemote() {
       error
         ? Teact.createElement('div', { className: 'error text-center' }, error)
         : null,
-      !loading && !error
+      !(loading || error)
         ? Teact.createElement(
             'div',
             { className: 'room-list d-flex flex-column align-items-center' },
