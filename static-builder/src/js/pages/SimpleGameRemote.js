@@ -31,7 +31,7 @@ export function SimpleGameRemote() {
   /* biome-disable lint/style/useNamingConvention */
   const handleJoin = async match => {
     try {
-      // biome-ignore lint/style/useNamingConvention
+      // biome-ignore lint/style/useNamingConvention: API responseのjson dataと合わせる必要があるため
       const response = await api.post('/api/simple-matches/join/', {
         match_id: match.match_id,
       })
