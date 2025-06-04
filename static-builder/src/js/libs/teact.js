@@ -267,15 +267,16 @@ function reconcileChildren(wipFiber, elements) {
 
 function useState(initial) {
   const oldHook = wipFiber.alternate?.hooks?.[hookIndex]
-  const hook = {
-    state: oldHook ? oldHook.state : initial,
+  const hook = oldHook ?? {
+    state: initial,
     queue: [],
   }
 
-  const actions = oldHook ? oldHook.queue : []
+  const actions = hook.queue
   for (const action of actions) {
     hook.state = action(hook.state)
   }
+  hook.queue = []
 
   const setState = action => {
     if (action instanceof Function) {
