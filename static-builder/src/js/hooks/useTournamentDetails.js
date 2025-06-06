@@ -1,4 +1,3 @@
-import { Teact } from '@/js/libs/teact'
 import { api } from '@/js/infrastructures/api/fetch'
 
 class TournamentDetails {
