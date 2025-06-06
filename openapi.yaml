@@ -175,6 +175,52 @@ paths:
               schema:
                 $ref: "#/components/schemas/error_response"
 
+  /api/matches/{match_id}:
+    parameters:
+      - name: match_id
+        in: path
+        required: true
+        description: マッチID
+        schema:
+          type: integer
+    get:
+      tags:
+        - remote_simple
+      summary: リモート対戦のルームID取得
+      security:
+        - bearerAuth: []
+      description: 指定されたマッチIDのリモート対戦のルームIDを取得します。
+      responses:
+        "200":
+          description: ルームID取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  room_id:
+                    type: string
+                    description: リモート対戦のルームID
+              example:
+                room_id: "room:SIMPLE:12345"
+        "400":
+          description: リクエストエラー(無効なmatch_id, Not Foundも含む)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+        "401":
+          description: 認証エラー(JWTトークンが無効または未提供)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
+        "403":
+          description: アクセス拒否(ユーザーが対戦ルームに参加していない場合)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_response"
 
   /api/auth/login:
     post:
