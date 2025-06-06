@@ -144,24 +144,6 @@ export const TournamentWaitBegin = props => {
     )
   }
 
-  const getMessage = () => {
-    if (connectionStatus !== 'connected') {
-      return Teact.createElement('span', null, 'Connecting to tournament...')
-    }
-    if (isReady) {
-      return Teact.createElement(
-        'span',
-        null,
-        'All players ready! Tournament bracket below:',
-      )
-    }
-    return Teact.createElement(
-      'span',
-      null,
-      `Waiting for Players..... (${waitingFor} more to start).`,
-    )
-  }
-
   return HeaderWithTitleLayout(
     Teact.createElement(
       'div',
