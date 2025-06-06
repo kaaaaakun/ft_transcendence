@@ -17,10 +17,10 @@ export const TournamentWaitBegin = props => {
   const [error, setError] = Teact.useState(null)
   const [waitingFor, setWaitingFor] = Teact.useState(4)
   const [isReady, setIsReady] = Teact.useState(false)
-  const [members, setMembers] = Teact.useState([])
-  const [currentPlayers, setCurrentPlayers] = Teact.useState(0)
+  const [_members, setMembers] = Teact.useState([])
+  const [_currentPlayers, setCurrentPlayers] = Teact.useState(0)
   const [connectionStatus, setConnectionStatus] = Teact.useState('disconnected')
-  const [isInitialized, setIsInitialized] = Teact.useState(false) // 初期化フラグ
+  const [_isInitialized, setIsInitialized] = Teact.useState(false) // 初期化フラグ
 
   Teact.useEffect(() => {
     console.log('TournamentWaitBegin useEffect called', { tournamentId })
