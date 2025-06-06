@@ -68,7 +68,6 @@ class RoomConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
-        # Redisからルーム情報を取得・作成
         room_data = await sync_to_async(self.get_or_create_room_data)()
         if not room_data:
             await self.send(text_data=json.dumps({
@@ -77,39 +76,31 @@ class RoomConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
-        # ユーザーがすでにトーナメントメンバーかチェック
         is_existing_member = await sync_to_async(self.is_existing_tournament_member)()
 
         if not is_existing_member:
             await self.close(code=4002)  # User not a tournament member
 
-        # チャンネルグループに参加
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
         )
 
-        # ユーザーを現在の接続者リストに追加（再接続でも毎回追加）
         await sync_to_async(self.add_user_to_active_connections)()
 
-        # 定期的なステータス更新を開始
         self.status_task = asyncio.create_task(self.periodic_status_update())
 
-        # 即座に現在の状況を通知
         await self.broadcast_room_status()
 
     async def disconnect(self, close_code):
-        # 定期更新タスクを停止
         if self.status_task:
             self.status_task.cancel()
 
         if self.room_id and self.user:
-            # ユーザーを現在の接続者リストから削除（トーナメント参加者リストからは削除しない）
             await sync_to_async(self.remove_user_from_active_connections)()
 
             print(f"DEBUG: {self.user.display_name} disconnected from {self.room_id}")
 
-            # 他の参加者に一時的な退室を通知（メンバー数は変わらない）
             await self.broadcast_room_status(user_disconnected=self.user.display_name)
 
         # チャンネルグループから退室
@@ -359,16 +350,25 @@ class RoomConsumer(AsyncWebsocketConsumer):
             return []
 
     def get_current_entry_count(self):
-        """現在のentry_countを取得"""
+        """現在のentry_countをPostgreSQLのトーナメント参加者数と同期"""
         try:
+            from tournament.models import TournamentPlayer
+
             room_parts = self.room_id.split('.')
             if len(room_parts) == 3:
+                tournament_id = int(room_parts[2])
+
+                actual_count = TournamentPlayer.objects.filter(
+                    tournament_id=tournament_id
+                ).count()
+
                 room_type = room_parts[1]
                 table_id = int(room_parts[2])
-                room_data = RoomKey.get_room(room_type, table_id)
+                key = RoomKey.generate_key(room_type, table_id)
+                self.redis_client.hset(key, "entry_count", actual_count)
 
-                if room_data and 'entry_count' in room_data:
-                    return int(room_data['entry_count'])
+                return actual_count
+
             return -1
         except Exception as e:
             print(f"ERROR: get_current_entry_count: {e}")

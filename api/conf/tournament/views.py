@@ -23,7 +23,6 @@ from .models import Tournament, TournamentPlayer
 from utils.decorators import admin_only
 from .utils import get_latest_unfinished_tournament
 
-# start: ユースケースでは本来必要ないが、データの確認のために追加
 @method_decorator(admin_only, name = 'dispatch')
 class TournamentViewSet(viewsets.ModelViewSet):
     queryset = Tournament.objects.all()
@@ -31,7 +30,6 @@ class TournamentViewSet(viewsets.ModelViewSet):
 @method_decorator(admin_only, name = 'dispatch')
 class TournamentPlayerViewSet(viewsets.ModelViewSet):
     queryset = TournamentPlayer.objects.all()
-# :end
 
 class JoinTournamentView(APIView):
     def __init__(self):
@@ -60,7 +58,6 @@ class JoinTournamentView(APIView):
                 ).select_related('tournament').first()
 
                 if existing_participation:
-                    # 既に参加中のトーナメントがある場合、その情報を返す
                     tournament = existing_participation.tournament
                     room_data = self._get_room_data(tournament)
 
@@ -81,7 +78,6 @@ class JoinTournamentView(APIView):
 
 
                 if tournament:
-                    # 既存のトーナメントに参加する場合
                     room_type = self._get_room_type(tournament_type)
                     current_count = RoomKey.increment_entry_count(
                         room_type,
@@ -89,19 +85,15 @@ class JoinTournamentView(APIView):
                     )
 
                     if current_count == -1:
-                        # 定員オーバーまたはルームが存在しない場合、新しいトーナメントを作成
                         tournament = self._create_new_tournament(tournament_type, user)
                         room_data = self._get_room_data(tournament)
                     else:
-                        # 既存のトーナメントに参加
                         self._add_user_to_existing_tournament(tournament, user)
                         room_data = self._get_room_data(tournament)
                 else:
-                    # 新しいトーナメントを作成
                     tournament = self._create_new_tournament(tournament_type, user)
                     room_data = self._get_room_data(tournament)
 
-                # 3. ROOM_MEMBERSデータを作成する
                 RoomMembers.objects.get_or_create(
                     room_id=f"tournament_{tournament.id}",
                     user=user
@@ -144,10 +136,8 @@ class JoinTournamentView(APIView):
 
     def _create_new_tournament(self, tournament_type, user):
             """新しいトーナメントを作成"""
-            # TOURNAMENTSデータを作成
             tournament = Tournament.create(type=tournament_type)
 
-            # ROOMSデータを作成（Redis）
             room_type = self._get_room_type(tournament_type)
             RoomKey.create_room(
                 room_type=room_type,
@@ -155,7 +145,6 @@ class JoinTournamentView(APIView):
                 tournament_id=tournament.id
             )
 
-            # 最初のプレイヤーを追加
             TournamentPlayer.objects.create(
                 tournament=tournament,
                 user=user,
@@ -167,11 +156,9 @@ class JoinTournamentView(APIView):
 
     def _add_user_to_existing_tournament(self, tournament, user):
         """既存のトーナメントにユーザーを追加"""
-        # 既に参加しているかチェック
         if TournamentPlayer.objects.filter(tournament=tournament, user=user).exists():
             raise ValidationError("User already joined this tournament")
 
-        # 次のエントリー番号を取得
         existing_players_count = TournamentPlayer.objects.filter(tournament=tournament).count()
 
         if existing_players_count >= tournament.type:
@@ -216,7 +203,6 @@ class TournamentDetailView(APIView):
             if not user:
                 raise AuthError('Authorization header is required.')
 
-            # トーナメントの存在確認
             try:
                 tournament = Tournament.objects.get(id=tournament_id)
             except Tournament.DoesNotExist:
@@ -225,7 +211,6 @@ class TournamentDetailView(APIView):
                     status=status.HTTP_404_NOT_FOUND
                 )
 
-            # ユーザーがこのトーナメントに参加しているかチェック
             try:
                 tournament_player = TournamentPlayer.objects.get(
                     tournament=tournament,
@@ -237,12 +222,10 @@ class TournamentDetailView(APIView):
                     status=status.HTTP_403_FORBIDDEN
                 )
 
-            # Room情報を取得
             room_type = self._get_room_type(tournament.type)
             room_id = f"room.{room_type}.{tournament.id}"
             room_data = self._get_room_data(tournament)
 
-            # トーナメント参加者リストを取得
             tournament_players = TournamentPlayer.objects.filter(
                 tournament=tournament
             ).select_related('user').order_by('entry_number')
