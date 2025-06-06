@@ -9,5 +9,5 @@ router.register(r'detail', MatchDetailViewSet, basename='detail')
 urlpatterns = [
     path('', include(router.urls)),
     path('local/', LocalSimpleMatchView.as_view(), name = 'local'),
-    path('<int:match_id>/', MatchIdView.as_view(), name = 'match_id'),
+    path('<int:match_id>/', MatchIdView.as_view(), name = 'match-id'),
 ]
