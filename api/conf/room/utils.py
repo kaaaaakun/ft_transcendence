@@ -5,7 +5,7 @@ VALID_ROOM_TYPES = ["SIMPLE", "TOURNAMENT_MATCH", "WAITING_4P", "WAITING_8P"]
 class RoomKey:
     @staticmethod
     def generate_key(room_type: str, table_id: int) -> str:
-        return f"room:{room_type}:{table_id}"
+        return f"room.{room_type}.{table_id}"
 
     @staticmethod
     def create_room(room_type: str, table_id: int, match_id: int = None, tournament_id: int = None):
@@ -27,7 +27,16 @@ class RoomKey:
     def get_room(room_type: str, table_id: int) -> dict:
         redis_client = get_redis()
         key = RoomKey.generate_key(room_type, table_id)
-        return redis_client.hgetall(key)
+        room_data =  redis_client.hgetall(key)
+        if room_data:
+            decoded_data = {}
+            for k, v in room_data.items():
+                decoded_key = k.decode() if isinstance(k, bytes) else k
+                decoded_value = v.decode() if isinstance(v, bytes) else v
+                decoded_data[decoded_key] = decoded_value
+            return decoded_data
+
+        return room_data
 
     @staticmethod
     def increment_entry_count(room_type: str, table_id: int) -> int:

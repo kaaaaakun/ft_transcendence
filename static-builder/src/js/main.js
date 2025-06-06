@@ -13,6 +13,7 @@ import { PasswordReset } from '@/js/pages/PasswordReset'
 import { SimpleGameLocal } from '@/js/pages/SimpleGameLocal'
 import { TournamentsBracket } from '@/js/pages/TournamentsBracket'
 import { TournamentsDisplayName } from '@/js/pages/TournamentsDisplayName'
+import { TournamentWaitBegin } from '@/js/pages/TournamentWaitBegin'
 import { RemoteTournamentsIndex } from '@/js/pages/RemoteTournamentsIndex'
 
 function App() {
@@ -55,7 +56,7 @@ function App() {
     }),
     Route({
       path: '/remote/tournament/:id',
-      component: Home, //遷移先のページは仮置き
+      component: TournamentWaitBegin,
     }),
     Route({
       path: '/tournaments/display-name',
