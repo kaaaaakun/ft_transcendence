@@ -92,3 +92,32 @@ class SimpleMatchJoinView(APIView):
             return Response({"error": str(e)}, status = status.HTTP_401_UNAUTHORIZED)
         except DatabaseError as e:
             return Response({"error": "Database error occurred."}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class MatchIdView(APIView):
+    def get(self, request, match_id):
+        try:
+            user = get_user_by_auth(request.headers.get('Authorization'))
+            if not user:
+                raise AuthError('Authorization header is incorrect.')
+
+            match_id_int = int(match_id)
+            match = Match.objects.filter(id = match_id_int).first()
+            if not match:
+                return Response({"error": "Match not found."}, status = status.HTTP_400_BAD_REQUEST)
+            if match.is_finished:
+                return Response({"error": "Match is already finished."}, status = status.HTTP_400_BAD_REQUEST)
+            match_detail = MatchDetail.objects.filter(match = match, user = user).first()
+            if not match_detail:
+                return Response({"error": "User is not part of this match."}, status = status.HTTP_403_FORBIDDEN)
+
+            if match.tournament == None:
+                room_type = "SIMPLE"
+            else:
+                room_type = "TOURNAMENT_MATCH"
+            return Response({"room_id": RoomKey.generate_key(room_type, match_id_int)}, status = status.HTTP_200_OK)
+        except AuthError as e:
+            return Response({"error": str(e)}, status = status.HTTP_401_UNAUTHORIZED)
+        except (ValueError, TypeError):
+            return Response({"error": "Invalid match_id."}, status = status.HTTP_400_BAD_REQUEST)
+        except DatabaseError:
+            return Response({"error": "Database error occurred."}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
