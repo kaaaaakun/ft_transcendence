@@ -1,17 +1,11 @@
 import { Teact } from '@/js/libs/teact'
-
 export const useTournamentWebSocket = (roomName, loading) => {
-  console.log(
-    'useTournamentWebSocket called with roomName:',
-    roomName,
-    'loading:',
-    loading,
-  )
   const [waitingFor, setWaitingFor] = Teact.useState(4)
   const [isReady, setIsReady] = Teact.useState(false)
   const [members, setMembers] = Teact.useState([])
   const [currentPlayers, setCurrentPlayers] = Teact.useState(0)
   const [connectionStatus, setConnectionStatus] = Teact.useState('disconnected')
+  const [isInitialized, setIsInitialized] = Teact.useState(false) // 初期化フラグ
 
   Teact.useEffect(() => {
     if (loading === null) {
@@ -25,11 +19,12 @@ export const useTournamentWebSocket = (roomName, loading) => {
     if (!token) {
       console.error('No access token found')
       setConnectionStatus('error')
+      setIsInitialized(true)
       return
     }
 
-    console.log('Connecting to WebSocket with room:', roomName)
     setConnectionStatus('connecting')
+    setIsInitialized(true)
 
     const baseWsUrl = import.meta.env.VITE_WEBSOCKET_URL ?? 'wss://localhost'
     const ws = new WebSocket(`${baseWsUrl}/api/ws/${roomName}/?token=${token}`)
@@ -42,7 +37,6 @@ export const useTournamentWebSocket = (roomName, loading) => {
     ws.onmessage = event => {
       try {
         const data = JSON.parse(event.data)
-        console.log('Received:', data)
 
         if (data.status === 'waiting') {
           setWaitingFor(data.waiting_for || 4)
@@ -76,18 +70,13 @@ export const useTournamentWebSocket = (roomName, loading) => {
       // }
     }
   }, [roomName, loading])
-  console.log('useTournamentWebSocket state:', {
-    waitingFor,
-    isReady,
-    members,
-    currentPlayers,
-    connectionStatus,
-  })
+
   return {
     waitingFor,
     isReady,
     members,
     currentPlayers,
     connectionStatus,
+    isInitialized,
   }
 }

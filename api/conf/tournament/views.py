@@ -84,7 +84,6 @@ class JoinTournamentView(APIView):
                     # 既存のトーナメントに参加する場合
                     room_type = self._get_room_type(tournament_type)
                     current_count = RoomKey.increment_entry_count(
-                        self.redis_client,
                         room_type,
                         tournament.id
                     )
@@ -295,7 +294,7 @@ class TournamentDetailView(APIView):
     def _get_room_data(self, tournament):
         """Redisからルームデータを取得"""
         room_type = self._get_room_type(tournament.type)
-        return RoomKey.get_room(self.redis_client, room_type, tournament.id)
+        return RoomKey.get_room(room_type, tournament.id)
 
     def _get_room_status(self, room_data, current_players, max_players):
         """ルームの状態を判定"""

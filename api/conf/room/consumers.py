@@ -20,7 +20,6 @@ class RoomConsumer(AsyncWebsocketConsumer):
         self.user = None
         self.room_group_name = None
         self.status_task = None
-        self.is_new_member = False  # 新規メンバーかどうかのフラグ
 
     async def get_auth_header(self):
 
@@ -51,19 +50,18 @@ class RoomConsumer(AsyncWebsocketConsumer):
         return None
 
     async def connect(self):
-        # URLからroom_id を取得
         self.room_id = self.scope['url_route']['kwargs']['room_id']
         self.room_group_name = f"room_{self.room_id}"
 
         auth_header = await self.get_auth_header()
 
         if not auth_header:
-            await self.close(code=4001)  # Unauthorized
+            await self.close(code=4001)
             return
 
         self.user = await sync_to_async(get_user_by_auth)(auth_header)
         if not self.user:
-            await self.close(code=4001)  # Unauthorized
+            await self.close(code=4001)
             return
 
         print(f"DEBUG: User {self.user.display_name} connecting to {self.room_id}")
@@ -83,18 +81,7 @@ class RoomConsumer(AsyncWebsocketConsumer):
         is_existing_member = await sync_to_async(self.is_existing_tournament_member)()
 
         if not is_existing_member:
-            # 新規メンバーの場合のみ追加処理
-            result = await sync_to_async(self.add_tournament_member)()
-            if result == -1:
-                await self.send(text_data=json.dumps({
-                    'error': 'Room is full or error occurred'
-                }))
-                await self.close()
-                return
-            self.is_new_member = True
-            print(f"DEBUG: {self.user.display_name} added as new tournament member")
-        else:
-            print(f"DEBUG: {self.user.display_name} is already a tournament member, skipping addition")
+            await self.close(code=4002)  # User not a tournament member
 
         # チャンネルグループに参加
         await self.channel_layer.group_add(
@@ -227,14 +214,13 @@ class RoomConsumer(AsyncWebsocketConsumer):
                 table_id = int(room_parts[2])
 
                 # 既存のルーム情報を取得（get_roomでデコード済み）
-                room_data = RoomKey.get_room(self.redis_client, room_type, table_id)
+                room_data = RoomKey.get_room(room_type, table_id)
 
                 if room_data:
                     return room_data
                 else:
                     # ルームが存在しない場合は作成
                     RoomKey.create_room(
-                        self.redis_client,
                         room_type,
                         table_id,
                         tournament_id=1  # 適切な値に設定
@@ -255,49 +241,29 @@ class RoomConsumer(AsyncWebsocketConsumer):
             return None
 
     def is_existing_tournament_member(self):
-        """ユーザーが既にトーナメントメンバーかチェック"""
+        """ユーザーが既にトーナメントメンバーかチェック（PostgreSQLのtournament_playersテーブルを確認）"""
         try:
-            tournament_members_key = f"tournament_members:{self.room_id}"
-            return self.redis_client.sismember(tournament_members_key, self.user.id)
-        except Exception as e:
-            print(f"ERROR: is_existing_tournament_member: {e}")
-            return False
-
-
-    def add_tournament_member(self):
-        """ユーザーをトーナメント参加者として永続的に追加（新規の場合のみ）"""
-        try:
-            tournament_members_key = f"tournament_members:{self.room_id}"
-
-            # 既に参加している場合は何もしない
-            if self.redis_client.sismember(tournament_members_key, self.user.id):
-                print(f"DEBUG: User {self.user.display_name} already in tournament members")
-                return self.get_current_entry_count()
-
-            # PostgreSQLで既に登録済みかチェック
             from tournament.models import TournamentPlayer
+
             room_parts = self.room_id.split('.')
             if len(room_parts) == 3:
                 tournament_id = int(room_parts[2])
 
-                # PostgreSQLに既に存在する場合は、Redisに追加するだけ
-                if TournamentPlayer.objects.filter(
+                exists = TournamentPlayer.objects.filter(
                     tournament_id=tournament_id,
                     user=self.user
-                ).exists():
-                    # Redisに追加（同期のため）
-                    self.redis_client.sadd(tournament_members_key, self.user.id)
-                    self.redis_client.expire(tournament_members_key, 86400)
-                    print(f"DEBUG: User {self.user.display_name} already in PostgreSQL, syncing to Redis")
-                    return self.get_current_entry_count()
+                ).exists()
 
-            # ここには到達しないはず（WebSocket接続前に必ずJoinTournamentViewを通るため）
-            print(f"WARNING: User {self.user.display_name} connecting without prior tournament join")
-            return -1
+                print(f"DEBUG: Checking tournament_players for user {self.user.display_name} in tournament {tournament_id}: {exists}")
+                return exists
+
+            print(f"WARNING: Invalid room_id format: {self.room_id}")
+            return False
 
         except Exception as e:
-            print(f"ERROR: add_tournament_member: {e}")
-            return -1
+            print(f"ERROR: is_existing_tournament_member: {e}")
+            return False
+
 
     def add_user_to_active_connections(self):
         """ユーザーを現在の接続者リストに追加"""
@@ -319,39 +285,52 @@ class RoomConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             print(f"ERROR: remove_user_from_active_connections: {e}")
 
-    def get_tournament_members(self):
-        """トーナメント参加者リストを取得（永続的なメンバー）"""
-        try:
-            tournament_members_key = f"tournament_members:{self.room_id}"
-            user_ids = self.redis_client.smembers(tournament_members_key)
-            members = []
 
-            for user_id in user_ids:
+    def get_tournament_members(self):
+        """トーナメント参加者リストを取得（PostgreSQLのtournament_playersテーブルから取得）"""
+        try:
+            from tournament.models import TournamentPlayer
+
+            room_parts = self.room_id.split('.')
+            if len(room_parts) != 3:
+                print(f"WARNING: Invalid room_id format: {self.room_id}")
+                return []
+
+            tournament_id = int(room_parts[2])
+
+            tournament_players = TournamentPlayer.objects.filter(
+                tournament_id=tournament_id
+            ).select_related('user').order_by('entry_number')
+
+            members = []
+            for tournament_player in tournament_players:
                 try:
-                    from user.models import User
-                    user = User.objects.get(id=int(user_id.decode()))
+                    user = tournament_player.user
                     members.append({
                         'user_id': user.id,
                         'display_name': user.display_name,
+                        'entry_number': tournament_player.entry_number,
+                        'round': tournament_player.round,
                         'status': 'member',
-                        # TournamentBracket形式に合わせて追加
                         'player': {
                             'name': user.display_name
                         },
                         'tournament_players': {
-                            'victory_count': 0  # 初期値
+                            'victory_count': 0
                         },
                         'next_player': False
                     })
                 except Exception as e:
-                    print(f"ERROR: Failed to get user {user_id}: {e}")
+                    print(f"ERROR: Failed to process tournament_player {tournament_player.id}: {e}")
                     continue
 
-            print(f"DEBUG: Retrieved {len(members)} tournament members")
+            print(f"DEBUG: Retrieved {len(members)} tournament members from PostgreSQL for tournament {tournament_id}")
             return members
+
         except Exception as e:
             print(f"ERROR: get_tournament_members: {e}")
             return []
+
 
     def get_connected_users(self):
         """現在接続中のユーザーリストを取得"""
@@ -386,7 +365,7 @@ class RoomConsumer(AsyncWebsocketConsumer):
             if len(room_parts) == 3:
                 room_type = room_parts[1]
                 table_id = int(room_parts[2])
-                room_data = RoomKey.get_room(self.redis_client, room_type, table_id)
+                room_data = RoomKey.get_room(room_type, table_id)
 
                 if room_data and 'entry_count' in room_data:
                     return int(room_data['entry_count'])
