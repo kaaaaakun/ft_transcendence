@@ -110,7 +110,7 @@ class MatchIdView(APIView):
             if not match_detail:
                 return Response({"error": "User is not part of this match."}, status = status.HTTP_403_FORBIDDEN)
 
-            if match.tournament == None:
+            if match.tournament is None:
                 room_type = "SIMPLE"
             else:
                 room_type = "TOURNAMENT_MATCH"
