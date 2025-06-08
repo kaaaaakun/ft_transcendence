@@ -6,7 +6,7 @@ info:
   contact:
     name: とらせん
     url: https://www.example.com/support
-    email: support@example.com    
+    email: support@example.com
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -444,6 +444,74 @@ paths:
               schema:
                 $ref: "#/components/schemas/error_response"
 
+  /api/tournaments/:
+    post:
+      tags:
+        - remote_players
+      summary: トーナメント参加
+      security:
+        - bearerAuth: []
+      description: |
+        指定されたタイプのトーナメントに参加します。
+        - 既に参加中のトーナメントがある場合は、その情報を返します（200）
+        - 新規参加の場合は、新しいトーナメントまたは既存の空きがあるトーナメントに参加します（201）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/tournament_join_request"
+      responses:
+        "200":
+          description: 既に参加中のトーナメント情報
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/tournament_join_response"
+                  - type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Already joined this tournament"
+        "201":
+          description: トーナメント参加成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/tournament_join_response"
+        "400":
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_single_response"
+              examples:
+                invalid_type:
+                  summary: 無効なトーナメントタイプ
+                  value:
+                    error: "Invalid tournament type"
+                tournament_full:
+                  summary: トーナメント満員
+                  value:
+                    error: "Tournament is already full"
+        "401":
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_single_response"
+              example:
+                error: "Authorization header is required."
+        "500":
+          description: サーバー内部エラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_single_response"
+              example:
+                error: "Internal server error"
+
 components:
   parameters:
     display_name:
@@ -460,7 +528,7 @@ components:
       description: フレンドの表示名
       schema:
         type: string
-  
+
   securitySchemes:
     bearerAuth:
       type: http
@@ -630,7 +698,7 @@ components:
         password_confirmation: "password1"
         secret_question: "母親の旧姓は？"
         secret_answer: "石川"
-    
+
     user_passwordreset_request:
       type: object
       properties:
@@ -662,7 +730,7 @@ components:
         - login_name
       example:
         login_name: "user1"
-    
+
     secret_question_response:
       type: object
       properties:
@@ -672,7 +740,7 @@ components:
         - secret_question
       example:
         secret_question: "母親の旧姓は？"
-    
+
     friends_response:
       type: object
       properties:
@@ -700,7 +768,7 @@ components:
             is_online: false
           - friend_name: "user4"
             is_online: true
-    
+
     user_patch_request:
       type: object
       properties:
@@ -841,7 +909,60 @@ components:
             wins: 1
             losses: 1
             win_rate: 50.0
-    
+
+    tournament_join_request:
+          type: object
+          properties:
+            type:
+              type: integer
+              enum: [4, 8]
+              description: トーナメントタイプ（4人または8人）
+          required:
+            - type
+          example:
+            type: 4
+
+    tournament_join_response:
+        type: object
+        properties:
+          id:
+            type: integer
+            description: トーナメントID
+          tournament_type:
+            type: integer
+            description: トーナメントタイプ（4人または8人）
+          room_id:
+            type: string
+            description: ルームID
+          current_players:
+            type: string
+            description: 現在の参加者数
+          max_players:
+            type: integer
+            description: 最大参加者数
+          is_full:
+            type: boolean
+            description: ルームが満員かどうか
+          user_entry_number:
+            type: integer
+            description: ユーザーのエントリー番号
+        required:
+          - id
+          - tournament_type
+          - room_id
+          - current_players
+          - max_players
+          - is_full
+          - user_entry_number
+        example:
+          id: 1
+          tournament_type: 4
+          room_id: "tournament_1"
+          current_players: "2"
+          max_players: 4
+          is_full: false
+          user_entry_number: 1
+
     error_response:
       type: object
       properties:
@@ -865,3 +986,14 @@ components:
             message: "ログイン名が不正です。"
           - field: "password"
             message: "パスワードが不正です。"
+
+    error_single_response:
+      type: object
+      properties:
+        error:
+          type: string
+          description: "単一エラーメッセージ"
+      required:
+        - error
+      example:
+        error: "Invalid tournament type"
