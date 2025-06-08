@@ -68,7 +68,7 @@ class RoomConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
-        room_data = await sync_to_async(self.get_or_create_room_data)()
+        room_data = await sync_to_async(self.get_room_data)()
         if not room_data:
             await self.send(text_data=json.dumps({
                 'error': 'Room not found or invalid'
@@ -196,7 +196,7 @@ class RoomConsumer(AsyncWebsocketConsumer):
 
         await self.send(text_data=json.dumps(message))
 
-    def get_or_create_room_data(self):
+    def get_room_data(self):
         """Redisからルーム情報を取得、存在しない場合は作成"""
         try:
             room_parts = self.room_id.split('.')
@@ -210,25 +210,11 @@ class RoomConsumer(AsyncWebsocketConsumer):
                 if room_data:
                     return room_data
                 else:
-                    # ルームが存在しない場合は作成
-                    RoomKey.create_room(
-                        room_type,
-                        table_id,
-                        tournament_id=1  # 適切な値に設定
-                    )
-                    # 初期のentry_countを0に設定
-                    key = RoomKey.generate_key(room_type, table_id)
-                    self.redis_client.hset(key, "entry_count", 0)
+                    return None
 
-                    return {
-                        'type': room_type,
-                        'entry_count': '0',
-                        'match_id': '',
-                        'tournament_id': '1'
-                    }
             return None
         except Exception as e:
-            print(f"ERROR: get_or_create_room_data: {e}")
+            print(f"ERROR: get_room_data: {e}")
             return None
 
     def is_existing_tournament_member(self):
@@ -302,7 +288,6 @@ class RoomConsumer(AsyncWebsocketConsumer):
                         'display_name': user.display_name,
                         'entry_number': tournament_player.entry_number,
                         'round': tournament_player.round,
-                        'status': 'member',
                         'player': {
                             'name': user.display_name
                         },
