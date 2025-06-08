@@ -75,8 +75,11 @@ export function SimpleGameRemote() {
         const data = await response.json()
         navigate(`/remote/matches/${data.match_id}`)
       } else {
+        const errorData = await response.json()
         showErrorBanner({
-          message: 'Failed to create a room. Please try again later.',
+          message:
+            errorData.error ||
+            'Failed to create a room. Please try again later.',
           onclose: () => {},
         })
       }
