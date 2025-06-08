@@ -4,6 +4,6 @@ WORKDIR /app
 
 COPY . .
 
-RUN npm install dotenv @nomicfoundation/hardhat-toolbox --save-dev
+RUN npm ci
 
 CMD ["npx", "hardhat", "run", "scripts/deploy.js", "--network", "sepolia"]
