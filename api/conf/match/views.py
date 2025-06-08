@@ -106,15 +106,20 @@ class MatchIdView(APIView):
                 return Response({"error": "Match not found."}, status = status.HTTP_400_BAD_REQUEST)
             if match.is_finished:
                 return Response({"error": "Match is already finished."}, status = status.HTTP_400_BAD_REQUEST)
-            match_detail = MatchDetail.objects.filter(match = match, user = user).first()
-            if not match_detail:
-                return Response({"error": "User is not part of this match."}, status = status.HTTP_403_FORBIDDEN)
 
             if match.tournament is None:
                 room_type = "SIMPLE"
             else:
                 room_type = "TOURNAMENT_MATCH"
-            return Response({"room_id": RoomKey.generate_key(room_type, match_id_int)}, status = status.HTTP_200_OK)
+
+            room_id = RoomKey.generate_key(room_type, match_id_int)
+            room_membership = RoomMembers.objects.filter(room_id = room_id, user = user).first()
+            if not room_membership: # Room_members data will be deleted when the match_detail is created.(Not implemented yet)
+                match_participation = MatchDetail.objects.filter(match = match, user = user).first()
+                if not match_participation:
+                    return Response({"error": "User is not part of this match."}, status = status.HTTP_403_FORBIDDEN)
+            return Response({"room_id": room_id}, status = status.HTTP_200_OK)
+
         except AuthError as e:
             return Response({"error": str(e)}, status = status.HTTP_401_UNAUTHORIZED)
         except (ValueError, TypeError):
