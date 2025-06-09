@@ -7,7 +7,7 @@ services:
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
     volumes:
-      - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - ./elk/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
       - vol_elasticsearch:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
@@ -38,9 +38,9 @@ services:
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
     volumes:
-      - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+      - ./elk/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
     ports:
-      - 5601:5601
+        - 5601:5601
     environment:
       KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
     networks:
@@ -57,8 +57,8 @@ services:
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
     volumes:
-      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
-      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./elk/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./elk/logstash/pipeline:/usr/share/logstash/pipeline:ro
       - vol_logs:/var/log/django
     # ports:
       # - 5044:5044
@@ -95,7 +95,7 @@ services:
       # see: https://www.elastic.co/guide/en/beats/libbeat/current/config-file-permissions.html
       - --strict.perms=false
     volumes:
-      - ./filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./elk/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - type: bind
         source: /var/lib/docker/containers
         target: /var/lib/docker/containers
@@ -134,7 +134,7 @@ services:
       # from within a container.
       - --system.hostfs=/hostfs
     volumes:
-      - ./metricbeat/config/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
+      - ./elk/metricbeat/config/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
       - type: bind
         source: /
         target: /hostfs
@@ -172,10 +172,10 @@ services:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
     init: true
     volumes:
-      - ./setup/entrypoint.sh:/entrypoint.sh:ro
-      - ./setup/lib.sh:/lib.sh:ro
-      - ./setup/roles:/roles:ro
-      - ./setup/saved_object/export.ndjson:/import/kibana_objects.ndjson:ro # 設定ファイルをマウント
+      - ./elk/setup/entrypoint.sh:/entrypoint.sh:ro
+      - ./elk/setup/lib.sh:/lib.sh:ro
+      - ./elk/setup/roles:/roles:ro
+      - ./elk/setup/saved_object/export.ndjson:/import/kibana_objects.ndjson:ro # 設定ファイルをマウント
     environment:
       ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
       LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}

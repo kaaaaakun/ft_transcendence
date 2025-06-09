@@ -21,6 +21,8 @@ run: build up
 re: down image-prune run
 
 build:
+	docker network inspect net_pong >/dev/null 2>&1 || docker network create net_pong
+	docker volume inspect vol_logs >/dev/null 2>&1 || docker volume create vol_logs
 	$(DOCKER_COMPOSE) build
 
 up: cert setup-elk
