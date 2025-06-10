@@ -177,16 +177,15 @@ class RoomConsumer(AsyncWebsocketConsumer):
     def get_tournament_capacity(self):
         """トーナメントの定員を取得（PostgreSQLのtournamentテーブルから取得）"""
         try:
-            from tournament.models import Tournament
-
+            tournament_capacity = 4
             room_parts = self.room_id.split('.')
             if len(room_parts) == 3:
                 tournament_type = room_parts[1]
-                return 4 if tournament_type == 'WAITING_4P' else 8
-            return 0
+                if tournament_type == 'WAITING_8P' : tournament_capacity = 8
+            return tournament_capacity
         except Exception as e:
             print(f"ERROR: get_tournament_capacity: {e}")
-            return 0
+            return tournament_capacity
 
     # チャンネルグループからのメッセージハンドラー
     async def room_ready(self, event):
