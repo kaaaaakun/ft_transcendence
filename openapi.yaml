@@ -511,6 +511,54 @@ paths:
                 $ref: "#/components/schemas/error_single_response"
               example:
                 error: "Internal server error"
+  /api/tournaments/{tournament_id}/:
+    get:
+      tags:
+        - remote_players
+      summary: トーナメント情報を取得
+      description: トーナメントの詳細情報を取得します。
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournament_id
+          in: path
+          required: true
+          description: Unique identifier for the tournament
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+          example: 123
+      responses:
+        '200':
+          description: トーナメント情報の取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TournamentDetailResponse'
+              example:
+                tournament_id: 123
+                tournament_type: 4
+                is_finished: false
+                room_id: "room.WAITING_4P.123"
+                room_name: "room.WAITING_4P.123"
+                websocket_url: "room.WAITING_4P.123"
+                current_players: 2
+                max_players: 4
+                is_full: false
+                user_entry_number: 1
+                players:
+                  - user_id: 1
+                    display_name: "Player1"
+                    entry_number: 0
+                    round: 1
+                  - user_id: 2
+                    display_name: "Player2"
+                    entry_number: 1
+                    round: 1
+                room_status: "waiting"
+
+
 
 components:
   parameters:
