@@ -138,12 +138,12 @@ class RoomConsumer(AsyncWebsocketConsumer):
         current_count = await sync_to_async(self.get_current_entry_count)()
         connected_users = await sync_to_async(self.get_connected_users)()
         tournament_members = await sync_to_async(self.get_tournament_members)()
-
+        tournament_capacity = self.get_tournament_capacity()
         if current_count == -1:
             return
 
-        # 4人に達した場合
-        if current_count >= 4:
+        # 人数が達した場合
+        if current_count >= tournament_capacity:
             # 定期更新を停止
             if self.status_task:
                 self.status_task.cancel()
@@ -162,7 +162,7 @@ class RoomConsumer(AsyncWebsocketConsumer):
             message_data = {
                 'type': 'room_update',
                 'entry_count': current_count,
-                'waiting_for': 4 - current_count,
+                'waiting_for': tournament_capacity - current_count,
                 'members': tournament_members,
                 'connected_members': connected_users
             }
@@ -173,6 +173,19 @@ class RoomConsumer(AsyncWebsocketConsumer):
                 self.room_group_name,
                 message_data
             )
+
+    def get_tournament_capacity(self):
+        """トーナメントの定員を取得（PostgreSQLのtournamentテーブルから取得）"""
+        try:
+            tournament_capacity = 4
+            room_parts = self.room_id.split('.')
+            if len(room_parts) == 3:
+                tournament_type = room_parts[1]
+                if tournament_type == 'WAITING_8P' : tournament_capacity = 8
+            return tournament_capacity
+        except Exception as e:
+            print(f"ERROR: get_tournament_capacity: {e}")
+            return tournament_capacity
 
     # チャンネルグループからのメッセージハンドラー
     async def room_ready(self, event):
