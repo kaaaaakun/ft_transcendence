@@ -142,7 +142,7 @@ class RoomConsumer(AsyncWebsocketConsumer):
         if current_count == -1:
             return
 
-        # 4人に達した場合
+        # 人数が達した場合
         if current_count >= tournament_capacity:
             # 定期更新を停止
             if self.status_task:
