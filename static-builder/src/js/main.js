@@ -11,8 +11,10 @@ import { api } from '@/js/infrastructures/api/fetch'
 import { DeleteAccount } from '@/js/pages/DeleteAccount'
 import { PasswordReset } from '@/js/pages/PasswordReset'
 import { SimpleGameLocal } from '@/js/pages/SimpleGameLocal'
+import { SimpleGameRemote } from '@/js/pages/SimpleGameRemote'
 import { TournamentsBracket } from '@/js/pages/TournamentsBracket'
 import { TournamentsDisplayName } from '@/js/pages/TournamentsDisplayName'
+import { RemoteTournamentsIndex } from '@/js/pages/RemoteTournamentsIndex'
 
 function App() {
   console.log('App rendered')
@@ -46,10 +48,18 @@ function App() {
     }),
     Route({
       path: '/remote/simple',
+      component: SimpleGameRemote,
+    }),
+    Route({
+      path: '/remote/matches/:id',
       component: Home, //遷移先のページは仮置き
     }),
     Route({
       path: '/remote/tournament',
+      component: RemoteTournamentsIndex, //遷移先のページは仮置き
+    }),
+    Route({
+      path: '/remote/tournament/:id',
       component: Home, //遷移先のページは仮置き
     }),
     Route({
