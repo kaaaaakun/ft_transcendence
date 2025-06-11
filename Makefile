@@ -9,7 +9,7 @@ else
   COMPOSE_YML     = ./docker-compose.yml
 endif
 
-DOCKER_COMPOSE = docker compose --env-file $(ENV_PATH) -f $(COMPOSE_YML) -f ./elk/docker-compose.yml
+DOCKER_COMPOSE = docker compose --env-file $(ENV_PATH) -f $(COMPOSE_YML) #-f ./elk/docker-compose.yml
 
 all: run
 
@@ -25,11 +25,11 @@ build:
 	docker volume inspect vol_logs >/dev/null 2>&1 || docker volume create vol_logs
 	$(DOCKER_COMPOSE) build
 
-up: cert setup-elk
+up: cert # setup-elk
 	$(DOCKER_COMPOSE) up -d
 
 fdown:
-	$(DOCKER_COMPOSE) rm --stop --force  setup
+	$(DOCKER_COMPOSE) rm --stop --force # setup
 	$(DOCKER_COMPOSE) down -v
 
 down:
