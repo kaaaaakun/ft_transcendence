@@ -202,7 +202,7 @@ paths:
                     type: string
                     description: リモート対戦のルームID
               example:
-                room_id: "room:SIMPLE:12345"
+                room_id: "room.SIMPLE.12345"
         "400":
           description: リクエストエラー(無効なmatch_id, Not Foundも含む)
           content:
