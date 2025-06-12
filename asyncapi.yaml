@@ -43,6 +43,25 @@ channels:
       message:
         $ref: '#/components/messages/MatchStatus'
 
+  /api/ws/room.WAITING_{playerCount}P.{tournamentId}/:
+    parameters:
+      playerCount:
+        description: プレイヤー数 (4または8)
+        schema:
+          type: integer
+          enum:
+            - 4
+            - 8
+      tournamentId:
+        description: トーナメントのID
+        schema:
+          type: string
+    subscribe:
+      operationId: onWaitingRoomStatus
+      message:
+        $ref: '#/components/messages/waitingRoomStatus'
+
+
 components:
   messages:
     KeyInput:
@@ -67,6 +86,83 @@ components:
             $ref: '#/components/schemas/PlayerStatus'
           ballPosition:
             $ref: '#/components/schemas/BallPosition'
+    waitingRoomStatus:
+      payload:
+        type: object
+        required:
+          - status
+          - entry_count
+          - waiting_for
+          - members
+          - connected_members
+        properties:
+          status:
+            type: string
+            description: トーナメントの状態
+            enum:
+              - waiting
+              - ready
+              - finished
+          entry_count:
+            type: integer
+          waiting_for:
+            type: integer
+          members:
+            type: array
+            items:
+              type: object
+              required:
+                - user_id
+                - display_name
+                - entry_number
+                - round
+                - player
+                - tournament_players
+              properties:
+                user_id:
+                  type: integer
+                display_name:
+                  type: string
+                entry_number:
+                  type: integer
+                round:
+                  type: integer
+                player:
+                  type: object
+                  required:
+                    - name
+                  properties:
+                    name:
+                      type: string
+                tournament_players:
+                  type: object
+                  required:
+                    - victory_count
+                  properties:
+                    victory_count:
+                      type: integer
+          connected_members:
+            type: array
+            items:
+              type: object
+              required:
+                - user_id
+                - display_name
+                - status
+              properties:
+                user_id:
+                  type: integer
+                display_name:
+                  type: string
+                status:
+                  type: string
+                  enum:
+                    - connected
+                    - disconnected
+          match_ongoing:
+            type: string
+            description: ユーザーが参加できるマッチがあったら返す。これを見てフロントはゲーム画面にアクセスできる。
+            example: 'room.TOURNAMENT_MATCH.3'
 
   schemas:
     KeyInput:
