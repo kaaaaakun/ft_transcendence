@@ -81,6 +81,7 @@ services:
       - net_pong
     volumes:
       - vol_avatars_data:/var/www/data/avatars
+      - vol_logs:/var/log/django
     environment:
       DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME}
       DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL}
@@ -131,3 +132,5 @@ volumes:
     
   vol_avatars_data:
     name: "vol_avatars_data"
+  vol_logs:
+    name: "vol_logs"
