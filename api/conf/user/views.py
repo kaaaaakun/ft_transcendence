@@ -21,6 +21,8 @@ from .serializers import (
 )
 from .exceptions import AuthError
 from rest_framework_simplejwt.authentication import JWTAuthentication
+import logging
+logger = logging.getLogger('django')
 
 class UserLoginView(APIView):
     def post(self, request, *args, **kwargs):
@@ -41,6 +43,7 @@ class UserView(APIView):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            logger.info('create user')
             return JsonResponse({
                 'message': 'Sign up successful',
             }, status=status.HTTP_201_CREATED)
