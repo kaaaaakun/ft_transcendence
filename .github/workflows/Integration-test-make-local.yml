@@ -19,4 +19,4 @@ jobs:
 
       - name: テストの実行
         working-directory: ./
-        run: make test
+        run: make local
