@@ -60,7 +60,7 @@ def try_create_simple_match(user):
             for match in active_simple_matches:
                 room_key = RoomKey.generate_key(room_type = "SIMPLE", table_id = match.id)
                 room_keys.append(room_key)
-            room_members = RoomMembers.objects.filter(room_id__in = room_keys)
+            room_members = RoomMembers.objects.filter(room_id__in = room_keys, user = user)
             if room_members.exists(): # room_members will be deleted if the match_detail is created.
                 return {"error": "You already have an active room members."}, False
             match_details = MatchDetail.objects.filter(match__in = active_simple_matches, user = user)
