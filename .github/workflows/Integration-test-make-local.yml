@@ -1,0 +1,22 @@
+name: Integration build local test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリのチェックアウト
+        uses: actions/checkout@v4
+
+      # Docker ComposeがGitHub Actionsのランナーで利用可能であることを確認
+      # 通常、ubuntu-latestにはDockerとDocker Compose (v2) がプリインストールされています。
+
+      - name: テストの実行
+        working-directory: ./
+        run: make local
