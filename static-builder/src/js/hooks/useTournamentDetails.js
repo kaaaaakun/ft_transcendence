@@ -4,10 +4,10 @@ class TournamentDetails {
   async fetchData(tournamentId) {
     try {
       const response = await api.get(`/api/tournaments/${tournamentId}/`)
-      if (!response.ok) throw new Error('Failed to fetch tournament details')
+      if (!response.ok) { throw new Error('Failed to fetch tournament details') }
       const responseData = await response.json()
-      const roomName = responseData.room_name // ←ここも修正
-      if (!roomName) throw new Error('Room name not found in tournament data')
+      const roomName = responseData.room_name
+      if (!roomName) { throw new Error('Room name not found in tournament data') }
       return {
         roomName,
         tournamentType: responseData.tournament_type || 4,
