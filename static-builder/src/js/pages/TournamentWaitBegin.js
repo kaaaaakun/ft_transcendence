@@ -1,7 +1,5 @@
 import '@/scss/styles.scss'
-import { DefaultButton } from '@/js/components/ui/button'
 import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
-import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 import { useBanner } from '@/js/hooks/useBanner'
 
@@ -9,7 +7,6 @@ import { tournament } from '@/js/hooks/useTournamentDetails'
 import { ConnectionStatus } from '@/js/components/tournament/ConnectionStatus'
 
 export const TournamentWaitBegin = props => {
-  const navigate = useNavigate()
   const { showErrorBanner, banners } = useBanner()
   const tournamentId = props.params?.id || '1'
 
@@ -31,14 +28,14 @@ export const TournamentWaitBegin = props => {
         const data = await tournament.fetchData(tournamentId)
 
         console.log('Fetched tournament data:', data)
-        if (!data.error) {
-          setRoomName(data.roomName)
-          setTornamentType(data.tournamentType)
-        } else {
+        if (data.error) {
           showErrorBanner({
             message: data.error,
             onClose: () => {},
           })
+        } else {
+          setRoomName(data.roomName)
+          setTornamentType(data.tournamentType)
         }
         setLoading(data.loading)
       } catch (error) {
