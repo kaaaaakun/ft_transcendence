@@ -29,7 +29,6 @@ class RoomConsumer(AsyncWebsocketConsumer):
         for header_name, header_value in self.scope.get('headers', []):
             if header_name == b'authorization':
                 auth_header = header_value.decode()
-                print(f"DEBUG: Found Authorization header")
                 return auth_header
 
         query_string = self.scope.get('query_string', b'').decode()
@@ -38,12 +37,10 @@ class RoomConsumer(AsyncWebsocketConsumer):
         if query_string:
             try:
                 parsed_query = urllib.parse.parse_qs(query_string)
-                print(f"DEBUG: Parsed query: {parsed_query}")
 
                 if 'token' in parsed_query:
                     token = parsed_query['token'][0]
                     auth_header = f"Bearer {token}"
-                    print(f"DEBUG: Found token in query parameters")
                     return auth_header
 
             except Exception as e:
@@ -97,9 +94,11 @@ class RoomConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         if self.status_task:
+            print(f"DEBUG: Cancelling status task for room {self.room_id}")
             self.status_task.cancel()
             
         if self.match_task:
+            print(f"DEBUG: Cancelling match task for room {self.room_id}")
             self.match_task.cancel()
 
         if self.room_id and self.user:
@@ -207,18 +206,24 @@ class RoomConsumer(AsyncWebsocketConsumer):
 
         # 人数が達した場合
         if current_count >= tournament_capacity:
-            # 定期更新を停止
-            if self.status_task:
-                self.status_task.cancel()
+
+            # 進行中のマッチ情報を取得
+            ongoing_match_info = await sync_to_async(self.get_ongoing_match_for_users)()
+
+            message_data = {
+                'type': 'room_ready',
+                'entry_count': current_count,
+                'members': tournament_members,
+                'connected_members': connected_users,
+            }
+            
+            # 進行中のマッチがある場合は追加
+            if ongoing_match_info:
+                message_data['match_ongoing'] = ongoing_match_info
 
             await self.channel_layer.group_send(
                 self.room_group_name,
-                {
-                    'type': 'room_ready',
-                    'entry_count': current_count,
-                    'members': tournament_members,
-                    'connected_members': connected_users
-                }
+                message_data
             )
         else:
             # まだ人数が足りない場合
@@ -236,6 +241,41 @@ class RoomConsumer(AsyncWebsocketConsumer):
                 self.room_group_name,
                 message_data
             )
+
+    def get_ongoing_match_for_users(self):
+        """現在のユーザーの進行中マッチ情報を取得"""
+        try:
+            from match.models import MatchDetail
+            print(f"DEBUG: Getting ongoing match for user {self.user.display_name} in room {self.room_id}")
+            
+            # ユーザーが認証されていない場合は None を返す
+            if not self.user:
+                print("DEBUG: User is not authenticated, returning None for ongoing match.")
+                return None
+            
+            room_parts = self.room_id.split('.')
+            if len(room_parts) != 3:
+                return None
+
+            tournament_id = int(room_parts[2])
+            
+            # 現在のユーザーの進行中マッチを検索
+            ongoing_match_details = MatchDetail.objects.filter(
+                user=self.user,
+                match__tournament_id=tournament_id,
+                match__is_finished=False
+            ).select_related('match').first()
+            
+            if ongoing_match_details:
+                match_id = ongoing_match_details.match.id
+                print(f"DEBUG: Found ongoing match {match_id} for user {self.user.display_name} in tournament {tournament_id}")
+                return f"room.TOURNAMENT_MATCH.{match_id}"
+            
+            return None
+            
+        except Exception as e:
+            print(f"ERROR: get_ongoing_match_for_users: {e}")
+            return None
 
     async def update_matches(self):
         """トーナメントのマッチ情報を更新"""
@@ -285,7 +325,8 @@ class RoomConsumer(AsyncWebsocketConsumer):
             'status': 'room_ready',
             'entry_count': event['entry_count'],
             'members': event['members'],
-            'connected_members': event['connected_members']
+            'connected_members': event['connected_members'],
+            'match_ongoing': event.get('match_ongoing', None)
         }))
 
     async def room_update(self, event):

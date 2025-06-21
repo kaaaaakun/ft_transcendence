@@ -61,16 +61,6 @@ class Match(models.Model):
     def initialize_first_round_matches(cls, tournament):
         """
         トーナメントの最初のラウンドのマッチとマッチ詳細を作成する
-        
-        Args:
-            tournament: Tournament オブジェクト
-            
-        Returns:
-            list: 作成されたMatchオブジェクトのリスト
-            
-        Raises:
-            ValueError: トーナメントが既に終了している場合
-            ValueError: プレイヤー数が不正な場合
         """
         if tournament.is_finished:
             raise ValueError("Cannot initialize matches for a finished tournament.")
@@ -109,17 +99,8 @@ class Match(models.Model):
     @classmethod
     def create_next_round_matches(cls, tournament):
         """
-        次のラウンドのマッチとマッチ詳細を作成する（非同期対応）
+        次のラウンドのマッチとマッチ詳細を作成する
         各ブロックで勝者が出揃った時点でマッチを作成する
-        
-        Args:
-            tournament: Tournament オブジェクト
-            
-        Returns:
-            list: 作成されたMatchオブジェクトのリスト
-            
-        Raises:
-            ValueError: トーナメントが既に終了している場合
         """
         if tournament.is_finished:
             raise ValueError("Cannot create matches for a finished tournament.")
@@ -139,7 +120,6 @@ class Match(models.Model):
     def _create_4_player_next_round(cls, tournament):
         """4人トーナメントの次のラウンドマッチを作成"""
         created_matches = []
-        
         # ラウンド2のプレイヤーを取得（ラウンド1の勝者）
         round2_players = TournamentPlayer.objects.filter(
             tournament=tournament,
@@ -153,8 +133,8 @@ class Match(models.Model):
                 tournament=tournament
             ).count()
             
-            # 既に2試合ある場合は決勝戦作成済み
-            if existing_matches < 2:
+            # 既に3試合ある場合は決勝戦作成済み
+            if existing_matches < 3:
                 player1 = round2_players[0]
                 player2 = round2_players[1]
                 
