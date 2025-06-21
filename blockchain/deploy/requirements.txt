@@ -1,0 +1,27 @@
+# Python requirements for blockchain direct access
+# PythonからWeb3.pyを使用して直接ブロックチェーンにアクセスするための依存関係
+
+# Web3.py - Ethereum Python library
+web3==6.20.0
+
+# Solidity compiler for Python
+py-solc-x==1.12.0
+
+# JSON handling and validation
+jsonschema==4.19.0
+
+# Environment variables
+python-dotenv==1.0.0
+
+# Logging
+colorlog==6.7.0
+
+# Optional: for better performance
+eth-hash[pycryptodome]==0.5.1
+
+# Optional: for async support
+aiohttp==3.9.0
+
+# Optional: for development
+pytest==7.4.0
+pytest-asyncio==0.21.0

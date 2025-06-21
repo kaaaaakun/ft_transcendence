@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Smart Contract Definition",
+  "type": "object",
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "description": { "type": "string" },
+        "author": { "type": "string" },
+        "license": { "type": "string" },
+        "compiler": {
+          "type": "object",
+          "properties": {
+            "version": { "type": "string" },
+            "settings": { "type": "object" }
+          }
+        }
+      },
+      "required": ["name", "version", "description"]
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "pragma": { "type": "string" },
+        "imports": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "contractName": { "type": "string" }
+      }
+    },
+    "abi": {
+      "type": "array",
+      "description": "Contract ABI (Application Binary Interface)"
+    },
+    "bytecode": {
+      "type": "object",
+      "properties": {
+        "object": { "type": "string" },
+        "sourceMap": { "type": "string" }
+      }
+    },
+    "deployment": {
+      "type": "object",
+      "properties": {
+        "networks": {
+          "type": "object",
+          "patternProperties": {
+            ".*": {
+              "type": "object",
+              "properties": {
+                "address": { "type": "string" },
+                "transactionHash": { "type": "string" },
+                "blockNumber": { "type": "number" },
+                "gasUsed": { "type": "number" },
+                "constructorArgs": { "type": "array" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,150 @@
+{
+  "metadata": {
+    "name": "MyContract",
+    "version": "1.0.0",
+    "description": "Simple message storage contract with owner tracking",
+    "author": "42Tokyo Team",
+    "license": "MIT",
+    "compiler": {
+      "version": "0.8.20",
+      "settings": {
+        "optimizer": {
+          "enabled": false,
+          "runs": 200
+        }
+      }
+    },
+    "created": "2025-06-22T00:00:00Z",
+    "updated": "2025-06-22T00:00:00Z"
+  },
+  "source": {
+    "pragma": "^0.8.20",
+    "imports": [],
+    "contractName": "MyContract",
+    "filePath": "./contracts/MyContract.sol"
+  },
+  "interface": {
+    "stateVariables": [
+      {
+        "name": "message",
+        "type": "string",
+        "visibility": "public",
+        "description": "Stores the current message",
+        "getter": true
+      },
+      {
+        "name": "owner",
+        "type": "address",
+        "visibility": "public", 
+        "description": "Address of the contract owner",
+        "getter": true
+      }
+    ],
+    "events": [
+      {
+        "name": "MessageUpdated",
+        "parameters": [
+          {
+            "name": "oldMessage",
+            "type": "string",
+            "indexed": false,
+            "description": "Previous message value"
+          },
+          {
+            "name": "newMessage", 
+            "type": "string",
+            "indexed": false,
+            "description": "New message value"
+          },
+          {
+            "name": "updatedBy",
+            "type": "address",
+            "indexed": false,
+            "description": "Address that updated the message"
+          }
+        ],
+        "description": "Emitted when the message is updated"
+      }
+    ],
+    "constructor": {
+      "parameters": [
+        {
+          "name": "_message",
+          "type": "string",
+          "description": "Initial message value"
+        }
+      ],
+      "description": "Initializes the contract with a message and sets the owner"
+    },
+    "functions": [
+      {
+        "name": "updateMessage",
+        "visibility": "public",
+        "stateMutability": "nonpayable",
+        "parameters": [
+          {
+            "name": "_newMessage",
+            "type": "string",
+            "description": "New message to set"
+          }
+        ],
+        "returnParameters": [],
+        "description": "Updates the message and emits an event",
+        "emits": ["MessageUpdated"],
+        "modifiers": []
+      },
+      {
+        "name": "getMessage",
+        "visibility": "public",
+        "stateMutability": "view",
+        "parameters": [],
+        "returnParameters": [
+          {
+            "type": "string",
+            "description": "Current message value"
+          }
+        ],
+        "description": "Returns the current message",
+        "emits": [],
+        "modifiers": []
+      }
+    ]
+  },
+  "deployment": {
+    "constructorArgs": [
+      {
+        "name": "_message",
+        "value": "Hello, Sepolia!",
+        "type": "string"
+      }
+    ],
+    "gasEstimate": {
+      "creation": 150000,
+      "runtime": 50000
+    },
+    "networks": {}
+  },
+  "testing": {
+    "testCases": [
+      {
+        "name": "should deploy with initial message",
+        "type": "deployment",
+        "expectedResult": "success"
+      },
+      {
+        "name": "should update message",
+        "type": "function",
+        "function": "updateMessage",
+        "args": ["New message"],
+        "expectedResult": "success"
+      },
+      {
+        "name": "should emit MessageUpdated event",
+        "type": "event",
+        "function": "updateMessage",
+        "args": ["Event test"],
+        "expectedEvent": "MessageUpdated"
+      }
+    ]
+  }
+}

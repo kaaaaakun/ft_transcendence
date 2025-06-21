@@ -1,84 +1,99 @@
-## 🧩 スタック構成
+# Blockchain Deploy Service
 
-- **Solidity**: スマートコントラクト言語（例：v0.8.x）
-- **Hardhat**: Ethereum 開発環境
-- **Docker + Dockerfile**
-- **Infura / Alchemy**: Sepolia ノード接続用（RPC URL）
-- **.env**: 秘密鍵と RPC 情報の管理
+ft_transcendenceのDjango APIから**直接**Ethereumスマートコントラクトをデプロイ・操作するサービスです。PythonのWeb3ライブラリを使用してNode.jsを挟まずにブロックチェーンにアクセスします。
 
----
+## 🧩 技術スタック
 
-## 📁 プロジェクト構成例
+- **Solidity ^0.8.20**: スマートコントラクト言語
+- **Python 3.x + Web3.py**: Django APIからの直接ブロックチェーンアクセス
+- **py-solc-x**: Pythonでのコントラクトコンパイル
+- **Ethereum (Sepolia)**: テストネットワーク
+- **Docker**: コンテナ化されたデプロイ環境
+
+## 📁 プロジェクト構成
 
 ```
-/
-├── contracts/
+blockchain/deploy/
+├── contracts/              # Solidityコントラクト
 │   └── MyContract.sol
-├── scripts/
-│   └── deploy.js
-├── hardhat.config.js
-├── package.json
-├── .env
-├── Dockerfile
-└── .dockerignore
+├── python/                 # Python直接アクセス用
+│   ├── blockchain_manager.py    # メインクラス
+│   ├── contract_deployer.py     # デプロイ機能
+│   ├── contract_interface.py    # コントラクト操作
+│   └── config.py               # 設定管理
+├── abi/                   # コンパイル済みABI
+│   └── MyContract.json
+├── sample-data/          # サンプルデータ
+│   └── deployment-data.json
+├── requirements.txt      # Python依存関係
+├── .env.sample          # 環境変数テンプレート
+└── README.md
 ```
 
----
+## 🚀 Python直接アクセス方式
 
-## 🔐 `.env`ファイル（※絶対に Git 管理しない）
-
-📄 `.env`
+### アーキテクチャ
 
 ```
-SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/your_project_id
-PRIVATE_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Django/Python → Web3.py → Ethereum RPC → Blockchain
 ```
 
-- `PRIVATE_KEY`: デプロイに使用するウォレットの秘密鍵（頭に 0x は不要）
-- `SEPOLIA_RPC_URL`: Infura や Alchemy で発行した Sepolia RPC エンドポイント
+### 基本的な使用方法
 
-### それぞれのキーの取得方法
+```python
+# Django models.py または views.py
+from blockchain.deploy.python.blockchain_manager import BlockchainManager
 
-#### ✅ PRIVATE_KEY の取得方法
-
-- MetaMask を開く。
-- 対象のアカウントを選択。
-- 「アカウントの詳細」→「秘密鍵のエクスポート」。
-- パスワードを入力して表示された秘密鍵（64 桁の 16 進数）をコピー。
-  ⚠️ 絶対に他人に見せてはいけません。 .env ファイルは .gitignore に含めること！
-
-#### ✅ RPC_URL の取得方法
-
-これは Sepolia のようなネットワークに接続するための RPC エンドポイント。Infura や Alchemy を使うのが一般的です。
-
-- 🔧 Infura で取得する手順
-  - https://infura.io/ に登録 & ログイン。
-- 「Create new project」→ 任意の名前を設定。
-- 作成したプロジェクトを選び、「Endpoints」から Sepolia を選択。
-- 表示される HTTPS の URL をコピー（例: https://sepolia.infura.io/v3/あなたのAPIキー）
-
----
-
-## ✅ 出力例：
-
-```sh
-make deploy
+class Tournament(models.Model):
+    name = models.CharField(max_length=100)
+    contract_address = models.CharField(max_length=42, null=True, blank=True)
+    
+    def deploy_blockchain_contract(self):
+        """Pythonから直接ブロックチェーンにコントラクトをデプロイ"""
+        manager = BlockchainManager()
+        
+        constructor_args = [f"Tournament: {self.name}"]
+        
+        # 直接デプロイ実行
+        result = manager.deploy_contract(
+            contract_name="MyContract",
+            constructor_args=constructor_args,
+            metadata={
+                "deployer": "tournament_system",
+                "tournamentId": str(self.id)
+            }
+        )
+        
+        if result['success']:
+            self.contract_address = result['contract_address']
+            self.save()
+        
+        return result
+    
+    def update_contract_message(self, new_message):
+        """デプロイ済みコントラクトのメッセージを更新"""
+        if not self.contract_address:
+            raise ValueError("Contract not deployed")
+        
+        manager = BlockchainManager()
+        result = manager.call_contract_function(
+            contract_address=self.contract_address,
+            function_name="updateMessage",
+            args=[new_message]
+        )
+        
+        return result
+    
+    def get_contract_message(self):
+        """コントラクトからメッセージを取得"""
+        if not self.contract_address:
+            return None
+        
+        manager = BlockchainManager()
+        result = manager.read_contract_function(
+            contract_address=self.contract_address,
+            function_name="getMessage"
+        )
+        
+        return result
 ```
-
-実行することで、下記のアドレスが取得できる
-このアドレスを使用することで、テストネットに接続できる。
-
-```
-MyContract deployed to: 0x1234567890abcdef...
-```
-
----
-
-## 💡 補足情報
-
-| 項目              | 内容                                                                |
-| ----------------- | ------------------------------------------------------------------- |
-| テスト ETH の入手 | [Sepolia Faucet](https://sepoliafaucet.com/) で入手可能             |
-| コントラクト確認  | [Etherscan Sepolia](https://sepolia.etherscan.io/) でアドレスを検索 |
-| デバッグ          | `console.log()`可（Hardhat ではデバッグ容易）                       |
-| セキュリティ      | `.env`は**絶対に**Git に含めないこと                                |

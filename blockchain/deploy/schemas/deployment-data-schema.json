@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Deployment Data Schema",
+  "description": "DBからデプロイスクリプトに渡すJSONデータのスキーマ",
+  "type": "object",
+  "required": ["contractName", "constructorArgs", "metadata"],
+  "properties": {
+    "contractName": {
+      "type": "string",
+      "description": "デプロイするコントラクト名",
+      "example": "MyContract"
+    },
+    "constructorArgs": {
+      "type": "array",
+      "description": "コンストラクタ引数の配列",
+      "items": {
+        "oneOf": [
+          { "type": "string" },
+          { "type": "number" },
+          { "type": "boolean" }
+        ]
+      },
+      "example": ["Hello, Blockchain!", 123, true]
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["deployer", "purpose"],
+      "properties": {
+        "deployer": {
+          "type": "string",
+          "description": "デプロイ実行者（ユーザーID等）",
+          "example": "user123"
+        },
+        "purpose": {
+          "type": "string",
+          "description": "デプロイの目的",
+          "example": "production deployment"
+        },
+        "version": {
+          "type": "string",
+          "description": "コントラクトバージョン",
+          "example": "1.0.0"
+        },
+        "gameId": {
+          "type": "string",
+          "description": "関連するゲームID（ft_transcendence用）",
+          "example": "game_456"
+        },
+        "tournamentId": {
+          "type": "string",
+          "description": "関連するトーナメントID",
+          "example": "tournament_789"
+        }
+      }
+    },
+    "gasSettings": {
+      "type": "object",
+      "description": "ガス設定（オプション）",
+      "properties": {
+        "gasLimit": {
+          "oneOf": [
+            { "type": "string", "enum": ["auto"] },
+            { "type": "number" }
+          ],
+          "default": "auto"
+        },
+        "gasPrice": {
+          "oneOf": [
+            { "type": "string", "enum": ["auto"] },
+            { "type": "number" }
+          ],
+          "default": "auto"
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "description": "デプロイ前の検証設定",
+      "properties": {
+        "skipTests": {
+          "type": "boolean",
+          "default": false
+        },
+        "requireConfirmation": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    }
+  }
+}

@@ -7,8 +7,6 @@
     "compile": "hardhat compile",
     "deploy": "hardhat run scripts/deploy.js --network sepolia",
     "deploy:local": "hardhat run scripts/deploy.js --network localhost",
-    "deploy:with-data": "hardhat run scripts/deploy-with-data.js --network sepolia",
-    "deploy:django": "hardhat run scripts/deploy-with-data.js --network sepolia stdin",
     "test": "hardhat test",
     "node": "hardhat node",
     "clean": "hardhat clean",

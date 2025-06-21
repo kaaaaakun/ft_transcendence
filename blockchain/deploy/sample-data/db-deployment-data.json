@@ -1,0 +1,20 @@
+{
+  "contractName": "MyContract",
+  "constructorArgs": ["Hello from Database!", 42],
+  "metadata": {
+    "deployer": "user_123",
+    "purpose": "Tournament contract deployment",
+    "version": "1.0.0",
+    "gameId": "game_456",
+    "tournamentId": "tournament_789",
+    "description": "Smart contract for ft_transcendence tournament system"
+  },
+  "gasSettings": {
+    "gasLimit": "auto",
+    "gasPrice": "auto"
+  },
+  "validation": {
+    "skipTests": false,
+    "requireConfirmation": false
+  }
+}
