@@ -5,7 +5,14 @@ class TournamentDetails {
     try {
       const response = await api.get(`/api/tournaments/${tournamentId}/`)
       if (!response.ok) {
-        throw new Error('Failed to fetch tournament details')
+        if (response.status === 403) {
+          throw new Error('Access denied (403)')
+        }
+        if (response.status === 404) {
+          throw new Error('Tournament not found (404)')
+        }
+
+        throw new Error(`An unknown error occurred (${response.status})`)
       }
       const responseData = await response.json()
       const roomName = responseData.room_name
