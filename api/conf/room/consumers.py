@@ -7,10 +7,11 @@ from asgiref.sync import sync_to_async
 from django.conf import settings
 
 from .models import RoomMembers
+from match.models import Match
 from .utils import RoomKey
 from user.utils import get_user_by_auth
 import urllib.parse
-
+from tournament.models import Tournament
 
 class RoomConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
@@ -20,6 +21,7 @@ class RoomConsumer(AsyncWebsocketConsumer):
         self.user = None
         self.room_group_name = None
         self.status_task = None
+        self.match_task = None
 
     async def get_auth_header(self):
 
@@ -87,14 +89,18 @@ class RoomConsumer(AsyncWebsocketConsumer):
         )
 
         await sync_to_async(self.add_user_to_active_connections)()
-
+        await self.initialize_tournament()
         self.status_task = asyncio.create_task(self.periodic_status_update())
+        self.match_task = asyncio.create_task(self.periodic_match_update())
 
         await self.broadcast_room_status()
 
     async def disconnect(self, close_code):
         if self.status_task:
             self.status_task.cancel()
+            
+        if self.match_task:
+            self.match_task.cancel()
 
         if self.room_id and self.user:
             await sync_to_async(self.remove_user_from_active_connections)()
@@ -132,6 +138,63 @@ class RoomConsumer(AsyncWebsocketConsumer):
                 await self.broadcast_room_status()
         except asyncio.CancelledError:
             pass
+
+    async def periodic_match_update(self):
+        """定期的にトーナメントマッチを更新"""
+        try:
+            while True:
+                await asyncio.sleep(3)  # 3秒間隔で更新
+                await self.update_tournament_matches()
+        except asyncio.CancelledError:
+            pass
+
+    async def initialize_tournament(self):
+        """トーナメントの最初のラウンドマッチを作成"""
+        try:
+            room_parts = self.room_id.split('.')
+            if len(room_parts) != 3:
+                print(f"WARNING: Invalid room_id format: {self.room_id}")
+                return
+
+            tournament_id = int(room_parts[2])
+            
+            # 既にマッチが存在するかチェック
+            matches_exist = await sync_to_async(
+                lambda: Match.objects.filter(tournament_id=tournament_id).exists()
+            )()
+            
+            if matches_exist:
+                print(f"DEBUG: Matches already exist for tournament {tournament_id}")
+                return
+            
+            print(f"DEBUG: Creating first round matches for tournament {tournament_id}")
+            
+            tournament = await sync_to_async(Tournament.objects.get)(id=tournament_id)
+            created_matches = await sync_to_async(Match.initialize_first_round_matches)(tournament)
+            
+            print(f"DEBUG: Created {len(created_matches)} first round matches")
+            
+        except Exception as e:
+            print(f"ERROR: initialize_tournament: {e}")
+
+    async def update_tournament_matches(self):
+        """次のラウンドのマッチを定期的にチェック・作成"""
+        try:
+            room_parts = self.room_id.split('.')
+            if len(room_parts) != 3:
+                return
+
+            tournament_id = int(room_parts[2])
+            tournament = await sync_to_async(Tournament.objects.get)(id=tournament_id)
+            
+            if tournament.is_finished:
+                return
+            
+            await sync_to_async(Match.create_next_round_matches)(tournament)
+        
+            
+        except Exception as e:
+            print(f"ERROR: update_tournament_matches: {e}")
 
     async def broadcast_room_status(self, user_disconnected=None):
         """ルームの現在の状況を全員に通知"""
@@ -174,6 +237,35 @@ class RoomConsumer(AsyncWebsocketConsumer):
                 message_data
             )
 
+    async def update_matches(self):
+        """トーナメントのマッチ情報を更新"""
+        try:
+            room_parts = self.room_id.split('.')
+            if len(room_parts) != 3:
+                print(f"WARNING: Invalid room_id format: {self.room_id}")
+                return
+
+            tournament_id = int(room_parts[2])
+            
+            # Check if matches already exist - wrap in sync_to_async
+            matches_exist = await sync_to_async(
+                lambda: Match.objects.filter(tournament_id=tournament_id).exists()
+            )()
+            
+            if matches_exist:
+                print(f"DEBUG: Matches already exist for tournament {tournament_id}, skipping update.")
+                return
+            
+            print(f"DEBUG: No matches found for tournament {tournament_id}, creating new matches.")
+            
+            tournament = await sync_to_async(Tournament.objects.get)(id=tournament_id)
+            
+            await sync_to_async(Match.initialize_first_round_matches)(tournament)
+            await sync_to_async(Match.create_next_round_matches)(tournament)
+            
+        except Exception as e:
+            print(f"ERROR: update_matches: {e}")
+            
     def get_tournament_capacity(self):
         """トーナメントの定員を取得（PostgreSQLのtournamentテーブルから取得）"""
         try:

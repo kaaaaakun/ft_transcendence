@@ -1,5 +1,6 @@
 from django.db import models
-from tournament.models import Tournament
+from django.db.models import Max
+from tournament.models import Tournament, TournamentPlayer
 from user.models import User
 
 MATCH_TX_STATUS_CHOICES = [
@@ -55,6 +56,192 @@ class Match(models.Model):
         match.tx_address = address
         match.save()
         return match
+
+    @classmethod
+    def initialize_first_round_matches(cls, tournament):
+        """
+        トーナメントの最初のラウンドのマッチとマッチ詳細を作成する
+        
+        Args:
+            tournament: Tournament オブジェクト
+            
+        Returns:
+            list: 作成されたMatchオブジェクトのリスト
+            
+        Raises:
+            ValueError: トーナメントが既に終了している場合
+            ValueError: プレイヤー数が不正な場合
+        """
+        if tournament.is_finished:
+            raise ValueError("Cannot initialize matches for a finished tournament.")
+        
+        # エントリーナンバー順にトーナメントプレイヤーを取得
+        tournament_players = TournamentPlayer.objects.filter(
+            tournament=tournament
+        ).order_by('entry_number')
+        
+        # プレイヤー数の確認
+        player_count = tournament_players.count()
+        if player_count != tournament.type:
+            raise ValueError(f"Expected {tournament.type} players, but found {player_count} players.")
+        
+        # プレイヤー数が偶数でない場合はエラー
+        if player_count % 2 != 0:
+            raise ValueError("Player count must be even to create matches.")
+        
+        created_matches = []
+        
+        # 隣接するプレイヤー同士でマッチを作成
+        for i in range(0, player_count, 2):
+            player1 = tournament_players[i]
+            player2 = tournament_players[i + 1]
+            
+            # マッチを作成
+            match = cls.create_for_tournament(tournament)
+            created_matches.append(match)
+            
+            # 各プレイヤーのマッチ詳細を作成
+            MatchDetail.create(match, player1.user)
+            MatchDetail.create(match, player2.user)
+        
+        return created_matches
+
+    @classmethod
+    def create_next_round_matches(cls, tournament):
+        """
+        次のラウンドのマッチとマッチ詳細を作成する（非同期対応）
+        各ブロックで勝者が出揃った時点でマッチを作成する
+        
+        Args:
+            tournament: Tournament オブジェクト
+            
+        Returns:
+            list: 作成されたMatchオブジェクトのリスト
+            
+        Raises:
+            ValueError: トーナメントが既に終了している場合
+        """
+        if tournament.is_finished:
+            raise ValueError("Cannot create matches for a finished tournament.")
+        
+        created_matches = []
+        
+        if tournament.type == 4:
+            # 4人トーナメントの場合
+            created_matches.extend(cls._create_4_player_next_round(tournament))
+        elif tournament.type == 8:
+            # 8人トーナメントの場合
+            created_matches.extend(cls._create_8_player_next_round(tournament))
+        
+        return created_matches
+
+    @classmethod
+    def _create_4_player_next_round(cls, tournament):
+        """4人トーナメントの次のラウンドマッチを作成"""
+        created_matches = []
+        
+        # ラウンド2のプレイヤーを取得（ラウンド1の勝者）
+        round2_players = TournamentPlayer.objects.filter(
+            tournament=tournament,
+            round=2
+        ).order_by('entry_number')
+        
+        # 2人揃ったら決勝戦を作成
+        if round2_players.count() == 2:
+            # 既に決勝戦が作成されているかチェック
+            existing_matches = Match.objects.filter(
+                tournament=tournament
+            ).count()
+            
+            # 既に2試合ある場合は決勝戦作成済み
+            if existing_matches < 2:
+                player1 = round2_players[0]
+                player2 = round2_players[1]
+                
+                match = cls.create_for_tournament(tournament)
+                created_matches.append(match)
+                
+                MatchDetail.create(match, player1.user)
+                MatchDetail.create(match, player2.user)
+        
+        return created_matches
+
+    @classmethod
+    def _create_8_player_next_round(cls, tournament):
+        """8人トーナメントの次のラウンドマッチを作成"""
+        created_matches = []
+        
+        # ラウンド2のプレイヤー（ラウンド1の勝者）
+        round2_players = TournamentPlayer.objects.filter(
+            tournament=tournament,
+            round=2
+        ).order_by('entry_number')
+        
+        # ラウンド3のプレイヤー（ラウンド2の勝者）
+        round3_players = TournamentPlayer.objects.filter(
+            tournament=tournament,
+            round=3
+        ).order_by('entry_number')
+        
+        # 準決勝（ラウンド2）のマッチ作成
+        created_matches.extend(cls._create_semifinal_matches(tournament, round2_players))
+        
+        # 決勝（ラウンド3）のマッチ作成
+        if round3_players.count() == 2:
+            # 既に決勝戦が作成されているかチェック
+            total_matches = Match.objects.filter(tournament=tournament).count()
+            expected_matches_before_final = 4 + 2  # ラウンド1: 4試合 + 準決勝: 2試合
+            
+            if total_matches < expected_matches_before_final + 1:
+                player1 = round3_players[0]
+                player2 = round3_players[1]
+                
+                match = cls.create_for_tournament(tournament)
+                created_matches.append(match)
+                
+                MatchDetail.create(match, player1.user)
+                MatchDetail.create(match, player2.user)
+        
+        return created_matches
+
+    @classmethod
+    def _create_semifinal_matches(cls, tournament, round2_players):
+        """準決勝マッチを作成（ブロック単位で勝者が出揃った時点で作成）"""
+        created_matches = []
+        
+        # 既存の準決勝マッチ数を確認
+        existing_semifinal_matches = Match.objects.filter(tournament=tournament).count() - 4  # ラウンド1は4試合
+        
+        # ブロック1（0,1 vs 2,3）のマッチ作成チェック
+        block1_winners = round2_players.filter(entry_number__lt=4)
+        if block1_winners.count() >= 2 and existing_semifinal_matches == 0:
+            # ブロック1で2人の勝者が出た場合、マッチ作成
+            block1_list = list(block1_winners[:2])
+            player1 = block1_list[0]
+            player2 = block1_list[1]
+            
+            match = cls.create_for_tournament(tournament)
+            created_matches.append(match)
+            
+            MatchDetail.create(match, player1.user)
+            MatchDetail.create(match, player2.user)
+            existing_semifinal_matches += 1
+        
+        # ブロック2（4,5 vs 6,7）のマッチ作成チェック
+        block2_winners = round2_players.filter(entry_number__gte=4)
+        if block2_winners.count() >= 2 and existing_semifinal_matches <= 1:
+            # ブロック2で2人の勝者が出た場合、マッチ作成
+            block2_list = list(block2_winners[:2])
+            player1 = block2_list[0]
+            player2 = block2_list[1]
+            
+            match = cls.create_for_tournament(tournament)
+            created_matches.append(match)
+            
+            MatchDetail.create(match, player1.user)
+            MatchDetail.create(match, player2.user)
+        
+        return created_matches
 
 class MatchDetail(models.Model):
     match = models.ForeignKey(Match, on_delete = models.CASCADE)
