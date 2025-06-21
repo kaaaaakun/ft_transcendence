@@ -189,12 +189,9 @@ class Match(models.Model):
         """準決勝マッチを作成（ブロック単位で勝者が出揃った時点で作成）"""
         created_matches = []
         
-        # 既存の準決勝マッチ数を確認
-        existing_semifinal_matches = Match.objects.filter(tournament=tournament).count() - 4  # ラウンド1は4試合
-        
         # ブロック1（0,1 vs 2,3）のマッチ作成チェック
         block1_winners = round2_players.filter(entry_number__lt=4)
-        if block1_winners.count() >= 2 and existing_semifinal_matches == 0:
+        if block1_winners.count() >= 2 and not cls._block_semifinal_exists(tournament, block_range=(0, 3)):
             # ブロック1で2人の勝者が出た場合、マッチ作成
             block1_list = list(block1_winners[:2])
             player1 = block1_list[0]
@@ -205,11 +202,10 @@ class Match(models.Model):
             
             MatchDetail.create(match, player1.user)
             MatchDetail.create(match, player2.user)
-            existing_semifinal_matches += 1
         
         # ブロック2（4,5 vs 6,7）のマッチ作成チェック
         block2_winners = round2_players.filter(entry_number__gte=4)
-        if block2_winners.count() >= 2 and existing_semifinal_matches <= 1:
+        if block2_winners.count() >= 2 and not cls._block_semifinal_exists(tournament, block_range=(4, 7)):
             # ブロック2で2人の勝者が出た場合、マッチ作成
             block2_list = list(block2_winners[:2])
             player1 = block2_list[0]
@@ -222,6 +218,37 @@ class Match(models.Model):
             MatchDetail.create(match, player2.user)
         
         return created_matches
+
+    @classmethod
+    def _block_semifinal_exists(cls, tournament, block_range):
+        """指定されたブロック範囲の準決勝マッチが既に存在するかチェック"""
+        min_entry, max_entry = block_range
+        
+        # そのトーナメントの全マッチを取得
+        matches = Match.objects.filter(tournament=tournament)
+        
+        for match in matches:
+            # マッチの参加者のエントリー番号を取得
+            match_details = MatchDetail.objects.filter(match=match)
+            participants_entry_numbers = []
+            
+            for detail in match_details:
+                try:
+                    tournament_player = TournamentPlayer.objects.get(
+                        tournament=tournament,
+                        user=detail.user,
+                        round__gte=2  # ラウンド2以上（準決勝参加者）
+                    )
+                    participants_entry_numbers.append(tournament_player.entry_number)
+                except TournamentPlayer.DoesNotExist:
+                    continue
+            
+            # 指定されたブロック範囲の2人が参加しているマッチかチェック
+            if (len(participants_entry_numbers) == 2 and 
+                all(min_entry <= entry <= max_entry for entry in participants_entry_numbers)):
+                return True
+        
+        return False
 
 class MatchDetail(models.Model):
     match = models.ForeignKey(Match, on_delete = models.CASCADE)
