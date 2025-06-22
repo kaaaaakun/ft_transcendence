@@ -33,16 +33,6 @@ channels:
       message:
         $ref: '#/components/messages/MatchStatus'
 
-  /api/ws/local-tournament-match:
-    publish:
-      operationId: sendKeyInputForTournamentMatch
-      message:
-        $ref: '#/components/messages/KeyInput'
-    subscribe:
-      operationId: onMatchStatusForTournamentMatch
-      message:
-        $ref: '#/components/messages/MatchStatus'
-
   /api/ws/room.WAITING_{playerCount}P.{tournamentId}/:
     parameters:
       playerCount:
@@ -61,6 +51,18 @@ channels:
       message:
         $ref: '#/components/messages/waitingRoomStatus'
 
+  /api/ws/room.SIMPLE.{matchId}:
+    publish:
+      operationId: sendKeyInputForSimpleMatch
+      message:
+        $ref: '#/components/messages/KeyInput'
+    subscribe:
+      operationId: onSimpleMatchEvent
+      message:
+        oneOf:
+          - $ref: '#/components/messages/MatchStart'
+          - $ref: '#/components/messages/MatchUpdate'
+          - $ref: '#/components/messages/MatchEnd'
 
 components:
   messages:
@@ -72,6 +74,7 @@ components:
             $ref: '#/components/schemas/KeyInput'
           right:
             $ref: '#/components/schemas/KeyInput'
+
     MatchStatus:
       payload:
         type: object
@@ -86,6 +89,7 @@ components:
             $ref: '#/components/schemas/PlayerStatus'
           ballPosition:
             $ref: '#/components/schemas/BallPosition'
+
     waitingRoomStatus:
       payload:
         type: object
@@ -164,6 +168,57 @@ components:
             description: ユーザーが参加できるマッチがあったら返す。これを見てフロントはゲーム画面にアクセスできる。
             example: 'room.TOURNAMENT_MATCH.3'
 
+    MatchStart:
+      payload:
+        type: object
+        required: [type, players]
+        properties:
+          type:
+            type: string
+            enum: [start]
+          players:
+            type: object
+            required: [left, right]
+            properties:
+              left:
+                $ref: '#/components/schemas/PlayerInfo'
+              right:
+                $ref: '#/components/schemas/PlayerInfo'
+
+    MatchUpdate:
+      payload:
+        type: object
+        required: [type, left, right, ballPosition]
+        properties:
+          type:
+            type: string
+            enum: [update]
+          left:
+            $ref: '#/components/schemas/PlayerStatus'
+          right:
+            $ref: '#/components/schemas/PlayerStatus'
+          ballPosition:
+            $ref: '#/components/schemas/BallPosition'
+
+    MatchEnd:
+      payload:
+        type: object
+        required: [type, left, right, winner, redirectUrl]
+        properties:
+          type:
+            type: string
+            enum: [end]
+          left:
+            $ref: '#/components/schemas/PlayerStatus'
+          right:
+            $ref: '#/components/schemas/PlayerStatus'
+          winner:
+            type: string
+            description: 勝利したプレイヤー名
+          redirectUrl:
+            type: string
+            description: リダイレクト先の URL
+
   schemas:
     KeyInput:
       type: object
@@ -181,6 +236,7 @@ components:
           enum:
             - push
             - release
+
     BallPosition:
       type: object
       required:
@@ -193,6 +249,7 @@ components:
         y:
           type: number
           format: float
+
     PlayerStatus:
       type: object
       required:
@@ -204,3 +261,10 @@ components:
           format: float
         score:
           type: integer
+
+    PlayerInfo:
+      type: object
+      required: [display_name]
+      properties:
+        name:
+          type: string
