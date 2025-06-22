@@ -1,7 +1,7 @@
 import { Teact } from '@/js/libs/teact'
 import { Navigate } from './Navigate'
 
-export function withProtection(Component) {
+export function ProtectedRoute(Component) {
   return function ProtectedComponent(props) {
     const accessToken = localStorage.getItem('access_token')
     if (!accessToken) {
