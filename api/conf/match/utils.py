@@ -4,6 +4,8 @@ from .models import Match, MatchDetail
 from room.models import RoomMembers
 from room.utils import RoomKey
 
+SIMPLE_WAITING_ROOM_LIMIT = 5
+
 def create_simple_match_response(waiting_simple_room_keys):
     room_members = RoomMembers.objects.filter(room_id__in = waiting_simple_room_keys)
     response_data = []
@@ -48,4 +50,29 @@ def try_join_match(match_id, user):
         return {"error": "Match does not exist."}, False
     except DatabaseError:
         RoomKey.decrement_entry_count(room_type = room_data["type"], table_id = match_id)
+        return {"error": "Database error occurred."}, False
+    
+def try_create_simple_match(user):
+    try:
+        active_simple_matches = Match.objects.filter(is_finished = False, tournament__isnull = True)
+        if active_simple_matches.exists():
+            room_keys = []
+            for match in active_simple_matches:
+                room_key = RoomKey.generate_key(room_type = "SIMPLE", table_id = match.id)
+                room_keys.append(room_key)
+            room_members = RoomMembers.objects.filter(room_id__in = room_keys, user = user)
+            if room_members.exists(): # room_members will be deleted if the match_detail is created.
+                return {"error": "You already have an active room members."}, False
+            match_details = MatchDetail.objects.filter(match__in = active_simple_matches, user = user)
+            if match_details.exists():
+                return {"error": "You already have an active match detail."}, False
+        waiting_simple_room_keys = RoomKey.get_keys_by_type_and_entry_count("SIMPLE", 2)
+        if len(waiting_simple_room_keys) < SIMPLE_WAITING_ROOM_LIMIT:
+            match = Match.objects.create()
+            room_key = RoomKey.create_room(room_type = "SIMPLE", table_id = match.id, match_id = match.id)
+            RoomMembers.objects.create(room_id = room_key, user = user)
+            return {"match_id": match.id}, True
+        else:
+            return {"error": "Waiting room limit reached."}, False
+    except DatabaseError:
         return {"error": "Database error occurred."}, False

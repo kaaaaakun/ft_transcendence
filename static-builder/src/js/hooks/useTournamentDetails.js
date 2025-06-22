@@ -1,37 +1,39 @@
 import { api } from '@/js/infrastructures/api/fetch'
 
 class TournamentDetails {
-  async fetchData(tournamentId, setData) {
+  async fetchData(tournamentId) {
     try {
       const response = await api.get(`/api/tournaments/${tournamentId}/`)
-
       if (!response.ok) {
-        throw new Error('Failed to fetch tournament details')
+        if (response.status === 403) {
+          throw new Error('Access denied (403)')
+        }
+        if (response.status === 404) {
+          throw new Error('Tournament not found (404)')
+        }
+
+        throw new Error(`An unknown error occurred (${response.status})`)
       }
-
       const responseData = await response.json()
-
-      const roomName = responseData.websocket_url
+      const roomName = responseData.room_name
       if (!roomName) {
         throw new Error('Room name not found in tournament data')
       }
-
-      console.log('fetchData responseData:', responseData)
-
       return {
-        roomName: responseData.room_name,
+        roomName,
         tournamentType: responseData.tournament_type || 4,
         tournamentData: responseData,
         loading: false,
         error: null,
       }
     } catch (error) {
-      console.error('Failed to initialize tournament:', error)
-      setData(prev => ({
-        ...prev,
-        error: error.message,
+      return {
+        roomName: null,
+        tournamentType: 4,
+        tournamentData: null,
         loading: false,
-      }))
+        error: error.message,
+      }
     }
   }
 }
