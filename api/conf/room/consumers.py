@@ -206,25 +206,21 @@ class RoomConsumer(AsyncWebsocketConsumer):
 
         # 人数が達した場合
         if current_count >= tournament_capacity:
-
-            # 進行中のマッチ情報を取得
-            ongoing_match_info = await sync_to_async(self.get_ongoing_match_for_users)()
-
-            message_data = {
+            common_message_data = {
                 'type': 'room_ready',
                 'entry_count': current_count,
                 'members': tournament_members,
                 'connected_members': connected_users,
             }
-            
-            # 進行中のマッチがある場合は追加
-            if ongoing_match_info:
-                message_data['match_ongoing'] = ongoing_match_info
 
             await self.channel_layer.group_send(
                 self.room_group_name,
-                message_data
+                common_message_data
             )
+            
+            # 各接続中ユーザーに個別のmatch_ongoing情報を送信
+            await self.send_individual_match_info(connected_users)
+            
         else:
             # まだ人数が足りない場合
             message_data = {
@@ -242,16 +238,37 @@ class RoomConsumer(AsyncWebsocketConsumer):
                 message_data
             )
 
-    def get_ongoing_match_for_users(self):
-        """現在のユーザーの進行中マッチ情報を取得"""
+    async def send_individual_match_info(self, connected_users):
+        """接続中の各ユーザーに個別のマッチ情報を送信"""
+        try:
+            from user.models import User
+            
+            for connected_user in connected_users:
+                user_id = connected_user['user_id']
+                user = await sync_to_async(User.objects.get)(id=user_id)
+                
+                # そのユーザーの進行中マッチ情報を取得
+                ongoing_match_info = await sync_to_async(self.get_ongoing_match_for_user)(user)
+                
+                if ongoing_match_info:
+                    # 個別にマッチ情報を送信
+                    await self.channel_layer.group_send(
+                        self.room_group_name,
+                        {
+                            'type': 'individual_match_info',
+                            'target_user_id': user_id,
+                            'match_ongoing': ongoing_match_info
+                        }
+                    )
+                    
+        except Exception as e:
+            print(f"ERROR: send_individual_match_info: {e}")
+
+    def get_ongoing_match_for_user(self, user):
+        """指定されたユーザーの進行中マッチ情報を取得"""
         try:
             from match.models import MatchDetail
-            print(f"DEBUG: Getting ongoing match for user {self.user.display_name} in room {self.room_id}")
-            
-            # ユーザーが認証されていない場合は None を返す
-            if not self.user:
-                print("DEBUG: User is not authenticated, returning None for ongoing match.")
-                return None
+            print(f"DEBUG: Getting ongoing match for user {user.display_name} in room {self.room_id}")
             
             room_parts = self.room_id.split('.')
             if len(room_parts) != 3:
@@ -259,22 +276,22 @@ class RoomConsumer(AsyncWebsocketConsumer):
 
             tournament_id = int(room_parts[2])
             
-            # 現在のユーザーの進行中マッチを検索
+            # 指定されたユーザーの進行中マッチを検索
             ongoing_match_details = MatchDetail.objects.filter(
-                user=self.user,
+                user=user,
                 match__tournament_id=tournament_id,
                 match__is_finished=False
             ).select_related('match').first()
             
             if ongoing_match_details:
                 match_id = ongoing_match_details.match.id
-                print(f"DEBUG: Found ongoing match {match_id} for user {self.user.display_name} in tournament {tournament_id}")
+                print(f"DEBUG: Found ongoing match {match_id} for user {user.display_name} in tournament {tournament_id}")
                 return f"room.TOURNAMENT_MATCH.{match_id}"
             
             return None
             
         except Exception as e:
-            print(f"ERROR: get_ongoing_match_for_users: {e}")
+            print(f"ERROR: get_ongoing_match_for_user: {e}")
             return None
 
     async def update_matches(self):
@@ -325,9 +342,17 @@ class RoomConsumer(AsyncWebsocketConsumer):
             'status': 'room_ready',
             'entry_count': event['entry_count'],
             'members': event['members'],
-            'connected_members': event['connected_members'],
-            'match_ongoing': event.get('match_ongoing', None)
+            'connected_members': event['connected_members']
         }))
+
+    async def individual_match_info(self, event):
+        """個別のマッチ情報を処理（本人のみに送信）"""
+        target_user_id = event['target_user_id']
+        
+        if self.user and self.user.id == target_user_id:
+            await self.send(text_data=json.dumps({
+                'match_ongoing': event['match_ongoing']
+            }))
 
     async def room_update(self, event):
         message = {
