@@ -16,6 +16,7 @@ import { TournamentsBracket } from '@/js/pages/TournamentsBracket'
 import { TournamentsDisplayName } from '@/js/pages/TournamentsDisplayName'
 import { TournamentWaitBegin } from '@/js/pages/TournamentWaitBegin'
 import { RemoteTournamentsIndex } from '@/js/pages/RemoteTournamentsIndex'
+import { withProtection } from '@/js/components/common/ProtectedRoute'
 
 function App() {
   console.log('App rendered')
@@ -49,7 +50,7 @@ function App() {
     }),
     Route({
       path: '/remote/simple',
-      component: SimpleGameRemote,
+      component: withProtection(SimpleGameRemote),
     }),
     Route({
       path: '/remote/matches/:id',
@@ -57,11 +58,11 @@ function App() {
     }),
     Route({
       path: '/remote/tournament',
-      component: RemoteTournamentsIndex, //遷移先のページは仮置き
+      component: withProtection(RemoteTournamentsIndex),
     }),
     Route({
       path: '/remote/tournament/:id',
-      component: TournamentWaitBegin,
+      component: withProtection(TournamentWaitBegin),
     }),
     Route({
       path: '/tournaments/display-name',
@@ -73,11 +74,11 @@ function App() {
     }),
     Route({
       path: '/users/:username',
-      component: UserProfile,
+      component: withProtection(UserProfile),
     }),
     Route({
       path: '/users/:id/friends',
-      component: FriendsList,
+      component: withProtection(FriendsList),
     }),
     Route({
       path: '/login',
@@ -93,7 +94,7 @@ function App() {
     }),
     Route({
       path: '/delete-account',
-      component: DeleteAccount,
+      component: withProtection(DeleteAccount),
     }),
   )
 }
