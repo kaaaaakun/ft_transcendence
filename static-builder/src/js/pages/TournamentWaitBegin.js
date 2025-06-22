@@ -1,20 +1,18 @@
 import '@/scss/styles.scss'
-import { DefaultButton } from '@/js/components/ui/button'
 import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
-import { useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
+import { useBanner } from '@/js/hooks/useBanner'
 
 import { tournament } from '@/js/hooks/useTournamentDetails'
 import { ConnectionStatus } from '@/js/components/tournament/ConnectionStatus'
 
 export const TournamentWaitBegin = props => {
-  const navigate = useNavigate()
+  const { showErrorBanner, banners } = useBanner()
   const tournamentId = props.params?.id || '1'
 
   const [roomName, setRoomName] = Teact.useState(null)
   const [tournamentType, setTornamentType] = Teact.useState(4) // デフォルトのトーナメントタイプ
   const [loading, setLoading] = Teact.useState(true)
-  const [error, setError] = Teact.useState(null)
   const [waitingFor, setWaitingFor] = Teact.useState(4)
   const [isReady, setIsReady] = Teact.useState(false)
   const [_members, setMembers] = Teact.useState([])
@@ -30,15 +28,24 @@ export const TournamentWaitBegin = props => {
         const data = await tournament.fetchData(tournamentId)
 
         console.log('Fetched tournament data:', data)
-        setRoomName(data.roomName)
-        setTornamentType(data.tournamentType)
+        if (data.error) {
+          showErrorBanner({
+            message: data.error,
+            onClose: () => {},
+          })
+        } else {
+          setRoomName(data.roomName)
+          setTornamentType(data.tournamentType)
+        }
         setLoading(data.loading)
-        setError(data.error)
       } catch (error) {
         console.error('Error fetching tournament details:', error)
+        showErrorBanner({
+          message: `Error fetching tournament details: ${error.message}`,
+          onClose: () => {},
+        })
       }
     }
-
     fetchTournamentDetails()
   }, [])
 
@@ -50,7 +57,7 @@ export const TournamentWaitBegin = props => {
   }, [roomName])
 
   console.log(
-    `  useTournamentDetails: roomName=${roomName}, tournamentType=${tournamentType}, loading=${loading}, error=${error}`,
+    `  useTournamentDetails: roomName=${roomName}, tournamentType=${tournamentType}, loading=${loading}`,
   )
 
   Teact.useEffect(() => {
@@ -122,32 +129,11 @@ export const TournamentWaitBegin = props => {
     }
   }, [roomName, loading]) // 依存配列を追加
 
-  if (error) {
-    return HeaderWithTitleLayout(
-      Teact.createElement(
-        'div',
-        { className: 'container vh-100' },
-        Teact.createElement(
-          'div',
-          { className: 'alert alert-danger text-center' },
-          `Error: ${error}`,
-        ),
-        Teact.createElement(
-          'div',
-          { className: 'd-grid gap-2 col-3 mx-auto mt-4' },
-          DefaultButton({
-            text: 'Back to Tournament Selection',
-            onClick: () => navigate('/remote/simple'),
-          }),
-        ),
-      ),
-    )
-  }
-
   return HeaderWithTitleLayout(
     Teact.createElement(
       'div',
       { className: 'container vh-100' },
+      ...banners,
       Teact.createElement(
         'div',
         { className: 'text-center' },
@@ -164,11 +150,19 @@ export const TournamentWaitBegin = props => {
         }),
 
         Teact.createElement(
-          'p',
+          'div',
           {
-            className: `mt-4 ${isReady ? 'text-white bg-success' : 'text-dark bg-light'} text-center font-weight-bold p-3 rounded`,
+            className: `mt-4 ${isReady ? 'text-white bg-success' : 'text-dark bg-light'} text-center font-weight-bold p-3 rounded d-flex align-items-center justify-content-center flex-column`,
           },
-          waitingFor,
+          Teact.createElement(
+            'p',
+            'text-center',
+            `Waiting for ${waitingFor} more people ...`,
+          ),
+          Teact.createElement('div', {
+            className: 'spinner-border text-primary spinner-border-sm spinner',
+            role: 'status',
+          }),
         ),
       ),
     ),
