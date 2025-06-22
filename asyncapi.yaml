@@ -51,13 +51,23 @@ channels:
       message:
         $ref: '#/components/messages/waitingRoomStatus'
 
-  /api/ws/room.SIMPLE.{matchId}:
+  /api/ws/room.{matchType}.{matchId}:
+    parameters:
+      matchType:
+        description: マッチのタイプ (TOURNAMENT_MATCH)
+        schema:
+          type: string
+          enum: [SIMPLE, TOURNAMENT_MATCH]
+      matchId:
+        description: マッチのID
+        schema:
+          type: string
     publish:
-      operationId: sendKeyInputForSimpleMatch
+      operationId: sendKeyInputForRemoteMatch
       message:
         $ref: '#/components/messages/KeyInput'
     subscribe:
-      operationId: onSimpleMatchEvent
+      operationId: onMatchStatusForRemoteMatch
       message:
         oneOf:
           - $ref: '#/components/messages/MatchStart'
@@ -266,5 +276,5 @@ components:
       type: object
       required: [display_name]
       properties:
-        name:
+        display_name:
           type: string
