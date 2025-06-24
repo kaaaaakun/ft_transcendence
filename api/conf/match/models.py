@@ -172,7 +172,7 @@ class Match(models.Model):
             total_matches = Match.objects.filter(tournament=tournament).count()
             expected_matches_before_final = 4 + 2  # ラウンド1: 4試合 + 準決勝: 2試合
             
-            if total_matches < expected_matches_before_final + 1:
+            if total_matches == expected_matches_before_final:
                 player1 = round3_players[0]
                 player2 = round3_players[1]
                 
@@ -191,7 +191,7 @@ class Match(models.Model):
         
         # ブロック1（0,1 vs 2,3）のマッチ作成チェック
         block1_winners = round2_players.filter(entry_number__lt=4)
-        if block1_winners.count() >= 2 and not cls._block_semifinal_exists(tournament, block_range=(0, 3)):
+        if block1_winners.count() == 2 and not cls._block_semifinal_exists(tournament, block_range=(0, 3)):
             # ブロック1で2人の勝者が出た場合、マッチ作成
             block1_list = list(block1_winners[:2])
             player1 = block1_list[0]
@@ -205,7 +205,7 @@ class Match(models.Model):
         
         # ブロック2（4,5 vs 6,7）のマッチ作成チェック
         block2_winners = round2_players.filter(entry_number__gte=4)
-        if block2_winners.count() >= 2 and not cls._block_semifinal_exists(tournament, block_range=(4, 7)):
+        if block2_winners.count() == 2 and not cls._block_semifinal_exists(tournament, block_range=(4, 7)):
             # ブロック2で2人の勝者が出た場合、マッチ作成
             block2_list = list(block2_winners[:2])
             player1 = block2_list[0]

@@ -293,36 +293,6 @@ class RoomConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             print(f"ERROR: get_ongoing_match_for_user: {e}")
             return None
-
-    async def update_matches(self):
-        """トーナメントのマッチ情報を更新"""
-        try:
-            room_parts = self.room_id.split('.')
-            if len(room_parts) != 3:
-                print(f"WARNING: Invalid room_id format: {self.room_id}")
-                return
-
-            tournament_id = int(room_parts[2])
-            
-            # Check if matches already exist - wrap in sync_to_async
-            matches_exist = await sync_to_async(
-                lambda: Match.objects.filter(tournament_id=tournament_id).exists()
-            )()
-            
-            if matches_exist:
-                print(f"DEBUG: Matches already exist for tournament {tournament_id}, skipping update.")
-                return
-            
-            print(f"DEBUG: No matches found for tournament {tournament_id}, creating new matches.")
-            
-            tournament = await sync_to_async(Tournament.objects.get)(id=tournament_id)
-            
-            await sync_to_async(Match.initialize_first_round_matches)(tournament)
-            await sync_to_async(Match.create_next_round_matches)(tournament)
-            
-        except Exception as e:
-            print(f"ERROR: update_matches: {e}")
-            
     def get_tournament_capacity(self):
         """トーナメントの定員を取得（PostgreSQLのtournamentテーブルから取得）"""
         try:
