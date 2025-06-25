@@ -41,7 +41,7 @@ def try_join_match(match_id, user):
             return {"error": "Match is full."}, False
         RoomMembers.objects.create(room_id = room_id, user = user)
         room_members = RoomMembers.objects.filter(room_id = room_id)
-        if len(room_members) != 2:
+        if room_members.count() != 2:
             return {"error": "RoomMembers count is not as expected."}, False
         for i, member in enumerate(room_members):
             if i == 0:
