@@ -4,7 +4,7 @@
 ```
 $ > cd api
 $ > make
-$ > docker exec -it dev-backend-1 bash
+$ > docker exec -it dev-api bash
 $container > run
 ```
 
@@ -30,10 +30,10 @@ test match # エンドポイントのテスト。manage.pyのあるディレク�
 ├── README.md
 ├── .dockerignore
 ├── conf # Djangoの動作に必要なファイル。Dockerfileでコンテナへコピーする。
-│   ├── app_xxx # アプリ毎にディレクトリとソースファイルを作成
+│   ├── xxx # アプリ毎にディレクトリとソースファイルを作成
 │   │   ├── ~~.py
 │   │   └── ~~.py
-│   ├── app_match # example
+│   ├── match # example
 │   │   ├── admin.py
 │   │   ├── consumers.py # WS接続管理の親玉
 │   │   ├── routing.py # WS接続のルーティングを管理
@@ -46,7 +46,7 @@ test match # エンドポイントのテスト。manage.pyのあるディレク�
 │   │   ├── __init__.py # 空ファイル
 │   │   ├── decorators.py
 │   │   └── websocket.py
-│   └── project # プロジェクトディレクトリのソースファイル
+│   └── trans # プロジェクトディレクトリのソースファイル
 │       ├── asgi.py
 │       ├── settings.py
 │       └── urls.py
@@ -55,8 +55,9 @@ test match # エンドポイントのテスト。manage.pyのあるディレク�
 │   ├── index.html # APIエンドポイントを利用してゲーム画面をざっくり再現できるファイル。ブラウザでひらく。
 │   ├── settings.py
 │   └── .env.sample
-└── tool # ファイルが1つだけなら親ディレクトリにファイルを移動するかも
+└── tool
     └── entrypoint.sh # コンテナ起動後に実行するコマンド集
+    └── requirements.txt
 ```
 
 ## 新たなappを追加する時は下記のコマンドを実行
@@ -76,6 +77,16 @@ python3 -m pip install -r tool/requirements.txt
 cd api/conf
 python3 manage.py makemigrations
 ```
+
+ローカルに不要なインストールをしたくない場合、dev-apiコンテナ上で行うこともできる。
+```
+$ > cd api
+$ > make
+$ > docker exec -it dev-api bash
+$container > python3 makemigrations
+```
+これによってアプリ内のmigrationsディレクトリに新しい設定ファイルが生成される。
+コンテナ内にある設定ファイルを``docker cp``コマンドでローカルにコピーできる。
 
 ## SECRET_KEY の作成方法
 ```sh
