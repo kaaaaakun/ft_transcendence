@@ -1,7 +1,6 @@
 import json
 import os
 from web3 import Web3
-from web3.middleware import geth_poa_middleware
 from django.conf import settings
 
 
@@ -24,12 +23,23 @@ class BlockchainController:
         
         # 設定読み込み
         rpc_url = getattr(settings, 'BLOCKCHAIN_RPC_URL', 'https://sepolia.infura.io/v3/YOUR_PROJECT_ID')
-        cls._private_key = getattr(settings, 'BLOCKCHAIN_PRIVATE_KEY', None)
+        private_key = getattr(settings, 'BLOCKCHAIN_PRIVATE_KEY', None)
         contract_address = getattr(settings, 'BLOCKCHAIN_CONTRACT_ADDRESS', None)
+        
+        # 秘密鍵の0xプレフィックス処理
+        if private_key:
+            cls._private_key = private_key if private_key.startswith('0x') else '0x' + private_key
         
         # Web3初期化
         cls._w3 = Web3(Web3.HTTPProvider(rpc_url))
-        cls._w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+        
+        # POAミドルウェアを追加（新しいバージョンのweb3.py用）
+        try:
+            from web3.middleware import ExtraDataToPOAMiddleware
+            cls._w3.middleware_onion.inject(ExtraDataToPOAMiddleware, layer=0)
+        except ImportError:
+            # 古いバージョンの場合は何もしない
+            pass
         
         # アカウント設定
         if cls._private_key:
@@ -49,12 +59,23 @@ class BlockchainController:
     def _load_abi():
         """ABIファイルを読み込む"""
         try:
+            # まず現在のディレクトリから探す
+            abi_path = 'MyContract.json'
+            if os.path.exists(abi_path):
+                with open(abi_path, 'r') as file:
+                    return json.load(file)['abi']
+            
+            # 次にblockchainディレクトリから探す
             abi_path = os.path.join(
                 settings.BASE_DIR,
                 'blockchain/deploy/artifacts/contracts/MyContract.sol/MyContract.json'
             )
-            with open(abi_path, 'r') as file:
-                return json.load(file)['abi']
+            if os.path.exists(abi_path):
+                with open(abi_path, 'r') as file:
+                    return json.load(file)['abi']
+            
+            print(f"ABIファイルが見つかりません: {abi_path}")
+            return None
         except Exception as e:
             print(f"ABI読み込みエラー: {e}")
             return None
@@ -72,13 +93,15 @@ class BlockchainController:
                 match_id, match_time, user_id1, score1, user_id2, score2
             ).build_transaction({
                 'from': cls._account.address,
-                'gas': 200000,
+                'gas': 500000,  # 200,000から500,000に増加
                 'gasPrice': cls._w3.eth.gas_price,
                 'nonce': cls._w3.eth.get_transaction_count(cls._account.address),
             })
             
             signed_txn = cls._w3.eth.account.sign_transaction(transaction, cls._private_key)
-            tx_hash = cls._w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+            # 新しいWeb3.pyバージョンでは raw_transaction を使用
+            raw_tx = getattr(signed_txn, 'raw_transaction', getattr(signed_txn, 'rawTransaction', None))
+            tx_hash = cls._w3.eth.send_raw_transaction(raw_tx)
             tx_receipt = cls._w3.eth.wait_for_transaction_receipt(tx_hash)
             
             return {'success': True, 'tx_hash': tx_hash.hex()}
@@ -106,4 +129,3 @@ class BlockchainController:
         except Exception as e:
             print(f"取得エラー: {e}")
             return None
-    
