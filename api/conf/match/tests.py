@@ -29,8 +29,8 @@ def create_test_match_detail_simple():
     match = create_test_match_simple()
     users = create_test_user_4()
     match_details = []
-    match_details.append(MatchDetail.create(match, users[0]))
-    match_details.append(MatchDetail.create(match, users[1]))
+    match_details.append(MatchDetail.create(match, users[0], is_left_side = True))
+    match_details.append(MatchDetail.create(match, users[1], is_left_side = False))
     return match_details
 
 #--------------
@@ -72,6 +72,7 @@ class MatchDetailTestCase(TestCase):
         self.assertIsInstance(matchDetails[0], MatchDetail)
         self.assertEqual(matchDetails[0].match.id, matchDetails[1].match.id)
         self.assertNotEqual(matchDetails[0].user, matchDetails[1].user)
+        self.assertNotEqual(matchDetails[0].is_left_side, matchDetails[1].is_left_side)
         self.assertEqual(matchDetails[0].score, 0)
 
 #--------------
