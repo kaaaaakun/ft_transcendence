@@ -19,6 +19,7 @@ services:
       retries: 5
     expose:
       - "5432"
+    # TODO: 提出前にPORTを閉じる
     ports:
       - "5432:5432"
     networks:
@@ -101,6 +102,7 @@ services:
     image: redis:7.4.2
     networks:
       - net_pong
+    # TODO: 提出前にPORTを閉じる
     ports:
       - "6379:6379"
     healthcheck:
