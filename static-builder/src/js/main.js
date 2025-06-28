@@ -11,7 +11,7 @@ import { api } from '@/js/infrastructures/api/fetch'
 import { DeleteAccount } from '@/js/pages/DeleteAccount'
 import { PasswordReset } from '@/js/pages/PasswordReset'
 import { SimpleGameLocal } from '@/js/pages/SimpleGameLocal'
-import { SimpleGameRemote } from '@/js/pages/SimpleGameRemote'
+import { RemoteSimpleIndex } from '@/js/pages/RemoteSimpleIndex'
 import { TournamentsBracket } from '@/js/pages/TournamentsBracket'
 import { TournamentsDisplayName } from '@/js/pages/TournamentsDisplayName'
 import { TournamentWaitBegin } from '@/js/pages/TournamentWaitBegin'
@@ -50,7 +50,7 @@ function App() {
     }),
     Route({
       path: '/remote/simple',
-      component: ProtectedRoute(SimpleGameRemote),
+      component: ProtectedRoute(RemoteSimpleIndex),
     }),
     Route({
       path: '/remote/matches/:id',
