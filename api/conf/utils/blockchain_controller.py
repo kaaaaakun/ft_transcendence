@@ -25,11 +25,7 @@ class BlockchainController:
         rpc_url = getattr(settings, 'BLOCKCHAIN_RPC_URL', 'https://sepolia.infura.io/v3/YOUR_PROJECT_ID')
         private_key = getattr(settings, 'BLOCKCHAIN_PRIVATE_KEY', None)
         contract_address = getattr(settings, 'BLOCKCHAIN_CONTRACT_ADDRESS', None)
-        
-        # 秘密鍵の0xプレフィックス処理
-        if private_key:
-            cls._private_key = private_key if private_key.startswith('0x') else '0x' + private_key
-        
+
         # Web3初期化
         cls._w3 = Web3(Web3.HTTPProvider(rpc_url))
         
@@ -43,7 +39,7 @@ class BlockchainController:
         
         # アカウント設定
         if cls._private_key:
-            cls._account = cls._w3.eth.account.from_key(cls._private_key)
+            cls._account = cls._w3.eth.account.from_key(private_key)
         
         # ABI読み込み
         contract_abi = cls._load_abi()
@@ -59,6 +55,7 @@ class BlockchainController:
     def _load_abi():
         """ABIファイルを読み込む"""
         try:
+
             # まず現在のディレクトリから探す
             abi_path = 'MyContract.json'
             if os.path.exists(abi_path):
@@ -82,6 +79,11 @@ class BlockchainController:
     
     @classmethod
     def store_match_result(cls, match_id, match_time, user_id1, score1, user_id2, score2):
+
+        if not BlockchainController.private_key:
+            print("dry-runモードのため、試合結果は保存されません。")
+            return {'success': False, 'error': 'dry-runモードでは保存できません'}
+
         """試合結果を保存"""
         cls._initialize()
         
@@ -110,6 +112,12 @@ class BlockchainController:
     
     @classmethod
     def get_match_result(cls, match_id):
+
+        # dry-runモードでは結果を取得しない
+        if not BlockchainController._private_key:
+            print("dry-runモードのため、試合結果は取得できません。")
+            return None
+
         """試合結果を取得"""
         cls._initialize()
         
