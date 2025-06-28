@@ -464,13 +464,20 @@ class RoomConsumer(AsyncWebsocketConsumer):
             user_id_ints = [int(user_id.decode()) for user_id in user_ids]
             users = User.objects.filter(id__in=user_id_ints).only('id', 'display_name')
             
+            # 順序保証とエラー処理のためのマッピング作成
+            user_map = {user.id: user for user in users}
+            
             connected_users = []
-            for user in users:
-                connected_users.append({
-                    'user_id': user.id,
-                    'display_name': user.display_name,
-                    'status': 'connected'
-                })
+            for user_id in user_id_ints:
+                user = user_map.get(user_id)
+                if user:
+                    connected_users.append({
+                        'user_id': user.id,
+                        'display_name': user.display_name,
+                        'status': 'connected'
+                    })
+                else:
+                    print(f"WARNING: user_id={user_id} is in Redis but not in DB")
 
             print(f"DEBUG: Retrieved {len(connected_users)} connected users")
             return connected_users
