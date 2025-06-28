@@ -9,7 +9,7 @@ from .game_logic import GameManager, LocalSimpleScoreManager, TournamentScoreMan
 from .models import Match
 from tournament.models import Tournament
 
-FRAME = 30 # フロントを見つつ調整
+FRAME = 20 # フレームレート最適化（30fps→20fps）
 END_GAME_SCORE = settings.END_GAME_SCORE
 
 # Baseクラス
@@ -50,13 +50,28 @@ class LocalSimpleMatchConsumer(LocalBaseMatchConsumer):
         self.game_manager = GameManager(score_manager=LocalSimpleScoreManager())
 
     async def game_loop(self):
+        # ゲーム状態をキャッシュして無駄な計算を減らす
+        last_game_state = None
+        frames_since_score_check = 0
+        
         while self.is_running:
             self.game_manager.update_game_state()
-            await self.send(text_data=json.dumps(self.game_manager.get_game_state()))
-            if (
-                self.game_manager.score_manager.get_score("left") == END_GAME_SCORE or
-                self.game_manager.score_manager.get_score("right") == END_GAME_SCORE
-            ):
-                self.is_running = False
+            current_game_state = self.game_manager.get_game_state()
+            
+            # 状態が変化した時のみ送信（帯域幅節約）
+            if current_game_state != last_game_state:
+                await self.send(text_data=json.dumps(current_game_state))
+                last_game_state = current_game_state
+            
+            # スコアチェックを毎フレームではなく10フレームごとに実行
+            frames_since_score_check += 1
+            if frames_since_score_check >= 10:
+                if (
+                    self.game_manager.score_manager.get_score("left") == END_GAME_SCORE or
+                    self.game_manager.score_manager.get_score("right") == END_GAME_SCORE
+                ):
+                    self.is_running = False
+                frames_since_score_check = 0
+            
             await asyncio.sleep(self.frame_rate)
         await self.close()
