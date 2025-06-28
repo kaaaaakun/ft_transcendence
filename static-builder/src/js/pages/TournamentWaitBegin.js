@@ -5,6 +5,7 @@ import { useBanner } from '@/js/hooks/useBanner'
 
 import { tournament } from '@/js/hooks/useTournamentDetails'
 import { ConnectionStatus } from '@/js/components/tournament/ConnectionStatus'
+import { TournamentsBracket } from './TournamentsBracket'
 
 export const TournamentWaitBegin = props => {
   const { showErrorBanner, banners } = useBanner()
@@ -21,13 +22,9 @@ export const TournamentWaitBegin = props => {
   const [_isInitialized, setIsInitialized] = Teact.useState(false) // 初期化フラグ
 
   Teact.useEffect(() => {
-    console.log('TournamentWaitBegin useEffect called', { tournamentId })
-
     const fetchTournamentDetails = async () => {
       try {
         const data = await tournament.fetchData(tournamentId)
-
-        console.log('Fetched tournament data:', data)
         if (data.error) {
           showErrorBanner({
             message: data.error,
@@ -50,19 +47,6 @@ export const TournamentWaitBegin = props => {
   }, [])
 
   Teact.useEffect(() => {
-    console.log('waitingFor useEffect called', { waitingFor })
-  }, [waitingFor])
-  Teact.useEffect(() => {
-    console.log('roomName useEffect called', { roomName })
-  }, [roomName])
-
-  console.log(
-    `  useTournamentDetails: roomName=${roomName}, tournamentType=${tournamentType}, loading=${loading}`,
-  )
-
-  Teact.useEffect(() => {
-    console.log('    useEffect called', { roomName, loading })
-
     if (loading === null) {
       return
     }
@@ -148,22 +132,25 @@ export const TournamentWaitBegin = props => {
           connectionStatus,
           roomName,
         }),
-
-        Teact.createElement(
-          'div',
-          {
-            className: `mt-4 ${isReady ? 'text-white bg-success' : 'text-dark bg-light'} text-center font-weight-bold p-3 rounded d-flex align-items-center justify-content-center flex-column`,
-          },
-          Teact.createElement(
-            'p',
-            'text-center',
-            `Waiting for ${waitingFor} more people ...`,
-          ),
-          Teact.createElement('div', {
-            className: 'spinner-border text-primary spinner-border-sm spinner',
-            role: 'status',
-          }),
-        ),
+        waitingFor === 0
+          ? null
+          : Teact.createElement(
+              'div',
+              {
+                className: `mt-4 ${isReady ? 'text-white bg-success' : 'text-dark bg-light'} text-center font-weight-bold p-3 rounded d-flex align-items-center justify-content-center flex-column`,
+              },
+              Teact.createElement(
+                'p',
+                'text-center',
+                `Waiting for ${waitingFor} more people ...`,
+              ),
+              Teact.createElement('div', {
+                className:
+                  'spinner-border text-primary spinner-border-sm spinner',
+                role: 'status',
+              }),
+            ),
+        TournamentsBracket(_members, tournamentType),
       ),
     ),
   )
