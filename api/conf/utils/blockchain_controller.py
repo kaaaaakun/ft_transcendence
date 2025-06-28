@@ -80,13 +80,13 @@ class BlockchainController:
     @classmethod
     def store_match_result(cls, match_id, match_time, user_id1, score1, user_id2, score2):
 
-        if not BlockchainController.private_key:
+        # dry-runモードのチェック
+        if getattr(settings, 'BLOCKCHAIN_PRIVATE_KEY', None) == 'dry-run':
             print("dry-runモードのため、試合結果は保存されません。")
             return {'success': False, 'error': 'dry-runモードでは保存できません'}
 
         """試合結果を保存"""
         cls._initialize()
-        
         if not cls._contract or not cls._account:
             return {'success': False, 'error': 'ブロックチェーン接続エラー'}
         
@@ -113,17 +113,11 @@ class BlockchainController:
     @classmethod
     def get_match_result(cls, match_id):
 
-        # dry-runモードでは結果を取得しない
-        if not BlockchainController._private_key:
-            print("dry-runモードのため、試合結果は取得できません。")
-            return None
-
         """試合結果を取得"""
         cls._initialize()
-        
         if not cls._contract:
             return None
-        
+
         try:
             result = cls._contract.functions.getMatchResult(match_id).call()
             return {
