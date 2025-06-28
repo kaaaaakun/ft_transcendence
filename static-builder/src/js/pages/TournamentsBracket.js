@@ -50,14 +50,25 @@ export const TournamentsBracket = () => {
     )
   }
 
+  // SVG要素のキャッシュとメモ化
+  const participantBoardCache = new Map()
+  
   function createParticipantBoard(participant, x, y) {
+    const cacheKey = `${participant.player.name}-${x}-${y}-${participant.next_player}`
+    
+    // キャッシュにあれば再利用
+    if (participantBoardCache.has(cacheKey)) {
+      return participantBoardCache.get(cacheKey)
+    }
+    
     const xAdjustment = 5
     const yAdjustment = 12
     const textWidth = 110
     const textHeight = 20
     const fighterColor = '#FCAA30'
     const otherColor = '#182F44'
-    return [
+    
+    const elements = [
       Teact.createElement('rect', {
         x: x - xAdjustment,
         y: y - yAdjustment,
@@ -80,6 +91,13 @@ export const TournamentsBracket = () => {
         participant.player.name,
       ),
     ]
+    
+    // キャッシュに保存（最大100要素まで）
+    if (participantBoardCache.size < 100) {
+      participantBoardCache.set(cacheKey, elements)
+    }
+    
+    return elements
   }
 
   function createChampionParticipantBoard(participants, tournamentEnd) {
