@@ -29,8 +29,8 @@ def create_test_match_detail_simple():
     match = create_test_match_simple()
     users = create_test_user_4()
     match_details = []
-    match_details.append(MatchDetail.create(match, users[0]))
-    match_details.append(MatchDetail.create(match, users[1]))
+    match_details.append(MatchDetail.create(match, users[0], is_left_side = True))
+    match_details.append(MatchDetail.create(match, users[1], is_left_side = False))
     return match_details
 
 #--------------
@@ -72,6 +72,7 @@ class MatchDetailTestCase(TestCase):
         self.assertIsInstance(matchDetails[0], MatchDetail)
         self.assertEqual(matchDetails[0].match.id, matchDetails[1].match.id)
         self.assertNotEqual(matchDetails[0].user, matchDetails[1].user)
+        self.assertNotEqual(matchDetails[0].is_left_side, matchDetails[1].is_left_side)
         self.assertEqual(matchDetails[0].score, 0)
 
 #--------------
@@ -154,3 +155,27 @@ class MatchAPITestCase(APITestCase):
         # print(response.data) # for debugging purposes
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertIn('match_id', response.data)
+
+    def test_get_match_id(self):
+        # Redisの初期化
+        get_redis().flushdb()
+
+        match = create_test_match_detail_simple()[0].match
+        url = reverse('match-id', kwargs={'match_id': match.id})
+        # matchのデータからユーザー情報を取得して、ログイン情報を取得する
+        user = match.matchdetail_set.first().user
+        access_response = self.client.post(
+            reverse('login'),
+            {'login_name': user.login_name, 'password': 'a'},
+            format='json'
+        )
+        token = access_response.json()['access_token']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        # match_idが存在する時
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('room_id', response.data)
+        # match_idが存在しない時
+        url = reverse('match-id', kwargs={'match_id': 9999})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
