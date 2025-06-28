@@ -6,6 +6,9 @@ import { HeaderWithTitleLayout } from '@/js/layouts/HeaderWithTitleLayout'
 import { useLocation, useNavigate } from '@/js/libs/router'
 import { Teact } from '@/js/libs/teact'
 
+// SVG要素のキャッシュ（モジュールスコープで安定性確保）
+const participantBoardCache = new Map()
+
 export const TournamentsBracket = () => {
   const loc = useLocation()
   const navigate = useNavigate()
@@ -50,24 +53,21 @@ export const TournamentsBracket = () => {
     )
   }
 
-  // SVG要素のキャッシュとメモ化
-  const participantBoardCache = new Map()
-  
   function createParticipantBoard(participant, x, y) {
     const cacheKey = `${participant.player.name}-${x}-${y}-${participant.next_player}`
-    
+
     // キャッシュにあれば再利用
     if (participantBoardCache.has(cacheKey)) {
       return participantBoardCache.get(cacheKey)
     }
-    
+
     const xAdjustment = 5
     const yAdjustment = 12
     const textWidth = 110
     const textHeight = 20
     const fighterColor = '#FCAA30'
     const otherColor = '#182F44'
-    
+
     const elements = [
       Teact.createElement('rect', {
         x: x - xAdjustment,
@@ -91,12 +91,15 @@ export const TournamentsBracket = () => {
         participant.player.name,
       ),
     ]
-    
-    // キャッシュに保存（最大100要素まで）
-    if (participantBoardCache.size < 100) {
-      participantBoardCache.set(cacheKey, elements)
+
+    // キャッシュに保存（LRU風の削除戦略）
+    if (participantBoardCache.size >= 100) {
+      // 最も古いエントリを削除
+      const firstKey = participantBoardCache.keys().next().value
+      participantBoardCache.delete(firstKey)
     }
-    
+    participantBoardCache.set(cacheKey, elements)
+
     return elements
   }
 
