@@ -6,11 +6,10 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 
 def get_opponent_user_and_score(match_id, user_id):
-  match = Match.objects.get(id=match_id)
-  match_details = MatchDetail.objects.filter(match_id=match_id)
+  match_details = MatchDetail.objects.filter(match_id=match_id).select_related('user')
   for match_detail in match_details:
     if match_detail.user_id != user_id:
-      return User.objects.get(id=match_detail.user_id), match_detail.score
+      return match_detail.user, match_detail.score
   return None
 
 def get_relation_to_current_user(user_id, access_id):
@@ -25,18 +24,35 @@ def get_relation_to_current_user(user_id, access_id):
   return 'stranger'
 
 def create_response(user, access_id):
-  match_details = MatchDetail.objects.filter(user_id=user.id)
+  match_details = MatchDetail.objects.filter(user_id=user.id).select_related('match')
+  all_match_details = MatchDetail.objects.filter(
+    match_id__in=[md.match_id for md in match_details]
+  ).select_related('user', 'match')
+  
+  match_details_by_match = {}
+  for md in all_match_details:
+    if md.match_id not in match_details_by_match:
+      match_details_by_match[md.match_id] = []
+    match_details_by_match[md.match_id].append(md)
+  
   game_records = []
   for match_detail in match_details:
-    opponent_user, opponent_score = get_opponent_user_and_score(match_detail.match_id, user.id)
+    opponent_user = None
+    opponent_score = None
     
-    game_records.append({
-      # 'date': match_detail.match_id.created_at,
-      'result': "win" if match_detail.score == 10 else "lose",
-      'opponent_name': opponent_user.display_name,
-      'score': {'player': match_detail.score, 'opponent': opponent_score},
-      'match_type': 'tournament' if Match.objects.get(id=match_detail.match_id).tournament_id else 'local'
-    })
+    for md in match_details_by_match[match_detail.match_id]:
+      if md.user_id != user.id:
+        opponent_user = md.user
+        opponent_score = md.score
+        break
+    
+    if opponent_user:
+      game_records.append({
+        'result': "win" if match_detail.score == 10 else "lose",
+        'opponent_name': opponent_user.display_name,
+        'score': {'player': match_detail.score, 'opponent': opponent_score},
+        'match_type': 'tournament' if match_detail.match.tournament_id else 'local'
+      })
   win_count = len([game_record for game_record in game_records if game_record['result'] == 'win'])
   lose_count = len([game_record for game_record in game_records if game_record['result'] == 'lose'])
   response = {

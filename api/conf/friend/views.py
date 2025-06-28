@@ -16,7 +16,7 @@ class FriendListByNameView(APIView):
         user = User.objects.filter(display_name=display_name).first()
         if not user:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-        friends = Friend.objects.filter(user=user, status='accepted')
+        friends = Friend.objects.filter(user=user, status='accepted').select_related('friend')
         serializer = FriendListSerializer(friends, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -79,6 +79,6 @@ class FriendRequestsListByNameView(APIView):
         user = User.objects.filter(display_name=display_name).first()
         if not user:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-        requests = Friend.objects.filter(Q(friend=user) | Q(user=user), status='pending')
+        requests = Friend.objects.filter(Q(friend=user) | Q(user=user), status='pending').select_related('user', 'friend')
         serializer = FriendRequestSerializer(requests, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
