@@ -450,24 +450,27 @@ class RoomConsumer(AsyncWebsocketConsumer):
 
 
     def get_connected_users(self):
-        """現在接続中のユーザーリストを取得"""
+        """現在接続中のユーザーリストを取得（N+1クエリ最適化）"""
         try:
+            from user.models import User
+            
             active_users_key = f"active_users:{self.room_id}"
             user_ids = self.redis_client.smembers(active_users_key)
+            
+            if not user_ids:
+                return []
+            
+            # N+1クエリ回避：一括でユーザー情報を取得
+            user_id_ints = [int(user_id.decode()) for user_id in user_ids]
+            users = User.objects.filter(id__in=user_id_ints).only('id', 'display_name')
+            
             connected_users = []
-
-            for user_id in user_ids:
-                try:
-                    from user.models import User
-                    user = User.objects.get(id=int(user_id.decode()))
-                    connected_users.append({
-                        'user_id': user.id,
-                        'display_name': user.display_name,
-                        'status': 'connected'
-                    })
-                except Exception as e:
-                    print(f"ERROR: Failed to get connected user {user_id}: {e}")
-                    continue
+            for user in users:
+                connected_users.append({
+                    'user_id': user.id,
+                    'display_name': user.display_name,
+                    'status': 'connected'
+                })
 
             print(f"DEBUG: Retrieved {len(connected_users)} connected users")
             return connected_users
