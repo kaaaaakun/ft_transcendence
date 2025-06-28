@@ -3,6 +3,7 @@ import asyncio
 from asgiref.sync import sync_to_async
 from asyncio import sleep
 import json
+import copy
 
 from django.conf import settings
 from .game_logic import GameManager, LocalSimpleScoreManager, TournamentScoreManager
@@ -61,7 +62,7 @@ class LocalSimpleMatchConsumer(LocalBaseMatchConsumer):
             # 状態が変化した時のみ送信（帯域幅節約）
             if current_game_state != last_game_state:
                 await self.send(text_data=json.dumps(current_game_state))
-                last_game_state = current_game_state
+                last_game_state = copy.deepcopy(current_game_state)
             
             # スコアチェックを毎フレームではなく10フレームごとに実行
             frames_since_score_check += 1
