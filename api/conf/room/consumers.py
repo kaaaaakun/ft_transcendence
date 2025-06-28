@@ -133,7 +133,7 @@ class RoomConsumer(AsyncWebsocketConsumer):
         """定期的にルームステータスを更新"""
         try:
             while True:
-                await asyncio.sleep(2)  # 2秒間隔で更新
+                await asyncio.sleep(10)  # 10秒間隔で更新（負荷軽減）
                 await self.broadcast_room_status()
         except asyncio.CancelledError:
             pass
@@ -142,7 +142,7 @@ class RoomConsumer(AsyncWebsocketConsumer):
         """定期的にトーナメントマッチを更新"""
         try:
             while True:
-                await asyncio.sleep(3)  # 3秒間隔で更新
+                await asyncio.sleep(15)  # 15秒間隔で更新（負荷軽減）
                 await self.update_tournament_matches()
         except asyncio.CancelledError:
             pass
