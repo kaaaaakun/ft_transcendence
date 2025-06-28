@@ -91,8 +91,8 @@ class Match(models.Model):
             created_matches.append(match)
             
             # 各プレイヤーのマッチ詳細を作成
-            MatchDetail.create(match, player1.user)
-            MatchDetail.create(match, player2.user)
+            MatchDetail.create(match, player1.user, is_left_side=True)
+            MatchDetail.create(match, player2.user, is_left_side=False)
         
         return created_matches
 
@@ -141,8 +141,8 @@ class Match(models.Model):
                 match = cls.create_for_tournament(tournament)
                 created_matches.append(match)
                 
-                MatchDetail.create(match, player1.user)
-                MatchDetail.create(match, player2.user)
+                MatchDetail.create(match, player1.user, is_left_side=True)
+                MatchDetail.create(match, player2.user, is_left_side=False)
         
         return created_matches
 
@@ -179,8 +179,8 @@ class Match(models.Model):
                 match = cls.create_for_tournament(tournament)
                 created_matches.append(match)
                 
-                MatchDetail.create(match, player1.user)
-                MatchDetail.create(match, player2.user)
+                MatchDetail.create(match, player1.user, is_left_side=True)
+                MatchDetail.create(match, player2.user, is_left_side=False)
         
         return created_matches
 
@@ -200,8 +200,8 @@ class Match(models.Model):
             match = cls.create_for_tournament(tournament)
             created_matches.append(match)
             
-            MatchDetail.create(match, player1.user)
-            MatchDetail.create(match, player2.user)
+            MatchDetail.create(match, player1.user, is_left_side=True)
+            MatchDetail.create(match, player2.user, is_left_side=False)
         
         # ブロック2（4,5 vs 6,7）のマッチ作成チェック
         block2_winners = round2_players.filter(entry_number__gte=4)
@@ -214,8 +214,8 @@ class Match(models.Model):
             match = cls.create_for_tournament(tournament)
             created_matches.append(match)
             
-            MatchDetail.create(match, player1.user)
-            MatchDetail.create(match, player2.user)
+            MatchDetail.create(match, player1.user, is_left_side=True)
+            MatchDetail.create(match, player2.user, is_left_side=False)
         
         return created_matches
 
