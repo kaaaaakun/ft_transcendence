@@ -41,10 +41,14 @@ def try_join_match(match_id, user):
             return {"error": "Match is full."}, False
         RoomMembers.objects.create(room_id = room_id, user = user)
         room_members = RoomMembers.objects.filter(room_id = room_id)
-        if len(room_members) != 2:
+        if room_members.count() != 2:
             return {"error": "RoomMembers count is not as expected."}, False
-        for member in room_members:
-            MatchDetail.objects.create(match = match, user = member.user)
+        for i, member in enumerate(room_members):
+            if i == 0:
+                is_left_side = True
+            else:
+                is_left_side = False
+            MatchDetail.objects.create(match = match, user = member.user, is_left_side = is_left_side)
         return {"match_id": match_id}, True     
     except Match.DoesNotExist:
         return {"error": "Match does not exist."}, False

@@ -254,15 +254,17 @@ class MatchDetail(models.Model):
     match = models.ForeignKey(Match, on_delete = models.CASCADE)
     user = models.ForeignKey(User, on_delete = models.CASCADE)
     score = models.IntegerField(default = 0)
+    is_left_side = models.BooleanField(default = True)
 
     class Meta:
         db_table = 'match_details'
 
     @classmethod
-    def create(cls, match, user):
+    def create(cls, match, user, is_left_side):
         if match.is_finished:
             raise ValueError("Cannot create a match detail for a finished match.")
         return cls.objects.create(
             match = match,
             user = user,
+            is_left_side = is_left_side
         )
