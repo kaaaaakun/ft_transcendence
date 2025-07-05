@@ -5,3 +5,4 @@ reverseproxy/ssl/*
 *note*
 
 **/MyContract.dbg.json
+**/node_modules
