@@ -20,11 +20,14 @@ contract MyContract {
     // 試合結果を保存するマッピング（matchId => MatchResult）
     mapping(string => MatchResult) public matchResults;
     
-    // 試合結果が存在するかチェックするマッピング
+    // 試合結果が存在するかチェックするマッピング（Primary Key機能）
     mapping(string => bool) public matchExists;
     
     // 保存された試合の総数
     uint256 public totalMatches;
+    
+    // matchId一覧を管理する配列（Primary Key管理用）
+    string[] public matchIdList;
     
     // イベント：試合結果が保存された時に発火
     event MatchResultStored(
@@ -53,8 +56,9 @@ contract MyContract {
         string memory _displayName2,
         string memory _score2
     ) public {
-        require(!matchExists[_matchId], "Match ID already exists");
-        require(bytes(_matchId).length > 0, "Match ID cannot be empty");
+        // Primary Key制約: matchIdの重複チェック
+        require(!matchExists[_matchId], "Match ID already exists - Primary Key constraint violation");
+        require(bytes(_matchId).length > 0, "Match ID cannot be empty - Primary Key cannot be null");
         require(bytes(_userId1).length > 0, "User ID 1 cannot be empty");
         require(bytes(_userId2).length > 0, "User ID 2 cannot be empty");
         require(bytes(_displayName1).length > 0, "Display name 1 cannot be empty");
@@ -79,7 +83,9 @@ contract MyContract {
             player2: player2
         });
         
+        // Primary Key登録: matchIdを一意のキーとして登録
         matchExists[_matchId] = true;
+        matchIdList.push(_matchId);
         totalMatches++;
         
         emit MatchResultStored(_matchId, _matchTime, _userId1, _displayName1, _score1, _userId2, _displayName2, _score2);
@@ -96,7 +102,8 @@ contract MyContract {
         string memory displayName2,
         string memory score2
     ) {
-        require(matchExists[_matchId], "Match does not exist");
+        // Primary Key制約: 存在しないmatchIdへのアクセスを防ぐ
+        require(matchExists[_matchId], "Match does not exist - Primary Key not found");
         
         MatchResult memory result = matchResults[_matchId];
         return (
@@ -109,5 +116,21 @@ contract MyContract {
             result.player2.displayName,
             result.player2.score
         );
+    }
+    
+    // Primary Key管理関数: 全てのmatchIdを取得
+    function getAllMatchIds() public view returns (string[] memory) {
+        return matchIdList;
+    }
+    
+    // Primary Key管理関数: matchIdの存在確認
+    function isMatchIdExists(string memory _matchId) public view returns (bool) {
+        return matchExists[_matchId];
+    }
+    
+    // Primary Key管理関数: 特定のインデックスのmatchIdを取得
+    function getMatchIdByIndex(uint256 _index) public view returns (string memory) {
+        require(_index < matchIdList.length, "Index out of bounds");
+        return matchIdList[_index];
     }
 }
