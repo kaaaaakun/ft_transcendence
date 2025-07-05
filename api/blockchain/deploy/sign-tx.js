@@ -4,7 +4,7 @@ const path = require('path');
 
 // .envファイルを読み込む関数
 function loadEnv() {
-    const envPath = path.join(__dirname, '../../../.env');
+    const envPath = path.join(__dirname, './.env');
     if (fs.existsSync(envPath)) {
         const envContent = fs.readFileSync(envPath, 'utf8');
         const envVars = {};
@@ -21,20 +21,20 @@ function loadEnv() {
 
 async function main() {
     const env = loadEnv();
-    const privateKey = env.BLOCKCHAIN_PRIVATE_KEY;
+    const privateKey = env.PRIVATE_KEY;
     
     if (!privateKey || privateKey === 'dry-run') {
-        console.error('エラー: .envファイルにBLOCKCHAIN_PRIVATE_KEYが見つからないか、dry-runに設定されています');
+        console.error('エラー: .envファイルにPRIVATE_KEYが見つからないか、dry-runに設定されています');
         console.log('.envファイルに有効なプライベートキーを設定してください');
         return;
     }
     
+    const contractAddress = env.BLOCKCHAIN_CONTRACT_ADDRESS;
+
     const provider = new ethers.JsonRpcProvider('https://sepolia.infura.io/v3/6c1109f241ab4df28479c8335bfcd384');
     const wallet = new ethers.Wallet(privateKey, provider);
     
     console.log('ウォレットアドレス:', wallet.address);
-    
-    const contractAddress = "0x8b279a6343105c9f36A728B401d3FF2B23799923";
     
     // コントラクトABI（storeMatchResult関数のみ）
     const abi = [
@@ -43,13 +43,13 @@ async function main() {
     
     const iface = new ethers.Interface(abi);
     const data = iface.encodeFunctionData("storeMatchResult", [
-        "match_001",
+        "match_002",
         "1690000000",
-        "user_01",
-        "Alice!",
+        "user_id_01",
+        "Alice",
         "10",
-        "user_02",
-        "Bob!",
+        "user_id_02",
+        "Bob",
         "8"
     ]);
     
