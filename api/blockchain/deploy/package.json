@@ -58,6 +58,7 @@
     "escalade": "^3.2.0",
     "escape-string-regexp": "^4.0.0",
     "ethereum-cryptography": "^1.2.0",
+    "ethers": "^6.15.0",
     "fdir": "^6.4.5",
     "fill-range": "^7.1.1",
     "find-up": "^5.0.0",
