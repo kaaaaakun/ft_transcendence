@@ -6,4 +6,8 @@ deploy:
 	docker-compose --env-file .env up --build --remove-orphans
 	docker-compose --env-file .env down --remove-orphans
 
+test:
+	npm install
+	node sign-tx.js
+
 .PHONY: deploy
