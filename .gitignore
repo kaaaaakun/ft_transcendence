@@ -3,3 +3,11 @@
 .DS_Store
 reverseproxy/ssl/*
 *note*
+
+# Blockchain SSH Configuration
+.env.blockchain
+blockchain/ssh/keys/*
+*.pem
+*.key
+*_rsa
+*_rsa.pub

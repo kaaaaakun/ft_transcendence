@@ -44,7 +44,7 @@ ps:
 setup-elk:
 	$(DOCKER_COMPOSE) up setup
 
-PHONY: run re build up down fdown image-prune ps generate setup-elk
+PHONY: run re build up down fdown image-prune ps generate setup-elk ssh-setup ssh-keygen ssh-config ssh-clean
 
 # -- 証明書の作成
 cert:
@@ -57,4 +57,25 @@ cert:
 cert_clean:
 	rm -rf $(CERT_DIR)
 
-PHONY:cert
+# -- ブロックチェーンSSH設定の自動生成
+SSH_SCRIPTS_DIR = ./blockchain/ssh/scripts
+SSH_KEYS_DIR = ./blockchain/ssh/keys
+
+ssh-setup: ssh-keygen ssh-config
+
+ssh-keygen:
+	@echo "Generating SSH keys for blockchain environment..."
+	@$(SSH_SCRIPTS_DIR)/generate-ssh-keys.sh -e dev
+	@$(SSH_SCRIPTS_DIR)/generate-ssh-keys.sh -e staging
+	@$(SSH_SCRIPTS_DIR)/generate-ssh-keys.sh -e prod
+
+ssh-config:
+	@echo "Generating SSH configuration for blockchain environment..."
+	@$(SSH_SCRIPTS_DIR)/generate-ssh-config.sh -e all
+
+ssh-clean:
+	@echo "Cleaning SSH keys and configuration..."
+	@rm -rf $(SSH_KEYS_DIR)
+	@echo "SSH keys removed. Please manually remove SSH config entries from ~/.ssh/config if needed."
+
+PHONY:cert ssh-setup ssh-keygen ssh-config ssh-clean
