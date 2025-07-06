@@ -12,6 +12,7 @@ import { DeleteAccount } from '@/js/pages/DeleteAccount'
 import { PasswordReset } from '@/js/pages/PasswordReset'
 import { SimpleGameLocal } from '@/js/pages/SimpleGameLocal'
 import { RemoteSimpleIndex } from '@/js/pages/RemoteSimpleIndex'
+import { RemoteGame } from '@/js/pages/RemoteGame'
 import { TournamentsBracket } from '@/js/pages/TournamentsBracket'
 import { TournamentsDisplayName } from '@/js/pages/TournamentsDisplayName'
 import { TournamentWaitBegin } from '@/js/pages/TournamentWaitBegin'
@@ -54,7 +55,7 @@ function App() {
     }),
     Route({
       path: '/remote/matches/:id',
-      component: Home, //遷移先のページは仮置き
+      component: RemoteGame,
     }),
     Route({
       path: '/remote/tournament',
