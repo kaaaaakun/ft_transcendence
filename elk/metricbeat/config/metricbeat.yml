@@ -20,24 +20,30 @@ setup.template.settings.index.mapping.total_fields.limit: 10200
 
 metricbeat.modules:
 - module: elasticsearch
-  hosts: [ http://elasticsearch:9200 ]
+  hosts: [ https://elasticsearch:9200 ]
   username: monitoring_internal
   password: ${MONITORING_INTERNAL_PASSWORD}
   xpack.enabled: true
   period: 10s
   enabled: true
+  ssl.certificate_authorities: [/usr/share/metricbeat/config/certs/ca.crt]
+  ssl.verification_mode: certificate
 - module: logstash
-  hosts: [ http://logstash:9600 ]
+  hosts: [ https://logstash:9600 ]
   xpack.enabled: true
   period: 10s
   enabled: true
+  ssl.certificate_authorities: [/usr/share/metricbeat/config/certs/ca.crt]
+  ssl.verification_mode: certificate
 - module: kibana
-  hosts: [ http://kibana:5601 ]
+  hosts: [ https://kibana:5601 ]
   username: monitoring_internal
   password: ${MONITORING_INTERNAL_PASSWORD}
   xpack.enabled: true
   period: 10s
   enabled: true
+  ssl.certificate_authorities: [/usr/share/metricbeat/config/certs/ca.crt]
+  ssl.verification_mode: certificate
 - module: docker
   metricsets:
     - container
@@ -58,13 +64,18 @@ processors:
 monitoring:
   enabled: true
   elasticsearch:
+    hosts: [ https://elasticsearch:9200 ]
     username: beats_system
     password: ${BEATS_SYSTEM_PASSWORD}
+    ssl.certificate_authorities: [/usr/share/metricbeat/config/certs/ca.crt]
+    ssl.verification_mode: certificate
 
 output.elasticsearch:
-  hosts: [ http://elasticsearch:9200 ]
+  hosts: [ https://elasticsearch:9200 ]
   username: metricbeat_internal
   password: ${METRICBEAT_INTERNAL_PASSWORD}
+  ssl.certificate_authorities: [/usr/share/metricbeat/config/certs/ca.crt]
+  ssl.verification_mode: certificate
 
 ## HTTP endpoint for health checking
 ## https://www.elastic.co/guide/en/beats/metricbeat/current/http-endpoint.html

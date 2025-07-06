@@ -135,6 +135,7 @@ services:
       - --system.hostfs=/hostfs
     volumes:
       - ./elk/metricbeat/config/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
+      - ./elk/ssl:/usr/share/metricbeat/config/certs:ro
       - type: bind
         source: /
         target: /hostfs
