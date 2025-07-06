@@ -4,176 +4,160 @@ import { Teact } from '@/js/libs/teact'
 import { useNavigate } from '@/js/libs/router'
 import { api } from '@/js/infrastructures/api/fetch'
 
-// 定数設定
-const BACKGROUND_COLOR = '#1E1E2C'
+// 定数
+// const WALL_X_LIMIT = 500
+// const WALL_Y_LIMIT = 300
+// const PADDLE_HEIGHT = 30
+// const BALL_RADIUS = 4
 const PADDLE_WIDTH = 5
+const BACKGROUND_COLOR = '#1E1E2C'
 const UPDATE_INTERVAL = 1000 / 60
 
 const RemoteGame = ({ params }) => {
-  // URL の :id (Match テーブルの主キー)
-  const { id: dbMatchId } = params || {}
+  const { id } = params || {}
   const navigate = useNavigate()
 
-  // --- 状態管理 ---
-  // ルームID (REST から取得: e.g. "room.SIMPLE.12345")
+  // 状態管理
   const [roomId, setRoomId] = Teact.useState(null)
-  // プレイヤー情報
-  const [players, setPlayers] = Teact.useState({ left: null, right: null })
-  // ゲームの動的状態 (パドル位置、スコア、ボール位置)
-  const [gameState, setGameState] = Teact.useState({
-    left:  { paddlePosition: 0, score: 0 },
-    right: { paddlePosition: 0, score: 0 },
-    ballPosition: { x: WALL_X_LIMIT / 2, y: WALL_Y_LIMIT / 2 },
-  })
-  // マッチ開始／終了フラグ
   const [matchStarted, setMatchStarted] = Teact.useState(false)
   const [matchEnded, setMatchEnded] = Teact.useState(false)
-  // 結果情報
+  const [leftPlayerName, setLeftPlayerName] = Teact.useState('')
+  const [rightPlayerName, setRightPlayerName] = Teact.useState('')
   const [winner, setWinner] = Teact.useState(null)
-  const [redirectUrl, setRedirectUrl] = Teact.useState(null)
 
-  // --- 1) REST で room_id を取得 ---
+  // REST で room_id を取得
   Teact.useEffect(() => {
-    if (!dbMatchId) return
-    api.get(`/api/matches/${dbMatchId}`)
-      .then(res => {
-        if (!res.ok) throw new Error(`Match fetch failed: ${res.status}`)
-        return res.json()
-      })
-      .then(data => {
-        // レスポンス例: { room_id: "room.SIMPLE.12345" }
-        setRoomId(data.room_id)
-      })
-      .catch(err => {
-        console.error('Error fetching room_id:', err)
-        navigate('/')
-      })
-  }, [dbMatchId])
+    if (!id) return
+    api.get(`/api/matches/${id}`)
+      .then(res => { if (!res.ok) throw new Error(res.status); return res.json() })
+      .then(json => setRoomId(json.room_id))
+      .catch(() => navigate('/'))
+  }, [id])
 
-  // --- 2) WebSocket 接続とメッセージ処理 ---
+  // WebSocket 接続と描画ループ
   Teact.useEffect(() => {
     if (!roomId) return
-    const baseWsUrl = import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost'
-    // roomId をフルに使って接続
-    const wsUrl = `${baseWsUrl}/api/ws/${roomId}`
-    const socket = new WebSocket(wsUrl)
+    const socket = new WebSocket(`${import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost'}/api/ws/${roomId}`)
 
-    // Arrow キー状態
-    let upPressed = false
-    let downPressed = false
-
-    // キー入力メッセージ化
-    const makeKeyMsg = (key, pressed) => {
-      if (key !== 'ArrowUp' && key !== 'ArrowDown') return null
-      if ((key === 'ArrowUp' && upPressed === pressed) ||
-          (key === 'ArrowDown' && downPressed === pressed)) return null
-      if (key === 'ArrowUp') upPressed = pressed
-      if (key === 'ArrowDown') downPressed = pressed
-      return {
-        key: key === 'ArrowUp' ? 'PaddleUpKey' : 'PaddleDownKey',
-        action: pressed ? 'push' : 'release'
-      }
-    }
-
-    const onKeyDown = e => {
-      const msg = makeKeyMsg(e.key, true)
-      if (msg && socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(msg))
-    }
-    const onKeyUp = e => {
-      const msg = makeKeyMsg(e.key, false)
-      if (msg && socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(msg))
-    }
-    document.addEventListener('keydown', onKeyDown)
-    document.addEventListener('keyup', onKeyUp)
-
+    // 初期配置およびゲーム状態
+    let leftPaddleY = (WALL_Y_LIMIT - PADDLE_HEIGHT) / 2
+    let rightPaddleY = (WALL_Y_LIMIT - PADDLE_HEIGHT) / 2
+    let ballX = WALL_X_LIMIT / 2
+    let ballY = WALL_Y_LIMIT / 2
+    let leftScore = 0
+    let rightScore = 0
+    let leftName = ''
+    let rightName = ''
+    let winnerName = ''
     let intervalId = null
-    // メッセージ受信
-    socket.addEventListener('message', evt => {
-      const data = JSON.parse(evt.data)
-      switch (data.type) {
-        case 'start':
-          setPlayers(data.players)
-          setMatchStarted(true)
-          intervalId = setInterval(draw, UPDATE_INTERVAL)
-          break
-        case 'update':
-          setGameState({ left: data.left, right: data.right, ballPosition: data.ballPosition })
-          break
-        case 'end':
-          setGameState({ left: data.left, right: data.right, ballPosition: data.ballPosition })
-          setWinner(data.winner)
-          setRedirectUrl(data.redirectUrl)
-          setMatchEnded(true)
-          clearInterval(intervalId)
-          break
-      }
-    })
 
-    // 描画関数
-    function draw() {
+    // 描画ユーティリティ
+    const clearCanvas = (ctx, canvas) => ctx.clearRect(0, 0, canvas.width, canvas.height)
+    const drawRect = (ctx, x, y, w, h, color) => { ctx.fillStyle = color; ctx.fillRect(x, y, w, h) }
+    const drawBall = (ctx, x, y, r, color) => { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill() }
+    const drawText = (ctx, text, x, y, font='48px sans-serif', color='white') => { ctx.font = font; ctx.fillStyle = color; ctx.textAlign = 'center'; ctx.fillText(text, x, y) }
+    const drawDashedLine = (ctx, x, canvas) => { ctx.strokeStyle = 'white'; ctx.setLineDash([5,5]); ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke(); ctx.setLineDash([]) }
+
+    // 描画ループ
+    function update() {
       const canvas = document.getElementById('pongCanvas')
       if (!canvas) return
       const ctx = canvas.getContext('2d')
-      ctx.fillStyle = BACKGROUND_COLOR
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-      ctx.strokeStyle = 'white'
-      ctx.setLineDash([5,5])
-      ctx.beginPath()
-      ctx.moveTo(canvas.width/2,0)
-      ctx.lineTo(canvas.width/2,canvas.height)
-      ctx.stroke()
-      ctx.setLineDash([])
-
+      clearCanvas(ctx, canvas)
+      drawRect(ctx, 0, 0, canvas.width, canvas.height, BACKGROUND_COLOR)
+      drawDashedLine(ctx, canvas.width/2, canvas)
+      drawRect(ctx, 0, leftPaddleY, PADDLE_WIDTH, PADDLE_HEIGHT, 'white')
+      drawRect(ctx, canvas.width - PADDLE_WIDTH, rightPaddleY, PADDLE_WIDTH, PADDLE_HEIGHT, 'white')
+      drawBall(ctx, ballX, ballY, BALL_RADIUS, 'white')
+      drawText(ctx, `${leftScore}`, canvas.width / 4, 50)
+      drawText(ctx, `${rightScore}`, (canvas.width / 4) * 3, 50)
+      ctx.font = '18px sans-serif'
       ctx.fillStyle = 'white'
-      const { left, right } = gameState
-      ctx.fillRect(0, left.paddlePosition - PADDLE_HEIGHT/2, PADDLE_WIDTH, PADDLE_HEIGHT)
-      ctx.fillRect(canvas.width - PADDLE_WIDTH, right.paddlePosition - PADDLE_HEIGHT/2, PADDLE_WIDTH, PADDLE_HEIGHT)
+      ctx.textAlign = 'center'
+      ctx.fillText(leftName, canvas.width / 4, 70)
+      ctx.fillText(rightName, (canvas.width / 4) * 3, 70)
+      if (winnerName) drawText(ctx, `${winnerName} wins!`, canvas.width / 2, canvas.height / 2, '36px sans-serif')
+    }
 
-      if (!matchEnded) {
-        ctx.beginPath()
-        ctx.arc(gameState.ballPosition.x, gameState.ballPosition.y, BALL_RADIUS, 0, Math.PI*2)
-        ctx.fill()
-      }
-
-      ctx.font = '48px sans-serif'
-      ctx.fillText(left.score, canvas.width/4, 50)
-      ctx.fillText(right.score, (canvas.width/4)*3, 50)
-
-      if (matchEnded) {
-        ctx.fillText(`${winner} wins!`, canvas.width/2 - 100, canvas.height/2)
+    socket.onmessage = e => {
+      const msg = JSON.parse(e.data)
+      if (msg.type === 'start') {
+        leftName = msg.players.left
+        rightName = msg.players.right
+          // プレイヤー名を state に反映
+  setLeftPlayerName(msg.players.left)
+  setRightPlayerName(msg.players.right)
+  setMatchStarted(true)
+        update()
+        intervalId = setInterval(update, UPDATE_INTERVAL)
+      } else if (msg.type === 'update') {
+        leftPaddleY = msg.left.paddlePosition - PADDLE_HEIGHT / 2
+        rightPaddleY = msg.right.paddlePosition - PADDLE_HEIGHT / 2
+        ballX = msg.ballPosition.x
+        ballY = msg.ballPosition.y
+        leftScore = msg.left.score
+        rightScore = msg.right.score
+      } else if (msg.type === 'end') {
+        leftPaddleY = msg.left.paddlePosition - PADDLE_HEIGHT / 2
+        rightPaddleY = msg.right.paddlePosition - PADDLE_HEIGHT / 2
+        ballX = msg.ballPosition.x
+        ballY = msg.ballPosition.y
+        leftScore = msg.left.score
+        rightScore = msg.right.score
+        winnerName = msg.winner
+        setMatchEnded(true)
+        clearInterval(intervalId)
+        update()
+        setTimeout(() => navigate(msg.redirectUrl), 6000)
       }
     }
 
-    // クリーンアップ
+    const keyHandler = e => {
+      if (socket.readyState !== WebSocket.OPEN) return
+      const map = { ArrowUp: 'PaddleUpKey', ArrowDown: 'PaddleDownKey' }
+      if (!map[e.key]) return
+      const action = e.type === 'keydown' ? 'push' : 'release'
+      socket.send(JSON.stringify({ key: map[e.key], action }))
+    }
+    document.addEventListener('keydown', keyHandler)
+    document.addEventListener('keyup', keyHandler)
+
     return () => {
       clearInterval(intervalId)
       socket.close()
-      document.removeEventListener('keydown', onKeyDown)
-      document.removeEventListener('keyup', onKeyUp)
+      document.removeEventListener('keydown', keyHandler)
+      document.removeEventListener('keyup', keyHandler)
     }
-  }, [roomId])
+  }, [roomId, matchEnded])
 
-  // --- 3) 終了後リダイレクト ---
-  Teact.useEffect(() => {
-    if (matchEnded && redirectUrl) navigate(redirectUrl)
-  }, [matchEnded, redirectUrl])
-
-  // --- レンダリング ---
-  return matchStarted
-    ? HeaderWithTitleLayout(
+  // レンダリング
+  if (!roomId) return HeaderWithTitleLayout(Teact.createElement('h1', { className: 'text-center text-light' }, 'Loading...'))
+  if (!matchStarted) return HeaderWithTitleLayout(Teact.createElement('h1', { className: 'text-center text-light' }, 'Waiting for players...'))
+  return HeaderWithTitleLayout(
+    Teact.createElement(
+      'div',
+      { className: 'container' },
+      Teact.createElement(
+        'div',
+        { id: 'pong', className: 'd-flex justify-content-center align-items-center' },
         Teact.createElement(
           'div',
-          { className: 'd-flex justify-content-center align-items-center' },
-          Teact.createElement('canvas', { id: 'pongCanvas', width: WALL_X_LIMIT, height: WALL_Y_LIMIT })
-        )
-      )
-    : HeaderWithTitleLayout(
+          { id: 'leftPlayer', className: 'text-center fs-2 text-white me-3', style: { writingMode: 'vertical-rl' } },
+          leftPlayerName
+        ),
         Teact.createElement(
-          'h1',
-          { className: 'text-center text-light' },
-          'Waiting for opponent...'
+          'div',
+          { className: 'position-relative', style: { width: `${WALL_X_LIMIT}px`, height: `${WALL_Y_LIMIT}px`, backgroundColor: BACKGROUND_COLOR } },
+          Teact.createElement('canvas', { id: 'pongCanvas', width: WALL_X_LIMIT, height: WALL_Y_LIMIT })
+        ),
+        Teact.createElement(
+          'div',
+          { id: 'rightPlayer', className: 'text-center fs-2 text-white ms-3', style: { writingMode: 'vertical-rl' } },
+          rightPlayerName
         )
       )
+    )
+  )
 }
 
 export { RemoteGame }
