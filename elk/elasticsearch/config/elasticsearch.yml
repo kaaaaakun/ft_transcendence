@@ -10,3 +10,19 @@ network.host: 0.0.0.0
 #
 xpack.license.self_generated.type: trial
 xpack.security.enabled: true
+
+## SSL/TLS settings
+## see https://www.elastic.co/guide/en/elasticsearch/reference/current/security-settings.html#ssl-tls-settings
+#
+xpack.security.transport.ssl.enabled: true
+xpack.security.transport.ssl.verification_mode: certificate
+xpack.security.transport.ssl.client_authentication: required
+xpack.security.transport.ssl.keystore.path: certs/elasticsearch.p12
+xpack.security.transport.ssl.truststore.path: certs/elasticsearch.p12
+
+xpack.security.http.ssl.enabled: true
+xpack.security.http.ssl.keystore.path: certs/elasticsearch.p12
+xpack.security.http.ssl.truststore.path: certs/elasticsearch.p12
+
+## Memory lock settings
+bootstrap.memory_lock: true

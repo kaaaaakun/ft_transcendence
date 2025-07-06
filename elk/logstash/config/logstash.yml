@@ -5,3 +5,9 @@
 http.host: 0.0.0.0
 
 node.name: logstash
+
+## SSL/TLS settings for API endpoints
+api.ssl.enabled: true
+api.ssl.certificate: /usr/share/logstash/config/certs/logstash.crt
+api.ssl.key: /usr/share/logstash/config/certs/logstash.key
+api.ssl.certificate_authorities: [/usr/share/logstash/config/certs/ca.crt]
