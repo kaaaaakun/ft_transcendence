@@ -65,7 +65,9 @@ channels:
     publish:
       operationId: sendKeyInputForRemoteMatch
       message:
-        $ref: '#/components/messages/KeyInput'
+        KeyInput:
+          payload:
+            $ref: '#/components/schemas/KeyInput'
     subscribe:
       operationId: onMatchStatusForRemoteMatch
       message:
