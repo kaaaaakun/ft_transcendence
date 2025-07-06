@@ -4,10 +4,5 @@
 reverseproxy/ssl/*
 *note*
 
-# Blockchain SSH Configuration
-.env.blockchain
-blockchain/ssh/keys/*
-*.pem
-*.key
-*_rsa
-*_rsa.pub
+# SSH keys for blockchain development
+ssh/

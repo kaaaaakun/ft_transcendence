@@ -44,7 +44,7 @@ ps:
 setup-elk:
 	$(DOCKER_COMPOSE) up setup
 
-PHONY: run re build up down fdown image-prune ps generate setup-elk ssh-setup ssh-keygen ssh-config ssh-clean
+PHONY: run re build up down fdown image-prune ps generate setup-elk ssh-setup ssh-clean ssh-show
 
 # -- 証明書の作成
 cert:
@@ -57,25 +57,35 @@ cert:
 cert_clean:
 	rm -rf $(CERT_DIR)
 
-# -- ブロックチェーンSSH設定の自動生成
-SSH_SCRIPTS_DIR = ./blockchain/ssh/scripts
-SSH_KEYS_DIR = ./blockchain/ssh/keys
+# -- ブロックチェーンSSH鍵の生成
+SSH_DIR = ./ssh
+SSH_KEYS_DIR = $(SSH_DIR)/keys
 
-ssh-setup: ssh-keygen ssh-config
-
-ssh-keygen:
-	@echo "Generating SSH keys for blockchain environment..."
-	@$(SSH_SCRIPTS_DIR)/generate-ssh-keys.sh -e dev
-	@$(SSH_SCRIPTS_DIR)/generate-ssh-keys.sh -e staging
-	@$(SSH_SCRIPTS_DIR)/generate-ssh-keys.sh -e prod
-
-ssh-config:
-	@echo "Generating SSH configuration for blockchain environment..."
-	@$(SSH_SCRIPTS_DIR)/generate-ssh-config.sh -e all
+ssh-setup:
+	@if [ ! -f "$(SSH_KEYS_DIR)/blockchain_dev_rsa" ]; then \
+		echo "Generating SSH keys for blockchain development..."; \
+		mkdir -p $(SSH_KEYS_DIR); \
+		ssh-keygen -t rsa -b 4096 -f "$(SSH_KEYS_DIR)/blockchain_dev_rsa" -N "" -C "ft_transcendence_blockchain@$$(hostname)"; \
+		chmod 600 $(SSH_KEYS_DIR)/blockchain_dev_rsa; \
+		chmod 644 $(SSH_KEYS_DIR)/blockchain_dev_rsa.pub; \
+		echo "SSH keys generated successfully!"; \
+		echo "Public key:"; \
+		cat $(SSH_KEYS_DIR)/blockchain_dev_rsa.pub; \
+	else \
+		echo "SSH keys already exist"; \
+	fi
 
 ssh-clean:
-	@echo "Cleaning SSH keys and configuration..."
-	@rm -rf $(SSH_KEYS_DIR)
-	@echo "SSH keys removed. Please manually remove SSH config entries from ~/.ssh/config if needed."
+	@echo "Cleaning SSH keys..."
+	@rm -rf $(SSH_DIR)
+	@echo "SSH keys removed"
 
-PHONY:cert ssh-setup ssh-keygen ssh-config ssh-clean
+ssh-show:
+	@if [ -f "$(SSH_KEYS_DIR)/blockchain_dev_rsa.pub" ]; then \
+		echo "Current SSH public key:"; \
+		cat $(SSH_KEYS_DIR)/blockchain_dev_rsa.pub; \
+	else \
+		echo "No SSH keys found. Run 'make ssh-setup' to generate."; \
+	fi
+
+PHONY:cert ssh-setup ssh-clean ssh-show
