@@ -27,13 +27,15 @@ const RemoteGame = ({ params }) => {
 
   // REST で room_id を取得
   Teact.useEffect(() => {
-    if (!id)
+    if (!id) {
       return
+    }
     api
       .get(`/api/matches/${id}`)
       .then(response => {
-        if (!response.ok)
+        if (!response.ok) {
           throw new Error(response.status)
+        }
         return response.json()
       })
       .then(json => setRoomId(json.room_id))
@@ -77,8 +79,8 @@ const RemoteGame = ({ params }) => {
       text,
       x,
       y,
-      font='48px sans-serif',
-      color='white',
+      font = '48px sans-serif',
+      color = 'white',
     ) => {
       ctx.font = font
       ctx.fillStyle = color
@@ -215,7 +217,7 @@ const RemoteGame = ({ params }) => {
             className: 'text-center fs-2 text-white me-3',
             style: { writingMode: 'vertical-rl' },
           },
-          leftPlayerName
+          leftPlayerName,
         ),
         Teact.createElement(
           'div',
@@ -225,13 +227,13 @@ const RemoteGame = ({ params }) => {
               width: `${WALL_X_LIMIT}px`,
               height: `${WALL_Y_LIMIT}px`,
               backgroundColor: BACKGROUND_COLOR,
-            }
+            },
           },
           Teact.createElement('canvas', {
             id: 'pongCanvas',
             width: WALL_X_LIMIT,
             height: WALL_Y_LIMIT,
-          },)
+          }),
         ),
         Teact.createElement(
           'div',
