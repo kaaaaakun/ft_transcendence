@@ -27,11 +27,13 @@ const RemoteGame = ({ params }) => {
 
   // REST で room_id を取得
   Teact.useEffect(() => {
-    if (!id) { return }
+    if (!id)
+      return
     api
       .get(`/api/matches/${id}`)
       .then(response => {
-        if (!response.ok) throw new Error(response.status);
+        if (!response.ok)
+          throw new Error(response.status)
         return response.json()
       })
       .then(json => setRoomId(json.room_id))
@@ -42,7 +44,7 @@ const RemoteGame = ({ params }) => {
   Teact.useEffect(() => {
     if (!roomId) return
     const socket = new WebSocket(
-      `${import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost'}/api/ws/${roomId}`
+      `${import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost'}/api/ws/${roomId}`,
     )
 
     // 初期配置およびゲーム状態
@@ -76,7 +78,7 @@ const RemoteGame = ({ params }) => {
       x,
       y,
       font='48px sans-serif',
-      color='white'
+      color='white',
     ) => {
       ctx.font = font
       ctx.fillStyle = color
@@ -85,10 +87,10 @@ const RemoteGame = ({ params }) => {
     }
     const drawDashedLine = (ctx, x, canvas) => {
       ctx.strokeStyle = 'white'
-      ctx.setLineDash([5,5])
+      ctx.setLineDash([5, 5])
       ctx.beginPath()
-      ctx.moveTo(x,0)
-      ctx.lineTo(x,canvas.height)
+      ctx.moveTo(x, 0)
+      ctx.lineTo(x, canvas.height)
       ctx.stroke()
       ctx.setLineDash([])
     }
@@ -108,7 +110,7 @@ const RemoteGame = ({ params }) => {
         rightPaddleY,
         PADDLE_WIDTH,
         PADDLE_HEIGHT,
-        'white'
+        'white',
       )
       drawBall(ctx, ballX, ballY, BALL_RADIUS, 'white')
       drawText(ctx, `${leftScore}`, canvas.width / 4, 50)
@@ -124,7 +126,7 @@ const RemoteGame = ({ params }) => {
           `${winnerName} wins!`,
           canvas.width / 2,
           canvas.height / 2,
-          '36px sans-serif'
+          '36px sans-serif',
         )
     }
 
@@ -133,7 +135,7 @@ const RemoteGame = ({ params }) => {
       if (msg.type === 'start') {
         leftName = msg.players.left
         rightName = msg.players.right
-          // プレイヤー名を state に反映
+        // プレイヤー名を state に反映
         setLeftPlayerName(msg.players.left)
         setRightPlayerName(msg.players.right)
         setMatchStarted(true)
@@ -185,16 +187,16 @@ const RemoteGame = ({ params }) => {
       Teact.createElement(
         'h1',
         { className: 'text-center text-light' },
-        'Loading...'
-      )
+        'Loading...',
+      ),
     )
   if (!matchStarted)
     return HeaderWithTitleLayout(
       Teact.createElement(
         'h1',
         { className: 'text-center text-light' },
-        'Waiting for players...'
-      )
+        'Waiting for players...',
+      ),
     )
   return HeaderWithTitleLayout(
     Teact.createElement(
@@ -204,7 +206,7 @@ const RemoteGame = ({ params }) => {
         'div',
         {
           id: 'pong',
-          className: 'd-flex justify-content-center align-items-center'
+          className: 'd-flex justify-content-center align-items-center',
         },
         Teact.createElement(
           'div',
@@ -219,19 +221,17 @@ const RemoteGame = ({ params }) => {
           'div',
           {
             className: 'position-relative',
-            style: { width: `${WALL_X_LIMIT}px`,
+            style: {
+              width: `${WALL_X_LIMIT}px`,
               height: `${WALL_Y_LIMIT}px`,
-              backgroundColor: BACKGROUND_COLOR
+              backgroundColor: BACKGROUND_COLOR,
             }
           },
-          Teact.createElement(
-            'canvas',
-            {
-              id: 'pongCanvas',
-              width: WALL_X_LIMIT,
-              height: WALL_Y_LIMIT
-            }
-          )
+          Teact.createElement('canvas', {
+            id: 'pongCanvas',
+            width: WALL_X_LIMIT,
+            height: WALL_Y_LIMIT,
+          },)
         ),
         Teact.createElement(
           'div',
@@ -240,10 +240,10 @@ const RemoteGame = ({ params }) => {
             className: 'text-center fs-2 text-white ms-3',
             style: { writingMode: 'vertical-rl' },
           },
-          rightPlayerName
-        )
-      )
-    )
+          rightPlayerName,
+        ),
+      ),
+    ),
   )
 }
 
