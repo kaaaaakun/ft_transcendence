@@ -55,7 +55,7 @@ function App() {
     }),
     Route({
       path: '/remote/matches/:id',
-      component: RemoteGame,
+      component: ProtectedRoute(RemoteGame),
     }),
     Route({
       path: '/remote/tournament',

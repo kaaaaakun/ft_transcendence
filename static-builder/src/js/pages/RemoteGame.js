@@ -5,10 +5,6 @@ import { useNavigate } from '@/js/libs/router'
 import { api } from '@/js/infrastructures/api/fetch'
 
 // 定数
-// const WALL_X_LIMIT = 500
-// const WALL_Y_LIMIT = 300
-// const PADDLE_HEIGHT = 30
-// const BALL_RADIUS = 4
 const PADDLE_WIDTH = 5
 const BACKGROUND_COLOR = '#1E1E2C'
 const UPDATE_INTERVAL = 1000 / 60
