@@ -23,7 +23,6 @@ const RemoteGame = ({ params }) => {
   const [matchEnded, setMatchEnded] = Teact.useState(false)
   const [leftPlayerName, setLeftPlayerName] = Teact.useState('')
   const [rightPlayerName, setRightPlayerName] = Teact.useState('')
-  const [winner, setWinner] = Teact.useState(null)
 
   // REST で room_id を取得
   Teact.useEffect(() => {
@@ -44,7 +43,9 @@ const RemoteGame = ({ params }) => {
 
   // WebSocket 接続と描画ループ
   Teact.useEffect(() => {
-    if (!roomId) return
+    if (!roomId) {
+      return
+    }
     const socket = new WebSocket(
       `${import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost'}/api/ws/${roomId}`,
     )
@@ -100,7 +101,9 @@ const RemoteGame = ({ params }) => {
     // 描画ループ
     function update() {
       const canvas = document.getElementById('pongCanvas')
-      if (!canvas) return
+      if (!canvas) {
+        return
+      }
       const ctx = canvas.getContext('2d')
       clearCanvas(ctx, canvas)
       drawRect(ctx, 0, 0, canvas.width, canvas.height, BACKGROUND_COLOR)
@@ -122,7 +125,7 @@ const RemoteGame = ({ params }) => {
       ctx.textAlign = 'center'
       ctx.fillText(leftName, canvas.width / 4, 70)
       ctx.fillText(rightName, (canvas.width / 4) * 3, 70)
-      if (winnerName)
+      if (winnerName) {
         drawText(
           ctx,
           `${winnerName} wins!`,
@@ -130,6 +133,7 @@ const RemoteGame = ({ params }) => {
           canvas.height / 2,
           '36px sans-serif',
         )
+      }
     }
 
     socket.onmessage = e => {
@@ -166,9 +170,14 @@ const RemoteGame = ({ params }) => {
     }
 
     const keyHandler = e => {
-      if (socket.readyState !== WebSocket.OPEN) return
+      if (socket.readyState !== WebSocket.OPEN) {
+        return
+      }
+      /* biome-ignore lint/style/useNamingConvention: 実際のキー入力（'ArrowUp'）（'ArrowDown'）をそのまま使用しているため */
       const map = { ArrowUp: 'PaddleUpKey', ArrowDown: 'PaddleDownKey' }
-      if (!map[e.key]) return
+      if (!map[e.key]) {
+        return
+      }
       const action = e.type === 'keydown' ? 'push' : 'release'
       socket.send(JSON.stringify({ key: map[e.key], action }))
     }
@@ -184,7 +193,7 @@ const RemoteGame = ({ params }) => {
   }, [roomId, matchEnded])
 
   // レンダリング
-  if (!roomId)
+  if (!roomId) {
     return HeaderWithTitleLayout(
       Teact.createElement(
         'h1',
@@ -192,7 +201,8 @@ const RemoteGame = ({ params }) => {
         'Loading...',
       ),
     )
-  if (!matchStarted)
+  }
+  if (!matchStarted) {
     return HeaderWithTitleLayout(
       Teact.createElement(
         'h1',
@@ -200,6 +210,7 @@ const RemoteGame = ({ params }) => {
         'Waiting for players...',
       ),
     )
+  }
   return HeaderWithTitleLayout(
     Teact.createElement(
       'div',
