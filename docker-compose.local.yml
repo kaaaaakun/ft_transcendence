@@ -121,6 +121,38 @@ services:
     ports:
       - "6379:6379"
 
+  mock-json:
+    container_name: "mock-json"
+    image: clue/json-server:latest
+    # ARMホストでamd64を動かす場合のみ
+    platform: linux/amd64
+    volumes:
+      - ./mock-server/mock-json/mock-db.json:/data/db.json:ro
+      - ./mock-server/mock-json/routes.json:/data/routes.json:ro
+    entrypoint: ["json-server"]
+    command:
+      - "/data/db.json"
+      - "--routes"
+      - "/data/routes.json"
+      - "--port"
+      - "3001"
+      - "--host"
+      - "0.0.0.0"
+    ports:
+      - "3001:3001"
+    networks:
+      - net_pong
+
+  mock-ws:
+    container_name: "mock-ws"
+    build:
+      context: ./mock-server/mock-ws
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    networks:
+      - net_pong
+
 networks:
   net_pong:
     driver: bridge
