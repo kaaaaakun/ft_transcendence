@@ -1,0 +1,10 @@
+services:
+  hardhat:
+    build: .
+    environment:
+      SEPOLIA_RPC_URL: ${SEPOLIA_RPC_URL}
+      PRIVATE_KEY: ${PRIVATE_KEY}
+    container_name: hardhat-deployer
+    volumes:
+      # NOTE: artifactsディレクトリ全体をローカルにマウント（ABIファイルを取得するため）
+      - ./artifacts/contracts/MyContract.sol:/app/artifacts/contracts/MyContract.sol
