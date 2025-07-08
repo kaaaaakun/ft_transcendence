@@ -42,9 +42,9 @@ const RemoteGame = ({ params }) => {
     if (!roomId) {
       return
     }
-    const access_token = localStorage.getItem('access_token')
+    const token = localStorage.getItem('access_token')
     const socket = new WebSocket(
-      `${import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost'}/api/ws/${roomId}?token=${encodeURIComponent(access_token)}`,
+      `${import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost'}/api/ws/${roomId}?token=${encodeURIComponent(token)}`,
     )
 
     // 初期配置およびゲーム状態
