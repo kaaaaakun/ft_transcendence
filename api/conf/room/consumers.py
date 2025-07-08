@@ -5,26 +5,49 @@ import redis
 import asyncio
 from asgiref.sync import sync_to_async
 from django.conf import settings
+import logging
+logger = logging.getLogger('django')
+from .game_logic import GameManager, ScoreManager, Paddle
+from utils.redis_client import get_redis
+from tournament.models import TournamentPlayer
+from match.models import MatchDetail
+from tournament.models import TournamentPlayer
 
 from .models import RoomMembers
 from match.models import Match
+from match.models import MatchDetail
 from .utils import RoomKey
 from user.utils import get_user_by_auth
 import urllib.parse
 from tournament.models import Tournament
+from .pong_game_task import run_pong_game
+
+FRAME = 30 # フロントを見つつ調整
+END_GAME_SCORE = settings.END_GAME_SCORE
 
 class RoomConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.redis_client = redis.StrictRedis(host="in_memory_db", port=6379, db=0)
+        self.redis_client = get_redis()
+        self.room_type = None
         self.room_id = None
         self.user = None
         self.room_group_name = None
-        self.status_task = None
-        self.match_task = None
+        self.next_send_duration = 0
+    
+    async def connect(self):
+        self.room_type = self.scope['url_route']['kwargs']['room_type']
+        self.room_id = self.scope['url_route']['kwargs']['room_id']
+        self.room_group_name = f"room.{self.room_type}.{self.room_id}"
+        self.user = await self.get_user_by_auth()
+        if not self.user:
+            await self.close(code=4001)
+            return
+        logger.debug(f"DEBUG: User {self.user.display_name} connecting to {self.room_group_name}")
+        await self.accept()
 
     async def get_auth_header(self):
-
+        """ヘッダーからAuthorizationトークンを取得"""
         auth_header = None
         for header_name, header_value in self.scope.get('headers', []):
             if header_name == b'authorization':
@@ -32,7 +55,7 @@ class RoomConsumer(AsyncWebsocketConsumer):
                 return auth_header
 
         query_string = self.scope.get('query_string', b'').decode()
-        print(f"DEBUG: Query string: {query_string}")
+        logger.debug(f"DEBUG: Query string: {query_string}")
 
         if query_string:
             try:
@@ -44,28 +67,101 @@ class RoomConsumer(AsyncWebsocketConsumer):
                     return auth_header
 
             except Exception as e:
-                print(f"DEBUG: Error parsing query string: {e}")
+                logger.error(f"DEBUG: Error parsing query string: {e}")
 
         return None
+    
+    async def get_user_by_auth(self):
+        """認証ヘッダーをチェックし、ユーザーを取得"""
+        auth_header = await self.get_auth_header()
+        if not auth_header:
+            return None
+
+        user = await sync_to_async(get_user_by_auth)(auth_header)
+        if not user:
+            return None
+
+        return user
+
+    async def periodic_status_update(self):
+        """定期的にルームステータスを送信"""
+        try:
+            while True:
+                logger.debug(f"DEBUG: Sending room status for {self.room_group_name}")
+                await asyncio.sleep(self.next_send_duration)
+                await self.broadcast_room_status()
+        except asyncio.CancelledError:
+            logger.error(f"DEBUG: Status update task cancelled for {self.room_group_name}") 
+            pass
+    
+    async def broadcast_room_status(self):
+        logger.debug(f"DEBUG: Broadcasting called")
+        pass
+
+    def get_room_data(self):
+        """Redisからルーム情報を取得、存在しない場合は作成"""
+        try:
+            if not self.room_id or not self.room_type:
+                logger.error("ERROR: Room ID or type is not set")
+                return None
+
+            # 既存のルーム情報を取得（get_roomでデコード済み）
+            room_data = RoomKey.get_room(self.room_type, self.room_id)
+
+            if room_data:
+                return room_data
+            else:
+                return None
+
+        except Exception as e:
+            logger.error(f"ERROR: get_room_data: {e}")
+            return None
+    
+    def add_user_to_active_connections(self):
+        """ユーザーを現在の接続者リストに追加"""
+        try:
+            # 現在接続中のユーザーリスト（短期間）
+            active_users_key = f"active_users:{self.room_group_name}"
+            self.redis_client.sadd(active_users_key, self.user.id)
+            self.redis_client.expire(active_users_key, 3600)  # 1時間で期限切れ
+            logger.debug(f"DEBUG: User {self.user.display_name} added to active connections")
+        except Exception as e:
+            logger.error(f"ERROR: add_user_to_active_connections: {e}")
+
+    def get_connected_users(self):
+        """現在接続中のユーザーリストを取得"""
+        try:
+            active_users_key = f"active_users:{self.room_group_name}"
+            user_ids = self.redis_client.smembers(active_users_key)
+            connected_users = []
+
+            for user_id in user_ids:
+                try:
+                    from user.models import User
+                    user = User.objects.get(id=int(user_id))
+                    connected_users.append({
+                        'user_id': user.id,
+                        'display_name': user.display_name,
+                        'status': 'connected'
+                    })
+                except Exception as e:
+                    logger.error(f"ERROR: Failed to get connected user {user_id}: {e}")
+                    continue
+
+            logger.debug(f"DEBUG: Retrieved {len(connected_users)} connected users")
+            return connected_users
+        except Exception as e:
+            logger.error(f"ERROR: get_connected_users: {e}")
+            return []
+class TournamentWaitRoomConsumer(RoomConsumer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.status_task = None
+        self.match_task = None
+        self.next_send_duration = 2
 
     async def connect(self):
-        self.room_id = self.scope['url_route']['kwargs']['room_id']
-        self.room_group_name = f"room_{self.room_id}"
-
-        auth_header = await self.get_auth_header()
-
-        if not auth_header:
-            await self.close(code=4001)
-            return
-
-        self.user = await sync_to_async(get_user_by_auth)(auth_header)
-        if not self.user:
-            await self.close(code=4001)
-            return
-
-        print(f"DEBUG: User {self.user.display_name} connecting to {self.room_id}")
-
-        await self.accept()
+        await super().connect()
 
         room_data = await sync_to_async(self.get_room_data)()
         if not room_data:
@@ -79,6 +175,7 @@ class RoomConsumer(AsyncWebsocketConsumer):
 
         if not is_existing_member:
             await self.close(code=4002)  # User not a tournament member
+
 
         await self.channel_layer.group_add(
             self.room_group_name,
@@ -94,17 +191,17 @@ class RoomConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         if self.status_task:
-            print(f"DEBUG: Cancelling status task for room {self.room_id}")
+            logger.debug(f"DEBUG: Cancelling status task for room {self.room_group_name}")
             self.status_task.cancel()
             
         if self.match_task:
-            print(f"DEBUG: Cancelling match task for room {self.room_id}")
+            logger.debug(f"DEBUG: Cancelling match task for room {self.room_group_name}")
             self.match_task.cancel()
 
-        if self.room_id and self.user:
+        if self.room_group_name and self.user:
             await sync_to_async(self.remove_user_from_active_connections)()
 
-            print(f"DEBUG: {self.user.display_name} disconnected from {self.room_id}")
+            logger.debug(f"DEBUG: {self.user.display_name} disconnected from {self.room_group_name}")
 
             await self.broadcast_room_status(user_disconnected=self.user.display_name)
 
@@ -129,15 +226,6 @@ class RoomConsumer(AsyncWebsocketConsumer):
         except json.JSONDecodeError:
             await self.send(text_data=json.dumps({'error': 'Invalid JSON'}))
 
-    async def periodic_status_update(self):
-        """定期的にルームステータスを更新"""
-        try:
-            while True:
-                await asyncio.sleep(2)  # 2秒間隔で更新
-                await self.broadcast_room_status()
-        except asyncio.CancelledError:
-            pass
-
     async def periodic_match_update(self):
         """定期的にトーナメントマッチを更新"""
         try:
@@ -150,12 +238,13 @@ class RoomConsumer(AsyncWebsocketConsumer):
     async def initialize_tournament(self):
         """トーナメントの最初のラウンドマッチを作成"""
         try:
-            room_parts = self.room_id.split('.')
-            if len(room_parts) != 3:
-                print(f"WARNING: Invalid room_id format: {self.room_id}")
+            if not self.room_id:
+                logger.error("ERROR: Room ID is not set")
                 return
-
-            tournament_id = int(room_parts[2])
+            if self.room_type != 'WAITING_4P' and self.room_type != 'WAITING_8P':
+                logger.error(f"ERROR: Invalid room type {self.room_type} for tournament initialization")
+                return
+            tournament_id = int(self.room_id)
             
             # 既にマッチが存在するかチェック
             matches_exist = await sync_to_async(
@@ -163,37 +252,37 @@ class RoomConsumer(AsyncWebsocketConsumer):
             )()
             
             if matches_exist:
-                print(f"DEBUG: Matches already exist for tournament {tournament_id}")
+                logger.debug(f"DEBUG: Matches already exist for tournament {tournament_id}")
                 return
             
-            print(f"DEBUG: Creating first round matches for tournament {tournament_id}")
+            logger.debug(f"DEBUG: Creating first round matches for tournament {tournament_id}")
             
             tournament = await sync_to_async(Tournament.objects.get)(id=tournament_id)
             created_matches = await sync_to_async(Match.initialize_first_round_matches)(tournament)
             
-            print(f"DEBUG: Created {len(created_matches)} first round matches")
+            logger.debug(f"DEBUG: Created {len(created_matches)} first round matches")
             
         except Exception as e:
-            print(f"ERROR: initialize_tournament: {e}")
+            logger.error(f"ERROR: initialize_tournament: {e}")
 
     async def update_tournament_matches(self):
         """次のラウンドのマッチを定期的にチェック・作成"""
         try:
-            room_parts = self.room_id.split('.')
-            if len(room_parts) != 3:
+            if not self.room_id:
+                logger.error("ERROR: Room ID is not set")
                 return
-
-            tournament_id = int(room_parts[2])
+            tournament_id = int(self.room_id)
             tournament = await sync_to_async(Tournament.objects.get)(id=tournament_id)
             
             if tournament.is_finished:
+                logger.debug(f"DEBUG: Tournament {tournament_id} is already finished")
                 return
             
             await sync_to_async(Match.create_next_round_matches)(tournament)
         
             
         except Exception as e:
-            print(f"ERROR: update_tournament_matches: {e}")
+            logger.error(f"ERROR: update_tournament_matches: {e}")
 
     async def broadcast_room_status(self, user_disconnected=None):
         """ルームの現在の状況を全員に通知"""
@@ -262,19 +351,17 @@ class RoomConsumer(AsyncWebsocketConsumer):
                     )
                     
         except Exception as e:
-            print(f"ERROR: send_individual_match_info: {e}")
+            logger.debug(f"ERROR: send_individual_match_info: {e}")
 
     def get_ongoing_match_for_user(self, user):
         """指定されたユーザーの進行中マッチ情報を取得"""
         try:
-            from match.models import MatchDetail
-            print(f"DEBUG: Getting ongoing match for user {user.display_name} in room {self.room_id}")
-            
-            room_parts = self.room_id.split('.')
-            if len(room_parts) != 3:
+            logger.debug(f"DEBUG: Getting ongoing match for user {user.display_name} in room {self.room_group_name}")
+            if not self.room_id:
+                logger.debug("ERROR: Room ID is not set")
                 return None
 
-            tournament_id = int(room_parts[2])
+            tournament_id = int(self.room_id)
             
             # 指定されたユーザーの進行中マッチを検索
             ongoing_match_details = MatchDetail.objects.filter(
@@ -285,29 +372,32 @@ class RoomConsumer(AsyncWebsocketConsumer):
             
             if ongoing_match_details:
                 match_id = ongoing_match_details.match.id
-                print(f"DEBUG: Found ongoing match {match_id} for user {user.display_name} in tournament {tournament_id}")
+                logger.debug(f"DEBUG: Found ongoing match {match_id} for user {user.display_name} in tournament {tournament_id}")
                 return f"room.TOURNAMENT_MATCH.{match_id}"
             
             return None
             
         except Exception as e:
-            print(f"ERROR: get_ongoing_match_for_user: {e}")
+            logger.debug(f"ERROR: get_ongoing_match_for_user: {e}")
             return None
+
     def get_tournament_capacity(self):
         """トーナメントの定員を取得（PostgreSQLのtournamentテーブルから取得）"""
         try:
-            tournament_capacity = 4
-            room_parts = self.room_id.split('.')
-            if len(room_parts) == 3:
-                tournament_type = room_parts[1]
-                if tournament_type == 'WAITING_8P' : tournament_capacity = 8
-            return tournament_capacity
+            if self.room_type == 'WAITING_4P':
+                return 4
+            elif self.room_type == 'WAITING_8P':
+                return 8
+            else:
+                logger.debug(f"WARNING: Invalid room type {self.room_type} for tournament capacity")
+                return 0
         except Exception as e:
-            print(f"ERROR: get_tournament_capacity: {e}")
-            return tournament_capacity
+            logger.debug(f"ERROR: get_tournament_capacity: {e}")
+            return 0
 
     # チャンネルグループからのメッセージハンドラー
     async def room_ready(self, event):
+        """ルームが準備完了したときの処理"""
         await self.send(text_data=json.dumps({
             'status': 'room_ready',
             'entry_count': event['entry_count'],
@@ -337,85 +427,41 @@ class RoomConsumer(AsyncWebsocketConsumer):
 
         await self.send(text_data=json.dumps(message))
 
-    def get_room_data(self):
-        """Redisからルーム情報を取得、存在しない場合は作成"""
-        try:
-            room_parts = self.room_id.split('.')
-            if len(room_parts) == 3:
-                room_type = room_parts[1]
-                table_id = int(room_parts[2])
-
-                # 既存のルーム情報を取得（get_roomでデコード済み）
-                room_data = RoomKey.get_room(room_type, table_id)
-
-                if room_data:
-                    return room_data
-                else:
-                    return None
-
-            return None
-        except Exception as e:
-            print(f"ERROR: get_room_data: {e}")
-            return None
-
     def is_existing_tournament_member(self):
         """ユーザーが既にトーナメントメンバーかチェック（PostgreSQLのtournament_playersテーブルを確認）"""
         try:
-            from tournament.models import TournamentPlayer
+            if not self.room_id or not self.user:
+                logger.debug("ERROR: Room ID or user is not set")
+                return False
+            tournament_id = int(self.room_id)
 
-            room_parts = self.room_id.split('.')
-            if len(room_parts) == 3:
-                tournament_id = int(room_parts[2])
+            exists = TournamentPlayer.objects.filter(
+                tournament_id=tournament_id,
+                user=self.user
+            ).exists()
 
-                exists = TournamentPlayer.objects.filter(
-                    tournament_id=tournament_id,
-                    user=self.user
-                ).exists()
-
-                print(f"DEBUG: Checking tournament_players for user {self.user.display_name} in tournament {tournament_id}: {exists}")
-                return exists
-
-            print(f"WARNING: Invalid room_id format: {self.room_id}")
-            return False
-
+            logger.debug(f"DEBUG: Checking tournament_players for user {self.user.display_name} in tournament {tournament_id}: {exists}")
+            return exists
         except Exception as e:
-            print(f"ERROR: is_existing_tournament_member: {e}")
+            logger.debug(f"ERROR: is_existing_tournament_member: {e}")
             return False
-
-
-    def add_user_to_active_connections(self):
-        """ユーザーを現在の接続者リストに追加"""
-        try:
-            # 現在接続中のユーザーリスト（短期間）
-            active_users_key = f"active_users:{self.room_id}"
-            self.redis_client.sadd(active_users_key, self.user.id)
-            self.redis_client.expire(active_users_key, 3600)  # 1時間で期限切れ
-            print(f"DEBUG: User {self.user.display_name} added to active connections")
-        except Exception as e:
-            print(f"ERROR: add_user_to_active_connections: {e}")
 
     def remove_user_from_active_connections(self):
         """ユーザーを現在の接続者リストから削除"""
         try:
-            active_users_key = f"active_users:{self.room_id}"
+            active_users_key = f"active_users:{self.room_group_name}"
             removed = self.redis_client.srem(active_users_key, self.user.id)
-            print(f"DEBUG: User {self.user.display_name} removed from active connections (removed: {removed})")
+            logger.debug(f"DEBUG: User {self.user.display_name} removed from active connections (removed: {removed})")
         except Exception as e:
-            print(f"ERROR: remove_user_from_active_connections: {e}")
-
+            logger.debug(f"ERROR: remove_user_from_active_connections: {e}")
 
     def get_tournament_members(self):
         """トーナメント参加者リストを取得（PostgreSQLのtournament_playersテーブルから取得）"""
         try:
-            from tournament.models import TournamentPlayer
-
-            room_parts = self.room_id.split('.')
-            if len(room_parts) != 3:
-                print(f"WARNING: Invalid room_id format: {self.room_id}")
+            if not self.room_id or not self.room_type:
+                logger.debug("ERROR: Room ID or type is not set")
                 return []
-
-            tournament_id = int(room_parts[2])
-
+            tournament_id = int(self.room_id)
             tournament_players = TournamentPlayer.objects.filter(
                 tournament_id=tournament_id
             ).select_related('user').order_by('entry_number')
@@ -438,72 +484,253 @@ class RoomConsumer(AsyncWebsocketConsumer):
                         'next_player': False
                     })
                 except Exception as e:
-                    print(f"ERROR: Failed to process tournament_player {tournament_player.id}: {e}")
+                    logger.debug(f"ERROR: Failed to process tournament_player {tournament_player.id}: {e}")
                     continue
 
-            print(f"DEBUG: Retrieved {len(members)} tournament members from PostgreSQL for tournament {tournament_id}")
+            logger.debug(f"DEBUG: Retrieved {len(members)} tournament members from PostgreSQL for tournament {tournament_id}")
             return members
 
         except Exception as e:
-            print(f"ERROR: get_tournament_members: {e}")
-            return []
-
-
-    def get_connected_users(self):
-        """現在接続中のユーザーリストを取得"""
-        try:
-            active_users_key = f"active_users:{self.room_id}"
-            user_ids = self.redis_client.smembers(active_users_key)
-            connected_users = []
-
-            for user_id in user_ids:
-                try:
-                    from user.models import User
-                    user = User.objects.get(id=int(user_id.decode()))
-                    connected_users.append({
-                        'user_id': user.id,
-                        'display_name': user.display_name,
-                        'status': 'connected'
-                    })
-                except Exception as e:
-                    print(f"ERROR: Failed to get connected user {user_id}: {e}")
-                    continue
-
-            print(f"DEBUG: Retrieved {len(connected_users)} connected users")
-            return connected_users
-        except Exception as e:
-            print(f"ERROR: get_connected_users: {e}")
+            logger.debug(f"ERROR: get_tournament_members: {e}")
             return []
 
     def get_current_entry_count(self):
         """現在のentry_countをPostgreSQLのトーナメント参加者数と同期"""
         try:
-            from tournament.models import TournamentPlayer
-
-            room_parts = self.room_id.split('.')
-            if len(room_parts) == 3:
-                tournament_id = int(room_parts[2])
-
-                actual_count = TournamentPlayer.objects.filter(
-                    tournament_id=tournament_id
-                ).count()
-
-                room_type = room_parts[1]
-                table_id = int(room_parts[2])
-                key = RoomKey.generate_key(room_type, table_id)
-                self.redis_client.hset(key, "entry_count", actual_count)
-
-                return actual_count
-
-            return -1
+            if not self.room_id or not self.room_type:
+                logger.error("ERROR: Room ID or type is not set")
+                return -1
+            tournament_id = self.room_id
+            actual_count = TournamentPlayer.objects.filter(
+                tournament_id=tournament_id
+            ).count()
+            key = RoomKey.generate_key(self.room_type, self.room_id)
+            self.redis_client.hset(key, "entry_count", actual_count)
+            return actual_count
         except Exception as e:
-            print(f"ERROR: get_current_entry_count: {e}")
+            logger.error(f"ERROR: get_current_entry_count: {e}")
             return -1
 
-    def get_room_users(self):
-        """ルームの参加者リストを取得（後方互換性のため残す）"""
-        return self.get_tournament_members()
+class MatchRoomConsumer(RoomConsumer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.next_send_duration = 1 / FRAME
+        self.game_manager = None
 
-    def create_room_members(self):
-        """ROOM_MEMBERSデータを作成（後方互換性のため残す）"""
-        return self.get_tournament_members()
+    async def connect(self):
+        try:
+            await super().connect()
+
+            room_data = await sync_to_async(self.get_room_data)()
+            if not room_data:
+                await self.send(text_data=json.dumps({
+                    'error': f'Room not found or invalid {self.room_id}'
+                }))
+                await self.close()
+                return
+            
+            match = await sync_to_async(lambda: Match.objects.filter(id=self.room_id).first())()
+            if not match:
+                logger.error(f"ERROR: Match with ID {self.room_id} not found")
+                await self.close(code=4001)
+                return
+            if match.is_finished:
+                logger.error(f"ERROR: Match with ID {self.room_id} is already finished")
+                await self.close(code=4002)
+                return
+            match_details = await sync_to_async(
+                lambda: MatchDetail.objects.filter(match_id=self.room_id).select_related('user')
+            )()
+            if not await sync_to_async(match_details.exists)():
+                logger.error(f"ERROR: No match details found for match {self.room_id}")
+                await self.close(code=4003)
+                return
+            if await sync_to_async(match_details.count)() != 2:
+                logger.error(f"ERROR: Too many match details found for match {self.room_id}")
+                await self.close(code=4004)
+                return
+            match_list = await sync_to_async(list)(match_details)
+            if match_list[0].user_id == self.user.id:
+                self.paddle = Paddle(is_left=match_list[0].is_left_side, room_group_name=self.room_group_name)
+            elif match_list[1].user_id == self.user.id:
+                self.paddle = Paddle(is_left=match_list[1].is_left_side, room_group_name=self.room_group_name)
+            else:
+                logger.error(f"ERROR: User {self.user.display_name} is not part of match {self.room_id}")
+                await self.close(code=4005)
+                return
+
+            logger.debug(f"DEBUG: Room data for {self.room_group_name} : {self.channel_name}")
+            await self.channel_layer.group_add(
+                self.room_group_name,
+                self.channel_name
+            )
+
+            self.add_user_to_active_connections()
+            connected_users = await sync_to_async(self.get_connected_users)()
+            if not connected_users:
+                logger.error(f"ERROR: No connected users found for room {self.room_id}")
+                await self.close(code=4002)
+                return
+
+            if len(connected_users) == 2 and not self.redis_client.exists("room:{self.room_group_name}:game_running"):
+                try:
+                    logger.debug(f"DEBUG: Starting periodic status update task for room {self.room_group_name}")
+                    
+                    self.game_manager = GameManager(
+                        score_manager=ScoreManager(self.room_group_name),
+                        room_group_name=self.room_group_name,
+                    )
+                    await self.game_manager.get_player_display_name(self.room_id)
+                    logger.debug(f"DEBUG: GameManager initialized for room {self.room_group_name}")
+                except Exception as e:
+                    logger.error(f"ERROR: Failed to initialize game manager for room {self.room_group_name}: {e}", exc_info=True)
+                    await self.close(code=4003)
+                    return
+            self.status_task = asyncio.create_task(self.broadcast_room_status())
+        except Exception as e:
+            logger.error(f"ERROR: connect: {e}", exc_info=True)
+            await self.close(code=4000)
+            return
+    
+    async def receive(self, text_data):
+        data = json.loads(text_data)
+        logger.debug(f"DEBUG: Received data in room {self.room_group_name}: {data}")
+        self.paddle.set_movement(data)
+
+    async def disconnect(self, close_code):
+        if self.room_id and self.user:
+            await sync_to_async(self.remove_user_from_active_connections)()
+
+            logger.debug(f"DEBUG: {self.user.display_name} disconnected from {self.room_id}")
+
+        # チャンネルグループから退室
+        if self.room_group_name:
+            await self.channel_layer.group_discard(
+                self.room_group_name,
+                self.channel_name
+            )
+    
+    async def broadcast_room_status(self):
+        logger.debug(f"DEBUG: game start")
+        try:
+            if self.game_manager:
+                self.redis_client.set(f"room:{self.room_group_name}:game_running", 'true')
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        'type': 'game_start',
+                        'left_player': self.game_manager.left_display_name,
+                        'right_player': self.game_manager.right_display_name
+                    })
+                await asyncio.sleep(3)
+                while True:
+                    await asyncio.sleep(self.next_send_duration)
+                    self.game_manager.update_game_state()
+                    game_state = self.game_manager.get_game_state()
+                    logger.debug(f"DEBUG: Broadcasting game state for room {self.room_id}: {game_state} : {self.room_group_name}")
+                    game_state['type'] = 'update'
+                    await self.channel_layer.group_send(
+                        self.room_group_name,
+                        {
+                            'type': 'game_message',
+                            'message': game_state
+                        }
+                    )
+                    if (
+                        self.game_manager.score_manager.get_score("left") == END_GAME_SCORE or
+                        self.game_manager.score_manager.get_score("right") == END_GAME_SCORE
+                    ):
+                        logger.debug(f"[{self.room_group_name}] ゲーム終了！")
+                        self.redis_client.set(f"room:{self.room_group_name}:game_running", 'false')
+                        break
+                try:
+                    await sync_to_async(Match.objects.filter(id=self.room_id).update)(is_finished=True)
+                    await sync_to_async(MatchDetail.objects.filter(match_id=self.room_id, is_left_side=True).update)(
+                        score=self.game_manager.score_manager.get_score("left")
+                    )
+                    await sync_to_async(MatchDetail.objects.filter(match_id=self.room_id, is_left_side=False).update)(
+                        score=self.game_manager.score_manager.get_score("right")
+                    )
+                    await self.channel_layer.group_send(
+                        self.room_group_name,
+                        {
+                            'type': 'game_end',
+                            'game_state': self.game_manager.get_game_state(),
+                            'left_player': self.game_manager.left_display_name,
+                            'right_player': self.game_manager.right_display_name,
+                            'redirect_url': f"/api/room/{self.room_type}/{self.room_id}/end/"
+                        }
+                    )
+                except Exception as e:
+                    logger.error(f"ERROR: Failed to update match details for {self.room_id}: {e}", exc_info=True)
+            else:
+                while True:
+                    connected_users = await sync_to_async(self.get_connected_users)()
+                    if len(connected_users) == 2:
+                        logger.debug(f"DEBUG: Starting game manager for room {self.room_group_name}")
+                        break
+                    await asyncio.sleep(self.next_send_duration)
+                while True:
+                    await asyncio.sleep(self.next_send_duration)
+                    val = self.redis_client.get(f"room:{self.room_group_name}:game_running")
+                    logger.debug(f"DEBUG: Game running status for room {self.room_group_name}: {val}")
+                    if val == "false":
+                        logger.debug(f"DEBUG: Game already finished for room {self.room_group_name}")
+                        break
+            logger.debug(f"DEBUG: closing room {self.room_group_name} after game end")
+            self.close()
+        except Exception as e:
+            logger.error(f"ERROR: broadcast_room_status: {e}", exc_info=True)
+            await self.close(code=4000)
+
+
+
+    async def game_message(self, event):
+        game_state = event["message"]
+        await self.send(text_data=json.dumps(game_state))
+
+    async def game_start(self, event):
+        """ゲーム開始の処理"""
+        left_player = event.get('left_player', {})
+        right_player = event.get('right_player', {})
+        await self.send(text_data=json.dumps({
+            'type': 'start',
+            'players': {
+                'left': {
+                    'display_name': left_player
+                    },
+                'right': {
+                    'display_name': right_player
+                },
+            },
+        }))
+    
+    async def game_end(self, event):
+        """ゲーム終了の処理"""
+        try:
+            game_state = event.get('game_state', {})
+            logger.debug(f"DEBUG: Game end event: {event}")
+            left_player_score = game_state.get('left', {}).get('score', 0)
+            right_player_score = game_state.get('right', {}).get('score', 0)
+            left_player = game_state.get('left_player', '')
+            right_player = game_state.get('right_player', '')
+            if left_player_score > right_player_score:
+                winner = left_player
+            elif right_player_score > left_player_score:
+                winner = right_player
+            else:
+                logger.error(f"Error: Game ended in a draw for room {self.room_group_name}")
+                winner = "Draw"
+            logger.debug(f"DEBUG: Game ended with winner: {winner} in room {self.room_group_name}")
+            await self.send(text_data=json.dumps({
+                'type': 'end',
+                'left': game_state.get('left', {}),
+                'right': game_state.get('right', {}),
+                'winner': winner,
+                'redirect_url': event.get('redirect_url', None)
+            }))
+        except Exception as e:
+            logger.error(f"ERROR: game_end: {e}", exc_info=True)
+            await self.close(code=4000)
+            return
+
