@@ -139,11 +139,13 @@ const RemoteGame = ({ params }) => {
     socket.onmessage = e => {
       const msg = JSON.parse(e.data)
       if (msg.type === 'start') {
-        leftName = msg.players.left
-        rightName = msg.players.right
+        const leftInfo = msg.players.left
+        const rightInfo = msg.players.right
+        leftName = leftInfo.display_name
+        rightName = rightInfo.display_name
         // プレイヤー名を state に反映
-        setLeftPlayerName(msg.players.left)
-        setRightPlayerName(msg.players.right)
+        setLeftPlayerName(leftName)
+        setRightPlayerName(rightName)
         setMatchStarted(true)
         update()
         intervalId = setInterval(update, UPDATE_INTERVAL)
@@ -157,8 +159,6 @@ const RemoteGame = ({ params }) => {
       } else if (msg.type === 'end') {
         leftPaddleY = msg.left.paddlePosition - PADDLE_HEIGHT / 2
         rightPaddleY = msg.right.paddlePosition - PADDLE_HEIGHT / 2
-        ballX = msg.ballPosition.x
-        ballY = msg.ballPosition.y
         leftScore = msg.left.score
         rightScore = msg.right.score
         winnerName = msg.winner
