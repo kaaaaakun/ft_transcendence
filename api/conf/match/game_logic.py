@@ -2,8 +2,7 @@ import math
 import random
 from django.conf import settings
 
-from utils.redis_client import get_redis
-
+#TODO: リモートのromm/game_logic.pyと共通化する
 
 # フィールド
 WALL_X_LIMIT = settings.WALL_X_LIMIT
@@ -84,28 +83,6 @@ class LocalSimpleScoreManager(ScoreManager):
 
     def get_score(self, side):
         return self.scores[side]
-
-class TournamentScoreManager(ScoreManager):
-    def __init__(self, position_matchdetail):
-        self.position_matchdetail = position_matchdetail
-        self.redis_client = get_redis()
-
-    def update_score(self, side, points):
-        if side == "left":
-            redis_key = f"matchdetail:{self.position_matchdetail['left']}:score"
-        else:
-            redis_key = f"matchdetail:{self.position_matchdetail['right']}:score"
-        current_score = int(self.redis_client.get(redis_key) or 0)
-        self.redis_client.set(redis_key, current_score + points)
-
-    def get_score(self, side):
-        redis_key = f"matchdetail:{self.position_matchdetail[side]}:score"
-        return int(self.redis_client.get(redis_key) or 0)
-    
-    def delete_score(self):
-        left_key = f"matchdetail:{self.position_matchdetail['left']}:score"
-        right_key = f"matchdetail:{self.position_matchdetail['right']}:score"
-        self.redis_client.delete(left_key, right_key)
 
 class Ball:
     def __init__(self):
