@@ -4,7 +4,13 @@ const wss = new WebSocketServer({ port: 3002, path: '/api/ws/room.SIMPLE.123' })
 wss.on('connection', ws => {
   // start
   setTimeout(() => {
-    ws.send(JSON.stringify({ type: 'start', players: { left: 'Alice', right: 'Bob' } }));
+    ws.send(JSON.stringify({
+      type: 'start',
+      players: {
+        left: { display_name: 'Alice' },
+        right: { display_name: 'Bob' }
+      }
+    }));
   }, 1000);
 
   // update (60fps)
@@ -24,7 +30,6 @@ wss.on('connection', ws => {
       type: 'end',
       left:  { paddlePosition: 0, score: 3 },
       right: { paddlePosition: 0, score: 5 },
-      ballPosition: { x: 400, y: 250 },
       winner: 'Bob',
       redirectUrl: '/'
     }));
