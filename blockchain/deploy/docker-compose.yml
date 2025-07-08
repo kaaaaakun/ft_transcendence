@@ -1,9 +1,0 @@
-version: '3.8'
-
-services:
-  hardhat:
-    build: .
-    environment:
-      SEPOLIA_RPC_URL: ${SEPOLIA_RPC_URL}
-      PRIVATE_KEY: ${PRIVATE_KEY}
-    container_name: hardhat-deployer
