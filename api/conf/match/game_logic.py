@@ -2,7 +2,7 @@ import math
 import random
 from django.conf import settings
 
-import utils.redis_client as get_redis
+from utils.redis_client import get_redis
 
 
 # フィールド
