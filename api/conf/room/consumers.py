@@ -20,7 +20,6 @@ from .utils import RoomKey
 from user.utils import get_user_by_auth
 import urllib.parse
 from tournament.models import Tournament
-from .pong_game_task import run_pong_game
 
 FRAME = 30 # フロントを見つつ調整
 END_GAME_SCORE = settings.END_GAME_SCORE
