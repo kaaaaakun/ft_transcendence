@@ -4,7 +4,7 @@ from django.conf import settings
 from asgiref.sync import sync_to_async
 
 from utils.redis_client import get_redis
-from match.models import MatchDetail
+from match.models import MatchDetail, Match
 import logging
 logger = logging.getLogger('django')
 
@@ -38,6 +38,7 @@ class GameManager:
         self.room_group_name = room_group_name
         self.left_display_name = ""
         self.right_display_name = ""
+        self.tournament_id = None
 
     async def get_player_display_name(self, room_id):
         try:
@@ -50,6 +51,17 @@ class GameManager:
             logger.error(f"Error getting player display names: {e}")
             self.left_display_name = "Left Player"
             self.right_display_name = "Right Player"
+    
+    async def get_tournament_id(self, room_id):
+        try:
+            match= await sync_to_async(Match.objects.get)(id=room_id)
+            self.tournament_id = match.tournament_id
+        except Match.DoesNotExist:
+            logger.error(f"MatchDetail for room {room_id} does not exist.")
+            return None
+        except Exception as e:
+            logger.error(f"Error getting tournament ID: {e}")
+            return None
 
     def update_game_state(self):
         self.ball.update_position()
@@ -67,9 +79,9 @@ class GameManager:
             self.ball.paddle_refrection(self.right_paddle)
         elif self.wall.is_goal(self.ball):
             if self.ball.isGoalLeft:
-                self.score_manager.update_score("left", 1)
-            else:
                 self.score_manager.update_score("right", 1)
+            else:
+                self.score_manager.update_score("left", 1)
             self.ball.reset()
 
     def get_game_state(self):

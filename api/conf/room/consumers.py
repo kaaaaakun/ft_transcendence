@@ -537,26 +537,6 @@ class MatchRoomConsumer(RoomConsumer):
                 logger.error(f"ERROR: Match with ID {self.room_id} is already finished")
                 await self.close(code=4002)
                 return
-            match_details = await sync_to_async(
-                lambda: MatchDetail.objects.filter(match_id=self.room_id).select_related('user')
-            )()
-            if not await sync_to_async(match_details.exists)():
-                logger.error(f"ERROR: No match details found for match {self.room_id}")
-                await self.close(code=4003)
-                return
-            if await sync_to_async(match_details.count)() != 2:
-                logger.error(f"ERROR: Too many match details found for match {self.room_id}")
-                await self.close(code=4004)
-                return
-            match_list = await sync_to_async(list)(match_details)
-            if match_list[0].user_id == self.user.id:
-                self.paddle = Paddle(is_left=match_list[0].is_left_side, room_group_name=self.room_group_name)
-            elif match_list[1].user_id == self.user.id:
-                self.paddle = Paddle(is_left=match_list[1].is_left_side, room_group_name=self.room_group_name)
-            else:
-                logger.error(f"ERROR: User {self.user.display_name} is not part of match {self.room_id}")
-                await self.close(code=4005)
-                return
 
             logger.debug(f"DEBUG: Room data for {self.room_group_name} : {self.channel_name}")
             await self.channel_layer.group_add(
@@ -594,6 +574,9 @@ class MatchRoomConsumer(RoomConsumer):
     async def receive(self, text_data):
         data = json.loads(text_data)
         logger.debug(f"DEBUG: Received data in room {self.room_group_name}: {data}")
+        if self.paddle is None:
+            logger.error(f"ERROR: Paddle is not initialized for user {self.user.display_name} in room {self.room_group_name}")
+            return
         self.paddle.set_movement(data)
 
     async def disconnect(self, close_code):
@@ -609,6 +592,28 @@ class MatchRoomConsumer(RoomConsumer):
                 self.channel_name
             )
     
+    async def get_create_paddle(self):
+            match_details = await sync_to_async(
+                lambda: MatchDetail.objects.filter(match_id=self.room_id).select_related('user')
+            )()
+            if not await sync_to_async(match_details.exists)():
+                logger.error(f"ERROR: No match details found for match {self.room_id}")
+                await self.close(code=4003)
+                return
+            if await sync_to_async(match_details.count)() != 2:
+                logger.error(f"ERROR: Too many match details found for match {self.room_id}")
+                await self.close(code=4004)
+                return
+            match_list = await sync_to_async(list)(match_details)
+            if match_list[0].user_id == self.user.id:
+                self.paddle = Paddle(is_left=match_list[0].is_left_side, room_group_name=self.room_group_name)
+            elif match_list[1].user_id == self.user.id:
+                self.paddle = Paddle(is_left=match_list[1].is_left_side, room_group_name=self.room_group_name)
+            else:
+                logger.error(f"ERROR: User {self.user.display_name} is not part of match {self.room_id}")
+                await self.close(code=4005)
+                return
+
     async def broadcast_room_status(self):
         logger.debug(f"DEBUG: game start")
         try:
@@ -621,6 +626,7 @@ class MatchRoomConsumer(RoomConsumer):
                         'left_player': self.game_manager.left_display_name,
                         'right_player': self.game_manager.right_display_name
                     })
+                await self.get_create_paddle()
                 await asyncio.sleep(3)
                 while True:
                     await asyncio.sleep(self.next_send_duration)
@@ -650,6 +656,7 @@ class MatchRoomConsumer(RoomConsumer):
                     await sync_to_async(MatchDetail.objects.filter(match_id=self.room_id, is_left_side=False).update)(
                         score=self.game_manager.score_manager.get_score("right")
                     )
+                    redirect_url = "/" if not self.game_manager.tournament_id else f"/remote/tournament/{self.game_manager.tournament_id}/"
                     await self.channel_layer.group_send(
                         self.room_group_name,
                         {
@@ -657,7 +664,7 @@ class MatchRoomConsumer(RoomConsumer):
                             'game_state': self.game_manager.get_game_state(),
                             'left_player': self.game_manager.left_display_name,
                             'right_player': self.game_manager.right_display_name,
-                            'redirect_url': f"/api/room/{self.room_type}/{self.room_id}/end/"
+                            'redirectUrl': redirect_url
                         }
                     )
                 except Exception as e:
@@ -666,6 +673,7 @@ class MatchRoomConsumer(RoomConsumer):
                 while True:
                     connected_users = await sync_to_async(self.get_connected_users)()
                     if len(connected_users) == 2:
+                        await self.get_create_paddle()
                         logger.debug(f"DEBUG: Starting game manager for room {self.room_group_name}")
                         break
                     await asyncio.sleep(self.next_send_duration)
@@ -711,8 +719,8 @@ class MatchRoomConsumer(RoomConsumer):
             logger.debug(f"DEBUG: Game end event: {event}")
             left_player_score = game_state.get('left', {}).get('score', 0)
             right_player_score = game_state.get('right', {}).get('score', 0)
-            left_player = game_state.get('left_player', '')
-            right_player = game_state.get('right_player', '')
+            left_player = event.get('left_player', '')
+            right_player = event.get('right_player', '')
             if left_player_score > right_player_score:
                 winner = left_player
             elif right_player_score > left_player_score:
@@ -726,7 +734,7 @@ class MatchRoomConsumer(RoomConsumer):
                 'left': game_state.get('left', {}),
                 'right': game_state.get('right', {}),
                 'winner': winner,
-                'redirect_url': event.get('redirect_url', None)
+                'redirectUrl': event.get('redirectUrl', None)
             }))
         except Exception as e:
             logger.error(f"ERROR: game_end: {e}", exc_info=True)
