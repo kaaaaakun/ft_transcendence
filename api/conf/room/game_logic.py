@@ -40,18 +40,22 @@ class GameManager:
         self.right_display_name = ""
         self.tournament_id = None
 
-    async def get_player_display_name(self, room_id):
+    async def get_player_info(self, room_id):
         try:
             left_player = await sync_to_async(MatchDetail.objects.get)(match_id=room_id, is_left_side=True)
             right_player = await sync_to_async(MatchDetail.objects.get)(match_id=room_id, is_left_side=False)
             logger.debug(f"left_player: {left_player}, right_player: {right_player}")
             self.left_display_name = await sync_to_async(lambda: left_player.user.display_name)()
             self.right_display_name = await sync_to_async(lambda: right_player.user.display_name)()
+            self.left_user_id = await sync_to_async(lambda: left_player.user.id)()
+            self.right_user_id = await sync_to_async(lambda: right_player.user.id)()
         except Exception as e:
             logger.error(f"Error getting player display names: {e}")
             self.left_display_name = "Left Player"
             self.right_display_name = "Right Player"
-    
+            self.left_user_id = None
+            self.right_user_id = None
+
     async def get_tournament_id(self, room_id):
         try:
             match= await sync_to_async(Match.objects.get)(id=room_id)
