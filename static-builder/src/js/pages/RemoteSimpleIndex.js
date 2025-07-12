@@ -7,7 +7,7 @@ import { useBanner } from '@/js/hooks/useBanner'
 
 const waitingRoomLimit = 5
 
-export function SimpleGameRemote() {
+export function RemoteSimpleIndex() {
   const [rooms, setRooms] = Teact.useState([])
   const [loading, setLoading] = Teact.useState(true)
   const [error, setError] = Teact.useState(null)

@@ -1,8 +1,13 @@
 import math
 import random
 from django.conf import settings
+from asgiref.sync import sync_to_async
 
-#TODO: リモートのromm/game_logic.pyと共通化する
+from utils.redis_client import get_redis
+from match.models import MatchDetail, Match
+import logging
+logger = logging.getLogger('django')
+
 
 # フィールド
 WALL_X_LIMIT = settings.WALL_X_LIMIT
@@ -24,12 +29,39 @@ PADDLE_Y_MAX = WALL_Y_LIMIT - (PADDLE_HEIGHT / 2)
 PADDLE_SPEED = 15
 
 class GameManager:
-    def __init__(self, score_manager):
+    def __init__(self, score_manager, room_group_name=None):
         self.score_manager = score_manager
         self.ball = Ball()
         self.wall = Wall()
-        self.left_paddle = Paddle(is_left = True)
-        self.right_paddle = Paddle(is_left = False)
+        self.left_paddle = Paddle(is_left = True, room_group_name=room_group_name)
+        self.right_paddle = Paddle(is_left = False, room_group_name=room_group_name)
+        self.room_group_name = room_group_name
+        self.left_display_name = ""
+        self.right_display_name = ""
+        self.tournament_id = None
+
+    async def get_player_display_name(self, room_id):
+        try:
+            left_player = await sync_to_async(MatchDetail.objects.get)(match_id=room_id, is_left_side=True)
+            right_player = await sync_to_async(MatchDetail.objects.get)(match_id=room_id, is_left_side=False)
+            logger.debug(f"left_player: {left_player}, right_player: {right_player}")
+            self.left_display_name = await sync_to_async(lambda: left_player.user.display_name)()
+            self.right_display_name = await sync_to_async(lambda: right_player.user.display_name)()
+        except Exception as e:
+            logger.error(f"Error getting player display names: {e}")
+            self.left_display_name = "Left Player"
+            self.right_display_name = "Right Player"
+    
+    async def get_tournament_id(self, room_id):
+        try:
+            match= await sync_to_async(Match.objects.get)(id=room_id)
+            self.tournament_id = match.tournament_id
+        except Match.DoesNotExist:
+            logger.error(f"MatchDetail for room {room_id} does not exist.")
+            return None
+        except Exception as e:
+            logger.error(f"Error getting tournament ID: {e}")
+            return None
 
     def update_game_state(self):
         self.ball.update_position()
@@ -47,9 +79,9 @@ class GameManager:
             self.ball.paddle_refrection(self.right_paddle)
         elif self.wall.is_goal(self.ball):
             if self.ball.isGoalLeft:
-                self.score_manager.update_score("left", 1)
-            else:
                 self.score_manager.update_score("right", 1)
+            else:
+                self.score_manager.update_score("left", 1)
             self.ball.reset()
 
     def get_game_state(self):
@@ -69,20 +101,21 @@ class GameManager:
         }
 
 class ScoreManager:
-    def update_score(self, side, points):
-        raise NotImplementedError
-    def get_score(self, side):
-        raise NotImplementedError
-
-class LocalSimpleScoreManager(ScoreManager):
-    def __init__(self):
-        self.scores = {"left": 0, "right": 0}
+    def __init__(self, room_group_name):
+        self.room_group_name = room_group_name
+        self.redis_client = get_redis()
 
     def update_score(self, side, points):
-        self.scores[side] += points
+        current_score = self.redis_client.get(f"room:{self.room_group_name}:score:{side}") or 0
+        self.redis_client.set(f"room:{self.room_group_name}:score:{side}", int(current_score) + points)
 
     def get_score(self, side):
-        return self.scores[side]
+        score = self.redis_client.get(f"room:{self.room_group_name}:score:{side}")
+        return int(score) if score else 0
+
+    def delete_score(self):
+        self.redis_client.delete(f"room:{self.room_group_name}:score:left")
+        self.redis_client.delete(f"room:{self.room_group_name}:score:right")
 
 class Ball:
     def __init__(self):
@@ -151,22 +184,33 @@ class Wall:
         return False
 
 class Paddle:
-    def __init__(self, is_left):
+    def __init__(self, is_left, room_group_name):
         self.is_left = is_left # True:左側, False:右側
         if self.is_left:
             self.x = PADDLE_INITIAL_X_LEFT
         else:
             self.x = PADDLE_INITIAL_X_RIGHT
         self.y = PADDLE_INITIAL_Y
-        self.movement_state = 0 # 0:stop, 1:down, -1:up
+        self.room_group_name = room_group_name
+        self.redis_client = get_redis()
+        self.redis_client.hsetnx(f"room:{self.room_group_name}:paddle:{'left' if self.is_left else 'right'}", "movement_state", 0)
 
-    def set_movement(self, state):
-        self.movement_state = state
+    def set_movement(self, paddle_data):
+        key = paddle_data["key"]
+        action = paddle_data["action"]
+        if key == "PaddleUpKey" and action == "push":
+            movement_state = -1
+        elif key == "PaddleDownKey" and action == "push":
+            movement_state = 1
+        elif action == "release":
+            movement_state = 0
+        self.redis_client.hset(f"room:{self.room_group_name}:paddle:{'left' if self.is_left else 'right'}", "movement_state", movement_state)
 
     def update_position(self):
-        if self.movement_state == 0:
+        movement_state = int(self.redis_client.hget(f"room:{self.room_group_name}:paddle:{'left' if self.is_left else 'right'}", "movement_state")) or 0
+        if movement_state == 0:
             return
-        y = self.y + self.movement_state * PADDLE_SPEED
+        y = self.y + movement_state * PADDLE_SPEED
         if y < PADDLE_Y_MIN or PADDLE_Y_MAX < y:
             # パドルがフィールド外に出る場合はポジションを更新しない
             return
