@@ -21,6 +21,9 @@ from user.utils import get_user_by_auth
 import urllib.parse
 from tournament.models import Tournament
 
+from utils.blockchain_controller import BlockchainController
+from datetime import datetime
+
 FRAME = 30 # フロントを見つつ調整
 END_GAME_SCORE = settings.END_GAME_SCORE
 
@@ -656,6 +659,21 @@ class MatchRoomConsumer(RoomConsumer):
                     await sync_to_async(MatchDetail.objects.filter(match_id=self.room_id, is_left_side=False).update)(
                         score=self.game_manager.score_manager.get_score("right")
                     )
+                    await self.game_manager.get_player_info(self.room_id)
+                    await self.game_manager.get_tournament_id(self.room_id)
+                    left_score = self.game_manager.score_manager.get_score("left")
+                    right_score = self.game_manager.score_manager.get_score("right")
+                    match_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    logger.debug(BlockchainController.store_match_result(
+                        match_id=self.room_id,
+                        match_time=match_time,
+                        user_id1=self.game_manager.left_user_id,
+                        display_name1=self.game_manager.left_display_name,
+                        score1=left_score,
+                        user_id2=self.game_manager.right_user_id,
+                        display_name2=self.game_manager.right_display_name,
+                        score2=right_score,
+                    ))
                     redirect_url = "/" if not self.game_manager.tournament_id else f"/remote/tournament/{self.game_manager.tournament_id}/"
                     await self.channel_layer.group_send(
                         self.room_group_name,
