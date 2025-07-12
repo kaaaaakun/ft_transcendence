@@ -340,6 +340,16 @@ export const UserProfile = props => {
         `${record.score.player} - ${record.score.opponent}`,
       ),
       Teact.createElement('td', { className: 'width-15' }, record.match_type),
+      Teact.createElement(
+        'td',
+        { className: 'width-15' },
+        record.tx_address || 'unavailable',
+      ),
+      Teact.createElement(
+        'td',
+        { className: 'width-15' },
+        record.tx_status || 'unavailable',
+      ),
     )
   }
 
@@ -435,7 +445,6 @@ export const UserProfile = props => {
       )
     }
     if (relation === 'stranger') {
-      console.log('userData', userData)
       return Teact.createElement(
         'button',
         {
@@ -502,6 +511,16 @@ export const UserProfile = props => {
                     'th',
                     { className: 'width-15' },
                     'Match Type',
+                  ),
+                  Teact.createElement(
+                    'th',
+                    { className: 'width-15' },
+                    'Transaction Address',
+                  ),
+                  Teact.createElement(
+                    'th',
+                    { className: 'width-15' },
+                    'Transaction Status',
                   ),
                 ),
               ),
