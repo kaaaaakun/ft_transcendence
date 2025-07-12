@@ -562,7 +562,7 @@ class MatchRoomConsumer(RoomConsumer):
                         score_manager=ScoreManager(self.room_group_name),
                         room_group_name=self.room_group_name,
                     )
-                    await self.game_manager.get_player_display_name(self.room_id)
+                    await self.game_manager.get_player_info(self.room_id)
                     logger.debug(f"DEBUG: GameManager initialized for room {self.room_group_name}")
                 except Exception as e:
                     logger.error(f"ERROR: Failed to initialize game manager for room {self.room_group_name}: {e}", exc_info=True)
@@ -659,21 +659,7 @@ class MatchRoomConsumer(RoomConsumer):
                     await sync_to_async(MatchDetail.objects.filter(match_id=self.room_id, is_left_side=False).update)(
                         score=self.game_manager.score_manager.get_score("right")
                     )
-                    await self.game_manager.get_player_info(self.room_id)
-                    await self.game_manager.get_tournament_id(self.room_id)
-                    left_score = self.game_manager.score_manager.get_score("left")
-                    right_score = self.game_manager.score_manager.get_score("right")
-                    match_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    logger.debug(BlockchainController.store_match_result(
-                        match_id=self.room_id,
-                        match_time=match_time,
-                        user_id1=self.game_manager.left_user_id,
-                        display_name1=self.game_manager.left_display_name,
-                        score1=left_score,
-                        user_id2=self.game_manager.right_user_id,
-                        display_name2=self.game_manager.right_display_name,
-                        score2=right_score,
-                    ))
+                    await self.handle_tx_info()
                     redirect_url = "/" if not self.game_manager.tournament_id else f"/remote/tournament/{self.game_manager.tournament_id}/"
                     await self.channel_layer.group_send(
                         self.room_group_name,
@@ -707,6 +693,33 @@ class MatchRoomConsumer(RoomConsumer):
         except Exception as e:
             logger.error(f"ERROR: broadcast_room_status: {e}", exc_info=True)
             await self.close(code=4000)
+
+    async def handle_tx_info(self):
+        logger.debug(f"DEBUG: Handling transaction info for match {self.room_id}")
+        await self.game_manager.get_player_info(self.room_id)
+        await self.game_manager.get_tournament_id(self.room_id)
+        left_score = self.game_manager.score_manager.get_score("left")
+        right_score = self.game_manager.score_manager.get_score("right")
+        match_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        response = BlockchainController.store_match_result(
+            match_id=self.room_id,
+            match_time=match_time,
+            user_id1=self.game_manager.left_user_id,
+            display_name1=self.game_manager.left_display_name,
+            score1=left_score,
+            user_id2=self.game_manager.right_user_id,
+            display_name2=self.game_manager.right_display_name,
+            score2=right_score,
+        )
+        is_success = response.get('success', False)
+        match = await sync_to_async(lambda: Match.objects.filter(id=self.room_id).first())()
+        if match:
+            if is_success:
+                match.tx_status = 'success'
+            else:
+                match.tx_status = 'pending'
+            match.tx_hash = response.get('tx_hash', 'unavailable')
+            await sync_to_async(match.save)()
 
 
 
