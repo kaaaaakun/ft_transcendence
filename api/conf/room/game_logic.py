@@ -36,6 +36,8 @@ class GameManager:
         self.left_paddle = Paddle(is_left = True, room_group_name=room_group_name)
         self.right_paddle = Paddle(is_left = False, room_group_name=room_group_name)
         self.room_group_name = room_group_name
+        self.left_user_id = None
+        self.right_user_id = None
         self.left_display_name = ""
         self.right_display_name = ""
         self.tournament_id = None
@@ -45,6 +47,8 @@ class GameManager:
             left_player = await sync_to_async(MatchDetail.objects.get)(match_id=room_id, is_left_side=True)
             right_player = await sync_to_async(MatchDetail.objects.get)(match_id=room_id, is_left_side=False)
             logger.debug(f"left_player: {left_player}, right_player: {right_player}")
+            self.left_user_id = left_player.user_id
+            self.right_user_id = right_player.user_id
             self.left_display_name = await sync_to_async(lambda: left_player.user.display_name)()
             self.right_display_name = await sync_to_async(lambda: right_player.user.display_name)()
         except Exception as e:

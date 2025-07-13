@@ -6,6 +6,7 @@ import { useBanner } from '@/js/hooks/useBanner'
 import { tournament } from '@/js/hooks/useTournamentDetails'
 import { ConnectionStatus } from '@/js/components/tournament/ConnectionStatus'
 import { TournamentsBracket } from './TournamentsBracket'
+import { useNavigate } from '@/js/libs/router'
 
 export const TournamentWaitBegin = props => {
   const { showErrorBanner, banners } = useBanner()
@@ -20,6 +21,7 @@ export const TournamentWaitBegin = props => {
   const [_currentPlayers, setCurrentPlayers] = Teact.useState(0)
   const [connectionStatus, setConnectionStatus] = Teact.useState('disconnected')
   const [_isInitialized, setIsInitialized] = Teact.useState(false) // 初期化フラグ
+  const navigate = useNavigate()
 
   Teact.useEffect(() => {
     const fetchTournamentDetails = async () => {
@@ -88,6 +90,11 @@ export const TournamentWaitBegin = props => {
           setCurrentPlayers(data.entry_count || 4)
           setMembers(data.members || [])
           setIsReady(true)
+          
+          if (data.match_ongoing){
+            ws.close() // ルームが準備できたら接続を閉じる
+            navigate(`/remote/matches/${data.match_ongoing}`)
+          }
         } else {
           console.warn('Unknown message status:', data.status)
         }

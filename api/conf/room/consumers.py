@@ -20,6 +20,7 @@ from .utils import RoomKey
 from user.utils import get_user_by_auth
 import urllib.parse
 from tournament.models import Tournament
+from django.db.models import F
 
 FRAME = 30 # フロントを見つつ調整
 END_GAME_SCORE = settings.END_GAME_SCORE
@@ -110,7 +111,7 @@ class RoomConsumer(AsyncWebsocketConsumer):
             if room_data:
                 return room_data
             else:
-                return None
+                return RoomKey.create_room(self.room_type, self.room_id, self.room_id)
 
         except Exception as e:
             logger.error(f"ERROR: get_room_data: {e}")
@@ -307,7 +308,6 @@ class TournamentWaitRoomConsumer(RoomConsumer):
             )
             
             # 各接続中ユーザーに個別のmatch_ongoing情報を送信
-            await self.send_individual_match_info(connected_users)
             
         else:
             # まだ人数が足りない場合
@@ -326,36 +326,10 @@ class TournamentWaitRoomConsumer(RoomConsumer):
                 message_data
             )
 
-    async def send_individual_match_info(self, connected_users):
-        """接続中の各ユーザーに個別のマッチ情報を送信"""
-        try:
-            from user.models import User
-            
-            for connected_user in connected_users:
-                user_id = connected_user['user_id']
-                user = await sync_to_async(User.objects.get)(id=user_id)
-                
-                # そのユーザーの進行中マッチ情報を取得
-                ongoing_match_info = await sync_to_async(self.get_ongoing_match_for_user)(user)
-                
-                if ongoing_match_info:
-                    # 個別にマッチ情報を送信
-                    await self.channel_layer.group_send(
-                        self.room_group_name,
-                        {
-                            'type': 'individual_match_info',
-                            'target_user_id': user_id,
-                            'match_ongoing': ongoing_match_info
-                        }
-                    )
-                    
-        except Exception as e:
-            logger.debug(f"ERROR: send_individual_match_info: {e}")
-
-    def get_ongoing_match_for_user(self, user):
+    def get_ongoing_match_for_user(self):
         """指定されたユーザーの進行中マッチ情報を取得"""
         try:
-            logger.debug(f"DEBUG: Getting ongoing match for user {user.display_name} in room {self.room_group_name}")
+            logger.debug(f"DEBUG: Getting ongoing match for user {self.user.display_name} in room {self.room_group_name}")
             if not self.room_id:
                 logger.debug("ERROR: Room ID is not set")
                 return None
@@ -364,15 +338,15 @@ class TournamentWaitRoomConsumer(RoomConsumer):
             
             # 指定されたユーザーの進行中マッチを検索
             ongoing_match_details = MatchDetail.objects.filter(
-                user=user,
+                user=self.user,
                 match__tournament_id=tournament_id,
                 match__is_finished=False
             ).select_related('match').first()
             
             if ongoing_match_details:
                 match_id = ongoing_match_details.match.id
-                logger.debug(f"DEBUG: Found ongoing match {match_id} for user {user.display_name} in tournament {tournament_id}")
-                return f"room.TOURNAMENT_MATCH.{match_id}"
+                logger.debug(f"DEBUG: Found ongoing match {match_id} for user {self.user.display_name} in tournament {tournament_id}")
+                return f"{match_id}"
             
             return None
             
@@ -397,11 +371,13 @@ class TournamentWaitRoomConsumer(RoomConsumer):
     # チャンネルグループからのメッセージハンドラー
     async def room_ready(self, event):
         """ルームが準備完了したときの処理"""
+        ongoing_match_info = await sync_to_async(self.get_ongoing_match_for_user)()
         await self.send(text_data=json.dumps({
             'status': 'room_ready',
             'entry_count': event['entry_count'],
             'members': event['members'],
-            'connected_members': event['connected_members']
+            'connected_members': event['connected_members'],
+            'match_ongoing': ongoing_match_info if ongoing_match_info else False,
         }))
 
     async def individual_match_info(self, event):
@@ -522,6 +498,7 @@ class MatchRoomConsumer(RoomConsumer):
 
             room_data = await sync_to_async(self.get_room_data)()
             if not room_data:
+                logger.error(f"ERROR: Room data not found for {self.room_group_name}")
                 await self.send(text_data=json.dumps({
                     'error': f'Room not found or invalid {self.room_id}'
                 }))
@@ -560,6 +537,7 @@ class MatchRoomConsumer(RoomConsumer):
                         room_group_name=self.room_group_name,
                     )
                     await self.game_manager.get_player_display_name(self.room_id)
+                    await self.game_manager.get_tournament_id(self.room_id)
                     logger.debug(f"DEBUG: GameManager initialized for room {self.room_group_name}")
                 except Exception as e:
                     logger.error(f"ERROR: Failed to initialize game manager for room {self.room_group_name}: {e}", exc_info=True)
@@ -656,6 +634,11 @@ class MatchRoomConsumer(RoomConsumer):
                     await sync_to_async(MatchDetail.objects.filter(match_id=self.room_id, is_left_side=False).update)(
                         score=self.game_manager.score_manager.get_score("right")
                     )
+                    game_state = self.game_manager.get_game_state()
+                    left_player_score = game_state.get('left', {}).get('score', 0)
+                    right_player_score = game_state.get('right', {}).get('score', 0)
+                    winner = self.game_manager.left_user_id if left_player_score > right_player_score else self.game_manager.right_user_id
+                    await sync_to_async(TournamentPlayer.objects.filter(tournament_id=self.game_manager.tournament_id, user_id=winner ).update)(round=F('round') + 1)
                     redirect_url = "/" if not self.game_manager.tournament_id else f"/remote/tournament/{self.game_manager.tournament_id}/"
                     await self.channel_layer.group_send(
                         self.room_group_name,
