@@ -71,7 +71,6 @@ def create_response(user, access_id):
 
 def fetch_tx_info(match):
   try:
-      # データベースに保存されている値をそのまま返す
       tx_address = match.tx_address if match.tx_address else 'unavailable'
       tx_status = match.tx_status if match.tx_status else 'unavailable'
       return tx_address, tx_status
