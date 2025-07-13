@@ -39,7 +39,6 @@ def create_response(user, access_id):
     match = Match.objects.get(id=match_detail.match_id)
     tx_address, tx_status = fetch_tx_info(match)
     created_at = localtime(Match.objects.get(id = match_detail.match_id).created_at).strftime('%Y-%m-%d %H:%M:%S')
-
     game_records.append({
       'date': created_at,
       'result': "win" if match_detail.score == END_GAME_SCORE else "lose",
