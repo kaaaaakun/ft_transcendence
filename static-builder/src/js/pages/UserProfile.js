@@ -497,7 +497,7 @@ export const UserProfile = props => {
                   ),
                   Teact.createElement(
                     'th',
-                    { className: 'width-10 border-end' },
+                    { className: 'width-15 border-end' },
                     'Date',
                   ),
                   Teact.createElement(
