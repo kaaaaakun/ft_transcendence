@@ -701,7 +701,6 @@ class MatchRoomConsumer(RoomConsumer):
         left_score = self.game_manager.score_manager.get_score("left")
         right_score = self.game_manager.score_manager.get_score("right")
         match_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
         response = BlockchainController.store_match_result(
             match_id=self.room_id,
             match_time=match_time,
