@@ -13,6 +13,9 @@ DOCKER_COMPOSE = docker compose --env-file $(ENV_PATH) -f $(COMPOSE_YML) -f ./el
 
 all: run
 
+connect:
+	cloudflared tunnel run ft-transcendence
+
 local:
 	$(MAKE) WITH_LOCAL=1 run
 
