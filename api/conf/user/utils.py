@@ -4,7 +4,7 @@ from django.db.models import Q
 from match.models import Match, MatchDetail
 from rest_framework_simplejwt.tokens import AccessToken
 from django.conf import settings
-import pytz
+from django.utils.timezone import localtime
 
 END_GAME_SCORE = settings.END_GAME_SCORE
 
@@ -32,8 +32,7 @@ def create_response(user, access_id):
   game_records = []
   for match_detail in match_details:
     opponent_user, opponent_score = get_opponent_user_and_score(match_detail.match_id, user.id)
-    jst = pytz.timezone('Asia/Tokyo')
-    created_at = Match.objects.get(id = match_detail.match_id).created_at.astimezone(jst).strftime('%Y-%m-%d %H:%M:%S')
+    created_at = localtime(Match.objects.get(id = match_detail.match_id).created_at).strftime('%Y-%m-%d %H:%M:%S')
     game_records.append({
       'date': created_at,
       'result': "win" if match_detail.score == END_GAME_SCORE else "lose",
