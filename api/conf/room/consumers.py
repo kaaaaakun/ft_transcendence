@@ -701,6 +701,7 @@ class MatchRoomConsumer(RoomConsumer):
         left_score = self.game_manager.score_manager.get_score("left")
         right_score = self.game_manager.score_manager.get_score("right")
         match_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
         response = BlockchainController.store_match_result(
             match_id=self.room_id,
             match_time=match_time,
@@ -711,14 +712,17 @@ class MatchRoomConsumer(RoomConsumer):
             display_name2=self.game_manager.right_display_name,
             score2=right_score,
         )
+        
         is_success = response.get('success', False)
+        
         match = await sync_to_async(lambda: Match.objects.filter(id=self.room_id).first())()
         if match:
             if is_success:
                 match.tx_status = 'success'
+                match.tx_address = response.get('tx_hash', 'unavailable')
             else:
-                match.tx_status = 'pending'
-            match.tx_hash = response.get('tx_hash', 'unavailable')
+                match.tx_status = 'failure'
+                match.tx_address = None
             await sync_to_async(match.save)()
 
 
