@@ -725,7 +725,7 @@ class MatchRoomConsumer(RoomConsumer):
                 match.tx_address = '-'
             else:
                 match.tx_status = 'failure'
-                match.tx_address = None
+                match.tx_address = '-'
             await sync_to_async(match.save)()
 
 
