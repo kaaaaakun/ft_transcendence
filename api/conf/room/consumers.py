@@ -712,7 +712,6 @@ class MatchRoomConsumer(RoomConsumer):
             display_name2=self.game_manager.right_display_name,
             score2=right_score,
         )
-        
         is_success = response.get('success', False)
         status = response.get('status', 'failure')  # dry-run時は'dry-run'が返される
         
