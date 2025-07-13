@@ -75,7 +75,7 @@ def fetch_tx_info(match):
       tx_status = match.tx_status if match.tx_status else 'unavailable'
       return tx_address, tx_status
   except Exception as e:
-      logger.error(f"トランザクション情報取得エラー: {e}")
+      logger.error(f"Error fetching transaction info: {e}")
       return 'error', 'error'
 
 def get_user_by_auth(auth):
