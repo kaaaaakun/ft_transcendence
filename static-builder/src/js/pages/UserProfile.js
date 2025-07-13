@@ -324,10 +324,17 @@ export const UserProfile = props => {
     return Teact.createElement(
       'tr',
       { className: 'text-center' },
+      // Match
       Teact.createElement(
         'td',
         { className: 'width-35 border-end' },
         `${userData.display_name} vs ${record.opponent_name}`,
+      ),
+      // Date
+      Teact.createElement(
+        'td',
+        { className: 'width-10 border-end' },
+        record.date,
       ),
       Teact.createElement(
         'td',
@@ -487,6 +494,11 @@ export const UserProfile = props => {
                     'th',
                     { className: 'width-35 border-end' },
                     'Match',
+                  ),
+                  Teact.createElement(
+                    'th',
+                    { className: 'width-10 border-end' },
+                    'Date',
                   ),
                   Teact.createElement(
                     'th',
