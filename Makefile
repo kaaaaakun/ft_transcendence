@@ -16,6 +16,13 @@ all: run
 connect:
 	cloudflared tunnel run ft-transcendence
 
+connect-bg:
+	nohup cloudflared tunnel run ft-transcendence > /dev/null 2>&1 &
+	@echo "Cloudflare tunnel started in background"
+
+connect-stop:
+	@pkill -f "cloudflared tunnel run ft-transcendence" || echo "No cloudflared tunnel process found"
+
 local:
 	$(MAKE) WITH_LOCAL=1 run
 
@@ -47,7 +54,7 @@ ps:
 setup-elk:
 	$(DOCKER_COMPOSE) up setup
 
-PHONY: run re build up down fdown image-prune ps generate setup-elk
+PHONY: run re build up down fdown image-prune ps generate setup-elk connect connect-bg connect-stop
 
 # -- 証明書の作成
 cert:
