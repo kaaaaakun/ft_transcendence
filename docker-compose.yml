@@ -20,8 +20,8 @@ services:
     expose:
       - "5432"
     # TODO: 提出前にPORTを閉じる
-    ports:
-      - "5432:5432"
+    # ports:
+    #   - "5432:5432"
     networks:
       - net_pong
 
@@ -41,8 +41,8 @@ services:
     container_name: "reverseproxy"
     image: nginx:1.26.1-alpine
     ports:
-      - "80:80"
-      - "443:443"
+      # - "80:80"
+      - "8002:8002"
     volumes:
       - ./reverseproxy/ssl/:/etc/ssl/
       - ./reverseproxy/nginx.conf:/etc/nginx/nginx.conf
@@ -106,8 +106,8 @@ services:
     networks:
       - net_pong
     # TODO: 提出前にPORTを閉じる
-    ports:
-      - "6379:6379"
+    # ports:
+    #   - "6379:6379"
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
       interval: 1s
