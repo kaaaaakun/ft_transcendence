@@ -718,7 +718,7 @@ class MatchRoomConsumer(RoomConsumer):
         if match:
             if is_success:
                 match.tx_status = 'success'
-                match.tx_address = response.get('tx_hash', 'unavailable')
+                match.tx_address = response.get('tx_hash', '-')
             elif status == 'dry-run':
                 match.tx_status = 'dry-run'
                 match.tx_address = '-'

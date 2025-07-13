@@ -326,7 +326,7 @@ export const UserProfile = props => {
       const txAddress = record.tx_address
 
       // 値がない場合
-      if (!txAddress || txAddress === 'unavailable' || txAddress === 'error') {
+      if (!txAddress || txAddress === '-' || txAddress === 'error') {
         return '-'
       }
 
@@ -374,7 +374,7 @@ export const UserProfile = props => {
       Teact.createElement(
         'td',
         { className: 'width-15' },
-        record.tx_status || 'unavailable',
+        record.tx_status || '-',
       ),
     )
   }

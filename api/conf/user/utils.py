@@ -71,8 +71,8 @@ def create_response(user, access_id):
 
 def fetch_tx_info(match):
   try:
-      tx_address = match.tx_address if match.tx_address else 'unavailable'
-      tx_status = match.tx_status if match.tx_status else 'unavailable'
+      tx_address = match.tx_address if match.tx_address else '-'
+      tx_status = match.tx_status if match.tx_status else '-'
       return tx_address, tx_status
   except Exception as e:
       logger.error(f"Error fetching transaction info: {e}")
