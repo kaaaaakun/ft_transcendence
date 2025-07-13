@@ -321,6 +321,36 @@ export const UserProfile = props => {
   }
 
   const renderGameRecord = record => {
+    // トランザクションアドレスのリンクを作成
+    const renderTxAddress = () => {
+      const txAddress = record.tx_address
+
+      // 値がない場合
+      if (!txAddress || txAddress === '-' || txAddress === 'error') {
+        return '-'
+      }
+
+      // トランザクションハッシュの場合はEtherscanリンクとして表示
+      if (txAddress.startsWith('0x') && txAddress.length >= 42) {
+        const fullUrl = `https://sepolia.etherscan.io/tx/${txAddress}`
+        const displayText = `${txAddress.substring(0, 10)}...${txAddress.slice(-8)}`
+
+        return Teact.createElement(
+          'a',
+          {
+            href: fullUrl,
+            target: '_blank',
+            rel: 'noopener noreferrer',
+            className: 'text-blue-500 hover:underline',
+            title: txAddress, // ホバー時にフルハッシュを表示
+          },
+          displayText,
+        )
+      }
+
+      return `${txAddress.substring(0, 8)}...${txAddress.slice(-8)}`
+    }
+
     return Teact.createElement(
       'tr',
       { className: 'text-center' },
@@ -340,15 +370,11 @@ export const UserProfile = props => {
         `${record.score.player} - ${record.score.opponent}`,
       ),
       Teact.createElement('td', { className: 'width-15' }, record.match_type),
+      Teact.createElement('td', { className: 'width-15' }, renderTxAddress()),
       Teact.createElement(
         'td',
         { className: 'width-15' },
-        record.tx_address || 'unavailable',
-      ),
-      Teact.createElement(
-        'td',
-        { className: 'width-15' },
-        record.tx_status || 'unavailable',
+        record.tx_status || '-',
       ),
     )
   }

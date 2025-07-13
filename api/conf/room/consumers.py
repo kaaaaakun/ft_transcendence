@@ -712,13 +712,19 @@ class MatchRoomConsumer(RoomConsumer):
             score2=right_score,
         )
         is_success = response.get('success', False)
+        status = response.get('status', 'failure')  # dry-run時は'dry-run'が返される
+        
         match = await sync_to_async(lambda: Match.objects.filter(id=self.room_id).first())()
         if match:
             if is_success:
                 match.tx_status = 'success'
+                match.tx_address = response.get('tx_hash', '-')
+            elif status == 'dry-run':
+                match.tx_status = 'dry-run'
+                match.tx_address = '-'
             else:
-                match.tx_status = 'pending'
-            match.tx_hash = response.get('tx_hash', 'unavailable')
+                match.tx_status = 'failure'
+                match.tx_address = '-'
             await sync_to_async(match.save)()
 
 
