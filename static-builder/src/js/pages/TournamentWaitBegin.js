@@ -80,23 +80,30 @@ export const TournamentWaitBegin = props => {
         const data = JSON.parse(event.data)
         console.log('Received WebSocket message:', data)
 
-        if (data.status === 'waiting') {
-          setWaitingFor(data.waiting_for || 4)
-          setCurrentPlayers(data.entry_count || 0)
-          setMembers(data.members || [])
-          setIsReady(false)
-        } else if (data.status === 'room_ready') {
-          setWaitingFor(0)
-          setCurrentPlayers(data.entry_count || 4)
-          setMembers(data.members || [])
-          setIsReady(true)
-          
-          if (data.match_ongoing){
-            ws.close() // ルームが準備できたら接続を閉じる
-            navigate(`/remote/matches/${data.match_ongoing}`)
+        switch (data.status) {
+          case 'waiting': {
+            setWaitingFor(data.waiting_for || 4)
+            setCurrentPlayers(data.entry_count || 0)
+            setMembers(data.members || [])
+            setIsReady(false)
+            break
           }
-        } else {
-          console.warn('Unknown message status:', data.status)
+          case 'ready': {
+            setWaitingFor(0)
+            setCurrentPlayers(data.entry_count || 4)
+            setMembers(data.members || [])
+            setIsReady(true)
+
+            if (data.match_ongoing) {
+              ws.close() // ルームが準備できたら接続を閉じる
+              navigate(`/remote/matches/${data.match_ongoing}`)
+            }
+            break
+          }
+          default: {
+            console.warn('Unknown message status:', data.status)
+            break
+          }
         }
       } catch (error) {
         console.error('Failed to parse message:', error)
