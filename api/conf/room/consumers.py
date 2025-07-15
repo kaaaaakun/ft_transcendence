@@ -528,7 +528,7 @@ class MatchRoomConsumer(RoomConsumer):
                 await self.close(code=4002)
                 return
 
-            if len(connected_users) == 2 and not self.redis_client.exists("room:{self.room_group_name}:game_running"):
+            if len(connected_users) == 2 and not self.redis_client.exists(f"room:{self.room_group_name}:game_running"):
                 try:
                     logger.debug(f"DEBUG: Starting periodic status update task for room {self.room_group_name}")
                     
@@ -596,6 +596,7 @@ class MatchRoomConsumer(RoomConsumer):
         logger.debug(f"DEBUG: game start")
         try:
             if self.game_manager:
+                logger.debug("game manager run")
                 self.redis_client.set(f"room:{self.room_group_name}:game_running", 'true')
                 await self.channel_layer.group_send(
                     self.room_group_name,
@@ -652,23 +653,7 @@ class MatchRoomConsumer(RoomConsumer):
                     )
                 except Exception as e:
                     logger.error(f"ERROR: Failed to update match details for {self.room_id}: {e}", exc_info=True)
-            else:
-                while True:
-                    connected_users = await sync_to_async(self.get_connected_users)()
-                    if len(connected_users) == 2:
-                        await self.get_create_paddle()
-                        logger.debug(f"DEBUG: Starting game manager for room {self.room_group_name}")
-                        break
-                    await asyncio.sleep(self.next_send_duration)
-                while True:
-                    await asyncio.sleep(self.next_send_duration)
-                    val = self.redis_client.get(f"room:{self.room_group_name}:game_running")
-                    logger.debug(f"DEBUG: Game running status for room {self.room_group_name}: {val}")
-                    if val == "false":
-                        logger.debug(f"DEBUG: Game already finished for room {self.room_group_name}")
-                        break
-            logger.debug(f"DEBUG: closing room {self.room_group_name} after game end")
-            self.close()
+
         except Exception as e:
             logger.error(f"ERROR: broadcast_room_status: {e}", exc_info=True)
             await self.close(code=4000)
