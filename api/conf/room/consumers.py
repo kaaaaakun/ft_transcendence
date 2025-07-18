@@ -373,7 +373,7 @@ class TournamentWaitRoomConsumer(RoomConsumer):
         """ルームが準備完了したときの処理"""
         ongoing_match_info = await sync_to_async(self.get_ongoing_match_for_user)()
         await self.send(text_data=json.dumps({
-            'status': 'room_ready',
+            'status': 'ready',
             'entry_count': event['entry_count'],
             'members': event['members'],
             'connected_members': event['connected_members'],
@@ -491,6 +491,7 @@ class MatchRoomConsumer(RoomConsumer):
         super().__init__(*args, **kwargs)
         self.next_send_duration = 1 / FRAME
         self.game_manager = None
+        self.primary_connection = False
 
     async def connect(self):
         try:
@@ -529,20 +530,26 @@ class MatchRoomConsumer(RoomConsumer):
                 return
 
             if len(connected_users) == 2 and not self.redis_client.exists(f"room:{self.room_group_name}:game_running"):
-                try:
-                    logger.debug(f"DEBUG: Starting periodic status update task for room {self.room_group_name}")
-                    
-                    self.game_manager = GameManager(
-                        score_manager=ScoreManager(self.room_group_name),
-                        room_group_name=self.room_group_name,
-                    )
-                    await self.game_manager.get_player_display_name(self.room_id)
-                    await self.game_manager.get_tournament_id(self.room_id)
-                    logger.debug(f"DEBUG: GameManager initialized for room {self.room_group_name}")
-                except Exception as e:
-                    logger.error(f"ERROR: Failed to initialize game manager for room {self.room_group_name}: {e}", exc_info=True)
-                    await self.close(code=4003)
-                    return
+                self.primary_connection = True
+                logger.debug(f"DEBUG: Primary connection established for room {self.room_group_name}")
+            try:
+                logger.debug(f"DEBUG: Starting periodic status update task for room {self.room_group_name}")
+                
+                self.game_manager = GameManager(
+                    self.user.id,
+                    score_manager=ScoreManager(self.room_group_name),
+                    room_group_name=self.room_group_name,
+                    primary_connection=self.primary_connection,
+                )
+                logger.debug(f"DEBUG: GameManager initialized for room {self.room_group_name}")
+            except Exception as e:
+                logger.error(f"ERROR: Failed to initialize game manager for room {self.room_group_name}: {e}", exc_info=True)
+                await self.close(code=4003)
+                return
+            logger.debug(f"DEBUG: GameManager created for useraaa {self.user.display_name} in room {self.room_group_name}")
+            if self.redis_client.exists(f"room:{self.room_group_name}:game_running"):
+                logger.debug(f"DEBUG: Game already running for room {self.room_group_name}, skipping game start")
+                await self.game_start()
             self.status_task = asyncio.create_task(self.broadcast_room_status())
         except Exception as e:
             logger.error(f"ERROR: connect: {e}", exc_info=True)
@@ -552,10 +559,10 @@ class MatchRoomConsumer(RoomConsumer):
     async def receive(self, text_data):
         data = json.loads(text_data)
         logger.debug(f"DEBUG: Received data in room {self.room_group_name}: {data}")
-        if self.paddle is None:
-            logger.error(f"ERROR: Paddle is not initialized for user {self.user.display_name} in room {self.room_group_name}")
+        if self.game_manager is None:
+            logger.error(f"ERROR: game_manager is not initialized for user {self.user.display_name} in room {self.room_group_name}")
             return
-        self.paddle.set_movement(data)
+        self.game_manager.set_paddle_movement(data)
 
     async def disconnect(self, close_code):
         if self.room_id and self.user:
@@ -569,43 +576,13 @@ class MatchRoomConsumer(RoomConsumer):
                 self.room_group_name,
                 self.channel_name
             )
-    
-    async def get_create_paddle(self):
-            match_details = await sync_to_async(
-                lambda: MatchDetail.objects.filter(match_id=self.room_id).select_related('user')
-            )()
-            if not await sync_to_async(match_details.exists)():
-                logger.error(f"ERROR: No match details found for match {self.room_id}")
-                await self.close(code=4003)
-                return
-            if await sync_to_async(match_details.count)() != 2:
-                logger.error(f"ERROR: Too many match details found for match {self.room_id}")
-                await self.close(code=4004)
-                return
-            match_list = await sync_to_async(list)(match_details)
-            if match_list[0].user_id == self.user.id:
-                self.paddle = Paddle(is_left=match_list[0].is_left_side, room_group_name=self.room_group_name)
-            elif match_list[1].user_id == self.user.id:
-                self.paddle = Paddle(is_left=match_list[1].is_left_side, room_group_name=self.room_group_name)
-            else:
-                logger.error(f"ERROR: User {self.user.display_name} is not part of match {self.room_id}")
-                await self.close(code=4005)
-                return
 
     async def broadcast_room_status(self):
         logger.debug(f"DEBUG: game start")
         try:
-            if self.game_manager:
-                logger.debug("game manager run")
+            if self.primary_connection:
                 self.redis_client.set(f"room:{self.room_group_name}:game_running", 'true')
-                await self.channel_layer.group_send(
-                    self.room_group_name,
-                    {
-                        'type': 'game_start',
-                        'left_player': self.game_manager.left_display_name,
-                        'right_player': self.game_manager.right_display_name
-                    })
-                await self.get_create_paddle()
+                await self.channel_layer.group_send(self.room_group_name, {'type': 'game_start'})
                 await asyncio.sleep(3)
                 while True:
                     await asyncio.sleep(self.next_send_duration)
@@ -651,34 +628,22 @@ class MatchRoomConsumer(RoomConsumer):
                             'redirectUrl': redirect_url
                         }
                     )
+                    await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
                 except Exception as e:
                     logger.error(f"ERROR: Failed to update match details for {self.room_id}: {e}", exc_info=True)
-
         except Exception as e:
             logger.error(f"ERROR: broadcast_room_status: {e}", exc_info=True)
             await self.close(code=4000)
-
-
 
     async def game_message(self, event):
         game_state = event["message"]
         await self.send(text_data=json.dumps(game_state))
 
-    async def game_start(self, event):
+    async def game_start(self, event=None):
         """ゲーム開始の処理"""
-        left_player = event.get('left_player', {})
-        right_player = event.get('right_player', {})
-        await self.send(text_data=json.dumps({
-            'type': 'start',
-            'players': {
-                'left': {
-                    'display_name': left_player
-                    },
-                'right': {
-                    'display_name': right_player
-                },
-            },
-        }))
+        await self.game_manager.get_player_info(self.room_id)
+        await self.game_manager.get_tournament_id(self.room_id)
+        await self.send(text_data=json.dumps(self.game_manager.get_start_message()))
     
     async def game_end(self, event):
         """ゲーム終了の処理"""
