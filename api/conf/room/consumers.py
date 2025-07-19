@@ -111,7 +111,9 @@ class RoomConsumer(AsyncWebsocketConsumer):
             if room_data:
                 return room_data
             else:
-                return RoomKey.create_room(self.room_type, self.room_id, self.room_id)
+                table_id = self.room_id
+                match_id = self.room_id
+                return RoomKey.create_room(self.room_type, table_id, match_id)
 
         except Exception as e:
             logger.error(f"ERROR: get_room_data: {e}")
@@ -546,7 +548,6 @@ class MatchRoomConsumer(RoomConsumer):
                 logger.error(f"ERROR: Failed to initialize game manager for room {self.room_group_name}: {e}", exc_info=True)
                 await self.close(code=4003)
                 return
-            logger.debug(f"DEBUG: GameManager created for useraaa {self.user.display_name} in room {self.room_group_name}")
             if self.redis_client.exists(f"room:{self.room_group_name}:game_running"):
                 logger.debug(f"DEBUG: Game already running for room {self.room_group_name}, skipping game start")
                 await self.game_start()
@@ -616,7 +617,7 @@ class MatchRoomConsumer(RoomConsumer):
                     left_player_score = game_state.get('left', {}).get('score', 0)
                     right_player_score = game_state.get('right', {}).get('score', 0)
                     winner = self.game_manager.left_user_id if left_player_score > right_player_score else self.game_manager.right_user_id
-                    await sync_to_async(TournamentPlayer.objects.filter(tournament_id=self.game_manager.tournament_id, user_id=winner ).update)(round=F('round') + 1)
+                    await sync_to_async(TournamentPlayer.objects.filter(tournament_id=self.game_manager.tournament_id, user_id=winner).update)(round=F('round') + 1)
                     redirect_url = "/" if not self.game_manager.tournament_id else f"/remote/tournament/{self.game_manager.tournament_id}/"
                     await self.channel_layer.group_send(
                         self.room_group_name,
