@@ -9,8 +9,6 @@ else
   COMPOSE_YML     = ./docker-compose.yml
 endif
 
-# ELKスタック（Elasticsearch, Logstash, Kibana）を含む統合構成
-# リバースプロキシ経由でのKibanaアクセスとログ監視機能を提供
 DOCKER_COMPOSE = docker compose --env-file $(ENV_PATH) -f $(COMPOSE_YML) -f ./elk/docker-compose.yml
 
 all: run
