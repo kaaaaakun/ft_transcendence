@@ -6,6 +6,7 @@ import { useBanner } from '@/js/hooks/useBanner'
 import { tournament } from '@/js/hooks/useTournamentDetails'
 import { ConnectionStatus } from '@/js/components/tournament/ConnectionStatus'
 import { TournamentsBracket } from './TournamentsBracket'
+import { useNavigate } from '@/js/libs/router'
 
 export const TournamentWaitBegin = props => {
   const { showErrorBanner, banners } = useBanner()
@@ -20,6 +21,7 @@ export const TournamentWaitBegin = props => {
   const [_currentPlayers, setCurrentPlayers] = Teact.useState(0)
   const [connectionStatus, setConnectionStatus] = Teact.useState('disconnected')
   const [_isInitialized, setIsInitialized] = Teact.useState(false) // 初期化フラグ
+  const navigate = useNavigate()
 
   Teact.useEffect(() => {
     const fetchTournamentDetails = async () => {
@@ -78,18 +80,30 @@ export const TournamentWaitBegin = props => {
         const data = JSON.parse(event.data)
         console.log('Received WebSocket message:', data)
 
-        if (data.status === 'waiting') {
-          setWaitingFor(data.waiting_for || 4)
-          setCurrentPlayers(data.entry_count || 0)
-          setMembers(data.members || [])
-          setIsReady(false)
-        } else if (data.status === 'room_ready') {
-          setWaitingFor(0)
-          setCurrentPlayers(data.entry_count || 4)
-          setMembers(data.members || [])
-          setIsReady(true)
-        } else {
-          console.warn('Unknown message status:', data.status)
+        switch (data.status) {
+          case 'waiting': {
+            setWaitingFor(data.waiting_for || 4)
+            setCurrentPlayers(data.entry_count || 0)
+            setMembers(data.members || [])
+            setIsReady(false)
+            break
+          }
+          case 'ready': {
+            setWaitingFor(0)
+            setCurrentPlayers(data.entry_count || 4)
+            setMembers(data.members || [])
+            setIsReady(true)
+
+            if (data.match_ongoing) {
+              ws.close() // ルームが準備できたら接続を閉じる
+              navigate(`/remote/matches/${data.match_ongoing}`)
+            }
+            break
+          }
+          default: {
+            console.warn('Unknown message status:', data.status)
+            break
+          }
         }
       } catch (error) {
         console.error('Failed to parse message:', error)

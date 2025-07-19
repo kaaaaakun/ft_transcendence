@@ -1,5 +1,6 @@
 from utils.redis_client import get_redis
-
+import logging
+logger = logging.getLogger('django')
 VALID_ROOM_TYPES = ["SIMPLE", "TOURNAMENT_MATCH", "WAITING_4P", "WAITING_8P"]
 
 class RoomKey:
@@ -28,6 +29,7 @@ class RoomKey:
         redis_client = get_redis()
         key = RoomKey.generate_key(room_type, table_id)
         room_data =  redis_client.hgetall(key)
+        logger.debug(f"DEBUG: Retrieved room data for {key}: {room_data}")
         if room_data:
             decoded_data = {}
             for k, v in room_data.items():
