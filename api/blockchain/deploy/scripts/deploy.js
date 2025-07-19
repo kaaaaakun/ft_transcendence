@@ -17,7 +17,7 @@ process.on("exit", (code) => {
 async function main() {
   try {
     const MyContract = await hre.ethers.getContractFactory("MyContract");
-    const contract = await MyContract.deploy("Hello, Sepolia!");
+    const contract = await MyContract.deploy();
 
     await contract.waitForDeployment();
 

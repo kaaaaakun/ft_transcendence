@@ -3,7 +3,10 @@ from friend.models import Friend
 from django.db.models import Q
 from match.models import Match, MatchDetail
 from rest_framework_simplejwt.tokens import AccessToken
+from django.conf import settings
+from django.utils.timezone import localtime
 
+END_GAME_SCORE = settings.END_GAME_SCORE
 
 def get_opponent_user_and_score(match_id, user_id):
   match = Match.objects.get(id=match_id)
@@ -29,13 +32,13 @@ def create_response(user, access_id):
   game_records = []
   for match_detail in match_details:
     opponent_user, opponent_score = get_opponent_user_and_score(match_detail.match_id, user.id)
-    
+    created_at = localtime(Match.objects.get(id = match_detail.match_id).created_at).strftime('%Y-%m-%d %H:%M:%S')
     game_records.append({
-      # 'date': match_detail.match_id.created_at,
-      'result': "win" if match_detail.score == 10 else "lose",
+      'date': created_at,
+      'result': "win" if match_detail.score == END_GAME_SCORE else "lose",
       'opponent_name': opponent_user.display_name,
       'score': {'player': match_detail.score, 'opponent': opponent_score},
-      'match_type': 'tournament' if Match.objects.get(id=match_detail.match_id).tournament_id else 'local'
+      'match_type': 'tournament' if Match.objects.get(id=match_detail.match_id).tournament_id else 'simple'
     })
   win_count = len([game_record for game_record in game_records if game_record['result'] == 'win'])
   lose_count = len([game_record for game_record in game_records if game_record['result'] == 'lose'])

@@ -5,7 +5,7 @@ from asyncio import sleep
 import json
 
 from django.conf import settings
-from .game_logic import GameManager, LocalSimpleScoreManager, TournamentScoreManager
+from .game_logic import GameManager, LocalSimpleScoreManager
 from .models import Match
 from tournament.models import Tournament
 

@@ -36,6 +36,9 @@ RUN pip install --no-cache-dir -r tool/requirements.txt
 
 WORKDIR ${DJANGO_PROJECT_DIR}
 
+# abi
+COPY ./api/blockchain/deploy/artifacts/contracts/MyContract.sol/MyContract.json ${DJANGO_PROJECT_DIR}
+
 # confディレクトリのファイルをコンテナ内にコピー
 COPY ./api/conf/ ${DJANGO_PROJECT_DIR}
 
