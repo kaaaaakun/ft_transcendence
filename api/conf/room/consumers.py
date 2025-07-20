@@ -20,6 +20,10 @@ from .utils import RoomKey
 from user.utils import get_user_by_auth
 import urllib.parse
 from tournament.models import Tournament
+from django.db.models import F
+
+from utils.blockchain_controller import BlockchainController
+from datetime import datetime
 
 FRAME = 30 # フロントを見つつ調整
 END_GAME_SCORE = settings.END_GAME_SCORE
@@ -33,7 +37,7 @@ class RoomConsumer(AsyncWebsocketConsumer):
         self.user = None
         self.room_group_name = None
         self.next_send_duration = 0
-    
+
     async def connect(self):
         self.room_type = self.scope['url_route']['kwargs']['room_type']
         self.room_id = self.scope['url_route']['kwargs']['room_id']
@@ -69,7 +73,7 @@ class RoomConsumer(AsyncWebsocketConsumer):
                 logger.error(f"DEBUG: Error parsing query string: {e}")
 
         return None
-    
+
     async def get_user_by_auth(self):
         """認証ヘッダーをチェックし、ユーザーを取得"""
         auth_header = await self.get_auth_header()
@@ -90,9 +94,9 @@ class RoomConsumer(AsyncWebsocketConsumer):
                 await asyncio.sleep(self.next_send_duration)
                 await self.broadcast_room_status()
         except asyncio.CancelledError:
-            logger.error(f"DEBUG: Status update task cancelled for {self.room_group_name}") 
+            logger.error(f"DEBUG: Status update task cancelled for {self.room_group_name}")
             pass
-    
+
     async def broadcast_room_status(self):
         logger.debug(f"DEBUG: Broadcasting called")
         pass
@@ -110,12 +114,14 @@ class RoomConsumer(AsyncWebsocketConsumer):
             if room_data:
                 return room_data
             else:
-                return None
+                table_id = self.room_id
+                match_id = self.room_id
+                return RoomKey.create_room(self.room_type, table_id, match_id)
 
         except Exception as e:
             logger.error(f"ERROR: get_room_data: {e}")
             return None
-    
+
     def add_user_to_active_connections(self):
         """ユーザーを現在の接続者リストに追加"""
         try:
@@ -192,7 +198,7 @@ class TournamentWaitRoomConsumer(RoomConsumer):
         if self.status_task:
             logger.debug(f"DEBUG: Cancelling status task for room {self.room_group_name}")
             self.status_task.cancel()
-            
+
         if self.match_task:
             logger.debug(f"DEBUG: Cancelling match task for room {self.room_group_name}")
             self.match_task.cancel()
@@ -244,23 +250,23 @@ class TournamentWaitRoomConsumer(RoomConsumer):
                 logger.error(f"ERROR: Invalid room type {self.room_type} for tournament initialization")
                 return
             tournament_id = int(self.room_id)
-            
+
             # 既にマッチが存在するかチェック
             matches_exist = await sync_to_async(
                 lambda: Match.objects.filter(tournament_id=tournament_id).exists()
             )()
-            
+
             if matches_exist:
                 logger.debug(f"DEBUG: Matches already exist for tournament {tournament_id}")
                 return
-            
+
             logger.debug(f"DEBUG: Creating first round matches for tournament {tournament_id}")
-            
+
             tournament = await sync_to_async(Tournament.objects.get)(id=tournament_id)
             created_matches = await sync_to_async(Match.initialize_first_round_matches)(tournament)
-            
+
             logger.debug(f"DEBUG: Created {len(created_matches)} first round matches")
-            
+
         except Exception as e:
             logger.error(f"ERROR: initialize_tournament: {e}")
 
@@ -272,14 +278,14 @@ class TournamentWaitRoomConsumer(RoomConsumer):
                 return
             tournament_id = int(self.room_id)
             tournament = await sync_to_async(Tournament.objects.get)(id=tournament_id)
-            
+
             if tournament.is_finished:
                 logger.debug(f"DEBUG: Tournament {tournament_id} is already finished")
                 return
-            
+
             await sync_to_async(Match.create_next_round_matches)(tournament)
-        
-            
+
+
         except Exception as e:
             logger.error(f"ERROR: update_tournament_matches: {e}")
 
@@ -305,10 +311,9 @@ class TournamentWaitRoomConsumer(RoomConsumer):
                 self.room_group_name,
                 common_message_data
             )
-            
+
             # 各接続中ユーザーに個別のmatch_ongoing情報を送信
-            await self.send_individual_match_info(connected_users)
-            
+
         else:
             # まだ人数が足りない場合
             message_data = {
@@ -326,56 +331,30 @@ class TournamentWaitRoomConsumer(RoomConsumer):
                 message_data
             )
 
-    async def send_individual_match_info(self, connected_users):
-        """接続中の各ユーザーに個別のマッチ情報を送信"""
-        try:
-            from user.models import User
-            
-            for connected_user in connected_users:
-                user_id = connected_user['user_id']
-                user = await sync_to_async(User.objects.get)(id=user_id)
-                
-                # そのユーザーの進行中マッチ情報を取得
-                ongoing_match_info = await sync_to_async(self.get_ongoing_match_for_user)(user)
-                
-                if ongoing_match_info:
-                    # 個別にマッチ情報を送信
-                    await self.channel_layer.group_send(
-                        self.room_group_name,
-                        {
-                            'type': 'individual_match_info',
-                            'target_user_id': user_id,
-                            'match_ongoing': ongoing_match_info
-                        }
-                    )
-                    
-        except Exception as e:
-            logger.debug(f"ERROR: send_individual_match_info: {e}")
-
-    def get_ongoing_match_for_user(self, user):
+    def get_ongoing_match_for_user(self):
         """指定されたユーザーの進行中マッチ情報を取得"""
         try:
-            logger.debug(f"DEBUG: Getting ongoing match for user {user.display_name} in room {self.room_group_name}")
+            logger.debug(f"DEBUG: Getting ongoing match for user {self.user.display_name} in room {self.room_group_name}")
             if not self.room_id:
                 logger.debug("ERROR: Room ID is not set")
                 return None
 
             tournament_id = int(self.room_id)
-            
+
             # 指定されたユーザーの進行中マッチを検索
             ongoing_match_details = MatchDetail.objects.filter(
-                user=user,
+                user=self.user,
                 match__tournament_id=tournament_id,
                 match__is_finished=False
             ).select_related('match').first()
-            
+
             if ongoing_match_details:
                 match_id = ongoing_match_details.match.id
-                logger.debug(f"DEBUG: Found ongoing match {match_id} for user {user.display_name} in tournament {tournament_id}")
-                return f"room.TOURNAMENT_MATCH.{match_id}"
-            
+                logger.debug(f"DEBUG: Found ongoing match {match_id} for user {self.user.display_name} in tournament {tournament_id}")
+                return f"{match_id}"
+
             return None
-            
+
         except Exception as e:
             logger.debug(f"ERROR: get_ongoing_match_for_user: {e}")
             return None
@@ -397,17 +376,19 @@ class TournamentWaitRoomConsumer(RoomConsumer):
     # チャンネルグループからのメッセージハンドラー
     async def room_ready(self, event):
         """ルームが準備完了したときの処理"""
+        ongoing_match_info = await sync_to_async(self.get_ongoing_match_for_user)()
         await self.send(text_data=json.dumps({
-            'status': 'room_ready',
+            'status': 'ready',
             'entry_count': event['entry_count'],
             'members': event['members'],
-            'connected_members': event['connected_members']
+            'connected_members': event['connected_members'],
+            'match_ongoing': ongoing_match_info if ongoing_match_info else False,
         }))
 
     async def individual_match_info(self, event):
         """個別のマッチ情報を処理（本人のみに送信）"""
         target_user_id = event['target_user_id']
-        
+
         if self.user and self.user.id == target_user_id:
             await self.send(text_data=json.dumps({
                 'match_ongoing': event['match_ongoing']
@@ -515,6 +496,7 @@ class MatchRoomConsumer(RoomConsumer):
         super().__init__(*args, **kwargs)
         self.next_send_duration = 1 / FRAME
         self.game_manager = None
+        self.primary_connection = False
 
     async def connect(self):
         try:
@@ -522,12 +504,13 @@ class MatchRoomConsumer(RoomConsumer):
 
             room_data = await sync_to_async(self.get_room_data)()
             if not room_data:
+                logger.error(f"ERROR: Room data not found for {self.room_group_name}")
                 await self.send(text_data=json.dumps({
                     'error': f'Room not found or invalid {self.room_id}'
                 }))
                 await self.close()
                 return
-            
+
             match = await sync_to_async(lambda: Match.objects.filter(id=self.room_id).first())()
             if not match:
                 logger.error(f"ERROR: Match with ID {self.room_id} not found")
@@ -551,33 +534,39 @@ class MatchRoomConsumer(RoomConsumer):
                 await self.close(code=4002)
                 return
 
-            if len(connected_users) == 2 and not self.redis_client.exists("room:{self.room_group_name}:game_running"):
-                try:
-                    logger.debug(f"DEBUG: Starting periodic status update task for room {self.room_group_name}")
-                    
-                    self.game_manager = GameManager(
-                        score_manager=ScoreManager(self.room_group_name),
-                        room_group_name=self.room_group_name,
-                    )
-                    await self.game_manager.get_player_display_name(self.room_id)
-                    logger.debug(f"DEBUG: GameManager initialized for room {self.room_group_name}")
-                except Exception as e:
-                    logger.error(f"ERROR: Failed to initialize game manager for room {self.room_group_name}: {e}", exc_info=True)
-                    await self.close(code=4003)
-                    return
+            if len(connected_users) == 2 and not self.redis_client.exists(f"room:{self.room_group_name}:game_running"):
+                self.primary_connection = True
+                logger.debug(f"DEBUG: Primary connection established for room {self.room_group_name}")
+            try:
+                logger.debug(f"DEBUG: Starting periodic status update task for room {self.room_group_name}")
+
+                self.game_manager = GameManager(
+                    self.user.id,
+                    score_manager=ScoreManager(self.room_group_name),
+                    room_group_name=self.room_group_name,
+                    primary_connection=self.primary_connection,
+                )
+                logger.debug(f"DEBUG: GameManager initialized for room {self.room_group_name}")
+            except Exception as e:
+                logger.error(f"ERROR: Failed to initialize game manager for room {self.room_group_name}: {e}", exc_info=True)
+                await self.close(code=4003)
+                return
+            if self.redis_client.exists(f"room:{self.room_group_name}:game_running"):
+                logger.debug(f"DEBUG: Game already running for room {self.room_group_name}, skipping game start")
+                await self.game_start()
             self.status_task = asyncio.create_task(self.broadcast_room_status())
         except Exception as e:
             logger.error(f"ERROR: connect: {e}", exc_info=True)
             await self.close(code=4000)
             return
-    
+
     async def receive(self, text_data):
         data = json.loads(text_data)
         logger.debug(f"DEBUG: Received data in room {self.room_group_name}: {data}")
-        if self.paddle is None:
-            logger.error(f"ERROR: Paddle is not initialized for user {self.user.display_name} in room {self.room_group_name}")
+        if self.game_manager is None:
+            logger.error(f"ERROR: game_manager is not initialized for user {self.user.display_name} in room {self.room_group_name}")
             return
-        self.paddle.set_movement(data)
+        self.game_manager.set_paddle_movement(data)
 
     async def disconnect(self, close_code):
         if self.room_id and self.user:
@@ -591,42 +580,13 @@ class MatchRoomConsumer(RoomConsumer):
                 self.room_group_name,
                 self.channel_name
             )
-    
-    async def get_create_paddle(self):
-            match_details = await sync_to_async(
-                lambda: MatchDetail.objects.filter(match_id=self.room_id).select_related('user')
-            )()
-            if not await sync_to_async(match_details.exists)():
-                logger.error(f"ERROR: No match details found for match {self.room_id}")
-                await self.close(code=4003)
-                return
-            if await sync_to_async(match_details.count)() != 2:
-                logger.error(f"ERROR: Too many match details found for match {self.room_id}")
-                await self.close(code=4004)
-                return
-            match_list = await sync_to_async(list)(match_details)
-            if match_list[0].user_id == self.user.id:
-                self.paddle = Paddle(is_left=match_list[0].is_left_side, room_group_name=self.room_group_name)
-            elif match_list[1].user_id == self.user.id:
-                self.paddle = Paddle(is_left=match_list[1].is_left_side, room_group_name=self.room_group_name)
-            else:
-                logger.error(f"ERROR: User {self.user.display_name} is not part of match {self.room_id}")
-                await self.close(code=4005)
-                return
 
     async def broadcast_room_status(self):
         logger.debug(f"DEBUG: game start")
         try:
-            if self.game_manager:
+            if self.primary_connection:
                 self.redis_client.set(f"room:{self.room_group_name}:game_running", 'true')
-                await self.channel_layer.group_send(
-                    self.room_group_name,
-                    {
-                        'type': 'game_start',
-                        'left_player': self.game_manager.left_display_name,
-                        'right_player': self.game_manager.right_display_name
-                    })
-                await self.get_create_paddle()
+                await self.channel_layer.group_send(self.room_group_name, {'type': 'game_start'})
                 await asyncio.sleep(3)
                 while True:
                     await asyncio.sleep(self.next_send_duration)
@@ -656,6 +616,12 @@ class MatchRoomConsumer(RoomConsumer):
                     await sync_to_async(MatchDetail.objects.filter(match_id=self.room_id, is_left_side=False).update)(
                         score=self.game_manager.score_manager.get_score("right")
                     )
+                    await self.handle_tx_info()
+                    game_state = self.game_manager.get_game_state()
+                    left_player_score = game_state.get('left', {}).get('score', 0)
+                    right_player_score = game_state.get('right', {}).get('score', 0)
+                    winner = self.game_manager.left_user_id if left_player_score > right_player_score else self.game_manager.right_user_id
+                    await sync_to_async(TournamentPlayer.objects.filter(tournament_id=self.game_manager.tournament_id, user_id=winner).update)(round=F('round') + 1)
                     redirect_url = "/" if not self.game_manager.tournament_id else f"/remote/tournament/{self.game_manager.tournament_id}/"
                     await self.channel_layer.group_send(
                         self.room_group_name,
@@ -667,28 +633,47 @@ class MatchRoomConsumer(RoomConsumer):
                             'redirectUrl': redirect_url
                         }
                     )
+                    await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
                 except Exception as e:
                     logger.error(f"ERROR: Failed to update match details for {self.room_id}: {e}", exc_info=True)
-            else:
-                while True:
-                    connected_users = await sync_to_async(self.get_connected_users)()
-                    if len(connected_users) == 2:
-                        await self.get_create_paddle()
-                        logger.debug(f"DEBUG: Starting game manager for room {self.room_group_name}")
-                        break
-                    await asyncio.sleep(self.next_send_duration)
-                while True:
-                    await asyncio.sleep(self.next_send_duration)
-                    val = self.redis_client.get(f"room:{self.room_group_name}:game_running")
-                    logger.debug(f"DEBUG: Game running status for room {self.room_group_name}: {val}")
-                    if val == "false":
-                        logger.debug(f"DEBUG: Game already finished for room {self.room_group_name}")
-                        break
-            logger.debug(f"DEBUG: closing room {self.room_group_name} after game end")
-            self.close()
         except Exception as e:
             logger.error(f"ERROR: broadcast_room_status: {e}", exc_info=True)
             await self.close(code=4000)
+
+    async def handle_tx_info(self):
+        logger.debug(f"DEBUG: Handling transaction info for match {self.room_id}")
+        await self.game_manager.get_player_info(self.room_id)
+        await self.game_manager.get_tournament_id(self.room_id)
+        left_score = self.game_manager.score_manager.get_score("left")
+        right_score = self.game_manager.score_manager.get_score("right")
+        match_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        response = BlockchainController.store_match_result(
+            match_id=self.room_id,
+            match_time=match_time,
+            user_id1=self.game_manager.left_user_id,
+            display_name1=self.game_manager.left_display_name,
+            score1=left_score,
+            user_id2=self.game_manager.right_user_id,
+            display_name2=self.game_manager.right_display_name,
+            score2=right_score,
+        )
+        logger.debug(f"DEBUG: Transaction response for match {self.room_id}: {response}")
+        logger.debug(f"match_id: {self.room_id}, match_time: {match_time}, user_id1: {self.game_manager.left_user_id}, display_name1: {self.game_manager.left_display_name}, score1: {left_score}, user_id2: {self.game_manager.right_user_id}, display_name2: {self.game_manager.right_display_name}, score2: {right_score}")
+        is_success = response.get('success', False)
+        status = response.get('status', 'failure')  # dry-run時は'dry-run'が返される
+
+        match = await sync_to_async(lambda: Match.objects.filter(id=self.room_id).first())()
+        if match:
+            if is_success:
+                match.tx_status = 'success'
+                match.tx_address = response.get('tx_hash', '-')
+            elif status == 'dry-run':
+                match.tx_status = 'dry-run'
+                match.tx_address = '-'
+            else:
+                match.tx_status = 'failure'
+                match.tx_address = '-'
+            await sync_to_async(match.save)()
 
 
 
@@ -696,22 +681,12 @@ class MatchRoomConsumer(RoomConsumer):
         game_state = event["message"]
         await self.send(text_data=json.dumps(game_state))
 
-    async def game_start(self, event):
+    async def game_start(self, event=None):
         """ゲーム開始の処理"""
-        left_player = event.get('left_player', {})
-        right_player = event.get('right_player', {})
-        await self.send(text_data=json.dumps({
-            'type': 'start',
-            'players': {
-                'left': {
-                    'display_name': left_player
-                    },
-                'right': {
-                    'display_name': right_player
-                },
-            },
-        }))
-    
+        await self.game_manager.get_player_info(self.room_id)
+        await self.game_manager.get_tournament_id(self.room_id)
+        await self.send(text_data=json.dumps(self.game_manager.get_start_message()))
+
     async def game_end(self, event):
         """ゲーム終了の処理"""
         try:

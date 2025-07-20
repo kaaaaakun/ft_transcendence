@@ -162,6 +162,7 @@ const RemoteGame = ({ params }) => {
         setMatchEnded(true)
         clearInterval(intervalId)
         update()
+        socket.close() // ゲーム終了後に WebSocket を閉じる
         setTimeout(() => navigate(msg.redirectUrl), 6000)
       }
     }
