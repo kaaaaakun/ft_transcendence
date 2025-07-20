@@ -143,6 +143,8 @@ class Match(models.Model):
                 
                 MatchDetail.create(match, player1.user, is_left_side=True)
                 MatchDetail.create(match, player2.user, is_left_side=False)
+            else:
+                TournamentPlayer.objects.filter(tournament=tournament).update(is_finished=True)
         
         return created_matches
 
@@ -181,6 +183,8 @@ class Match(models.Model):
                 
                 MatchDetail.create(match, player1.user, is_left_side=True)
                 MatchDetail.create(match, player2.user, is_left_side=False)
+            else:
+                TournamentPlayer.objects.filter(tournament=tournament).update(is_finished=True)
         
         return created_matches
 
