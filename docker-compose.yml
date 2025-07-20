@@ -17,11 +17,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     expose:
       - "5432"
-    # TODO: 提出前にPORTを閉じる
-    ports:
-      - "5432:5432"
     networks:
       - net_pong
 
@@ -30,18 +30,20 @@ services:
       context: .
       dockerfile: static-builder/Dockerfile
       target: build
+      network: host
       args:
         - VITE_API_URL
         - VITE_WEBSOCKET_URL
     container_name: "static-builder"
     volumes:
       - vol_static_builder:/usr/src/vite
+    networks:
+      - net_pong
 
   reverseproxy:
     container_name: "reverseproxy"
     image: nginx:1.26.1-alpine
     ports:
-      - "80:80"
       - "443:443"
     volumes:
       - ./reverseproxy/ssl/:/etc/ssl/
@@ -50,9 +52,10 @@ services:
       - vol_avatars_data:/var/www/data/avatars
     networks:
       - net_pong
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     depends_on:
-      api:
-        condition: service_healthy
       rdbms:
         condition: service_healthy
       static-builder:
@@ -64,6 +67,7 @@ services:
       context: .
       dockerfile: api/Dockerfile
       target: deploy_asgi
+      network: host
     container_name: "api"
     expose:
       - "8000"
@@ -93,9 +97,7 @@ services:
         [
           "CMD",
           "curl",
-          "-H",
-          "Host: reverseproxy",
-          "http://localhost:8000/health/",
+          "http://localhost:8000/health/"
         ]
       interval: 5s
       retries: 5
@@ -105,9 +107,9 @@ services:
     image: redis:7.4.2
     networks:
       - net_pong
-    # TODO: 提出前にPORTを閉じる
-    ports:
-      - "6379:6379"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
       interval: 1s

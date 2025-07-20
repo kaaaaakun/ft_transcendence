@@ -129,7 +129,8 @@ networks:
 volumes:
   vol_rdbms:
     name: "vol_rdbms"
-    
+  vol_static_builder:
+    name: "vol_static_builder"
   vol_avatars_data:
     name: "vol_avatars_data"
   vol_logs:

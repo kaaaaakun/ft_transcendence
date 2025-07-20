@@ -12,10 +12,9 @@ ENV BIND_PORT=8000
 ENV DJANGO_SETTINGS_MODULE=trans.settings
 
 # install for deploy
-RUN apt-get update
 ## gcc: psycopgのインストールに必要
 ## libpq-dev: psycopgの動作に必要
-RUN apt-get -y install \
+RUN apt-get update && apt-get -y install \
     gcc \
     libpq-dev
 

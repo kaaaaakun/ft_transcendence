@@ -6,12 +6,14 @@ services:
       context: elk/elasticsearch/
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
+      network: host
     volumes:
       - ./elk/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
       - vol_elasticsearch:/usr/share/elasticsearch/data
     # ports:
       # - 9200:9200
       # - 9300:9300
+    
     environment:
       node.name: elasticsearch
       ES_JAVA_OPTS: -Xms512m -Xmx512m
@@ -31,9 +33,11 @@ services:
       - net_pong
 
   kibana:
+    
     container_name: "kibana"
     image: "kibana"
     build:
+      network: host
       context: elk/kibana/
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
@@ -50,9 +54,11 @@ services:
         condition: service_healthy
 
   logstash:
+    
     container_name: "logstash"
     image: "logstash"
     build:
+      network: host
       context: elk/logstash/
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
@@ -78,9 +84,11 @@ services:
 
 
   filebeat:
+    
     container_name: "filebeat"
     image: "filebeat"
     build:
+      network: host
       context: elk/filebeat/
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
@@ -114,9 +122,11 @@ services:
         condition: service_healthy
 
   metricbeat:
+    
     container_name: "metricbeat"
     image: "metricbeat"
     build:
+      network: host
       context: elk/metricbeat/
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
@@ -168,6 +178,7 @@ services:
     container_name: "setup-elk"
     build:
       context: elk/setup/
+      network: host
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
     init: true
