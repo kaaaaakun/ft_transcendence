@@ -29,24 +29,38 @@ PADDLE_Y_MAX = WALL_Y_LIMIT - (PADDLE_HEIGHT / 2)
 PADDLE_SPEED = 15
 
 class GameManager:
-    def __init__(self, score_manager, room_group_name=None):
-        self.score_manager = score_manager
-        self.ball = Ball()
-        self.wall = Wall()
-        self.left_paddle = Paddle(is_left = True, room_group_name=room_group_name)
-        self.right_paddle = Paddle(is_left = False, room_group_name=room_group_name)
+    def __init__(self, user_id, score_manager=None, room_group_name=None, primary_connection=False):
         self.room_group_name = room_group_name
+        self.score_manager = score_manager
+        self.ball =  None
+        self.wall = None
+        self.left_paddle = None
+        self.right_paddle = None
+        self.left_user_id = None
+        self.right_user_id = None
         self.left_display_name = ""
         self.right_display_name = ""
         self.tournament_id = None
+        self.user_id = user_id
+        self.paddle = None
+        self.primary_connection = primary_connection
+        if primary_connection:
+            logger.debug(f"GameManager initialized with primary connection for user {user_id} in room {room_group_name}")
+            self.ball = Ball()
+            self.wall = Wall()
+            self.left_paddle = Paddle(is_left = True, room_group_name=room_group_name)
+            self.right_paddle = Paddle(is_left = False, room_group_name=room_group_name)
 
-    async def get_player_display_name(self, room_id):
+    async def get_player_info(self, room_id):
         try:
             left_player = await sync_to_async(MatchDetail.objects.get)(match_id=room_id, is_left_side=True)
             right_player = await sync_to_async(MatchDetail.objects.get)(match_id=room_id, is_left_side=False)
             logger.debug(f"left_player: {left_player}, right_player: {right_player}")
+            self.left_user_id = left_player.user_id
+            self.right_user_id = right_player.user_id
             self.left_display_name = await sync_to_async(lambda: left_player.user.display_name)()
             self.right_display_name = await sync_to_async(lambda: right_player.user.display_name)()
+            self.paddle = Paddle(is_left = self.user_id == left_player.user_id, room_group_name=self.room_group_name)
         except Exception as e:
             logger.error(f"Error getting player display names: {e}")
             self.left_display_name = "Left Player"
@@ -64,6 +78,9 @@ class GameManager:
             return None
 
     def update_game_state(self):
+        if not self.primary_connection:
+            logger.debug(f"Skipping game state update for non-primary connection in room {self.room_group_name}")
+            return
         self.ball.update_position()
         self.left_paddle.update_position()
         self.right_paddle.update_position()
@@ -99,6 +116,26 @@ class GameManager:
                 "y": self.ball.y
             }
         }
+    
+    def set_paddle_movement(self, paddle_data):
+        if self.paddle:
+            self.paddle.set_movement(paddle_data)
+        else:
+            logger.warning(f"Paddle not initialized for user {self.user_id} in room {self.room_group_name}")
+
+    def get_start_message(self):
+        return {
+            "type": "start",
+            'players': {
+                "left": {
+                    "display_name": self.left_display_name,
+                },
+                "right": {
+                    "display_name": self.right_display_name,
+                },
+            }
+        }
+
 
 class ScoreManager:
     def __init__(self, room_group_name):
@@ -196,8 +233,9 @@ class Paddle:
         self.redis_client.hsetnx(f"room:{self.room_group_name}:paddle:{'left' if self.is_left else 'right'}", "movement_state", 0)
 
     def set_movement(self, paddle_data):
-        key = paddle_data["key"]
-        action = paddle_data["action"]
+        key = paddle_data.get("key", "")
+        action = paddle_data.get("action", "")
+        movement_state = 0
         if key == "PaddleUpKey" and action == "push":
             movement_state = -1
         elif key == "PaddleDownKey" and action == "push":
