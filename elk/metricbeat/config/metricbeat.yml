@@ -32,7 +32,7 @@ metricbeat.modules:
   period: 10s
   enabled: true
 - module: kibana
-  hosts: [ http://kibana:5601 ]
+  hosts: [ http://kibana:5601/kibana ]
   username: monitoring_internal
   password: ${MONITORING_INTERNAL_PASSWORD}
   xpack.enabled: true
