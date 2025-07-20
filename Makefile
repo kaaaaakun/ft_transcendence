@@ -13,6 +13,41 @@ DOCKER_COMPOSE = docker compose --env-file $(ENV_PATH) -f $(COMPOSE_YML) -f ./el
 
 all: run
 
+connect:
+	cloudflared tunnel run ft-transcendence
+
+connect-bg:
+	nohup cloudflared tunnel run ft-transcendence > /dev/null 2>&1 &
+	@echo "Cloudflare tunnel started in background"
+
+connect-stop:
+	@pkill -f "cloudflared tunnel run ft-transcendence" || echo "No cloudflared tunnel process found"
+
+deploy-auto-bg:
+	@if pgrep -f "scripts/auto-deploy.sh" > /dev/null; then \
+		echo "Auto-deploy script is already running"; \
+	else \
+		nohup bash scripts/auto-deploy.sh > /dev/null 2>&1 & \
+		echo "Auto-deploy script started in background"; \
+	fi
+
+deploy-auto-stop:
+	@pkill -f "scripts/auto-deploy.sh" || echo "No auto-deploy script process found"
+
+deploy-auto-status:
+	@if pgrep -f "scripts/auto-deploy.sh" > /dev/null; then \
+		echo "Auto-deploy script is running (PID: $$(pgrep -f 'scripts/auto-deploy.sh'))"; \
+	else \
+		echo "Auto-deploy script is not running"; \
+	fi
+
+deploy-auto-log:
+	@if [ -f /tmp/auto-deploy.log ]; then \
+		tail -f /tmp/auto-deploy.log; \
+	else \
+		echo "Log file not found: /tmp/auto-deploy.log"; \
+	fi
+
 local:
 	$(MAKE) WITH_LOCAL=1 run
 
@@ -44,7 +79,7 @@ ps:
 setup-elk:
 	$(DOCKER_COMPOSE) up setup
 
-PHONY: run re build up down fdown image-prune ps generate setup-elk
+PHONY: run re build up down fdown image-prune ps generate setup-elk connect connect-bg connect-stop deploy-auto-bg deploy-auto-stop deploy-auto-status deploy-auto-log
 
 # -- 証明書の作成
 cert:

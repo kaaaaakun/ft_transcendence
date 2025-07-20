@@ -39,14 +39,18 @@ processors:
 monitoring:
   enabled: true
   elasticsearch:
-    hosts: ["http://elasticsearch:9200"]
+    hosts: ["https://elasticsearch:9200"]
     username: beats_system
     password: ${BEATS_SYSTEM_PASSWORD}
+    ssl.certificate_authorities: [/usr/share/filebeat/config/certs/ca.crt]
+    ssl.verification_mode: certificate
 
 output.elasticsearch:
-  hosts: [ http://elasticsearch:9200 ]
+  hosts: [ https://elasticsearch:9200 ]
   username: filebeat_internal
   password: ${FILEBEAT_INTERNAL_PASSWORD}
+  ssl.certificate_authorities: [/usr/share/filebeat/config/certs/ca.crt]
+  ssl.verification_mode: certificate
 
 ## HTTP endpoint for health checking
 ## https://www.elastic.co/guide/en/beats/filebeat/current/http-endpoint.html

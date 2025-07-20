@@ -25,9 +25,9 @@ elasticsearch.password: ${KIBANA_SYSTEM_PASSWORD}
 ## https://www.elastic.co/guide/en/kibana/current/using-kibana-with-security.html
 ## https://www.elastic.co/guide/en/kibana/current/kibana-encryption-keys.html
 #
-#xpack.security.encryptionKey:
-#xpack.encryptedSavedObjects.encryptionKey:
-#xpack.reporting.encryptionKey:
+xpack.security.encryptionKey: "a7a6311933d3503b89f1bdb94c0e6b1e4e7a7e4f7a7e4f7a7e4f7a7e4f7a7e4f"
+xpack.encryptedSavedObjects.encryptionKey: "b8b7422a44e4614c9a2fceb95d1f7c2f5f8a8f5f8a8f5f8a8f5f8a8f5f8a8f5f"
+xpack.reporting.encryptionKey: "c9c8533b55f5725dab30dfc86e2g8d3g6g9a9g6g9a9g6g9a9g6g9a9g6g9a9g6g"
 
 ## Telemetry settings
 telemetry.enabled: true
