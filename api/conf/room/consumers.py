@@ -534,20 +534,26 @@ class MatchRoomConsumer(RoomConsumer):
                 await self.close(code=4002)
                 return
 
-            if len(connected_users) == 2 and not self.redis_client.exists("room:{self.room_group_name}:game_running"):
-                try:
-                    logger.debug(f"DEBUG: Starting periodic status update task for room {self.room_group_name}")
+            if len(connected_users) == 2 and not self.redis_client.exists(f"room:{self.room_group_name}:game_running"):
+                self.primary_connection = True
+                logger.debug(f"DEBUG: Primary connection established for room {self.room_group_name}")
+            try:
+                logger.debug(f"DEBUG: Starting periodic status update task for room {self.room_group_name}")
 
-                    self.game_manager = GameManager(
-                        score_manager=ScoreManager(self.room_group_name),
-                        room_group_name=self.room_group_name,
-                    )
-                    await self.game_manager.get_player_info(self.room_id)
-                    logger.debug(f"DEBUG: GameManager initialized for room {self.room_group_name}")
-                except Exception as e:
-                    logger.error(f"ERROR: Failed to initialize game manager for room {self.room_group_name}: {e}", exc_info=True)
-                    await self.close(code=4003)
-                    return
+                self.game_manager = GameManager(
+                    self.user.id,
+                    score_manager=ScoreManager(self.room_group_name),
+                    room_group_name=self.room_group_name,
+                    primary_connection=self.primary_connection,
+                )
+                logger.debug(f"DEBUG: GameManager initialized for room {self.room_group_name}")
+            except Exception as e:
+                logger.error(f"ERROR: Failed to initialize game manager for room {self.room_group_name}: {e}", exc_info=True)
+                await self.close(code=4003)
+                return
+            if self.redis_client.exists(f"room:{self.room_group_name}:game_running"):
+                logger.debug(f"DEBUG: Game already running for room {self.room_group_name}, skipping game start")
+                await self.game_start()
             self.status_task = asyncio.create_task(self.broadcast_room_status())
         except Exception as e:
             logger.error(f"ERROR: connect: {e}", exc_info=True)
@@ -611,6 +617,11 @@ class MatchRoomConsumer(RoomConsumer):
                         score=self.game_manager.score_manager.get_score("right")
                     )
                     await self.handle_tx_info()
+                    game_state = self.game_manager.get_game_state()
+                    left_player_score = game_state.get('left', {}).get('score', 0)
+                    right_player_score = game_state.get('right', {}).get('score', 0)
+                    winner = self.game_manager.left_user_id if left_player_score > right_player_score else self.game_manager.right_user_id
+                    await sync_to_async(TournamentPlayer.objects.filter(tournament_id=self.game_manager.tournament_id, user_id=winner).update)(round=F('round') + 1)
                     redirect_url = "/" if not self.game_manager.tournament_id else f"/remote/tournament/{self.game_manager.tournament_id}/"
                     await self.channel_layer.group_send(
                         self.room_group_name,
@@ -646,6 +657,8 @@ class MatchRoomConsumer(RoomConsumer):
             display_name2=self.game_manager.right_display_name,
             score2=right_score,
         )
+        logger.debug(f"DEBUG: Transaction response for match {self.room_id}: {response}")
+        logger.debug(f"match_id: {self.room_id}, match_time: {match_time}, user_id1: {self.game_manager.left_user_id}, display_name1: {self.game_manager.left_display_name}, score1: {left_score}, user_id2: {self.game_manager.right_user_id}, display_name2: {self.game_manager.right_display_name}, score2: {right_score}")
         is_success = response.get('success', False)
         status = response.get('status', 'failure')  # dry-run時は'dry-run'が返される
 

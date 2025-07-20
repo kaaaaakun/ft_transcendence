@@ -59,10 +59,9 @@ class GameManager:
             logger.debug(f"left_player: {left_player}, right_player: {right_player}")
             self.left_user_id = left_player.user_id
             self.right_user_id = right_player.user_id
+            self.paddle = Paddle(is_left = self.user_id == left_player.user_id, room_group_name=self.room_group_name)
             self.left_display_name = await sync_to_async(lambda: left_player.user.display_name)()
             self.right_display_name = await sync_to_async(lambda: right_player.user.display_name)()
-            self.left_user_id = await sync_to_async(lambda: left_player.user.id)()
-            self.right_user_id = await sync_to_async(lambda: right_player.user.id)()
         except Exception as e:
             logger.error(f"Error getting player display names: {e}")
             self.left_display_name = "Left Player"
