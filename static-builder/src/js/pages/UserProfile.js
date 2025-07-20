@@ -383,11 +383,6 @@ export const UserProfile = props => {
         { className: 'width-15' },
         record.tx_status || '-',
       ),
-      Teact.createElement(
-        'td',
-        { className: 'width-15' },
-        record.tx_status || '-',
-      ),
     )
   }
 

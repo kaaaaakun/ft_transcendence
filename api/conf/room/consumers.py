@@ -610,41 +610,7 @@ class MatchRoomConsumer(RoomConsumer):
                     await sync_to_async(MatchDetail.objects.filter(match_id=self.room_id, is_left_side=False).update)(
                         score=self.game_manager.score_manager.get_score("right")
                     )
-                    await self.game_manager.get_player_info(self.room_id)
-                    await self.game_manager.get_tournament_id(self.room_id)
-                    left_score = self.game_manager.score_manager.get_score("left")
-                    right_score = self.game_manager.score_manager.get_score("right")
-                    match_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    logger.debug(BlockchainController.store_match_result(
-                        match_id=self.room_id,
-                        match_time=match_time,
-                        user_id1=self.game_manager.left_user_id,
-                        display_name1=self.game_manager.left_display_name,
-                        score1=left_score,
-                        user_id2=self.game_manager.right_user_id,
-                        display_name2=self.game_manager.right_display_name,
-                        score2=right_score,
-                    ))
-                    game_state = self.game_manager.get_game_state()
-                    left_player_score = game_state.get('left', {}).get('score', 0)
-                    right_player_score = game_state.get('right', {}).get('score', 0)
-                    winner = self.game_manager.left_user_id if left_player_score > right_player_score else self.game_manager.right_user_id
-                    await sync_to_async(TournamentPlayer.objects.filter(tournament_id=self.game_manager.tournament_id, user_id=winner).update)(round=F('round') + 1)
-                    await self.game_manager.get_player_info(self.room_id)
-                    await self.game_manager.get_tournament_id(self.room_id)
-                    left_score = self.game_manager.score_manager.get_score("left")
-                    right_score = self.game_manager.score_manager.get_score("right")
-                    match_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    logger.debug(BlockchainController.store_match_result(
-                        match_id=self.room_id,
-                        match_time=match_time,
-                        user_id1=self.game_manager.left_user_id,
-                        display_name1=self.game_manager.left_display_name,
-                        score1=left_score,
-                        user_id2=self.game_manager.right_user_id,
-                        display_name2=self.game_manager.right_display_name,
-                        score2=right_score,
-                    ))
+                    await self.handle_tx_info()
                     redirect_url = "/" if not self.game_manager.tournament_id else f"/remote/tournament/{self.game_manager.tournament_id}/"
                     await self.channel_layer.group_send(
                         self.room_group_name,
@@ -695,6 +661,8 @@ class MatchRoomConsumer(RoomConsumer):
                 match.tx_status = 'failure'
                 match.tx_address = '-'
             await sync_to_async(match.save)()
+
+
 
     async def game_message(self, event):
         game_state = event["message"]
