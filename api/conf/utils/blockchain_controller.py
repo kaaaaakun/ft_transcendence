@@ -87,7 +87,7 @@ class BlockchainController:
         # dry-runモードのチェック
         if getattr(settings, 'BLOCKCHAIN_PRIVATE_KEY', None) == 'dry-run':
             print("dry-runモードのため、試合結果は保存されません。")
-            return {'success': False, 'error': 'dry-runモードでは保存できません'}
+            return {'success': False, 'status': 'dry-run', 'error': 'dry-runモードでは保存できません'}
 
         cls._initialize()
         if not cls._contract or not cls._account:
