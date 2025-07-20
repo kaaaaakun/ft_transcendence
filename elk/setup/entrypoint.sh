@@ -122,7 +122,7 @@ log 'Waiting for Kibana availability'
 # ELASTIC_USER 環境変数がセットされていなければ 'elastic' を使う
 declare kibana_user="${ELASTIC_USER:-elastic}"
 # Kibana APIが応答するまで待つ (ユーザー名とパスワードは環境変数から取得)
-until curl -s -I -u "${kibana_user}:${ELASTIC_PASSWORD}" "http://kibana:5601/api/status" | grep -q "HTTP/1.1 200 OK"; do
+until curl -s -I -u "${kibana_user}:${ELASTIC_PASSWORD}" "http://kibana:5601/kibana/api/status" | grep -q "HTTP/1.1 200 OK"; do
   sublog 'Kibana is not ready yet...'
   sleep 5 # 5秒待って再試行
 done
@@ -133,7 +133,7 @@ sublog 'Kibana is ready'
 if [[ -f "/import/kibana_objects.ndjson" ]]; then
   log "Importing Kibana saved objects from /import/kibana_objects.ndjson..."
   # curl で Kibana API を叩いてインポート実行
-  curl -X POST "http://kibana:5601/api/saved_objects/_import?overwrite=true" \
+  curl -X POST "http://kibana:5601/kibana/api/saved_objects/_import?overwrite=true" \
        -H "kbn-xsrf: true" \
        -u "${kibana_user}:${ELASTIC_PASSWORD}" \
        --form file=@/import/kibana_objects.ndjson
