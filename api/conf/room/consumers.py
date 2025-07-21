@@ -582,10 +582,10 @@ class MatchRoomConsumer(RoomConsumer):
             )
 
     async def wait_opponent(self):
-        # matchができるまで待機
+        # match_detailができるまで待機
         while True:
-            matches = await sync_to_async(Match.objects.filter(id=self.room_id).exists)()
-            if matches:
+            exists = await sync_to_async(MatchDetail.objects.filter(match_id=self.room_id).exists)()
+            if exists:
                 break
             else:
                 logger.debug("waiting...")
