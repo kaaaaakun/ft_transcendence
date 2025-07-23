@@ -125,6 +125,11 @@ class Match(models.Model):
             tournament=tournament,
             round=2
         ).order_by('entry_number')
+
+        round3_players = TournamentPlayer.objects.filter(
+            tournament=tournament,
+            round=3
+        ).order_by('entry_number')
         
         # 2人揃ったら決勝戦を作成
         if round2_players.count() == 2:
@@ -143,8 +148,9 @@ class Match(models.Model):
                 
                 MatchDetail.create(match, player1.user, is_left_side=True)
                 MatchDetail.create(match, player2.user, is_left_side=False)
-            else:
-                TournamentPlayer.objects.filter(tournament=tournament).update(is_finished=True)
+
+        if round3_players.count() == 1:
+            TournamentPlayer.objects.filter(tournament=tournament).update(is_finished=True)
         
         return created_matches
 
@@ -163,6 +169,11 @@ class Match(models.Model):
         round3_players = TournamentPlayer.objects.filter(
             tournament=tournament,
             round=3
+        ).order_by('entry_number')
+
+        round4_players = TournamentPlayer.objects.filter(
+            tournament=tournament,
+            round=4
         ).order_by('entry_number')
         
         # 準決勝（ラウンド2）のマッチ作成
@@ -183,8 +194,8 @@ class Match(models.Model):
                 
                 MatchDetail.create(match, player1.user, is_left_side=True)
                 MatchDetail.create(match, player2.user, is_left_side=False)
-            else:
-                TournamentPlayer.objects.filter(tournament=tournament).update(is_finished=True)
+        if round4_players.count() == 1:
+            TournamentPlayer.objects.filter(tournament=tournament).update(is_finished=True)
         
         return created_matches
 
