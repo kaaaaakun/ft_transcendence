@@ -534,7 +534,7 @@ class MatchRoomConsumer(RoomConsumer):
                 await self.close(code=4002)
                 return
 
-            if len(connected_users) == 2 and not self.redis_client.exists(f"room:{self.room_group_name}:game_running"):
+            if len(connected_users) == 1 and not self.redis_client.exists(f"room:{self.room_group_name}:game_running"):
                 self.primary_connection = True
                 logger.debug(f"DEBUG: Primary connection established for room {self.room_group_name}")
             try:
@@ -581,10 +581,23 @@ class MatchRoomConsumer(RoomConsumer):
                 self.channel_name
             )
 
+    async def wait_opponent(self):
+        # match_detailができるまで待機
+        while True:
+            exists = await sync_to_async(MatchDetail.objects.filter(match_id=self.room_id).exists)()
+            if exists:
+                break
+            else:
+                logger.debug("waiting...")
+            asyncio.sleep(1)
+
+
     async def broadcast_room_status(self):
         logger.debug(f"DEBUG: game start")
         try:
             if self.primary_connection:
+                self.redis_client.set(f"room:{self.room_group_name}:game_running", 'false')
+                await self.wait_opponent()
                 self.redis_client.set(f"room:{self.room_group_name}:game_running", 'true')
                 await self.channel_layer.group_send(self.room_group_name, {'type': 'game_start'})
                 await asyncio.sleep(3)
