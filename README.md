@@ -55,6 +55,13 @@ ft_transcendence/
 ```
 
 ## 42 Setup
+Vertual BoxでUbuntuを設定した。
+メモリ：8G、プロセッサー：4、ディスクサイズ：100G
+
+makeで何度か失敗したが、Ubuntuをライブモードとかいうお手軽版で動かしてた模様。（そんな選択はしてないけど）
+インストールには時間がかかるが、このときにUbuntuデスクトップが表示されてて使えそうに思えるが、目的のためにはまだ使えない。
+Ubuntuの再起動を促されるまで待つこと！、かつリスタート後に``df -h``で/dev/sda2が/にマウントされていることを確認
+
 ```
 sudo apt-get update
 sudo apt-get install git
