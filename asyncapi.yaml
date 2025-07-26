@@ -51,8 +51,16 @@ channels:
       message:
         $ref: '#/components/messages/waitingRoomStatus'
 
-  /api/ws/room.{matchType}.{matchId}:
+  /api/ws/room.{matchType}.{matchId}/?token=<token>:
+    description: |
+    クエリパラメータ `?token=<token>` を指定して、JWTトークンを送信する必要があります。
     parameters:
+      token:
+        in: query
+        description: JWTトークン
+        schema:
+          type: string
+        required: true
       matchType:
         description: マッチのタイプ (TOURNAMENT_MATCH)
         schema:
