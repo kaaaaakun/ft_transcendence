@@ -1,5 +1,5 @@
 {
-    "END_GAME_SCORE": 3,
+    "END_GAME_SCORE": 10,
     "WALL_X_LIMIT": 500,
     "WALL_Y_LIMIT": 300,
     "PADDLE_HEIGHT": 30,

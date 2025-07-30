@@ -5,7 +5,7 @@ ifdef WITH_LOCAL
   ENV_PATH        = ./.env.sample.local
   COMPOSE_YML     = ./docker-compose.local.yml
 else
-  ENV_PATH        = ./.env.sample
+  ENV_PATH        = ./.env
   COMPOSE_YML     = ./docker-compose.yml
 endif
 
